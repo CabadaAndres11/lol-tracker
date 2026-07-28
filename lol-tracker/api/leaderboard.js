@@ -1,5 +1,5 @@
 const players = require('../players.json');
-
+ 
 // Enrutamiento regional: cada plataforma (servidor) pertenece a un clúster
 // regional distinto para el endpoint de cuenta (Riot ID -> PUUID).
 const REGIONAL_ROUTING = {
@@ -7,13 +7,13 @@ const REGIONAL_ROUTING = {
   euw1: 'europe', eun1: 'europe', tr1: 'europe', ru: 'europe',
   kr: 'asia', jp1: 'asia',
 };
-
+ 
 const TIER_ORDER = [
   'CHALLENGER', 'GRANDMASTER', 'MASTER', 'DIAMOND', 'EMERALD',
   'PLATINUM', 'GOLD', 'SILVER', 'BRONZE', 'IRON', 'UNRANKED',
 ];
 const RANK_ORDER = ['I', 'II', 'III', 'IV', ''];
-
+ 
 async function riotFetch(url, apiKey) {
   const r = await fetch(url, { headers: { 'X-Riot-Token': apiKey } });
   if (!r.ok) {
@@ -22,34 +22,30 @@ async function riotFetch(url, apiKey) {
   }
   return r.json();
 }
-
+ 
 async function fetchPlayer(p, apiKey) {
   const region = REGIONAL_ROUTING[p.platform];
   if (!region) {
     throw new Error(`Plataforma desconocida "${p.platform}" para ${p.name}#${p.tag}`);
   }
-
+ 
   // 1. Riot ID (nombre#tag) -> PUUID
   const account = await riotFetch(
     `https://${region}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/${encodeURIComponent(p.name)}/${encodeURIComponent(p.tag)}`,
     apiKey
   );
-
-  // 2. PUUID -> datos de invocador (necesitamos el summonerId)
-  const summoner = await riotFetch(
-    `https://${p.platform}.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/${account.puuid}`,
-    apiKey
-  );
-
-  // 3. summonerId -> entradas de liga (rango, LP, winrate)
+ 
+  // 2. PUUID -> entradas de liga (rango, LP, winrate). El endpoint antiguo
+  // por summonerId está deprecado por Riot, así que consultamos directo
+  // por PUUID.
   const entries = await riotFetch(
-    `https://${p.platform}.api.riotgames.com/lol/league/v4/entries/by-summoner/${summoner.id}`,
+    `https://${p.platform}.api.riotgames.com/lol/league/v4/entries/by-puuid/${account.puuid}`,
     apiKey
   );
-
+ 
   const solo = entries.find((e) => e.queueType === 'RANKED_SOLO_5x5');
   const totalGames = solo ? solo.wins + solo.losses : 0;
-
+ 
   return {
     displayName: `${p.name}#${p.tag}`,
     platform: p.platform,
@@ -61,14 +57,14 @@ async function fetchPlayer(p, apiKey) {
     winrate: totalGames > 0 ? Math.round((solo.wins / totalGames) * 100) : null,
   };
 }
-
+ 
 module.exports = async function handler(req, res) {
   const apiKey = process.env.RIOT_API_KEY;
   if (!apiKey) {
     res.status(500).json({ error: 'Falta la variable de entorno RIOT_API_KEY en Vercel.' });
     return;
   }
-
+ 
   try {
     // Secuencial y no en paralelo puro: evita reventar el rate limit de la
     // clave de desarrollo si hay muchos participantes. Ajusta el delay si
@@ -85,7 +81,7 @@ module.exports = async function handler(req, res) {
         });
       }
     }
-
+ 
     results.sort((a, b) => {
       if (a.error) return 1;
       if (b.error) return -1;
@@ -95,10 +91,11 @@ module.exports = async function handler(req, res) {
       if (r !== 0) return r;
       return b.lp - a.lp;
     });
-
+ 
     res.setHeader('Cache-Control', 's-maxage=120, stale-while-revalidate=60');
     res.status(200).json({ updatedAt: new Date().toISOString(), players: results });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
+ 

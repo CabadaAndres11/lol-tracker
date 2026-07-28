@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Clasificación en vivo — Torneo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-inner">
+    <div class="eyebrow">
+      <span class="pulse" aria-hidden="true"></span>
+      <span id="status-text">En vivo</span>
+    </div>
+    <h1>Escalada del torneo</h1>
+    <p class="subtitle">Clasificación en tiempo real por LP en Solo/Duo</p>
+    <p class="updated">Última actualización: <span id="updated-at">—</span></p>
+  </div>
+</header>
+
+<main>
+  <div class="ladder-wrap">
+    <div class="ladder-rail" aria-hidden="true"></div>
+    <table class="ladder">
+      <thead>
+        <tr>
+          <th class="col-pos">#</th>
+          <th class="col-name">Jugador</th>
+          <th class="col-tier">Rango</th>
+          <th class="col-lp">LP</th>
+          <th class="col-wr">Winrate</th>
+        </tr>
+      </thead>
+      <tbody id="ladder-body">
+        <tr class="loading-row"><td colspan="5">Cargando clasificación…</td></tr>
+      </tbody>
+    </table>
+  </div>
+</main>
+
+<footer>
+  <p>Datos vía Riot Games API · se actualiza automáticamente cada 2 minutos</p>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>

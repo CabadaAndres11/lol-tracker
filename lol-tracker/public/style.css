@@ -1,0 +1,212 @@
+:root {
+  --bg: #0a0d12;
+  --surface: #12161d;
+  --surface-alt: #171c25;
+  --line: #232a35;
+  --text: #e8e6df;
+  --text-muted: #8b93a1;
+  --gold: #c9a15a;
+  --gold-soft: #7d6a42;
+  --rise: #3fa7a0;
+  --fall: #c15c5c;
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- Hero ---------- */
+
+.hero {
+  padding: 4.5rem 1.5rem 3rem;
+  background:
+    radial-gradient(ellipse at top, rgba(201, 161, 90, 0.08), transparent 60%),
+    var(--bg);
+  border-bottom: 1px solid var(--line);
+}
+
+.hero-inner {
+  max-width: 880px;
+  margin: 0 auto;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--rise);
+  background: rgba(63, 167, 160, 0.1);
+  border: 1px solid rgba(63, 167, 160, 0.25);
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+}
+
+.pulse {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--rise);
+  box-shadow: 0 0 0 0 rgba(63, 167, 160, 0.6);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(63, 167, 160, 0.55); }
+  70%  { box-shadow: 0 0 0 8px rgba(63, 167, 160, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(63, 167, 160, 0); }
+}
+
+h1 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(2rem, 5vw, 3rem);
+  margin: 0.9rem 0 0.4rem;
+  letter-spacing: -0.01em;
+}
+
+.subtitle {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 1.02rem;
+}
+
+.updated {
+  margin: 1.1rem 0 0;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+#updated-at { color: var(--gold); }
+
+/* ---------- Ladder ---------- */
+
+main {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 4rem;
+}
+
+.ladder-wrap {
+  position: relative;
+  display: flex;
+}
+
+.ladder-rail {
+  width: 2px;
+  margin-right: -1px;
+  background: linear-gradient(to bottom, var(--gold), var(--gold-soft) 60%, transparent);
+  flex-shrink: 0;
+}
+
+.ladder {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+thead th {
+  text-align: left;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 500;
+  padding: 0.9rem 1rem;
+  background: var(--surface-alt);
+  border-bottom: 1px solid var(--line);
+}
+
+tbody tr {
+  border-bottom: 1px solid var(--line);
+  transition: background 0.15s ease;
+}
+
+tbody tr:last-child { border-bottom: none; }
+
+tbody tr:hover { background: var(--surface-alt); }
+
+td {
+  padding: 0.95rem 1rem;
+  font-size: 0.94rem;
+}
+
+.col-pos {
+  width: 3rem;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+}
+
+.col-name { font-weight: 500; }
+
+.player-tag { color: var(--text-muted); font-weight: 400; }
+
+.col-tier {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+}
+
+.tier-pill {
+  display: inline-block;
+  padding: 0.2rem 0.55rem;
+  border-radius: 5px;
+  border: 1px solid currentColor;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+}
+
+.col-lp {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--gold);
+}
+
+.col-wr { font-family: var(--font-mono); }
+
+.wr-high { color: var(--rise); }
+.wr-low { color: var(--fall); }
+
+.error-row td {
+  color: var(--fall);
+  font-size: 0.85rem;
+  font-family: var(--font-mono);
+}
+
+.loading-row td {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 2.5rem 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+}
+
+footer {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-family: var(--font-mono);
+  padding: 0 1.5rem 3rem;
+}
+
+@media (max-width: 560px) {
+  .ladder-rail { display: none; }
+  .col-wr { display: none; }
+  thead th, td { padding: 0.7rem 0.6rem; font-size: 0.85rem; }
+}

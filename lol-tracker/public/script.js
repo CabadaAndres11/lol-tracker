@@ -33,7 +33,7 @@ async function loadLeaderboard() {
         tr.classList.add('error-row');
         tr.innerHTML = `
           <td>${i + 1}</td>
-          <td colspan="4">${escapeHtml(p.displayName)} — no se pudo cargar (${escapeHtml(p.error)})</td>
+          <td colspan="5">${escapeHtml(p.displayName)} — no se pudo cargar (${escapeHtml(p.error)})</td>
         `;
         body.appendChild(tr);
         return;
@@ -46,6 +46,11 @@ async function loadLeaderboard() {
         ? 'Sin clasificar'
         : `${capitalize(p.tier)} ${p.rank}`.trim();
 
+      const gainedClass = p.lpGained == null ? '' : p.lpGained >= 0 ? 'wr-high' : 'wr-low';
+      const gainedText = p.lpGained == null
+        ? '—'
+        : `${p.lpGained > 0 ? '+' : ''}${p.lpGained} LP`;
+
       tr.innerHTML = `
         <td class="col-pos">${i + 1}</td>
         <td class="col-name">${escapeHtml(name)}<span class="player-tag">#${escapeHtml(tag)}</span></td>
@@ -53,6 +58,7 @@ async function loadLeaderboard() {
           <span class="tier-pill" style="color:${color}">${escapeHtml(tierLabel)}</span>
         </td>
         <td class="col-lp">${p.tier === 'UNRANKED' ? '—' : `${p.lp} LP`}</td>
+        <td class="col-gained ${gainedClass}">${gainedText}</td>
         <td class="col-wr ${wrClass}">${p.winrate == null ? '—' : `${p.winrate}% (${p.wins}V/${p.losses}D)`}</td>
       `;
       body.appendChild(tr);

@@ -10,19 +10,19 @@
 <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-
+ 
 <header class="hero">
   <div class="hero-inner">
     <div class="eyebrow">
       <span class="pulse" aria-hidden="true"></span>
       <span id="status-text">En vivo</span>
     </div>
-    <h1>SOLOQ CHALLENGE</h1>
+    <h1>Escalada del torneo</h1>
     <p class="subtitle">Clasificación en tiempo real por LP en Solo/Duo</p>
     <p class="updated">Última actualización: <span id="updated-at">—</span></p>
   </div>
 </header>
-
+ 
 <main>
   <div class="ladder-wrap">
     <div class="ladder-rail" aria-hidden="true"></div>
@@ -33,20 +33,22 @@
           <th class="col-name">Jugador</th>
           <th class="col-tier">Rango</th>
           <th class="col-lp">LP</th>
+          <th class="col-gained">LP desde inicio</th>
           <th class="col-wr">Winrate</th>
         </tr>
       </thead>
       <tbody id="ladder-body">
-        <tr class="loading-row"><td colspan="5">Cargando clasificación…</td></tr>
+        <tr class="loading-row"><td colspan="6">Cargando clasificación…</td></tr>
       </tbody>
     </table>
   </div>
 </main>
-
+ 
 <footer>
   <p>Datos vía Riot Games API · se actualiza automáticamente cada 2 minutos</p>
 </footer>
-
+ 
 <script src="script.js"></script>
 </body>
 </html>
+ 

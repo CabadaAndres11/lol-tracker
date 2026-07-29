@@ -1,25 +1,19 @@
 const players = require('../players.json');
 const { fetchPlayer, absoluteLP } = require('./_riot');
- 
-const TIER_ORDER = [
-  'CHALLENGER', 'GRANDMASTER', 'MASTER', 'DIAMOND', 'EMERALD',
-  'PLATINUM', 'GOLD', 'SILVER', 'BRONZE', 'IRON', 'UNRANKED',
-];
-const RANK_ORDER = ['I', 'II', 'III', 'IV', ''];
- 
+
 module.exports = async function handler(req, res) {
   const apiKey = process.env.RIOT_API_KEY;
   if (!apiKey) {
     res.status(500).json({ error: 'Falta la variable de entorno RIOT_API_KEY en Vercel.' });
     return;
   }
- 
+
   try {
     const results = [];
     for (const p of players) {
       try {
         const player = await fetchPlayer(p, apiKey);
- 
+
         // Si el jugador tiene rango de partida definido en players.json,
         // calculamos cuánto LP ha ganado/perdido desde ahí.
         if (p.startTier && player.absoluteLP != null) {
@@ -28,7 +22,7 @@ module.exports = async function handler(req, res) {
         } else {
           player.lpGained = null;
         }
- 
+
         results.push(player);
       } catch (err) {
         results.push({
@@ -38,17 +32,18 @@ module.exports = async function handler(req, res) {
         });
       }
     }
- 
+
     results.sort((a, b) => {
       if (a.error) return 1;
       if (b.error) return -1;
-      const t = TIER_ORDER.indexOf(a.tier) - TIER_ORDER.indexOf(b.tier);
-      if (t !== 0) return t;
-      const r = RANK_ORDER.indexOf(a.rank) - RANK_ORDER.indexOf(b.rank);
-      if (r !== 0) return r;
-      return b.lp - a.lp;
+      // Quien no tenga LP ganado calculado (sin startTier definido, o sin
+      // clasificar todavía) se va al final, no arriba con un "0" engañoso.
+      if (a.lpGained == null && b.lpGained == null) return 0;
+      if (a.lpGained == null) return 1;
+      if (b.lpGained == null) return -1;
+      return b.lpGained - a.lpGained;
     });
- 
+
     res.setHeader('Cache-Control', 's-maxage=120, stale-while-revalidate=60');
     res.status(200).json({ updatedAt: new Date().toISOString(), players: results });
   } catch (err) {

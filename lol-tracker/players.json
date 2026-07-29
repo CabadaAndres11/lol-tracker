@@ -1,14 +1,14 @@
 [
-  { "name": "lihone", "tag": "EUW", "platform": "euw1" },
-  { "name": "Helbramn", "tag": "EUW", "platform": "euw1" },
-  { "name": "AitoRLG", "tag": "9945", "platform": "euw1" },
-  { "name": "Petea", "tag": "570", "platform": "euw1" },
-  { "name": "BløndPert", "tag": "2156", "platform": "euw1" },
-  { "name": "jugitfiuyguyg98", "tag": "EUW", "platform": "euw1" },
-  { "name": "RaidBolt", "tag": "EUW", "platform": "euw1" },
-  { "name": "Dashlight", "tag": "TWSTN", "platform": "euw1" },
-  { "name": "Ryu", "tag": "7784", "platform": "euw1" },
-  { "name": "ZZZ Di1do", "tag": "HB473", "platform": "euw1" },
-  { "name": "MGANHZ", "tag": "6500", "platform": "euw1" },
-  { "name": "oveRR", "tag": "1tap", "platform": "euw1" }
+  { "name": "lihone", "tag": "EUW", "platform": "euw1", "startTier": "PLATINUM", "startRank": "IV", "startLP": 95 },
+  { "name": "Helbramn", "tag": "EUW", "platform": "euw1", "startTier": "BRONZE", "startRank": "II", "startLP": 23 },
+  { "name": "AitoRLG", "tag": "9945", "platform": "euw1", "startTier": "GOLD", "startRank": "II", "startLP": 31 },
+  { "name": "Petea", "tag": "570", "platform": "euw1", "startTier": "GOLD", "startRank": "III", "startLP": 58 },
+  { "name": "BløndPert", "tag": "2156", "platform": "euw1", "startTier": "PLATINUM", "startRank": "IV", "startLP": 0 },
+  { "name": "jugitfiuyguyg98", "tag": "EUW", "platform": "euw1", "startTier": "EMERALD", "startRank": "IV", "startLP": 60 },
+  { "name": "RaidBolt", "tag": "EUW", "platform": "euw1", "startTier": "EMERALD", "startRank": "IV", "startLP": 0 },
+  { "name": "Dashlight", "tag": "TWSTN", "platform": "euw1", "startTier": "DIAMOND", "startRank": "IV", "startLP": 41 },
+  { "name": "Ryu", "tag": "7784", "platform": "euw1", "startTier": "DIAMOND", "startRank": "IV", "startLP": 15 },
+  { "name": "ZZZ Di1do", "tag": "HB473", "platform": "euw1", "startTier": "IRON", "startRank": "IV", "startLP": 73 },
+  { "name": "MGANHZ", "tag": "6500", "platform": "euw1", "startTier": "IRON", "startRank": "I", "startLP": 73 },
+  { "name": "oveRR", "tag": "1tap", "platform": "euw1", "startTier": "DIAMOND", "startRank": "IV", "startLP": 88 }
 ]

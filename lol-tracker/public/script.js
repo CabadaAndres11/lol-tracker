@@ -51,9 +51,13 @@ async function loadLeaderboard() {
         ? '—'
         : `${p.lpGained > 0 ? '+' : ''}${p.lpGained} LP`;
 
+      const liveDot = p.isLive
+        ? `<span class="live-dot" title="En partida ahora mismo"></span>`
+        : '';
+
       tr.innerHTML = `
         <td class="col-pos">${i + 1}</td>
-        <td class="col-name">${escapeHtml(name)}<span class="player-tag">#${escapeHtml(tag)}</span></td>
+        <td class="col-name">${liveDot}${escapeHtml(name)}<span class="player-tag">#${escapeHtml(tag)}</span></td>
         <td class="col-tier">
           <span class="tier-pill" style="color:${color}">${escapeHtml(tierLabel)}</span>
         </td>

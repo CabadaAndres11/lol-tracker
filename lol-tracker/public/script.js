@@ -14,6 +14,18 @@ const TIER_COLORS = {
 
 const REFRESH_MS = 2 * 60 * 1000;
 
+// op.gg usa códigos de región distintos a los "platform" de la API de Riot.
+const OPGG_REGIONS = {
+  euw1: 'euw', eun1: 'eune', tr1: 'tr', ru: 'ru',
+  na1: 'na', br1: 'br', la1: 'lan', la2: 'las', oc1: 'oce',
+  kr: 'kr', jp1: 'jp',
+};
+
+function opggUrl(name, tag, platform) {
+  const region = OPGG_REGIONS[platform] || 'euw';
+  return `https://www.op.gg/summoners/${region}/${encodeURIComponent(name)}-${encodeURIComponent(tag)}`;
+}
+
 async function loadLeaderboard() {
   const body = document.getElementById('ladder-body');
   const statusText = document.getElementById('status-text');
@@ -61,10 +73,13 @@ async function loadLeaderboard() {
         : '';
 
       const crown = i === 0 ? '<span class="crown" title="Va primero">👑</span>' : '';
+      const profileUrl = opggUrl(name, tag, p.platform);
 
       tr.innerHTML = `
         <td class="col-pos">${crown}${i + 1}</td>
-        <td class="col-name">${icon}${escapeHtml(name)}<span class="player-tag">#${escapeHtml(tag)}</span>${liveDot}</td>
+        <td class="col-name">
+          ${icon}<a class="player-link" href="${profileUrl}" target="_blank" rel="noopener noreferrer">${escapeHtml(name)}<span class="player-tag">#${escapeHtml(tag)}</span></a>${liveDot}
+        </td>
         <td class="col-tier">
           <span class="tier-badge">
             <span class="tier-hex" style="background: radial-gradient(circle at 35% 30%, ${color}, ${color}66 70%); border: 1px solid ${color};"></span>

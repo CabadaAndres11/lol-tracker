@@ -51,13 +51,16 @@ async function loadLeaderboard() {
         ? '—'
         : `${p.lpGained > 0 ? '+' : ''}${p.lpGained} LP`;
 
-      const liveDot = p.isLive
-        ? `<span class="live-dot" title="En partida ahora mismo"></span>`
-        : '';
+      const icon = p.iconUrl
+        ? `<span class="icon-wrap">
+             <img class="summoner-icon" src="${p.iconUrl}" alt="" loading="lazy" onerror="this.closest('.icon-wrap').style.display='none'">
+             ${p.isLive ? '<span class="live-dot" title="En partida ahora mismo"></span>' : ''}
+           </span>`
+        : (p.isLive ? `<span class="live-dot live-dot-standalone" title="En partida ahora mismo"></span>` : '');
 
       tr.innerHTML = `
         <td class="col-pos">${i + 1}</td>
-        <td class="col-name">${liveDot}${escapeHtml(name)}<span class="player-tag">#${escapeHtml(tag)}</span></td>
+        <td class="col-name">${icon}${escapeHtml(name)}<span class="player-tag">#${escapeHtml(tag)}</span></td>
         <td class="col-tier">
           <span class="tier-pill" style="color:${color}">${escapeHtml(tierLabel)}</span>
         </td>

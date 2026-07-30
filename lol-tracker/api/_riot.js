@@ -28,7 +28,25 @@ const REGIONAL_ROUTING = {
   kr: 'asia', jp1: 'asia',
 };
 
+// Espaciamos cada petición a Riot para no chocar con el límite de la clave
+// de desarrollo (20 peticiones/segundo). Con icono + estado en vivo ahora
+// hacemos 4 llamadas por jugador, así que sin esta pausa se dispara el 429
+// en cuanto hay varios jugadores en la lista.
+const REQUEST_GAP_MS = 150;
+let lastRequestAt = 0;
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function throttle() {
+  const wait = lastRequestAt + REQUEST_GAP_MS - Date.now();
+  if (wait > 0) await sleep(wait);
+  lastRequestAt = Date.now();
+}
+
 async function riotFetch(url, apiKey) {
+  await throttle();
   const r = await fetch(url, { headers: { 'X-Riot-Token': apiKey } });
   if (!r.ok) {
     const body = await r.text().catch(() => '');
@@ -40,6 +58,7 @@ async function riotFetch(url, apiKey) {
 async function isPlayerLive(p, puuid, apiKey) {
   const url = `https://${p.platform}.api.riotgames.com/lol/spectator/v5/active-games/by-summoner/${puuid}`;
   try {
+    await throttle();
     const r = await fetch(url, { headers: { 'X-Riot-Token': apiKey } });
     if (r.status === 404) return false; // no está en partida, respuesta normal
     if (!r.ok) return false; // cualquier otro fallo: no bloqueamos el resto del leaderboard por esto

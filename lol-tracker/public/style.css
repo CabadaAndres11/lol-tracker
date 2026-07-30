@@ -22,6 +22,22 @@ body {
   color: var(--text);
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
+  position: relative;
+}
+
+.hex-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  opacity: 0.35;
+  background-image:
+    linear-gradient(30deg, var(--line) 12%, transparent 12.5%, transparent 87%, var(--line) 87.5%, var(--line)),
+    linear-gradient(150deg, var(--line) 12%, transparent 12.5%, transparent 87%, var(--line) 87.5%, var(--line)),
+    linear-gradient(30deg, var(--line) 12%, transparent 12.5%, transparent 87%, var(--line) 87.5%, var(--line)),
+    linear-gradient(150deg, var(--line) 12%, transparent 12.5%, transparent 87%, var(--line) 87.5%, var(--line));
+  background-size: 64px 112px;
+  background-position: 0 0, 0 0, 32px 56px, 32px 56px;
+  mask-image: radial-gradient(ellipse 70% 50% at 50% 0%, black 0%, transparent 75%);
 }
 
 /* ---------- Hero ---------- */
@@ -77,6 +93,17 @@ h1 {
   letter-spacing: -0.01em;
 }
 
+.title-spark {
+  display: inline-block;
+  color: var(--gold);
+  animation: spark 2.4s ease-in-out infinite;
+}
+
+@keyframes spark {
+  0%, 100% { opacity: 1; transform: rotate(0deg) scale(1); }
+  50% { opacity: 0.5; transform: rotate(-8deg) scale(1.15); }
+}
+
 .subtitle {
   margin: 0;
   color: var(--text-muted);
@@ -111,6 +138,27 @@ main {
   background: linear-gradient(to bottom, var(--gold), var(--gold-soft) 60%, transparent);
   flex-shrink: 0;
 }
+
+.ladder-frame {
+  position: relative;
+  width: 100%;
+  padding: 3px;
+}
+
+.corner {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--gold);
+  opacity: 0.75;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.corner-tl { top: -2px; left: -2px; border-right: none; border-bottom: none; }
+.corner-tr { top: -2px; right: -2px; border-left: none; border-bottom: none; }
+.corner-bl { bottom: -2px; left: -2px; border-right: none; border-top: none; }
+.corner-br { bottom: -2px; right: -2px; border-left: none; border-top: none; }
 
 .ladder {
   width: 100%;
@@ -149,9 +197,10 @@ td {
 }
 
 .col-pos {
-  width: 3rem;
+  width: 3.8rem;
   font-family: var(--font-mono);
   color: var(--text-muted);
+  white-space: nowrap;
 }
 
 .col-name { font-weight: 500; }
@@ -196,13 +245,37 @@ td {
   font-size: 0.82rem;
 }
 
-.tier-pill {
-  display: inline-block;
-  padding: 0.2rem 0.55rem;
-  border-radius: 5px;
-  border: 1px solid currentColor;
+.tier-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tier-hex {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  clip-path: polygon(25% 3%, 75% 3%, 100% 50%, 75% 97%, 25% 97%, 0% 50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tier-label {
   font-size: 0.72rem;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
+}
+
+tbody tr.rank-first {
+  background: linear-gradient(90deg, rgba(201, 161, 90, 0.1), transparent 60%);
+}
+
+tbody tr.rank-first:hover {
+  background: linear-gradient(90deg, rgba(201, 161, 90, 0.16), rgba(201, 161, 90, 0.03) 60%);
+}
+
+.crown {
+  margin-right: 0.3rem;
 }
 
 .col-lp {

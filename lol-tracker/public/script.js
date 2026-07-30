@@ -53,7 +53,7 @@ async function loadLeaderboard() {
 
       const icon = p.iconUrl
         ? `<span class="icon-wrap">
-             <img class="summoner-icon" src="${p.iconUrl}" alt="" loading="lazy" onerror="this.closest('.icon-wrap').style.display='none'">
+             <img class="summoner-icon" src="${p.iconUrl}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
              ${p.isLive ? '<span class="live-dot" title="En partida ahora mismo"></span>' : ''}
            </span>`
         : (p.isLive ? `<span class="live-dot live-dot-standalone" title="En partida ahora mismo"></span>` : '');

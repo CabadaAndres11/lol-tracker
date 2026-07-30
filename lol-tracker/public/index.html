@@ -10,45 +10,52 @@
 <link rel="stylesheet" href="style.css" />
 </head>
 <body>
- 
+
+<div class="hex-bg" aria-hidden="true"></div>
+
 <header class="hero">
   <div class="hero-inner">
     <div class="eyebrow">
       <span class="pulse" aria-hidden="true"></span>
       <span id="status-text">En vivo</span>
     </div>
-    <h1>SOLOQ CHALLENGE</h1>
-    <p class="subtitle">Clasificación en tiempo real por LP en Solo/Duo</p>
+    <h1>La Grieta del Torneo <span class="title-spark">⚡</span></h1>
+    <p class="subtitle">Quién sube, quién baja, y quién se está tiltando en tiempo real</p>
     <p class="updated">Última actualización: <span id="updated-at">—</span></p>
   </div>
 </header>
- 
+
 <main>
   <div class="ladder-wrap">
     <div class="ladder-rail" aria-hidden="true"></div>
-    <table class="ladder">
-      <thead>
-        <tr>
-          <th class="col-pos">#</th>
-          <th class="col-name">Jugador</th>
-          <th class="col-tier">Rango</th>
-          <th class="col-lp">LP</th>
-          <th class="col-gained">Diferencia LP</th>
-          <th class="col-wr">Winrate</th>
-        </tr>
-      </thead>
-      <tbody id="ladder-body">
-        <tr class="loading-row"><td colspan="6">Cargando clasificación…</td></tr>
-      </tbody>
-    </table>
+    <div class="ladder-frame">
+      <span class="corner corner-tl" aria-hidden="true"></span>
+      <span class="corner corner-tr" aria-hidden="true"></span>
+      <span class="corner corner-bl" aria-hidden="true"></span>
+      <span class="corner corner-br" aria-hidden="true"></span>
+      <table class="ladder">
+        <thead>
+          <tr>
+            <th class="col-pos">#</th>
+            <th class="col-name">Invocador</th>
+            <th class="col-tier">Rango</th>
+            <th class="col-lp">LP</th>
+            <th class="col-gained">LP desde inicio</th>
+            <th class="col-wr">Winrate</th>
+          </tr>
+        </thead>
+        <tbody id="ladder-body">
+          <tr class="loading-row"><td colspan="6">Invocando la clasificación…</td></tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </main>
- 
+
 <footer>
-  <p>Datos vía Riot Games API · se actualiza automáticamente cada 2 minutos</p>
+  <p>Datos vía Riot Games API · se actualiza solo cada 2 minutos, como el respawn de Baron</p>
 </footer>
- 
+
 <script src="script.js"></script>
 </body>
 </html>
- 

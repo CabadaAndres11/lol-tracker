@@ -65,6 +65,19 @@ async function fetchPlayer(p, apiKey) {
     apiKey
   );
 
+  // El campo "id" (summonerId) de este endpoint está deprecado, pero el
+  // resto de datos, como el icono de invocador, siguen siendo válidos.
+  let iconUrl = null;
+  try {
+    const summoner = await riotFetch(
+      `https://${p.platform}.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/${account.puuid}`,
+      apiKey
+    );
+    iconUrl = `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/${summoner.profileIconId}.jpg`;
+  } catch {
+    // Si falla, simplemente no mostramos icono para ese jugador, no rompemos el resto.
+  }
+
   const solo = entries.find((e) => e.queueType === 'RANKED_SOLO_5x5');
   const totalGames = solo ? solo.wins + solo.losses : 0;
   const tier = solo ? solo.tier : 'UNRANKED';
@@ -83,6 +96,7 @@ async function fetchPlayer(p, apiKey) {
     winrate: totalGames > 0 ? Math.round((solo.wins / totalGames) * 100) : null,
     absoluteLP: absoluteLP(tier, rank, lp),
     isLive,
+    iconUrl,
   };
 }
 

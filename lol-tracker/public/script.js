@@ -28,6 +28,7 @@ async function loadLeaderboard() {
 
     data.players.forEach((p, i) => {
       const tr = document.createElement('tr');
+      if (i === 0 && !p.error) tr.classList.add('rank-first');
 
       if (p.error) {
         tr.classList.add('error-row');
@@ -43,7 +44,7 @@ async function loadLeaderboard() {
       const color = TIER_COLORS[p.tier] || TIER_COLORS.UNRANKED;
       const wrClass = p.winrate == null ? '' : p.winrate >= 50 ? 'wr-high' : 'wr-low';
       const tierLabel = p.tier === 'UNRANKED'
-        ? 'Sin clasificar'
+        ? 'Aún sin invocar'
         : `${capitalize(p.tier)} ${p.rank}`.trim();
 
       const gainedClass = p.lpGained == null ? '' : p.lpGained >= 0 ? 'wr-high' : 'wr-low';
@@ -59,11 +60,16 @@ async function loadLeaderboard() {
         ? `<span class="live-dot" title="En partida ahora mismo"></span>`
         : '';
 
+      const crown = i === 0 ? '<span class="crown" title="Va primero">👑</span>' : '';
+
       tr.innerHTML = `
-        <td class="col-pos">${i + 1}</td>
+        <td class="col-pos">${crown}${i + 1}</td>
         <td class="col-name">${icon}${escapeHtml(name)}<span class="player-tag">#${escapeHtml(tag)}</span>${liveDot}</td>
         <td class="col-tier">
-          <span class="tier-pill" style="color:${color}">${escapeHtml(tierLabel)}</span>
+          <span class="tier-badge">
+            <span class="tier-hex" style="background: radial-gradient(circle at 35% 30%, ${color}, ${color}66 70%); border: 1px solid ${color};"></span>
+            <span class="tier-label" style="color:${color}">${escapeHtml(tierLabel)}</span>
+          </span>
         </td>
         <td class="col-lp">${p.tier === 'UNRANKED' ? '—' : `${p.lp} LP`}</td>
         <td class="col-gained ${gainedClass}">${gainedText}</td>

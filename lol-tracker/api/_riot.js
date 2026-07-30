@@ -37,6 +37,18 @@ async function riotFetch(url, apiKey) {
   return r.json();
 }
 
+async function isPlayerLive(p, puuid, apiKey) {
+  const url = `https://${p.platform}.api.riotgames.com/lol/spectator/v5/active-games/by-summoner/${puuid}`;
+  try {
+    const r = await fetch(url, { headers: { 'X-Riot-Token': apiKey } });
+    if (r.status === 404) return false; // no está en partida, respuesta normal
+    if (!r.ok) return false; // cualquier otro fallo: no bloqueamos el resto del leaderboard por esto
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 async function fetchPlayer(p, apiKey) {
   const region = REGIONAL_ROUTING[p.platform];
   if (!region) {
@@ -58,6 +70,7 @@ async function fetchPlayer(p, apiKey) {
   const tier = solo ? solo.tier : 'UNRANKED';
   const rank = solo ? solo.rank : '';
   const lp = solo ? solo.leaguePoints : 0;
+  const isLive = await isPlayerLive(p, account.puuid, apiKey);
 
   return {
     displayName: `${p.name}#${p.tag}`,
@@ -69,6 +82,7 @@ async function fetchPlayer(p, apiKey) {
     losses: solo ? solo.losses : 0,
     winrate: totalGames > 0 ? Math.round((solo.wins / totalGames) * 100) : null,
     absoluteLP: absoluteLP(tier, rank, lp),
+    isLive,
   };
 }
 

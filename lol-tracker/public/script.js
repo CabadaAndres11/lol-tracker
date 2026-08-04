@@ -13,6 +13,7 @@ const TIER_COLORS = {
 };
 
 const REFRESH_MS = 2 * 60 * 1000;
+let lastUpdateTime = null;
 
 // op.gg usa códigos de región distintos a los "platform" de la API de Riot.
 const OPGG_REGIONS = {
@@ -95,8 +96,10 @@ async function loadLeaderboard() {
 
     renderPodium(data.players);
 
+     lastUpdateTime = new Date(data.updatedAt);
+
     document.getElementById('updated-at').textContent =
-      new Date(data.updatedAt).toLocaleTimeString('es-ES');
+    lastUpdateTime.toLocaleTimeString('es-ES');
     statusText.textContent = 'En vivo';
   } catch (err) {
     statusText.textContent = 'Error al actualizar';
@@ -156,8 +159,6 @@ function escapeHtml(str) {
 loadLeaderboard();
 setInterval(loadLeaderboard, REFRESH_MS);
 
-const UPDATE_INTERVAL = 120; // segundos
-
 const countdown = document.getElementById("update-countdown");
 const progress = document.getElementById("timer-progress");
 
@@ -167,28 +168,28 @@ const circumference = 2 * Math.PI * radius;
 progress.style.strokeDasharray = circumference;
 progress.style.strokeDashoffset = 0;
 
-let remaining = UPDATE_INTERVAL;
+function updateCountdown() {
 
-function updateCountdown(){
+    if (!lastUpdateTime) return;
+
+    const nextUpdate = new Date(lastUpdateTime.getTime() + REFRESH_MS);
+    const now = new Date();
+
+    let remaining = Math.floor((nextUpdate - now) / 1000);
+
+    if (remaining < 0) remaining = 0;
 
     const minutes = Math.floor(remaining / 60);
     const seconds = remaining % 60;
 
     countdown.textContent =
-        `${String(minutes).padStart(2,"0")}:${String(seconds).padStart(2,"0")}`;
+        `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 
-    const percent = remaining / UPDATE_INTERVAL;
+    const percent = remaining / (REFRESH_MS / 1000);
 
     progress.style.strokeDashoffset =
         circumference * (1 - percent);
-
-    remaining--;
-
-    if(remaining < 0){
-        remaining = UPDATE_INTERVAL;
-    }
 }
 
 updateCountdown();
-
-setInterval(updateCountdown,1000);
+setInterval(updateCountdown, 1000);

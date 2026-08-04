@@ -503,3 +503,50 @@ footer {
   .place-1 .podium-avatar { width: 64px; height: 64px; }
   .podium-lp { font-size: 0.7rem; }
 }
+
+#update-timer {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    padding: 10px 16px;
+
+    background: rgba(30,30,35,.92);
+    border: 1px solid rgba(255,255,255,.08);
+
+    border-radius: 12px;
+
+    color: white;
+
+    font-size: 15px;
+    font-weight: 600;
+
+    backdrop-filter: blur(8px);
+
+    z-index: 9999;
+
+    user-select: none;
+    pointer-events: none;
+}
+
+.timer-ring{
+    transform: rotate(-90deg);
+}
+
+.timer-ring-bg{
+    fill:none;
+    stroke:#444;
+    stroke-width:4;
+}
+
+.timer-ring-progress{
+    fill:none;
+    stroke:#37d67a;
+    stroke-width:4;
+    stroke-linecap:round;
+    transition:stroke-dashoffset 1s linear;
+}

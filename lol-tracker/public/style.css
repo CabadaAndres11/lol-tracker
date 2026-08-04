@@ -460,6 +460,11 @@ footer {
   margin-bottom: 0.7rem;
 }
 
+.podium-lp-negative {
+  color: var(--fall);
+  text-shadow: 0 0 8px rgba(193, 92, 92, 0.5);
+}
+
 .podium-step {
   width: 100%;
   border-radius: 10px 10px 0 0;

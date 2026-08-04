@@ -126,7 +126,10 @@ function renderPodium(players) {
 
     nameEl.textContent = name;
     nameEl.title = `${name}#${tag}`;
-    lpEl.textContent = p.tier === 'UNRANKED' ? 'Sin clasificar' : `${p.lp} LP`;
+    lpEl.textContent = p.lpGained == null
+      ? '—'
+      : `${p.lpGained > 0 ? '+' : ''}${p.lpGained} LP`;
+    lpEl.classList.toggle('podium-lp-negative', p.lpGained != null && p.lpGained < 0);
 
     if (p.iconUrl) {
       icon.src = p.iconUrl;

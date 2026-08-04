@@ -93,6 +93,8 @@ async function loadLeaderboard() {
       body.appendChild(tr);
     });
 
+    renderPodium(data.players);
+
     document.getElementById('updated-at').textContent =
       new Date(data.updatedAt).toLocaleTimeString('es-ES');
     statusText.textContent = 'En vivo';
@@ -102,6 +104,39 @@ async function loadLeaderboard() {
       body.innerHTML = `<tr class="error-row"><td colspan="5">No se pudo cargar la clasificación: ${escapeHtml(err.message)}</td></tr>`;
     }
     console.error(err);
+  }
+}
+
+function renderPodium(players) {
+  const top3 = players.filter(p => !p.error).slice(0, 3);
+
+  for (let place = 1; place <= 3; place++) {
+    const el = document.getElementById(`podium-${place}`);
+    const p = top3[place - 1];
+
+    if (!p) {
+      el.hidden = true;
+      continue;
+    }
+
+    const [name, tag] = p.displayName.split('#');
+    const nameEl = el.querySelector('.podium-name');
+    const lpEl = el.querySelector('.podium-lp');
+    const icon = el.querySelector('.podium-icon');
+
+    nameEl.textContent = name;
+    nameEl.title = `${name}#${tag}`;
+    lpEl.textContent = p.tier === 'UNRANKED' ? 'Sin clasificar' : `${p.lp} LP`;
+
+    if (p.iconUrl) {
+      icon.src = p.iconUrl;
+      icon.style.visibility = 'visible';
+    } else {
+      icon.removeAttribute('src');
+      icon.style.visibility = 'hidden';
+    }
+
+    el.hidden = false;
   }
 }
 

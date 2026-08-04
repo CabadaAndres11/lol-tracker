@@ -11,6 +11,30 @@
 </head>
 <body>
 
+<div id="update-timer">
+    <span id="update-text">
+        Actualización en:
+        <strong id="update-countdown">02:00</strong>
+    </span>
+
+    <svg class="timer-ring" width="42" height="42">
+        <circle
+            class="timer-ring-bg"
+            cx="21"
+            cy="21"
+            r="17">
+        </circle>
+
+        <circle
+            id="timer-progress"
+            class="timer-ring-progress"
+            cx="21"
+            cy="21"
+            r="17">
+        </circle>
+    </svg>
+</div>
+  
 <div class="hex-bg" aria-hidden="true"></div>
 
 <header class="hero">

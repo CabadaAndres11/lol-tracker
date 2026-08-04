@@ -9,6 +9,11 @@
   --gold-soft: #7d6a42;
   --rise: #3fa7a0;
   --fall: #c15c5c;
+  --neon-cyan: #2fe6e0;
+  --neon-purple: #b478ff;
+  --neon-pink: #ff4fa3;
+  --silver: #cfd8e3;
+  --bronze: #e2996a;
   --font-display: 'Space Grotesk', sans-serif;
   --font-body: 'Inter', sans-serif;
   --font-mono: 'IBM Plex Mono', monospace;
@@ -38,6 +43,31 @@ body {
   background-size: 64px 112px;
   background-position: 0 0, 0 0, 32px 56px, 32px 56px;
   mask-image: radial-gradient(ellipse 70% 50% at 50% 0%, black 0%, transparent 75%);
+}
+
+.hex-bg::before,
+.hex-bg::after {
+  content: '';
+  position: absolute;
+  width: 45vw;
+  height: 45vw;
+  max-width: 620px;
+  max-height: 620px;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.16;
+}
+
+.hex-bg::before {
+  top: -10%;
+  left: -8%;
+  background: var(--neon-purple);
+}
+
+.hex-bg::after {
+  top: 5%;
+  right: -10%;
+  background: var(--neon-cyan);
 }
 
 /* ---------- Hero ---------- */
@@ -91,6 +121,7 @@ h1 {
   font-size: clamp(2rem, 5vw, 3rem);
   margin: 0.9rem 0 0.4rem;
   letter-spacing: -0.01em;
+  text-shadow: 0 0 18px rgba(47, 230, 224, 0.35), 0 0 46px rgba(180, 120, 255, 0.18);
 }
 
 .title-spark {
@@ -122,7 +153,7 @@ h1 {
 /* ---------- Ladder ---------- */
 
 main {
-  max-width: 880px;
+  max-width: 1240px;
   margin: 0 auto;
   padding: 2.5rem 1.5rem 4rem;
 }
@@ -135,7 +166,8 @@ main {
 .ladder-rail {
   width: 2px;
   margin-right: -1px;
-  background: linear-gradient(to bottom, var(--gold), var(--gold-soft) 60%, transparent);
+  background: linear-gradient(to bottom, var(--neon-cyan), var(--gold-soft) 60%, transparent);
+  box-shadow: 0 0 12px rgba(47, 230, 224, 0.6);
   flex-shrink: 0;
 }
 
@@ -149,10 +181,11 @@ main {
   position: absolute;
   width: 18px;
   height: 18px;
-  border: 2px solid var(--gold);
-  opacity: 0.75;
+  border: 2px solid var(--neon-cyan);
+  opacity: 0.85;
   z-index: 1;
   pointer-events: none;
+  filter: drop-shadow(0 0 6px rgba(47, 230, 224, 0.7));
 }
 
 .corner-tl { top: -2px; left: -2px; border-right: none; border-bottom: none; }
@@ -164,9 +197,13 @@ main {
   width: 100%;
   border-collapse: collapse;
   background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 10px;
+  border: 1px solid rgba(47, 230, 224, 0.18);
+  border-radius: 14px;
   overflow: hidden;
+  box-shadow:
+    0 0 0 1px rgba(180, 120, 255, 0.06),
+    0 0 40px rgba(47, 230, 224, 0.08),
+    0 20px 60px rgba(0, 0, 0, 0.45);
 }
 
 thead th {
@@ -179,17 +216,34 @@ thead th {
   font-weight: 500;
   padding: 0.9rem 1rem;
   background: var(--surface-alt);
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid rgba(47, 230, 224, 0.22);
+  position: relative;
+}
+
+thead tr::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 1px;
+  background: linear-gradient(90deg, var(--neon-cyan), var(--neon-purple) 50%, transparent);
+  opacity: 0.6;
 }
 
 tbody tr {
   border-bottom: 1px solid var(--line);
-  transition: background 0.15s ease;
+  border-left: 2px solid transparent;
+  transition: background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
 }
 
 tbody tr:last-child { border-bottom: none; }
 
-tbody tr:hover { background: var(--surface-alt); }
+tbody tr:hover {
+  background: var(--surface-alt);
+  border-left-color: var(--neon-cyan);
+  box-shadow: inset 0 0 24px rgba(47, 230, 224, 0.06);
+}
 
 td {
   padding: 0.95rem 1rem;
@@ -234,11 +288,12 @@ td {
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  border: 1.5px solid var(--gold-soft);
+  border: 1.5px solid var(--neon-cyan);
   object-fit: cover;
   vertical-align: middle;
   margin-right: 0.6rem;
   background: var(--surface-alt);
+  box-shadow: 0 0 8px rgba(47, 230, 224, 0.5);
 }
 
 .live-dot {
@@ -249,7 +304,7 @@ td {
   background: var(--rise);
   margin-left: 0.6rem;
   vertical-align: middle;
-  box-shadow: 0 0 0 0 rgba(63, 167, 160, 0.6);
+  box-shadow: 0 0 0 0 rgba(63, 167, 160, 0.6), 0 0 8px rgba(63, 167, 160, 0.9);
   animation: pulse 2s infinite;
 }
 
@@ -272,6 +327,7 @@ td {
   display: flex;
   align-items: center;
   justify-content: center;
+  filter: drop-shadow(0 0 5px currentColor);
 }
 
 .tier-label {
@@ -295,6 +351,7 @@ tbody tr.rank-first:hover {
   font-family: var(--font-mono);
   font-weight: 600;
   color: var(--gold);
+  text-shadow: 0 0 10px rgba(201, 161, 90, 0.45);
 }
 
 .col-wr { font-family: var(--font-mono); }
@@ -324,8 +381,120 @@ footer {
   padding: 0 1.5rem 3rem;
 }
 
+/* ---------- Podio top 3 ---------- */
+
+.podium {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 1.4rem;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0.5rem 1.5rem 0;
+}
+
+.podium-place {
+  --medal-color: var(--gold);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 200px;
+  animation: podium-rise 0.5s ease both;
+}
+
+.podium-place.place-1 { order: 2; --medal-color: var(--gold); }
+.podium-place.place-2 { order: 1; --medal-color: var(--silver); }
+.podium-place.place-3 { order: 3; --medal-color: var(--bronze); }
+
+.podium-place.place-1 { animation-delay: 0.05s; }
+.podium-place.place-2 { animation-delay: 0.15s; }
+.podium-place.place-3 { animation-delay: 0.25s; }
+
+@keyframes podium-rise {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.podium-medal {
+  font-size: 1.4rem;
+  margin-bottom: 0.35rem;
+  filter: drop-shadow(0 0 8px var(--medal-color));
+}
+
+.podium-avatar {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 2px solid var(--medal-color);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--medal-color) 65%, transparent), 0 0 40px color-mix(in srgb, var(--medal-color) 35%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  margin-bottom: 0.6rem;
+}
+
+.podium-icon {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.podium-name {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-align: center;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.podium-lp {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--medal-color);
+  text-shadow: 0 0 8px color-mix(in srgb, var(--medal-color) 60%, transparent);
+  margin-bottom: 0.7rem;
+}
+
+.podium-step {
+  width: 100%;
+  border-radius: 10px 10px 0 0;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--medal-color) 22%, var(--surface)), var(--surface-alt));
+  border: 1px solid var(--medal-color);
+  border-bottom: none;
+  box-shadow: 0 0 24px color-mix(in srgb, var(--medal-color) 25%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 0.5rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--medal-color);
+}
+
+.podium-step span { text-shadow: 0 0 10px color-mix(in srgb, var(--medal-color) 70%, transparent); }
+
+.place-1 .podium-step { height: 96px; font-size: 1.6rem; }
+.place-2 .podium-step { height: 68px; font-size: 1.3rem; }
+.place-3 .podium-step { height: 50px; font-size: 1.3rem; }
+
+.place-1 .podium-avatar { width: 84px; height: 84px; }
+
+@media (max-width: 700px) {
+  .podium { gap: 0.7rem; padding-left: 1rem; padding-right: 1rem; }
+  .podium-place { width: 30%; }
+  .podium-name { font-size: 0.8rem; }
+}
+
 @media (max-width: 560px) {
   .ladder-rail { display: none; }
   .col-wr { display: none; }
   thead th, td { padding: 0.7rem 0.6rem; font-size: 0.85rem; }
+  .podium-avatar { width: 52px; height: 52px; }
+  .place-1 .podium-avatar { width: 64px; height: 64px; }
+  .podium-lp { font-size: 0.7rem; }
 }

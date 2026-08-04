@@ -155,3 +155,40 @@ function escapeHtml(str) {
 
 loadLeaderboard();
 setInterval(loadLeaderboard, REFRESH_MS);
+
+const UPDATE_INTERVAL = 120; // segundos
+
+const countdown = document.getElementById("update-countdown");
+const progress = document.getElementById("timer-progress");
+
+const radius = 17;
+const circumference = 2 * Math.PI * radius;
+
+progress.style.strokeDasharray = circumference;
+progress.style.strokeDashoffset = 0;
+
+let remaining = UPDATE_INTERVAL;
+
+function updateCountdown(){
+
+    const minutes = Math.floor(remaining / 60);
+    const seconds = remaining % 60;
+
+    countdown.textContent =
+        `${String(minutes).padStart(2,"0")}:${String(seconds).padStart(2,"0")}`;
+
+    const percent = remaining / UPDATE_INTERVAL;
+
+    progress.style.strokeDashoffset =
+        circumference * (1 - percent);
+
+    remaining--;
+
+    if(remaining < 0){
+        remaining = UPDATE_INTERVAL;
+    }
+}
+
+updateCountdown();
+
+setInterval(updateCountdown,1000);

@@ -193,3 +193,21 @@ function updateCountdown() {
 
 updateCountdown();
 setInterval(updateCountdown, 1000);
+
+const END_DATE = new Date("2026-10-06T00:00:00");
+
+function updateChallengeCountdown() {
+
+    const now = new Date();
+
+    const diff = END_DATE - now;
+
+    const days = Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+
+    document.getElementById("days-left").textContent = days;
+}
+
+updateChallengeCountdown();
+
+// Se actualiza cada hora (no hace falta hacerlo cada segundo)
+setInterval(updateChallengeCountdown, 60 * 60 * 1000);

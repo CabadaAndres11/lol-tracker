@@ -550,3 +550,30 @@ footer {
     stroke-linecap:round;
     transition:stroke-dashoffset 1s linear;
 }
+
+
+#challenge-countdown{
+    width: fit-content;
+    margin: 12px auto 28px;
+
+    padding: 12px 22px;
+
+    border-radius: 12px;
+
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.12);
+
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: 600;
+
+    text-align: center;
+
+    backdrop-filter: blur(8px);
+}
+
+#days-left{
+    color: #f4c874;
+    font-size: 1.35rem;
+    font-weight: 700;
+}

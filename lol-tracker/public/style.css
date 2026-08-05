@@ -586,8 +586,8 @@ footer {
 }
 
 .title-logo{
-    width:64px;
-    height:64px;
+    width:96px;
+    height:96px;
     object-fit:contain;
     filter: drop-shadow(0 0 8px rgba(244,200,116,.35));
 }

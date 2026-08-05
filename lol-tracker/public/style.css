@@ -81,8 +81,13 @@ body {
 }
 
 .hero-inner {
-  max-width: 880px;
+  max-width: 1000px;
   margin: 0 auto;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 50px;
 }
 
 .eyebrow {
@@ -590,4 +595,22 @@ footer {
     height:96px;
     object-fit:contain;
     filter: drop-shadow(0 0 8px rgba(244,200,116,.35));
+}
+
+.hero-logo{
+    flex-shrink: 0;
+}
+
+.hero-logo img{
+    width: 180px;
+    height: auto;
+    display: block;
+
+    filter: drop-shadow(0 0 18px rgba(201,161,90,.35));
+}
+
+.hero-content{
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
 }

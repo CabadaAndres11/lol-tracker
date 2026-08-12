@@ -614,3 +614,15 @@ footer {
     flex-direction:column;
     align-items:flex-start;
 }
+
+.col-start {
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.start-lp {
+  font-size: 0.75rem;
+  color: var(--gold-soft);
+  opacity: 0.8;
+}

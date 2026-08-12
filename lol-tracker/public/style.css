@@ -618,6 +618,9 @@ footer {
 .col-start {
   font-family: var(--font-mono);
   white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .col-start .tier-badge {
@@ -632,11 +635,11 @@ footer {
 }
 
 .col-start .start-lp {
-  display: inline;
-  margin-left: 0.5rem;
-
+  margin-left: 0;
   font-family: var(--font-mono);
-  font-size: 0.72rem;
-  font-weight: 500;
-  color: var(--gold-soft);
+  font-weight: 600;
+  font-size: 0.94rem;
+  color: var(--gold);
+  text-shadow: 0 0 10px rgba(201, 161, 90, 0.45);
+  line-height: 1;
 }

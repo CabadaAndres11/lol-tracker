@@ -45,9 +45,14 @@ async function loadLeaderboard() {
 
       if (p.error) {
         tr.classList.add('error-row');
+        const startTierLabel = p.startTier
+        ? `${capitalize(p.startTier)} ${p.startRank || ''}`.trim()
+        : '—';
+        
         tr.innerHTML = `
-          <td>${i + 1}</td>
-          <td colspan="5">${escapeHtml(p.displayName)} — no se pudo cargar (${escapeHtml(p.error)})</td>
+        <td class="col-gained ${gainedClass}">${gainedText}</td>
+        <td class="col-start">${escapeHtml(startTierLabel)}${p.startLP != null ? ` <span class="start-lp">${p.startLP} LP</span>` : ''}</td>
+        <td class="col-wr ${wrClass}">${p.winrate == null ? '—' : `${p.winrate}% (${p.wins}V/${p.losses}D)`}</td>
         `;
         body.appendChild(tr);
         return;

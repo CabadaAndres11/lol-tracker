@@ -154,10 +154,23 @@ async function loadLeaderboard() {
         </td>
 
         <td class="col-start">
-          ${escapeHtml(startTierLabel)}
-          ${p.startLP != null
-            ? `<span class="start-lp">${p.startLP} LP</span>`
-            : ''}
+            <span class="tier-badge">
+              <span
+                class="tier-hex"
+                style="background: radial-gradient(circle at 35% 30%, ${TIER_COLORS[p.startTier] || TIER_COLORS.UNRANKED}, ${TIER_COLORS[p.startTier] || TIER_COLORS.UNRANKED}66 70%); border: 1px solid ${TIER_COLORS[p.startTier] || TIER_COLORS.UNRANKED};"
+              ></span>
+          
+              <span
+                class="tier-label"
+                style="color:${TIER_COLORS[p.startTier] || TIER_COLORS.UNRANKED}"
+              >
+                ${escapeHtml(startTierLabel)}
+              </span>
+            </span>
+          
+            ${p.startLP != null
+              ? `<span class="start-lp">${p.startLP} LP</span>`
+              : ''}
         </td>
 
         <td class="col-wr ${wrClass}">

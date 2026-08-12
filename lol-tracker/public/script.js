@@ -17,9 +17,17 @@ let lastUpdateTime = null;
 
 // op.gg usa códigos de región distintos a los "platform" de la API de Riot.
 const OPGG_REGIONS = {
-  euw1: 'euw', eun1: 'eune', tr1: 'tr', ru: 'ru',
-  na1: 'na', br1: 'br', la1: 'lan', la2: 'las', oc1: 'oce',
-  kr: 'kr', jp1: 'jp',
+  euw1: 'euw',
+  eun1: 'eune',
+  tr1: 'tr',
+  ru: 'ru',
+  na1: 'na',
+  br1: 'br',
+  la1: 'lan',
+  la2: 'las',
+  oc1: 'oce',
+  kr: 'kr',
+  jp1: 'jp',
 };
 
 function opggUrl(name, tag, platform) {
@@ -41,34 +49,54 @@ async function loadLeaderboard() {
 
     data.players.forEach((p, i) => {
       const tr = document.createElement('tr');
-      if (i === 0 && !p.error) tr.classList.add('rank-first');
 
+      if (i === 0 && !p.error) {
+        tr.classList.add('rank-first');
+      }
+
+      // Jugador con error
       if (p.error) {
         tr.classList.add('error-row');
-        const startTierLabel = p.startTier
-        ? `${capitalize(p.startTier)} ${p.startRank || ''}`.trim()
-        : '—';
-        
+
         tr.innerHTML = `
-        <td class="col-gained ${gainedClass}">${gainedText}</td>
-        <td class="col-start">${escapeHtml(startTierLabel)}${p.startLP != null ? ` <span class="start-lp">${p.startLP} LP</span>` : ''}</td>
-        <td class="col-wr ${wrClass}">${p.winrate == null ? '—' : `${p.winrate}% (${p.wins}V/${p.losses}D)`}</td>
+          <td>${i + 1}</td>
+          <td colspan="6">
+            ${escapeHtml(p.displayName)} — no se pudo cargar (${escapeHtml(p.error)})
+          </td>
         `;
+
         body.appendChild(tr);
         return;
       }
 
       const [name, tag] = p.displayName.split('#');
+
       const color = TIER_COLORS[p.tier] || TIER_COLORS.UNRANKED;
-      const wrClass = p.winrate == null ? '' : p.winrate >= 50 ? 'wr-high' : 'wr-low';
+
+      const wrClass = p.winrate == null
+        ? ''
+        : p.winrate >= 50
+          ? 'wr-high'
+          : 'wr-low';
+
       const tierLabel = p.tier === 'UNRANKED'
         ? 'Aún sin invocar'
         : `${capitalize(p.tier)} ${p.rank}`.trim();
 
-      const gainedClass = p.lpGained == null ? '' : p.lpGained >= 0 ? 'wr-high' : 'wr-low';
+      const gainedClass = p.lpGained == null
+        ? ''
+        : p.lpGained >= 0
+          ? 'wr-high'
+          : 'wr-low';
+
       const gainedText = p.lpGained == null
         ? '—'
         : `${p.lpGained > 0 ? '+' : ''}${p.lpGained} LP`;
+
+      // Rango con el que comenzó el reto
+      const startTierLabel = p.startTier
+        ? `${capitalize(p.startTier)} ${p.startRank || ''}`.trim()
+        : '—';
 
       const icon = p.iconUrl
         ? `<img class="summoner-icon" src="${p.iconUrl}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">`
@@ -78,45 +106,100 @@ async function loadLeaderboard() {
         ? `<span class="live-dot" title="En partida ahora mismo"></span>`
         : '';
 
-      const crown = i === 0 ? '<span class="crown" title="Va primero">👑</span>' : '';
+      const crown = i === 0
+        ? '<span class="crown" title="Va primero">👑</span>'
+        : '';
+
       const profileUrl = opggUrl(name, tag, p.platform);
 
       tr.innerHTML = `
         <td class="col-pos">${crown}${i + 1}</td>
+
         <td class="col-name">
-          ${icon}<a class="player-link" href="${profileUrl}" target="_blank" rel="noopener noreferrer">${escapeHtml(name)}<span class="player-tag">#${escapeHtml(tag)}</span></a>${liveDot}
+          ${icon}
+          <a
+            class="player-link"
+            href="${profileUrl}"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            ${escapeHtml(name)}
+            <span class="player-tag">#${escapeHtml(tag)}</span>
+          </a>
+          ${liveDot}
         </td>
+
         <td class="col-tier">
           <span class="tier-badge">
-            <span class="tier-hex" style="background: radial-gradient(circle at 35% 30%, ${color}, ${color}66 70%); border: 1px solid ${color};"></span>
-            <span class="tier-label" style="color:${color}">${escapeHtml(tierLabel)}</span>
+            <span
+              class="tier-hex"
+              style="background: radial-gradient(circle at 35% 30%, ${color}, ${color}66 70%); border: 1px solid ${color};"
+            ></span>
+
+            <span
+              class="tier-label"
+              style="color:${color}"
+            >
+              ${escapeHtml(tierLabel)}
+            </span>
           </span>
         </td>
-        <td class="col-lp">${p.tier === 'UNRANKED' ? '—' : `${p.lp} LP`}</td>
-        <td class="col-gained ${gainedClass}">${gainedText}</td>
-        <td class="col-wr ${wrClass}">${p.winrate == null ? '—' : `${p.winrate}% (${p.wins}V/${p.losses}D)`}</td>
+
+        <td class="col-lp">
+          ${p.tier === 'UNRANKED' ? '—' : `${p.lp} LP`}
+        </td>
+
+        <td class="col-gained ${gainedClass}">
+          ${gainedText}
+        </td>
+
+        <td class="col-start">
+          ${escapeHtml(startTierLabel)}
+          ${p.startLP != null
+            ? `<span class="start-lp">${p.startLP} LP</span>`
+            : ''}
+        </td>
+
+        <td class="col-wr ${wrClass}">
+          ${p.winrate == null
+            ? '—'
+            : `${p.winrate}% (${p.wins}V/${p.losses}D)`}
+        </td>
       `;
+
       body.appendChild(tr);
     });
 
     renderPodium(data.players);
 
-     lastUpdateTime = new Date(data.updatedAt);
+    lastUpdateTime = new Date(data.updatedAt);
 
     document.getElementById('updated-at').textContent =
-    lastUpdateTime.toLocaleTimeString('es-ES');
+      lastUpdateTime.toLocaleTimeString('es-ES');
+
     statusText.textContent = 'En vivo';
+
   } catch (err) {
     statusText.textContent = 'Error al actualizar';
+
     if (!body.children.length || body.querySelector('.loading-row')) {
-      body.innerHTML = `<tr class="error-row"><td colspan="5">No se pudo cargar la clasificación: ${escapeHtml(err.message)}</td></tr>`;
+      body.innerHTML = `
+        <tr class="error-row">
+          <td colspan="7">
+            No se pudo cargar la clasificación: ${escapeHtml(err.message)}
+          </td>
+        </tr>
+      `;
     }
+
     console.error(err);
   }
 }
 
 function renderPodium(players) {
-  const top3 = players.filter(p => !p.error).slice(0, 3);
+  const top3 = players
+    .filter(p => !p.error)
+    .slice(0, 3);
 
   for (let place = 1; place <= 3; place++) {
     const el = document.getElementById(`podium-${place}`);
@@ -128,16 +211,22 @@ function renderPodium(players) {
     }
 
     const [name, tag] = p.displayName.split('#');
+
     const nameEl = el.querySelector('.podium-name');
     const lpEl = el.querySelector('.podium-lp');
     const icon = el.querySelector('.podium-icon');
 
     nameEl.textContent = name;
     nameEl.title = `${name}#${tag}`;
+
     lpEl.textContent = p.lpGained == null
       ? '—'
       : `${p.lpGained > 0 ? '+' : ''}${p.lpGained} LP`;
-    lpEl.classList.toggle('podium-lp-negative', p.lpGained != null && p.lpGained < 0);
+
+    lpEl.classList.toggle(
+      'podium-lp-negative',
+      p.lpGained != null && p.lpGained < 0
+    );
 
     if (p.iconUrl) {
       icon.src = p.iconUrl;
@@ -161,8 +250,18 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
+
+// ============================================================
+// CARGA Y ACTUALIZACIÓN DEL LEADERBOARD
+// ============================================================
+
 loadLeaderboard();
 setInterval(loadLeaderboard, REFRESH_MS);
+
+
+// ============================================================
+// CONTADOR DE ACTUALIZACIÓN
+// ============================================================
 
 const countdown = document.getElementById("update-countdown");
 const progress = document.getElementById("timer-progress");
@@ -175,44 +274,63 @@ progress.style.strokeDashoffset = 0;
 
 function updateCountdown() {
 
-    if (!lastUpdateTime) return;
+  if (!lastUpdateTime) return;
 
-    const nextUpdate = new Date(lastUpdateTime.getTime() + REFRESH_MS);
-    const now = new Date();
+  const nextUpdate = new Date(
+    lastUpdateTime.getTime() + REFRESH_MS
+  );
 
-    let remaining = Math.floor((nextUpdate - now) / 1000);
+  const now = new Date();
 
-    if (remaining < 0) remaining = 0;
+  let remaining = Math.floor(
+    (nextUpdate - now) / 1000
+  );
 
-    const minutes = Math.floor(remaining / 60);
-    const seconds = remaining % 60;
+  if (remaining < 0) {
+    remaining = 0;
+  }
 
-    countdown.textContent =
-        `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+  const minutes = Math.floor(remaining / 60);
+  const seconds = remaining % 60;
 
-    const percent = remaining / (REFRESH_MS / 1000);
+  countdown.textContent =
+    `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 
-    progress.style.strokeDashoffset =
-        circumference * (1 - percent);
+  const percent =
+    remaining / (REFRESH_MS / 1000);
+
+  progress.style.strokeDashoffset =
+    circumference * (1 - percent);
 }
 
 updateCountdown();
 setInterval(updateCountdown, 1000);
 
+
+// ============================================================
+// CONTADOR DEL RETO
+// ============================================================
+
 const END_DATE = new Date("2026-10-06T00:00:00");
 
 function updateChallengeCountdown() {
 
-    const now = new Date();
+  const now = new Date();
 
-    const diff = END_DATE - now;
+  const diff = END_DATE - now;
 
-    const days = Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+  const days = Math.max(
+    0,
+    Math.ceil(diff / (1000 * 60 * 60 * 24))
+  );
 
-    document.getElementById("days-left").textContent = days;
+  document.getElementById("days-left").textContent = days;
 }
 
 updateChallengeCountdown();
 
-// Se actualiza cada hora (no hace falta hacerlo cada segundo)
-setInterval(updateChallengeCountdown, 60 * 60 * 1000);
+// Se actualiza cada hora
+setInterval(
+  updateChallengeCountdown,
+  60 * 60 * 1000
+);

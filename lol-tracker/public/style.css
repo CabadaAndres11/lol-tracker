@@ -632,12 +632,11 @@ footer {
 }
 
 .col-start .start-lp {
-  display: block;
-  margin-top: 0.15rem;
-  margin-left: 1.55rem;
+  display: inline;
+  margin-left: 0.5rem;
 
   font-family: var(--font-mono);
   font-size: 0.72rem;
   font-weight: 500;
-  color: var(--text-muted);
+  color: var(--gold-soft);
 }

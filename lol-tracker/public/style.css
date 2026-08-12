@@ -221,7 +221,6 @@ thead th {
   font-weight: 500;
   padding: 0.9rem 1rem;
   background: var(--surface-alt);
-  border-bottom: 1px solid rgba(47, 230, 224, 0.22);
   position: relative;
 }
 

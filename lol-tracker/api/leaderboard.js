@@ -22,7 +22,10 @@ module.exports = async function handler(req, res) {
         } else {
           player.lpGained = null;
         }
-
+        player.startTier = p.startTier || null;
+        player.startRank = p.startRank || null;
+        player.startLP = p.startLP ?? null;
+        
         results.push(player);
       } catch (err) {
         results.push({

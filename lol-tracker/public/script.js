@@ -349,3 +349,12 @@ setInterval(
   updateChallengeCountdown,
   60 * 60 * 1000
 );
+
+
+// ============================================================
+// VENTANA FLOTANTE DEL GANADOR
+// ============================================================
+
+document.getElementById("winner-close").addEventListener("click", () => {
+  document.getElementById("winner-popup").classList.add("is-hidden");
+});

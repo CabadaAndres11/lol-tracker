@@ -649,3 +649,72 @@ footer {
   text-shadow: 0 0 10px rgba(201, 161, 90, 0.45);
   line-height: 1;
 }
+
+
+/* ============================================================
+   VENTANA FLOTANTE: GANADOR DEL ÚLTIMO RETO
+   ============================================================ */
+.winner-popup {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9998;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  max-width: calc(100vw - 40px);
+  padding: 14px 40px 14px 16px;
+  background: rgba(18, 22, 29, .94);
+  border: 1px solid var(--gold-soft);
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, .5), 0 0 20px rgba(201, 161, 90, .18);
+  backdrop-filter: blur(8px);
+  animation: winner-in .5s ease-out;
+}
+
+.winner-popup.is-hidden { display: none; }
+
+.winner-trophy { font-size: 30px; line-height: 1; }
+
+.winner-label {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  color: var(--gold);
+}
+
+.winner-name {
+  display: inline-block;
+  margin-top: 2px;
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.winner-name span { color: var(--text-muted); font-weight: 500; font-size: 15px; }
+.winner-name:hover { color: var(--gold); text-decoration: underline; }
+
+.winner-close {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.winner-close:hover { color: var(--text); background: rgba(255, 255, 255, .08); }
+
+@keyframes winner-in {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}

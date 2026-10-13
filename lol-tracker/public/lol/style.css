@@ -718,3 +718,23 @@ footer {
   from { opacity: 0; transform: translateY(16px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+
+/* Botón para volver a la pantalla de selección de juego */
+.back-home {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 9999;
+  padding: 10px 16px;
+  background: rgba(30, 30, 35, .92);
+  border: 1px solid rgba(255, 255, 255, .08);
+  border-radius: 12px;
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  backdrop-filter: blur(8px);
+}
+
+.back-home:hover { border-color: var(--gold-soft); color: var(--gold); }

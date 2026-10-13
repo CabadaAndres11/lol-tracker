@@ -32,24 +32,82 @@
   </div>
 </header>
 
-<main>
-  <div class="roster-top">
-    <p class="roster-count"><strong id="count">0</strong> participantes</p>
-    <button class="add-btn" id="open-modal" type="button">+ Añadir Participante</button>
-  </div>
+<nav class="tabs" role="tablist" aria-label="Secciones">
+  <button class="tab is-active" role="tab" data-tab="participantes" aria-selected="true" type="button">Participantes</button>
+  <button class="tab" role="tab" data-tab="descarga" aria-selected="false" type="button">Descarga</button>
+  <button class="tab" role="tab" data-tab="normas" aria-selected="false" type="button">Normas</button>
+</nav>
 
-  <div class="roster-wrap">
-    <div class="roster-rail" aria-hidden="true"></div>
-    <div class="roster-frame">
-      <span class="corner corner-tl" aria-hidden="true"></span>
-      <span class="corner corner-tr" aria-hidden="true"></span>
-      <span class="corner corner-bl" aria-hidden="true"></span>
-      <span class="corner corner-br" aria-hidden="true"></span>
-      <ol class="roster" id="roster">
-        <li class="roster-empty">Cargando participantes…</li>
+<main>
+
+  <!-- ===================== PARTICIPANTES ===================== -->
+  <section class="panel is-active" id="tab-participantes" role="tabpanel">
+    <div class="roster-top">
+      <p class="roster-count"><strong id="count">0</strong> participantes</p>
+      <button class="add-btn" id="open-modal" type="button">+ Añadir Participante</button>
+    </div>
+
+    <div class="roster-wrap">
+      <div class="roster-rail" aria-hidden="true"></div>
+      <div class="roster-frame">
+        <span class="corner corner-tl" aria-hidden="true"></span>
+        <span class="corner corner-tr" aria-hidden="true"></span>
+        <span class="corner corner-bl" aria-hidden="true"></span>
+        <span class="corner corner-br" aria-hidden="true"></span>
+        <ol class="roster" id="roster">
+          <li class="roster-empty">Cargando participantes…</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== DESCARGA ===================== -->
+  <section class="panel" id="tab-descarga" role="tabpanel" hidden>
+    <div class="card">
+      <h2>Descarga el juego</h2>
+      <p class="card-text">El juego se descarga desde Google Drive. Sigue los pasos de abajo para empezar tu aventura.</p>
+      <a class="add-btn download-btn" id="rom-download" href="https://drive.google.com/file/d/1jXTQZI6uxJ7caBO3YDFg3jgh_GnUNDA9/view" target="_blank" rel="noopener noreferrer">⬇ Descargar juego</a>
+    </div>
+
+    <div class="card">
+      <h2>Cómo jugarlo</h2>
+      <ol class="steps">
+        <li>Descarga el archivo desde el botón de arriba (Google Drive).</li>
+        <li>Extrae el <strong>ZIP</strong> descargado.</li>
+        <li>Inicia el <strong>Game.exe</strong>.</li>
+        <li>Selecciona <strong>"Nuevo Juego"</strong>.</li>
+        <li>Selecciona tu personaje e introduce tu nombre.</li>
+        <li>Selecciona el <strong>"Modo Normal"</strong> y después el <strong>"Modo Nuzlocke"</strong>.</li>
+        <li>Puedes saltar la intro del juego o no; se recomienda <strong>saltarla</strong>.</li>
+        <li>Avanza la conversación hasta llegar al camión, donde te preguntarán si deseas activar el <strong>"Modo Random"</strong>: elige <strong>Sí</strong>. Cuando te pregunten si lo quieres <strong>progresivo</strong>, elige <strong>No</strong>.</li>
+        <li>A partir de ese punto ya puedes jugar la aventura con normalidad.</li>
       </ol>
     </div>
-  </div>
+  </section>
+
+  <!-- ===================== NORMAS ===================== -->
+  <section class="panel" id="tab-normas" role="tabpanel" hidden>
+    <div class="card">
+      <h2>Normas del Nuzlocke</h2>
+      <p class="card-text">El propio juego regula la mayoría de las reglas gracias al <strong>Modo Nuzlocke</strong>, pero estas son las normas que debes conocer y respetar:</p>
+      <ol class="rules">
+        <li>Solo puedes capturar al <strong>primer Pokémon</strong> que encuentres en cada ruta o zona.</li>
+        <li>Si un Pokémon cae debilitado, se considera <strong>muerto</strong> y no se podrá volver a usar.</li>
+        <li>Los niveles de tus Pokémon <strong>no pueden superar el nivel del Pokémon más fuerte</strong> del próximo líder de gimnasio.</li>
+        <li><strong>No se pueden comprar objetos curativos</strong> en las tiendas.</li>
+        <li>Se recomienda ponerle un <strong>mote</strong> a cada Pokémon para encariñarte con tu equipo.</li>
+        <li>Si todo tu equipo cae debilitado, tu aventura termina.</li>
+        <li>No se permite reiniciar partida ni usar trucos para repetir encuentros o evitar pérdidas.</li>
+      </ol>
+    </div>
+
+    <div class="card">
+      <h2>Actualización diaria del equipo</h2>
+      <p class="card-text">Por el bien del torneo, <strong>todos los participantes que jueguen un día deben actualizar su equipo en esta página</strong> a diario. Así todos podemos seguir el progreso de la competición.</p>
+      <p class="card-note">🛠 Esta función estará disponible próximamente.</p>
+    </div>
+  </section>
+
 </main>
 
 <div class="modal" id="modal" hidden>

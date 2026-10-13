@@ -49,7 +49,10 @@ function validateTeam(team) {
       if (/[<>]/.test(text)) throw new Error('Hay caracteres no permitidos.');
     }
 
-    return { species, nickname, ability, moves };
+    // Número de la Pokédex (opcional): lo usa la web para mostrar la imagen.
+    const dexId = Number.isInteger(mon?.dexId) && mon.dexId > 0 && mon.dexId < 5000 ? mon.dexId : undefined;
+
+    return dexId ? { species, nickname, ability, moves, dexId } : { species, nickname, ability, moves };
   });
 }
 

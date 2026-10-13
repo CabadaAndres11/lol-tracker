@@ -713,3 +713,152 @@ footer {
   border-radius: 50%;
   filter: none;
 }
+
+
+/* ---------- Medallas ---------- */
+
+.mini-dots { display: flex; gap: 3px; align-items: center; }
+
+.mini-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--line);
+  transition: background .2s ease, box-shadow .2s ease;
+}
+
+.mini-dot.on { background: var(--c); box-shadow: 0 0 6px var(--c); }
+
+.crown { font-size: 0.95em; }
+
+.badges {
+  margin: 1rem 0 0.4rem;
+  padding: 0.9rem 1rem 1rem;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+.badges.is-champion {
+  border-color: var(--gold-soft);
+  box-shadow: 0 0 22px rgba(244, 200, 116, 0.18);
+}
+
+.badges-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.7rem;
+}
+
+.badges-title {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.badges-title strong { color: var(--gold); font-size: 0.9rem; }
+
+.champion-tag {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #f4c874;
+  text-shadow: 0 0 12px rgba(244, 200, 116, 0.6);
+  animation: spark 2.4s ease-in-out infinite;
+}
+
+.badges-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.badge {
+  --size: 52px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: transform .15s ease;
+}
+
+.badge svg {
+  width: var(--size);
+  height: var(--size);
+  overflow: visible;
+}
+
+.badge-league { --size: 76px; margin-left: auto; }
+
+.b-shape {
+  fill: color-mix(in srgb, var(--c) 10%, transparent);
+  stroke: color-mix(in srgb, var(--c) 45%, #5a616e);
+  stroke-width: 3;
+  stroke-linejoin: round;
+  stroke-dasharray: 5 4;
+  transition: fill .25s ease, stroke .25s ease;
+}
+
+.b-inner { fill: transparent; transition: fill .25s ease; }
+
+.badge:hover:not(.is-locked) { transform: translateY(-3px) scale(1.06); }
+.badge:focus-visible { outline: 2px solid var(--neon-cyan); outline-offset: 4px; border-radius: 8px; }
+
+.badge.is-on { color: var(--text); }
+
+.badge.is-on .b-shape {
+  fill: var(--c);
+  stroke: #fff;
+  stroke-opacity: .7;
+  stroke-dasharray: none;
+}
+
+.badge.is-on .b-inner { fill: rgba(255, 255, 255, 0.3); }
+
+.badge.is-on svg {
+  filter: drop-shadow(0 0 7px var(--c)) drop-shadow(0 0 14px var(--c));
+  animation: badge-pop .35s ease-out;
+}
+
+.badge-league.is-on svg { animation: badge-pop .35s ease-out, league-glow 2.6s ease-in-out infinite .35s; }
+
+.badge.is-locked { cursor: not-allowed; opacity: .4; }
+
+.badge-label {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: .06em;
+}
+
+@keyframes badge-pop {
+  0% { transform: scale(.7); }
+  60% { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
+
+@keyframes league-glow {
+  0%, 100% { filter: drop-shadow(0 0 8px var(--c)) drop-shadow(0 0 16px var(--c)); }
+  50% { filter: drop-shadow(0 0 14px var(--c)) drop-shadow(0 0 30px var(--c)); }
+}
+
+@media (max-width: 560px) {
+  .mini-dots { display: none; }
+  .badge { --size: 44px; }
+  .badge-league { --size: 64px; margin-left: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .badge svg, .champion-tag { animation: none !important; }
+}

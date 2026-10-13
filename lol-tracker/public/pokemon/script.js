@@ -17,6 +17,71 @@ let teamError = '';        // error al guardar un equipo
 
 const idOf = (p) => p.name.toLowerCase();
 
+// ---------------------------------------------------------------
+// Pokédex (nombres en inglés + imagen oficial, vía PokéAPI)
+// ---------------------------------------------------------------
+
+const DEX_URL = 'https://pokeapi.co/api/v2/pokemon-species?limit=2000';
+const ARTWORK_URL = (id) =>
+  `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
+
+let dexByName = {};   // 'mr mime' -> { id: 122, name: 'Mr Mime' }
+
+const dexKey = (str) => String(str).toLowerCase().replace(/[-_\s]+/g, ' ').trim();
+const prettyName = (slug) => slug.split('-').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+
+function dexLookup(name) {
+  return dexByName[dexKey(name)] || null;
+}
+
+function buildDex(results) {
+  dexByName = {};
+  results.forEach((r) => {
+    const id = Number(r.url.split('/').filter(Boolean).pop());
+    dexByName[dexKey(r.name)] = { id, name: prettyName(r.name) };
+  });
+
+  // Lista de sugerencias para el campo "Pokémon"
+  let list = document.getElementById('pokemon-names');
+  if (!list) {
+    list = document.createElement('datalist');
+    list.id = 'pokemon-names';
+    document.body.appendChild(list);
+  }
+  list.innerHTML = Object.values(dexByName)
+    .sort((a, b) => a.id - b.id)
+    .map((d) => `<option value="${escapeHtml(d.name)}"></option>`)
+    .join('');
+}
+
+async function loadDex() {
+  try {
+    const cached = localStorage.getItem('pokedex-v1');
+    if (cached) {
+      buildDex(JSON.parse(cached));
+      return;
+    }
+  } catch { /* sin caché, seguimos */ }
+
+  try {
+    const res = await fetch(DEX_URL);
+    if (!res.ok) throw new Error(`PokéAPI respondió ${res.status}`);
+    const data = await res.json();
+    buildDex(data.results);
+    try { localStorage.setItem('pokedex-v1', JSON.stringify(data.results)); } catch { /* ignorar */ }
+    if (!editing) render(); // para que aparezcan las imágenes de los equipos ya cargados
+  } catch (err) {
+    console.warn('No se pudo cargar la Pokédex:', err);
+  }
+}
+
+function monImage(mon) {
+  const id = mon.dexId || dexLookup(mon.species)?.id;
+  return id
+    ? `<img class="mon-img" src="${ARTWORK_URL(id)}" alt="${escapeHtml(mon.species)}" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'mon-img mon-img-empty',textContent:'?'}))">`
+    : `<div class="mon-img mon-img-empty">?</div>`;
+}
+
 function escapeHtml(str) {
   const div = document.createElement('div');
   div.textContent = str;
@@ -31,11 +96,16 @@ function monCard(mon, index, id) {
   const moves = mon.moves.filter(Boolean).map((m) => `<li>${escapeHtml(m)}</li>`).join('');
   return `
     <div class="mon">
-      <div class="mon-top">
-        <span class="mon-species">${escapeHtml(mon.species)}</span>
-        ${mon.nickname ? `<span class="mon-nick">“${escapeHtml(mon.nickname)}”</span>` : ''}
+      <div class="mon-head">
+        ${monImage(mon)}
+        <div class="mon-info">
+          <div class="mon-top">
+            <span class="mon-species">${escapeHtml(mon.species)}</span>
+            ${mon.nickname ? `<span class="mon-nick">“${escapeHtml(mon.nickname)}”</span>` : ''}
+          </div>
+          <div class="mon-ability"><span>Habilidad</span> ${escapeHtml(mon.ability)}</div>
+        </div>
       </div>
-      <div class="mon-ability"><span>Habilidad</span> ${escapeHtml(mon.ability)}</div>
       <ul class="mon-moves">${moves}</ul>
       <div class="mon-actions">
         <button type="button" class="link-btn" data-action="edit-mon" data-id="${encodeURIComponent(id)}" data-index="${index}">Editar</button>
@@ -56,7 +126,7 @@ function monForm(id, index) {
   return `
     <form class="mon-form" data-id="${encodeURIComponent(id)}" data-index="${index}" autocomplete="off">
       <div class="mon-form-grid">
-        <label>Pokémon *<input name="species" type="text" maxlength="30" required value="${v(mon?.species)}" /></label>
+        <label>Pokémon *<input name="species" type="text" maxlength="30" required list="pokemon-names" placeholder="Escribe en inglés…" value="${v(mon?.species)}" /></label>
         <label>Mote<input name="nickname" type="text" maxlength="30" value="${v(mon?.nickname)}" /></label>
         <label class="span-2">Habilidad *<input name="ability" type="text" maxlength="30" required value="${v(mon?.ability)}" /></label>
       </div>
@@ -204,8 +274,12 @@ roster.addEventListener('submit', async (e) => {
   const index = Number(f.dataset.index);
   const fd = new FormData(f);
 
+  // Si coincide con un Pokémon conocido, normalizamos el nombre y guardamos su nº de Pokédex.
+  const known = dexLookup(String(fd.get('species')));
+
   const mon = {
-    species: fd.get('species'),
+    species: known ? known.name : fd.get('species'),
+    dexId: known ? known.id : undefined,
     nickname: fd.get('nickname'),
     ability: fd.get('ability'),
     moves: [0, 1, 2, 3].map((i) => fd.get(`move${i}`)),
@@ -271,6 +345,7 @@ form.addEventListener('submit', async (e) => {
   }
 });
 
+loadDex();
 loadAll();
 // Refresca para ver los cambios de otros jugadores (se pausa mientras editas).
 setInterval(loadAll, 30 * 1000);

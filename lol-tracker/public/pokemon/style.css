@@ -247,13 +247,47 @@ main {
 }
 
 .roster-item {
+  border-bottom: 1px solid var(--line);
+  animation: item-in .35s ease-out;
+}
+
+.roster-head {
+  width: 100%;
   display: flex;
   align-items: center;
   gap: 1rem;
   padding: 0.95rem 1.2rem;
-  border-bottom: 1px solid var(--line);
-  animation: item-in .35s ease-out;
+  background: transparent;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background .15s ease;
 }
+
+.roster-head:hover { background: rgba(201, 161, 90, 0.07); }
+.roster-head:focus-visible { outline: 2px solid var(--neon-cyan); outline-offset: -2px; }
+
+.roster-name { flex: 1; }
+
+.team-badge {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.15rem 0.6rem;
+}
+
+.chevron {
+  color: var(--gold);
+  transition: transform .2s ease;
+}
+
+.roster-item.is-open .chevron { transform: rotate(90deg); }
+.roster-item.is-open { background: rgba(201, 161, 90, 0.04); }
 
 .roster-item:nth-child(even) { background: var(--surface-alt); }
 .roster-item:last-child { border-bottom: 0; }
@@ -491,3 +525,163 @@ footer {
   border: 1px solid rgba(63, 167, 160, 0.25);
   border-radius: 8px;
 }
+
+
+/* ---------- Equipo de cada participante ---------- */
+
+.team-panel {
+  padding: 0.4rem 1.2rem 1.4rem;
+  border-top: 1px dashed var(--line);
+  animation: item-in .25s ease-out;
+}
+
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 0.9rem;
+  margin: 1rem 0;
+}
+
+.team-empty,
+.team-full {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.mon {
+  padding: 0.9rem 1rem;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-top: 2px solid var(--gold-soft);
+  border-radius: 10px;
+}
+
+.mon-top { display: flex; align-items: baseline; gap: 0.5rem; flex-wrap: wrap; }
+
+.mon-species {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.mon-nick { color: var(--gold); font-size: 0.9rem; }
+
+.mon-ability {
+  margin-top: 0.3rem;
+  font-size: 0.85rem;
+  color: var(--text);
+}
+
+.mon-ability span {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-right: 0.3rem;
+}
+
+.mon-moves {
+  list-style: none;
+  margin: 0.7rem 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.35rem;
+}
+
+.mon-moves li {
+  font-size: 0.8rem;
+  padding: 0.25rem 0.5rem;
+  background: var(--surface-alt);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  overflow-wrap: anywhere;
+}
+
+.mon-actions { margin-top: 0.7rem; display: flex; gap: 1rem; }
+
+.link-btn {
+  padding: 0;
+  background: none;
+  border: 0;
+  font: inherit;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.link-btn:hover { color: var(--gold); }
+.link-danger:hover { color: var(--fall); }
+
+.add-btn.small { font-size: 0.85rem; padding: 0.55rem 1rem; }
+
+.team-add { margin-top: 0.4rem; }
+
+.mon-form {
+  padding: 0.9rem 1rem;
+  background: var(--bg);
+  border: 1px solid var(--neon-cyan);
+  border-radius: 10px;
+  box-shadow: 0 0 16px rgba(47, 230, 224, 0.12);
+}
+
+.team-add .mon-form { max-width: 520px; }
+
+.mon-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+}
+
+.mon-form .span-2 { grid-column: span 2; }
+
+.mon-form label,
+.mon-form-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.mon-form-label { margin: 0.8rem 0 0.3rem; }
+
+.mon-form input {
+  padding: 0.55rem 0.7rem;
+  font: inherit;
+  font-size: 0.9rem;
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  min-width: 0;
+}
+
+.mon-form input:focus {
+  outline: none;
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 0 3px rgba(47, 230, 224, .15);
+}
+
+.mon-form-moves { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+
+.mon-form-actions { display: flex; align-items: center; gap: 1rem; margin-top: 0.4rem; }
+
+@media (max-width: 560px) {
+  .team-grid { grid-template-columns: 1fr; }
+  .mon-form-grid, .mon-form-moves { grid-template-columns: 1fr; }
+  .mon-form .span-2 { grid-column: auto; }
+}
+
+/* Corrección: que el formulario no se salga de su caja */
+.mon-form label { min-width: 0; }
+.mon-form input { width: 100%; }
+.team-grid .mon-form { grid-column: 1 / -1; max-width: 520px; }

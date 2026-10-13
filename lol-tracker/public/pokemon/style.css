@@ -377,3 +377,117 @@ footer {
 @media (max-width: 560px) {
   .roster-rail { display: none; }
 }
+
+
+/* ---------- Pestañas ---------- */
+
+.tabs {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  padding: 1.5rem 1.5rem 0;
+}
+
+.tab {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0.65rem 1.3rem;
+  cursor: pointer;
+  transition: color .15s ease, border-color .15s ease, box-shadow .15s ease;
+}
+
+.tab:hover { color: var(--text); border-color: var(--gold-soft); }
+
+.tab.is-active {
+  color: var(--gold);
+  border-color: var(--gold);
+  box-shadow: 0 0 16px rgba(201, 161, 90, 0.25);
+}
+
+.panel { animation: item-in .3s ease-out; }
+
+/* ---------- Tarjetas (Descarga y Normas) ---------- */
+
+.card {
+  position: relative;
+  margin-bottom: 1.4rem;
+  padding: 1.6rem 1.6rem 1.4rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-left: 2px solid var(--neon-cyan);
+  border-radius: 12px;
+  box-shadow: -6px 0 18px -10px rgba(47, 230, 224, 0.6);
+}
+
+.card h2 {
+  margin: 0 0 0.7rem;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+}
+
+.card-text { margin: 0 0 1.2rem; color: var(--text-muted); line-height: 1.6; }
+
+.download-btn { display: inline-block; text-decoration: none; }
+
+.steps,
+.rules {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: item;
+}
+
+.steps li,
+.rules li {
+  position: relative;
+  counter-increment: item;
+  padding: 0.7rem 0 0.7rem 2.6rem;
+  line-height: 1.6;
+  border-bottom: 1px solid var(--line);
+}
+
+.steps li:last-child,
+.rules li:last-child { border-bottom: 0; }
+
+.steps li::before,
+.rules li::before {
+  content: counter(item);
+  position: absolute;
+  left: 0;
+  top: 0.7rem;
+  width: 1.8rem;
+  height: 1.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--gold);
+  background: rgba(201, 161, 90, 0.1);
+  border: 1px solid var(--gold-soft);
+  border-radius: 50%;
+}
+
+.steps strong,
+.rules strong { color: var(--gold); }
+
+.card-text strong { color: var(--gold); }
+
+.card-note {
+  margin: 0;
+  padding: 0.6rem 0.9rem;
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--rise);
+  background: rgba(63, 167, 160, 0.1);
+  border: 1px solid rgba(63, 167, 160, 0.25);
+  border-radius: 8px;
+}

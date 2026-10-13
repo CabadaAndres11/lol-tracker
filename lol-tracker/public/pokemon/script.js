@@ -1,3 +1,5 @@
+const MAX_TEAM = 6;
+
 const roster = document.getElementById('roster');
 const countEl = document.getElementById('count');
 const modal = document.getElementById('modal');
@@ -6,13 +8,87 @@ const input = document.getElementById('player-name');
 const errorEl = document.getElementById('form-error');
 const submitBtn = document.getElementById('submit-btn');
 
+// Estado de la pantalla
+let players = [];          // [{ name, at }]
+let teams = {};            // { idJugador: [pokemon, ...] }
+let openId = null;         // jugador cuyo desplegable está abierto
+let editing = null;        // { id, index } mientras se edita/añade un Pokémon (index -1 = nuevo)
+let teamError = '';        // error al guardar un equipo
+
+const idOf = (p) => p.name.toLowerCase();
+
 function escapeHtml(str) {
   const div = document.createElement('div');
   div.textContent = str;
   return div.innerHTML;
 }
 
-function render(players) {
+// ---------------------------------------------------------------
+// Render
+// ---------------------------------------------------------------
+
+function monCard(mon, index, id) {
+  const moves = mon.moves.filter(Boolean).map((m) => `<li>${escapeHtml(m)}</li>`).join('');
+  return `
+    <div class="mon">
+      <div class="mon-top">
+        <span class="mon-species">${escapeHtml(mon.species)}</span>
+        ${mon.nickname ? `<span class="mon-nick">“${escapeHtml(mon.nickname)}”</span>` : ''}
+      </div>
+      <div class="mon-ability"><span>Habilidad</span> ${escapeHtml(mon.ability)}</div>
+      <ul class="mon-moves">${moves}</ul>
+      <div class="mon-actions">
+        <button type="button" class="link-btn" data-action="edit-mon" data-id="${encodeURIComponent(id)}" data-index="${index}">Editar</button>
+        <button type="button" class="link-btn link-danger" data-action="delete-mon" data-id="${encodeURIComponent(id)}" data-index="${index}">Quitar</button>
+      </div>
+    </div>`;
+}
+
+function monForm(id, index) {
+  const mon = index >= 0 ? teams[id][index] : null;
+  const v = (x) => escapeHtml(x || '').replace(/"/g, '&quot;');
+  const moveInputs = [0, 1, 2, 3]
+    .map(
+      (i) => `<input name="move${i}" type="text" maxlength="30" placeholder="Movimiento ${i + 1}${i === 0 ? ' *' : ''}" value="${v(mon?.moves[i])}" ${i === 0 ? 'required' : ''} />`
+    )
+    .join('');
+
+  return `
+    <form class="mon-form" data-id="${encodeURIComponent(id)}" data-index="${index}" autocomplete="off">
+      <div class="mon-form-grid">
+        <label>Pokémon *<input name="species" type="text" maxlength="30" required value="${v(mon?.species)}" /></label>
+        <label>Mote<input name="nickname" type="text" maxlength="30" value="${v(mon?.nickname)}" /></label>
+        <label class="span-2">Habilidad *<input name="ability" type="text" maxlength="30" required value="${v(mon?.ability)}" /></label>
+      </div>
+      <div class="mon-form-label">Movimientos (1 a 4)</div>
+      <div class="mon-form-moves">${moveInputs}</div>
+      <p class="form-error" role="alert">${escapeHtml(teamError)}</p>
+      <div class="mon-form-actions">
+        <button type="submit" class="add-btn small">Guardar</button>
+        <button type="button" class="link-btn" data-action="cancel-mon">Cancelar</button>
+      </div>
+    </form>`;
+}
+
+function teamPanel(id) {
+  const team = teams[id] || [];
+  const cards = team
+    .map((mon, i) => (editing && editing.id === id && editing.index === i ? monForm(id, i) : monCard(mon, i, id)))
+    .join('');
+
+  const isAdding = editing && editing.id === id && editing.index === -1;
+  const addArea = isAdding
+    ? monForm(id, -1)
+    : team.length < MAX_TEAM
+      ? `<button type="button" class="add-btn small" data-action="add-mon" data-id="${encodeURIComponent(id)}">+ Añadir Pokémon</button>`
+      : `<p class="team-full">Equipo completo (${MAX_TEAM}/${MAX_TEAM})</p>`;
+
+  return `
+    <div class="team-grid">${cards || '<p class="team-empty">Este participante aún no ha añadido ningún Pokémon.</p>'}</div>
+    <div class="team-add">${addArea}</div>`;
+}
+
+function render() {
   countEl.textContent = players.length;
 
   if (!players.length) {
@@ -21,27 +97,140 @@ function render(players) {
   }
 
   roster.innerHTML = players
-    .map(
-      (p, i) => `
-        <li class="roster-item">
-          <span class="roster-pos">${i + 1}</span>
-          <span class="roster-name">${escapeHtml(p.name)}</span>
-        </li>`
-    )
+    .map((p, i) => {
+      const id = idOf(p);
+      const open = openId === id;
+      const count = (teams[id] || []).length;
+      return `
+        <li class="roster-item${open ? ' is-open' : ''}">
+          <button type="button" class="roster-head" data-action="toggle" data-id="${encodeURIComponent(id)}" aria-expanded="${open}">
+            <span class="roster-pos">${i + 1}</span>
+            <span class="roster-name">${escapeHtml(p.name)}</span>
+            <span class="team-badge">${count}/${MAX_TEAM}</span>
+            <span class="chevron" aria-hidden="true">▸</span>
+          </button>
+          ${open ? `<div class="team-panel">${teamPanel(id)}</div>` : ''}
+        </li>`;
+    })
     .join('');
 }
 
-async function loadPlayers() {
+// ---------------------------------------------------------------
+// Datos
+// ---------------------------------------------------------------
+
+async function loadAll() {
+  // No refrescamos mientras alguien está rellenando un formulario.
+  if (editing || !modal.hidden) return;
+
   try {
-    const res = await fetch('/api/pokemon-players');
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Error desconocido');
-    render(data.players);
+    const [pRes, tRes] = await Promise.all([fetch('/api/pokemon-players'), fetch('/api/pokemon-team')]);
+    const pData = await pRes.json();
+    const tData = await tRes.json();
+    if (!pRes.ok) throw new Error(pData.error || 'Error desconocido');
+    if (!tRes.ok) throw new Error(tData.error || 'Error desconocido');
+
+    players = pData.players;
+    teams = tData.teams;
+    if (editing) return; // por si empezó a editar mientras cargaba
+    render();
   } catch (err) {
     roster.innerHTML = `<li class="roster-empty roster-error">No se pudo cargar la lista: ${escapeHtml(err.message)}</li>`;
     console.error(err);
   }
 }
+
+async function saveTeam(id, team) {
+  const player = players.find((p) => idOf(p) === id);
+  const res = await fetch('/api/pokemon-team', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ player: player.name, team }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Error desconocido');
+  teams[id] = data.team;
+}
+
+// ---------------------------------------------------------------
+// Interacción con la lista (delegación de eventos)
+// ---------------------------------------------------------------
+
+roster.addEventListener('click', async (e) => {
+  const btn = e.target.closest('[data-action]');
+  if (!btn) return;
+
+  const action = btn.dataset.action;
+  const id = btn.dataset.id ? decodeURIComponent(btn.dataset.id) : null;
+  const index = Number(btn.dataset.index);
+
+  if (action === 'toggle') {
+    if (editing && editing.id === openId) return; // primero guardar o cancelar
+    openId = openId === id ? null : id;
+    teamError = '';
+    render();
+  } else if (action === 'add-mon') {
+    editing = { id, index: -1 };
+    teamError = '';
+    render();
+    roster.querySelector('.mon-form input')?.focus();
+  } else if (action === 'edit-mon') {
+    if (editing) return;
+    editing = { id, index };
+    teamError = '';
+    render();
+    roster.querySelector('.mon-form input')?.focus();
+  } else if (action === 'cancel-mon') {
+    editing = null;
+    teamError = '';
+    render();
+  } else if (action === 'delete-mon') {
+    if (editing) return;
+    const mon = teams[id][index];
+    if (!confirm(`¿Quitar a ${mon.nickname || mon.species} del equipo?`)) return;
+    try {
+      await saveTeam(id, teams[id].filter((_, i) => i !== index));
+    } catch (err) {
+      alert(err.message);
+    }
+    render();
+  }
+});
+
+roster.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const f = e.target;
+  const id = decodeURIComponent(f.dataset.id);
+  const index = Number(f.dataset.index);
+  const fd = new FormData(f);
+
+  const mon = {
+    species: fd.get('species'),
+    nickname: fd.get('nickname'),
+    ability: fd.get('ability'),
+    moves: [0, 1, 2, 3].map((i) => fd.get(`move${i}`)),
+  };
+
+  const current = teams[id] || [];
+  const next = index >= 0 ? current.map((m, i) => (i === index ? mon : m)) : [...current, mon];
+
+  const submit = f.querySelector('button[type="submit"]');
+  submit.disabled = true;
+  try {
+    await saveTeam(id, next);
+    editing = null;
+    teamError = '';
+    render();
+  } catch (err) {
+    teamError = err.message;
+    f.querySelector('.form-error').textContent = err.message;
+    submit.disabled = false;
+  }
+});
+
+// ---------------------------------------------------------------
+// Ventana "Añadir participante"
+// ---------------------------------------------------------------
 
 function openModal() {
   errorEl.textContent = '';
@@ -72,8 +261,9 @@ form.addEventListener('submit', async (e) => {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Error desconocido');
-    render(data.players);
+    players = data.players;
     closeModal();
+    render();
   } catch (err) {
     errorEl.textContent = err.message;
   } finally {
@@ -81,9 +271,9 @@ form.addEventListener('submit', async (e) => {
   }
 });
 
-loadPlayers();
-// Refresca la lista para ver a quienes se apunten desde otros dispositivos.
-setInterval(loadPlayers, 30 * 1000);
+loadAll();
+// Refresca para ver los cambios de otros jugadores (se pausa mientras editas).
+setInterval(loadAll, 30 * 1000);
 
 
 // ============================================================

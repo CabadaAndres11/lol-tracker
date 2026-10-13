@@ -84,3 +84,34 @@ form.addEventListener('submit', async (e) => {
 loadPlayers();
 // Refresca la lista para ver a quienes se apunten desde otros dispositivos.
 setInterval(loadPlayers, 30 * 1000);
+
+
+// ============================================================
+// PESTAÑAS
+// ============================================================
+
+const tabs = document.querySelectorAll('.tab');
+const panels = document.querySelectorAll('.panel');
+
+function showTab(name) {
+  if (!document.getElementById(`tab-${name}`)) name = 'participantes';
+
+  tabs.forEach((t) => {
+    const active = t.dataset.tab === name;
+    t.classList.toggle('is-active', active);
+    t.setAttribute('aria-selected', active);
+  });
+  panels.forEach((p) => {
+    p.hidden = p.id !== `tab-${name}`;
+  });
+}
+
+tabs.forEach((t) =>
+  t.addEventListener('click', () => {
+    history.replaceState(null, '', `#${t.dataset.tab}`);
+    showTab(t.dataset.tab);
+  })
+);
+
+// Permite enlazar directamente a una sección: /pokemon/#normas
+showTab(location.hash.slice(1) || 'participantes');

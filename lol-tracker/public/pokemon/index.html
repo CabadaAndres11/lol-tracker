@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Torneo RanomLocke — Pokémon</title>
+<link rel="icon" href="/LOGO.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/pokemon/style.css" />
+</head>
+<body>
+
+<a class="back-home" href="/" title="Volver al inicio">← Juegos</a>
+
+<div class="hex-bg" aria-hidden="true"></div>
+
+<header class="hero">
+  <div class="hero-inner">
+    <div class="hero-logo">
+      <img src="/LogoPokemon.png" alt="Pokémon">
+    </div>
+    <div class="hero-content">
+      <div class="eyebrow">
+        <span class="pulse"></span>
+        <span>Inscripciones abiertas</span>
+      </div>
+      <h1>TORNEO RANOMLOCKE <span class="title-spark">⚡</span></h1>
+      <p class="subtitle">Participantes</p>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="roster-top">
+    <p class="roster-count"><strong id="count">0</strong> participantes</p>
+    <button class="add-btn" id="open-modal" type="button">+ Añadir Participante</button>
+  </div>
+
+  <div class="roster-wrap">
+    <div class="roster-rail" aria-hidden="true"></div>
+    <div class="roster-frame">
+      <span class="corner corner-tl" aria-hidden="true"></span>
+      <span class="corner corner-tr" aria-hidden="true"></span>
+      <span class="corner corner-bl" aria-hidden="true"></span>
+      <span class="corner corner-br" aria-hidden="true"></span>
+      <ol class="roster" id="roster">
+        <li class="roster-empty">Cargando participantes…</li>
+      </ol>
+    </div>
+  </div>
+</main>
+
+<div class="modal" id="modal" hidden>
+  <form class="modal-card" id="add-form" autocomplete="off">
+    <button class="modal-close" id="close-modal" type="button" aria-label="Cerrar">&times;</button>
+    <h2>Añadir participante</h2>
+    <label for="player-name">Nombre</label>
+    <input id="player-name" name="name" type="text" minlength="2" maxlength="24" required placeholder="Tu nombre o apodo" />
+    <p class="form-error" id="form-error" role="alert"></p>
+    <button class="add-btn" id="submit-btn" type="submit">Añadir</button>
+  </form>
+</div>
+
+<footer>
+  <p>Cualquiera puede apuntarse · la lista se comparte entre todos los visitantes</p>
+</footer>
+
+<script src="/pokemon/script.js"></script>
+</body>
+</html>

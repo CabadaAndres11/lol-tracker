@@ -14,8 +14,89 @@ let teams = {};            // { idJugador: [pokemon, ...] }
 let openId = null;         // jugador cuyo desplegable está abierto
 let editing = null;        // { id, index } mientras se edita/añade un Pokémon (index -1 = nuevo)
 let teamError = '';        // error al guardar un equipo
+let badges = {};           // { idJugador: máscara de bits (bit 0 = medalla 1 ... bit 8 = Liga) }
 
 const idOf = (p) => p.name.toLowerCase();
+
+// ---------------------------------------------------------------
+// Medallas (misma forma y color para todos los jugadores)
+// Cambia aquí los nombres si quieres los de las medallas reales del juego.
+// ---------------------------------------------------------------
+
+const BADGES = [
+  { name: 'Medalla 1', color: '#ff5d5d', shape: { type: 'poly', sides: 30 } },               // círculo
+  { name: 'Medalla 2', color: '#ff9a3c', shape: { type: 'poly', sides: 3 } },                // triángulo
+  { name: 'Medalla 3', color: '#ffd23f', shape: { type: 'poly', sides: 4, rotate: 45 } },    // rombo
+  { name: 'Medalla 4', color: '#52d681', shape: { type: 'poly', sides: 5 } },                // pentágono
+  { name: 'Medalla 5', color: '#2fe6e0', shape: { type: 'poly', sides: 6 } },                // hexágono
+  { name: 'Medalla 6', color: '#4f9dff', shape: { type: 'star', points: 5, inner: 0.45 } },  // estrella
+  { name: 'Medalla 7', color: '#b478ff', shape: { type: 'poly', sides: 8, rotate: 22.5 } },  // octógono
+  { name: 'Medalla 8', color: '#ff4fa3', shape: { type: 'star', points: 4, inner: 0.35 } },  // destello
+  { name: 'Liga Pokémon', color: '#f4c874', shape: { type: 'star', points: 12, inner: 0.72 } }, // sol dorado
+];
+
+const LEAGUE = BADGES.length - 1;
+const bit = (i) => 1 << i;
+const hasBadge = (mask, i) => (mask & bit(i)) !== 0;
+const countBadges = (mask) => BADGES.reduce((n, _, i) => n + (hasBadge(mask, i) ? 1 : 0), 0);
+
+function shapePoints(shape, r) {
+  const pts = [];
+  if (shape.type === 'star') {
+    const n = shape.points * 2;
+    for (let k = 0; k < n; k++) {
+      const rad = k % 2 === 0 ? r : r * shape.inner;
+      const a = (Math.PI * 2 * k) / n - Math.PI / 2;
+      pts.push([50 + rad * Math.cos(a), 50 + rad * Math.sin(a)]);
+    }
+  } else {
+    const rot = ((shape.rotate || 0) * Math.PI) / 180;
+    for (let k = 0; k < shape.sides; k++) {
+      const a = (Math.PI * 2 * k) / shape.sides - Math.PI / 2 + rot;
+      pts.push([50 + r * Math.cos(a), 50 + r * Math.sin(a)]);
+    }
+  }
+  return pts.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(' ');
+}
+
+function badgeSvg(shape) {
+  return `<svg viewBox="0 0 100 100" aria-hidden="true">
+    <polygon class="b-shape" points="${shapePoints(shape, 44)}" />
+    <polygon class="b-inner" points="${shapePoints(shape, 22)}" />
+  </svg>`;
+}
+
+function badgesBlock(id) {
+  const mask = badges[id] || 0;
+  const total = countBadges(mask);
+  const champion = hasBadge(mask, LEAGUE);
+
+  const buttons = BADGES.map((b, i) => {
+    const on = hasBadge(mask, i);
+    const locked = !on && i > 0 && !hasBadge(mask, i - 1);
+    const label = on
+      ? `${b.name}: conseguida (clic para quitar)`
+      : locked
+        ? `${b.name}: bloqueada, necesitas ${BADGES[i - 1].name}`
+        : `${b.name}: clic para marcar como conseguida`;
+    return `
+      <button type="button" class="badge${on ? ' is-on' : ''}${locked ? ' is-locked' : ''}${i === LEAGUE ? ' badge-league' : ''}"
+        style="--c:${b.color}" data-action="badge" data-id="${encodeURIComponent(id)}" data-index="${i}"
+        aria-pressed="${on}" ${locked ? 'aria-disabled="true"' : ''} title="${escapeHtml(label)}">
+        ${badgeSvg(b.shape)}
+        <span class="badge-label">${i === LEAGUE ? 'LIGA' : i + 1}</span>
+      </button>`;
+  }).join('');
+
+  return `
+    <div class="badges${champion ? ' is-champion' : ''}">
+      <div class="badges-top">
+        <span class="badges-title">Medallas <strong>${total}/${BADGES.length}</strong></span>
+        ${champion ? '<span class="champion-tag">🏆 ¡Campeón de la Liga!</span>' : ''}
+      </div>
+      <div class="badges-row">${buttons}</div>
+    </div>`;
+}
 
 // ---------------------------------------------------------------
 // Pokédex (nombres en inglés + imagen oficial, vía PokéAPI)
@@ -154,6 +235,7 @@ function teamPanel(id) {
       : `<p class="team-full">Equipo completo (${MAX_TEAM}/${MAX_TEAM})</p>`;
 
   return `
+    ${badgesBlock(id)}
     <div class="team-grid">${cards || '<p class="team-empty">Este participante aún no ha añadido ningún Pokémon.</p>'}</div>
     <div class="team-add">${addArea}</div>`;
 }
@@ -171,11 +253,16 @@ function render() {
       const id = idOf(p);
       const open = openId === id;
       const count = (teams[id] || []).length;
+      const mask = badges[id] || 0;
+      const dots = BADGES.map(
+        (b, k) => `<span class="mini-dot${hasBadge(mask, k) ? ' on' : ''}" style="--c:${b.color}"></span>`
+      ).join('');
       return `
         <li class="roster-item${open ? ' is-open' : ''}">
           <button type="button" class="roster-head" data-action="toggle" data-id="${encodeURIComponent(id)}" aria-expanded="${open}">
             <span class="roster-pos">${i + 1}</span>
-            <span class="roster-name">${escapeHtml(p.name)}</span>
+            <span class="roster-name">${escapeHtml(p.name)}${hasBadge(mask, LEAGUE) ? ' <span class="crown" title="Campeón de la Liga">🏆</span>' : ''}</span>
+            <span class="mini-dots" title="${countBadges(mask)}/${BADGES.length} medallas">${dots}</span>
             <span class="team-badge">${count}/${MAX_TEAM}</span>
             <span class="chevron" aria-hidden="true">▸</span>
           </button>
@@ -194,14 +281,21 @@ async function loadAll() {
   if (editing || !modal.hidden) return;
 
   try {
-    const [pRes, tRes] = await Promise.all([fetch('/api/pokemon-players'), fetch('/api/pokemon-team')]);
+    const [pRes, tRes, bRes] = await Promise.all([
+      fetch('/api/pokemon-players'),
+      fetch('/api/pokemon-team'),
+      fetch('/api/pokemon-badges'),
+    ]);
     const pData = await pRes.json();
     const tData = await tRes.json();
+    const bData = await bRes.json();
     if (!pRes.ok) throw new Error(pData.error || 'Error desconocido');
     if (!tRes.ok) throw new Error(tData.error || 'Error desconocido');
+    if (!bRes.ok) throw new Error(bData.error || 'Error desconocido');
 
     players = pData.players;
     teams = tData.teams;
+    badges = bData.badges;
     if (editing) return; // por si empezó a editar mientras cargaba
     render();
   } catch (err) {
@@ -222,6 +316,42 @@ async function saveTeam(id, team) {
   teams[id] = data.team;
 }
 
+// Las peticiones de medallas se envían de una en una y en orden, para que
+// varios clics rápidos no lleguen desordenados al servidor.
+let badgeQueue = Promise.resolve();
+
+function saveBadges(id, mask) {
+  const player = players.find((p) => idOf(p) === id);
+  badgeQueue = badgeQueue
+    .then(async () => {
+      const res = await fetch('/api/pokemon-badges', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ player: player.name, mask }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Error desconocido');
+    })
+    .catch(async (err) => {
+      alert(err.message);
+      editing = null;
+      await loadAll(); // volvemos a lo que dice el servidor
+    });
+}
+
+function toggleBadge(id, i) {
+  if (editing) return; // primero guarda o cancela el formulario abierto
+  const mask = badges[id] || 0;
+  if (hasBadge(mask, i)) {
+    badges[id] = mask & ~bit(i); // quitar siempre se puede
+  } else {
+    if (i > 0 && !hasBadge(mask, i - 1)) return; // bloqueada
+    badges[id] = mask | bit(i);
+  }
+  render(); // respuesta inmediata
+  saveBadges(id, badges[id]);
+}
+
 // ---------------------------------------------------------------
 // Interacción con la lista (delegación de eventos)
 // ---------------------------------------------------------------
@@ -234,7 +364,9 @@ roster.addEventListener('click', async (e) => {
   const id = btn.dataset.id ? decodeURIComponent(btn.dataset.id) : null;
   const index = Number(btn.dataset.index);
 
-  if (action === 'toggle') {
+  if (action === 'badge') {
+    toggleBadge(id, index);
+  } else if (action === 'toggle') {
     if (editing && editing.id === openId) return; // primero guardar o cancelar
     openId = openId === id ? null : id;
     teamError = '';

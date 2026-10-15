@@ -37,6 +37,7 @@ function validateTeam(team) {
     const species = clean(mon?.species);
     const nickname = clean(mon?.nickname);
     const ability = clean(mon?.ability);
+    const item = clean(mon?.item); // objeto equipado (opcional)
     const moves = (Array.isArray(mon?.moves) ? mon.moves : []).slice(0, 4).map(clean);
     while (moves.length < 4) moves.push('');
 
@@ -44,7 +45,7 @@ function validateTeam(team) {
     if (!ability) throw new Error(`Pokémon ${n}: falta la habilidad.`);
     if (!moves[0]) throw new Error(`Pokémon ${n}: indica al menos un movimiento.`);
 
-    for (const text of [species, nickname, ability, ...moves]) {
+    for (const text of [species, nickname, ability, item, ...moves]) {
       if (text.length > MAX_FIELD) throw new Error(`Los textos no pueden superar ${MAX_FIELD} caracteres.`);
       if (/[<>]/.test(text)) throw new Error('Hay caracteres no permitidos.');
     }
@@ -52,7 +53,9 @@ function validateTeam(team) {
     // Número de la Pokédex (opcional): lo usa la web para mostrar la imagen.
     const dexId = Number.isInteger(mon?.dexId) && mon.dexId > 0 && mon.dexId < 5000 ? mon.dexId : undefined;
 
-    return dexId ? { species, nickname, ability, moves, dexId } : { species, nickname, ability, moves };
+    const out = { species, nickname, ability, item, moves };
+    if (dexId) out.dexId = dexId;
+    return out;
   });
 }
 

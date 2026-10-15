@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Torneo RanomLocke — Pokémon</title>
-<link rel="icon" href="/LogoPokemon.ico">
+<link rel="icon" href="/LOGO.ico">
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet" />
@@ -36,6 +36,7 @@
   <button class="tab is-active" role="tab" data-tab="participantes" aria-selected="true" type="button">Participantes</button>
   <button class="tab" role="tab" data-tab="descarga" aria-selected="false" type="button">Descarga</button>
   <button class="tab" role="tab" data-tab="normas" aria-selected="false" type="button">Normas</button>
+  <button class="tab" role="tab" data-tab="equipo" aria-selected="false" type="button">Equipo</button>
 </nav>
 
 <main>
@@ -105,6 +106,86 @@
       <h2>Actualización diaria del equipo</h2>
       <p class="card-text">Por el bien del torneo, <strong>todos los participantes que jueguen un día deben actualizar su equipo en esta página</strong> a diario. Así todos podemos seguir el progreso de la competición.</p>
     </div>
+  </section>
+
+  <!-- ===================== EQUIPO ===================== -->
+  <section class="panel" id="tab-equipo" role="tabpanel" hidden>
+
+    <div class="card">
+      <h2>Qué debes entregar</h2>
+      <p class="card-text">Cada participante debe presentar un equipo de <strong>6 Pokémon</strong>. Para darlo por entregado tienes que cumplir estos dos pasos antes de la <strong>fecha de entrega</strong>:</p>
+      <ol class="steps">
+        <li>Añade tus <strong>6 Pokémon</strong> en la pestaña <em>Participantes</em>, desplegando tu nombre, con <strong>todos sus detalles</strong>: Pokémon, mote, habilidad, objeto equipado y los 4 movimientos.</li>
+        <li>Envía una <strong>foto de tu equipo</strong> al <strong>WhatsApp privado del administrador</strong> para confirmar que los datos coinciden con los de tu partida.</li>
+      </ol>
+      <p class="card-note">📅 Fecha límite de entrega: por determinar</p>
+    </div>
+
+    <div class="card">
+      <h2>Pokémon especiales</h2>
+      <p class="card-text">Como norma general, tu equipo no puede incluir Pokémon de las categorías de abajo. La única excepción es que puedes <strong>rellenar un hueco del equipo</strong> con un Pokémon que sea:</p>
+      <div class="chips">
+        <span class="chip">Legendario</span>
+        <span class="chip">Singular</span>
+        <span class="chip">Ultraente</span>
+        <span class="chip">Paradoja</span>
+      </div>
+      <p class="card-text small">Solo un hueco puede ocupar uno de estos Pokémon; los otros cinco deben ser Pokémon normales.</p>
+    </div>
+
+    <div class="card">
+      <h2>Los combates: juegas con 4 de tus 6</h2>
+      <p class="card-text">En cada enfrentamiento solo se juega con <strong>4 de los 6 Pokémon</strong> entregados. Antes de empezar, cada jugador ve el equipo completo del rival:</p>
+
+      <div class="flow">
+        <div class="flow-step">
+          <div class="dots"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          <span class="flow-title">6 entregados</span>
+          <span class="flow-sub">tu equipo completo</span>
+        </div>
+        <span class="flow-arrow" aria-hidden="true">→</span>
+        <div class="flow-step">
+          <div class="dots"><i></i><i></i><i></i><i></i><i></i><i class="banned"></i></div>
+          <span class="flow-title">−1 baneado</span>
+          <span class="flow-sub">lo elige tu rival</span>
+        </div>
+        <span class="flow-arrow" aria-hidden="true">→</span>
+        <div class="flow-step">
+          <div class="dots"><i></i><i></i><i></i><i></i><i class="out"></i><i class="banned"></i></div>
+          <span class="flow-title">−1 descartado</span>
+          <span class="flow-sub">lo eliges tú</span>
+        </div>
+        <span class="flow-arrow" aria-hidden="true">→</span>
+        <div class="flow-step">
+          <div class="dots dots-four"><i></i><i></i><i></i><i></i></div>
+          <span class="flow-title">4 en combate</span>
+          <span class="flow-sub">los que juegas</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Formato del torneo</h2>
+      <ol class="steps">
+        <li><strong>Fase de liga:</strong> formato liga, donde todos se enfrentan contra todos repartidos en distintas jornadas.</li>
+        <li><strong>Clasificación:</strong> los <strong>8 mejores</strong> de la tabla pasan a la fase final.</li>
+        <li><strong>Fase final:</strong> bracket de eliminación directa (cuartos, semifinales y final) donde el que pierde queda fuera.</li>
+        <li><strong>Campeón:</strong> el ganador de la final se proclama campeón del torneo. 🏆</li>
+      </ol>
+    </div>
+
+    <div class="card">
+      <h2>Pendiente de confirmar</h2>
+      <p class="card-text">Estos detalles todavía no están definidos y se comunicarán más adelante:</p>
+      <ul class="todo">
+        <li>Fecha límite de entrega del equipo</li>
+        <li>Calendario de jornadas</li>
+        <li>Sistema de puntos y criterios de desempate</li>
+        <li>Si los combates son a una partida o al mejor de varias</li>
+        <li>Si se permiten cambios en el equipo una vez entregado</li>
+      </ul>
+    </div>
+
   </section>
 
 </main>

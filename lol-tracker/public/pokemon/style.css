@@ -943,3 +943,10 @@ footer {
 }
 
 .dots-four { grid-template-columns: repeat(2, 14px); }
+
+/* Tarjeta destacada (aviso importante) */
+.card-highlight {
+  border-color: var(--gold-soft);
+  border-left-color: var(--gold);
+  box-shadow: -6px 0 18px -10px rgba(201, 161, 90, 0.7);
+}

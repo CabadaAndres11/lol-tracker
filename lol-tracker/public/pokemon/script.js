@@ -185,6 +185,7 @@ function monCard(mon, index, id) {
             ${mon.nickname ? `<span class="mon-nick">“${escapeHtml(mon.nickname)}”</span>` : ''}
           </div>
           <div class="mon-ability"><span>Habilidad</span> ${escapeHtml(mon.ability)}</div>
+          ${mon.item ? `<div class="mon-ability"><span>Objeto</span> ${escapeHtml(mon.item)}</div>` : ''}
         </div>
       </div>
       <ul class="mon-moves">${moves}</ul>
@@ -209,7 +210,8 @@ function monForm(id, index) {
       <div class="mon-form-grid">
         <label>Pokémon *<input name="species" type="text" maxlength="30" required list="pokemon-names" placeholder="Escribe en inglés…" value="${v(mon?.species)}" /></label>
         <label>Mote<input name="nickname" type="text" maxlength="30" value="${v(mon?.nickname)}" /></label>
-        <label class="span-2">Habilidad *<input name="ability" type="text" maxlength="30" required value="${v(mon?.ability)}" /></label>
+        <label>Habilidad *<input name="ability" type="text" maxlength="30" required value="${v(mon?.ability)}" /></label>
+        <label>Objeto equipado<input name="item" type="text" maxlength="30" value="${v(mon?.item)}" /></label>
       </div>
       <div class="mon-form-label">Movimientos (1 a 4)</div>
       <div class="mon-form-moves">${moveInputs}</div>
@@ -414,6 +416,7 @@ roster.addEventListener('submit', async (e) => {
     dexId: known ? known.id : undefined,
     nickname: fd.get('nickname'),
     ability: fd.get('ability'),
+    item: fd.get('item'),
     moves: [0, 1, 2, 3].map((i) => fd.get(`move${i}`)),
   };
 

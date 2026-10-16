@@ -515,3 +515,40 @@ tabs.forEach((t) =>
 
 // Permite enlazar directamente a una sección: /pokemon/#normas
 showTab(location.hash.slice(1) || 'participantes');
+
+
+// ============================================================
+// AVISO AL ABRIR LA PÁGINA
+// ============================================================
+
+// Si en el futuro quieres volver a mostrar un aviso a todo el mundo
+// (aunque hayan pulsado "No mostrar más"), cambia este número de versión.
+const NOTICE_KEY = 'pokemon-notice-pokemon-z-v1';
+
+const notice = document.getElementById('notice');
+
+function noticeDismissed() {
+  try { return localStorage.getItem(NOTICE_KEY) === '1'; } catch { return false; }
+}
+
+function closeNotice() {
+  notice.hidden = true;
+}
+
+if (!noticeDismissed()) notice.hidden = false;
+
+document.getElementById('notice-ok').addEventListener('click', closeNotice);
+
+document.getElementById('notice-never').addEventListener('click', () => {
+  try { localStorage.setItem(NOTICE_KEY, '1'); } catch { /* sin almacenamiento: solo se cierra */ }
+  closeNotice();
+});
+
+document.getElementById('notice-download').addEventListener('click', () => {
+  closeNotice();
+  history.replaceState(null, '', '#descarga');
+  showTab('descarga');
+});
+
+notice.addEventListener('click', (e) => { if (e.target === notice) closeNotice(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !notice.hidden) closeNotice(); });

@@ -986,3 +986,253 @@ footer {
 
 .steps .chips { margin-top: 0.6rem; }
 .steps .chip { font-size: 0.8rem; padding: 0.3rem 0.7rem; }
+
+
+/* ============================================================
+   VISTA DE PARTICIPANTE: CÍRCULO CON SU EQUIPO
+   ============================================================ */
+
+.stage-wrap {
+  --D: min(380px, 88vw);   /* diámetro del círculo grande */
+  --m: calc(var(--D) * .21); /* diámetro de cada círculo de Pokémon */
+}
+
+main { overflow-x: clip; }
+
+.stage-top {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.2rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.jump { display: inline-flex; align-items: center; gap: 0.5rem; }
+
+.jump select {
+  max-width: 180px;
+  padding: 0.4rem 0.6rem;
+  font: inherit;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.jump select:focus { outline: none; border-color: var(--neon-cyan); }
+
+.stage-counter { color: var(--gold); font-weight: 600; }
+
+.stage-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0.8rem;
+}
+
+.slide { flex: 1; min-width: 0; will-change: transform, opacity; }
+
+.stage { display: flex; flex-direction: column; align-items: center; }
+
+.nav-arrow {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  margin-top: calc(var(--D) / 2 - 24px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0 4px;
+  font-size: 2rem;
+  line-height: 1;
+  color: var(--gold);
+  background: var(--surface);
+  border: 1px solid var(--gold-soft);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+
+.nav-arrow:hover:not(:disabled) {
+  transform: scale(1.1);
+  border-color: var(--gold);
+  box-shadow: 0 0 18px rgba(201, 161, 90, 0.4);
+}
+
+.nav-arrow:disabled { opacity: .3; cursor: default; }
+.nav-arrow:focus-visible { outline: 2px solid var(--neon-cyan); outline-offset: 3px; }
+
+/* ---------- Círculo grande ---------- */
+
+.circle {
+  position: relative;
+  width: var(--D);
+  height: var(--D);
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 30%, #1d2431, var(--surface) 62%, var(--bg));
+  border: 2px solid var(--gold-soft);
+  box-shadow:
+    0 0 0 7px rgba(201, 161, 90, 0.06),
+    0 0 46px rgba(201, 161, 90, 0.2),
+    inset 0 0 46px rgba(0, 0, 0, 0.55);
+}
+
+/* anillo punteado por el que "orbitan" los Pokémon */
+.circle::before {
+  content: '';
+  position: absolute;
+  inset: calc(var(--D) * .06 + var(--m) / 2);
+  border-radius: 50%;
+  border: 1px dashed var(--line);
+  pointer-events: none;
+}
+
+.circle-name {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0 calc(var(--D) * .27);
+  text-align: center;
+  pointer-events: none;
+}
+
+.circle-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1.1;
+  overflow-wrap: anywhere;
+  text-shadow: 0 0 18px rgba(47, 230, 224, 0.35);
+}
+
+.circle-sub {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: .06em;
+  color: var(--text-muted);
+}
+
+.mini {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--m);
+  height: var(--m);
+  margin: calc(var(--m) / -2) 0 0 calc(var(--m) / -2);
+  padding: 0;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  transform:
+    rotate(var(--a))
+    translateY(calc(var(--D) / -2 + var(--m) / 2 + var(--D) * .06))
+    rotate(calc(var(--a) * -1));
+}
+
+.mini-face {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  overflow: hidden;
+  background: radial-gradient(circle at 40% 30%, #222b3a, var(--bg));
+  border: 2px solid var(--gold-soft);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, .5);
+  transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+
+.mini:hover .mini-face,
+.mini:focus-visible .mini-face {
+  transform: scale(1.14);
+  border-color: var(--gold);
+  box-shadow: 0 0 18px rgba(201, 161, 90, .55);
+}
+
+.mini:focus-visible { outline: none; }
+
+.mini-img { width: 92%; height: 92%; object-fit: contain; }
+
+.mini-img-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  color: var(--text-muted);
+}
+
+.mini-empty .mini-face {
+  background: transparent;
+  border: 2px dashed var(--line);
+  box-shadow: none;
+  font-size: 1.5rem;
+  color: var(--text-muted);
+}
+
+.mini-empty:hover .mini-face { border-color: var(--gold); color: var(--gold); }
+
+.stage .badges { width: 100%; max-width: 700px; margin-top: 1.6rem; }
+
+/* ---------- Ventana emergente del Pokémon ---------- */
+
+.mon-modal-card {
+  width: min(520px, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+  gap: 0;
+}
+
+.popup-title { margin: 0 0 0.9rem; font-family: var(--font-display); font-size: 1.2rem; }
+
+.mon-modal-card .mon-form {
+  padding: 0;
+  background: none;
+  border: 0;
+  box-shadow: none;
+}
+
+.mon-detail { display: flex; flex-direction: column; align-items: center; text-align: center; }
+
+.detail-img {
+  width: 150px;
+  height: 150px;
+  object-fit: contain;
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, .6));
+}
+
+.detail-img-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 3rem;
+  color: var(--text-muted);
+  background: var(--surface-alt);
+  border: 1px dashed var(--line);
+  border-radius: 50%;
+}
+
+.mon-detail h2 { margin: 0.3rem 0 0; font-family: var(--font-display); font-size: 1.5rem; }
+.mon-detail .mon-nick { margin-top: 0.2rem; font-size: 1rem; }
+.detail-rows { margin-top: 0.8rem; display: flex; flex-direction: column; gap: 0.25rem; }
+.mon-detail .mon-moves { width: 100%; margin-top: 1rem; }
+.mon-detail .mon-actions { margin-top: 1rem; justify-content: center; }
+
+@media (max-width: 700px) {
+  .stage-row { flex-wrap: wrap; }
+  .slide { order: -1; flex-basis: 100%; }
+  .nav-arrow { margin-top: 1rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mini-face, .nav-arrow { transition: none; }
+}

@@ -51,7 +51,7 @@ function validateTeam(team) {
     }
 
     // Número de la Pokédex (opcional): lo usa la web para mostrar la imagen.
-    const dexId = Number.isInteger(mon?.dexId) && mon.dexId > 0 && mon.dexId < 5000 ? mon.dexId : undefined;
+    const dexId = Number.isInteger(mon?.dexId) && mon.dexId > 0 && mon.dexId < 20000 ? mon.dexId : undefined;
 
     const out = { species, nickname, ability, item, moves };
     if (dexId) out.dexId = dexId;

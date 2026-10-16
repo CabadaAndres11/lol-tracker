@@ -109,24 +109,72 @@ function badgesBlock(id) {
 // Pokédex (nombres en inglés + imagen oficial, vía PokéAPI)
 // ---------------------------------------------------------------
 
-const DEX_URL = 'https://pokeapi.co/api/v2/pokemon-species?limit=2000';
+const DEX_URL = 'https://pokeapi.co/api/v2/pokemon-species?limit=2000';  // especies base (nº 1-1025...)
+const FORMS_URL = 'https://pokeapi.co/api/v2/pokemon?limit=2000';          // incluye formas: Alola, Galar, Hisui, Paldea, Mega...
+const DEX_CACHE_KEY = 'pokedex-v2';
+const FORM_MIN_ID = 10000; // en PokéAPI las formas alternativas tienen id >= 10001
 const ARTWORK_URL = (id) =>
   `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
 
-let dexByName = {};   // 'mr mime' -> { id: 122, name: 'Mr Mime' }
+let dexByName = {};   // 'mr mime' | 'alolan raichu' | 'raichu alola' -> { id, name, baseId }
+let dexById = {};     // id -> { id, name, baseId }
 
 const dexKey = (str) => String(str).toLowerCase().replace(/[-_\s]+/g, ' ').trim();
-const prettyName = (slug) => slug.split('-').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+const cap = (w) => w.charAt(0).toUpperCase() + w.slice(1);
+const prettyName = (slug) => slug.split('-').map(cap).join(' ');
+
+// Palabras de formas que pasan al principio del nombre: raichu-alola -> "Alolan Raichu"
+const FORM_PREFIX = {
+  alola: 'Alolan',
+  galar: 'Galarian',
+  hisui: 'Hisuian',
+  paldea: 'Paldean',
+  mega: 'Mega',
+  gmax: 'Gigantamax',
+  primal: 'Primal',
+};
+
+function formName(slug) {
+  const parts = slug.split('-');
+  const k = parts.findIndex((p, i) => i > 0 && FORM_PREFIX[p]);
+  if (k === -1) return prettyName(slug);
+  const base = parts.slice(0, k);
+  const rest = parts.slice(k + 1);
+  return [FORM_PREFIX[parts[k]], ...base.map(cap), ...rest.map(cap)].join(' ');
+}
 
 function dexLookup(name) {
   return dexByName[dexKey(name)] || null;
 }
 
+const idFromUrl = (url) => Number(url.split('/').filter(Boolean).pop());
+
 function buildDex(results) {
   dexByName = {};
-  results.forEach((r) => {
-    const id = Number(r.url.split('/').filter(Boolean).pop());
-    dexByName[dexKey(r.name)] = { id, name: prettyName(r.name) };
+  dexById = {};
+
+  const species = results.filter((r) => idFromUrl(r.url) < FORM_MIN_ID);
+  const forms = results.filter((r) => idFromUrl(r.url) >= FORM_MIN_ID);
+
+  species.forEach((r) => {
+    const id = idFromUrl(r.url);
+    const entry = { id, name: prettyName(r.name), baseId: null };
+    dexById[id] = entry;
+    dexByName[dexKey(r.name)] = entry;
+  });
+
+  // Para cada forma, buscamos su especie base (quitando partes del final del nombre)
+  forms.forEach((r) => {
+    const id = idFromUrl(r.url);
+    const parts = r.name.split('-');
+    let baseId = null;
+    for (let n = parts.length - 1; n >= 1 && baseId == null; n--) {
+      baseId = dexByName[dexKey(parts.slice(0, n).join(' '))]?.id ?? null;
+    }
+    const entry = { id, name: formName(r.name), baseId };
+    dexById[id] = entry;
+    dexByName[dexKey(entry.name)] = entry;   // "alolan raichu"
+    dexByName[dexKey(r.name)] = entry;       // "raichu alola"
   });
 
   // Lista de sugerencias para el campo "Pokémon"
@@ -136,7 +184,7 @@ function buildDex(results) {
     list.id = 'pokemon-names';
     document.body.appendChild(list);
   }
-  list.innerHTML = Object.values(dexByName)
+  list.innerHTML = Object.values(dexById)
     .sort((a, b) => a.id - b.id)
     .map((d) => `<option value="${escapeHtml(d.name)}"></option>`)
     .join('');
@@ -144,7 +192,7 @@ function buildDex(results) {
 
 async function loadDex() {
   try {
-    const cached = localStorage.getItem('pokedex-v1');
+    const cached = localStorage.getItem(DEX_CACHE_KEY);
     if (cached) {
       buildDex(JSON.parse(cached));
       return;
@@ -152,11 +200,13 @@ async function loadDex() {
   } catch { /* sin caché, seguimos */ }
 
   try {
-    const res = await fetch(DEX_URL);
-    if (!res.ok) throw new Error(`PokéAPI respondió ${res.status}`);
-    const data = await res.json();
-    buildDex(data.results);
-    try { localStorage.setItem('pokedex-v1', JSON.stringify(data.results)); } catch { /* ignorar */ }
+    const [sRes, fRes] = await Promise.all([fetch(DEX_URL), fetch(FORMS_URL)]);
+    if (!sRes.ok || !fRes.ok) throw new Error(`PokéAPI respondió ${sRes.status}/${fRes.status}`);
+    const species = (await sRes.json()).results;
+    const forms = (await fRes.json()).results.filter((r) => idFromUrl(r.url) >= FORM_MIN_ID);
+    const all = [...species, ...forms];
+    buildDex(all);
+    try { localStorage.setItem(DEX_CACHE_KEY, JSON.stringify(all)); } catch { /* ignorar */ }
     if (!editing && !viewing) render(); // para que aparezcan las imágenes de los equipos ya cargados
   } catch (err) {
     console.warn('No se pudo cargar la Pokédex:', err);
@@ -165,9 +215,13 @@ async function loadDex() {
 
 function monImage(mon, cls = 'mon-img') {
   const id = mon.dexId || dexLookup(mon.species)?.id;
-  return id
-    ? `<img class="${cls}" src="${ARTWORK_URL(id)}" alt="${escapeHtml(mon.species)}" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'${cls} ${cls}-empty',textContent:'?'}))">`
-    : `<div class="${cls} ${cls}-empty">?</div>`;
+  if (!id) return `<div class="${cls} ${cls}-empty">?</div>`;
+
+  // Si una forma no tiene dibujo propio, probamos con el de su especie base.
+  const fb = dexById[id]?.baseId;
+  const fbAttr = fb ? ` data-fb="${ARTWORK_URL(fb)}"` : '';
+  const onerror = `if(this.dataset.fb){this.src=this.dataset.fb;delete this.dataset.fb}else{this.replaceWith(Object.assign(document.createElement('div'),{className:'${cls} ${cls}-empty',textContent:'?'}))}`;
+  return `<img class="${cls}" src="${ARTWORK_URL(id)}"${fbAttr} alt="${escapeHtml(mon.species)}" loading="lazy" onerror="${onerror}">`;
 }
 
 function escapeHtml(str) {

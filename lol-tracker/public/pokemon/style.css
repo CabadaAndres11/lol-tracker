@@ -983,3 +983,6 @@ footer {
 .add-btn.ghost:hover { border-color: var(--gold); box-shadow: none; }
 
 .notice-never { margin-top: 0.5rem; }
+
+.steps .chips { margin-top: 0.6rem; }
+.steps .chip { font-size: 0.8rem; padding: 0.3rem 0.7rem; }

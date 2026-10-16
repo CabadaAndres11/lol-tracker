@@ -950,3 +950,36 @@ footer {
   border-left-color: var(--gold);
   box-shadow: -6px 0 18px -10px rgba(201, 161, 90, 0.7);
 }
+
+
+/* ---------- Aviso al abrir la página ---------- */
+
+.notice-card {
+  width: min(440px, 100%);
+  align-items: center;
+  text-align: center;
+  gap: 0.6rem;
+  border-color: var(--gold);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, .6), 0 0 30px rgba(201, 161, 90, .3);
+  animation: item-in .3s ease-out;
+}
+
+.notice-icon { font-size: 2.2rem; line-height: 1; }
+
+.notice-card h2 { margin: 0; font-size: 1.4rem; color: var(--gold); }
+
+.notice-text { margin: 0.2rem 0 0.6rem; line-height: 1.6; color: var(--text); }
+.notice-text strong { color: var(--gold); }
+
+.notice-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.7rem; }
+
+.add-btn.ghost {
+  color: var(--text);
+  background: transparent;
+  border: 1px solid var(--gold-soft);
+  box-shadow: none;
+}
+
+.add-btn.ghost:hover { border-color: var(--gold); box-shadow: none; }
+
+.notice-never { margin-top: 0.5rem; }

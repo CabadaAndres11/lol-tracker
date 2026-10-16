@@ -66,14 +66,14 @@
   <section class="panel" id="tab-descarga" role="tabpanel" hidden>
     <div class="card">
       <h2>Descarga el juego</h2>
-      <p class="card-text">El juego se descarga desde Google Drive. Sigue los pasos de abajo para empezar tu aventura.</p>
-      <a class="add-btn download-btn" id="rom-download" href="https://drive.google.com/file/d/1jXTQZI6uxJ7caBO3YDFg3jgh_GnUNDA9/view" target="_blank" rel="noopener noreferrer">⬇ Descargar juego</a>
+      <p class="card-text">El juego se descarga desde MEGA. Sigue los pasos de abajo para empezar tu aventura.</p>
+      <a class="add-btn download-btn" id="rom-download" href="https://mega.nz/file/e2xywIrB#ZljOYk4AuTdPeH-HZTKtRT3lb-wurdykZjTMaEKgqyQ" target="_blank" rel="noopener noreferrer">⬇ Descargar juego</a>
     </div>
 
     <div class="card">
       <h2>Cómo jugarlo</h2>
       <ol class="steps">
-        <li>Descarga el archivo desde el botón de arriba (Google Drive).</li>
+        <li>Descarga el archivo desde el botón de arriba (MEGA).</li>
         <li>Extrae el <strong>ZIP</strong> descargado.</li>
         <li>Inicia el <strong>Game.exe</strong>.</li>
         <li>Selecciona <strong>"Nuevo Juego"</strong>.</li>
@@ -194,6 +194,19 @@
   </section>
 
 </main>
+
+<div class="modal" id="notice" role="dialog" aria-modal="true" aria-labelledby="notice-title" hidden>
+  <div class="modal-card notice-card">
+    <div class="notice-icon" aria-hidden="true">⚠️</div>
+    <h2 id="notice-title">¡Cuidado!</h2>
+    <p class="notice-text">Ya no estamos jugando el <strong>Pokémon Z</strong>. Asegúrate de tener <strong>actualizada tu partida</strong>: descarga la nueva versión desde la pestaña <em>Descarga</em>.</p>
+    <div class="notice-actions">
+      <button class="add-btn small" id="notice-download" type="button">Ir a Descarga</button>
+      <button class="add-btn small ghost" id="notice-ok" type="button">Entendido</button>
+    </div>
+    <button class="link-btn notice-never" id="notice-never" type="button">No mostrar más</button>
+  </div>
+</div>
 
 <div class="modal" id="modal" hidden>
   <form class="modal-card" id="add-form" autocomplete="off">

@@ -1,6 +1,11 @@
 const MAX_TEAM = 6;
 
-const roster = document.getElementById('roster');
+const stage = document.getElementById('stage');
+const slide = document.getElementById('slide');
+const monModal = document.getElementById('mon-modal');
+const monBody = document.getElementById('mon-modal-body');
+const jump = document.getElementById('jump');
+const counterEl = document.getElementById('stage-counter');
 const countEl = document.getElementById('count');
 const modal = document.getElementById('modal');
 const form = document.getElementById('add-form');
@@ -11,7 +16,9 @@ const submitBtn = document.getElementById('submit-btn');
 // Estado de la pantalla
 let players = [];          // [{ name, at }]
 let teams = {};            // { idJugador: [pokemon, ...] }
-let openId = null;         // jugador cuyo desplegable está abierto
+let currentId = null;      // participante que se está mostrando
+let viewing = null;        // { id, index } Pokémon abierto en la ventana emergente
+let animating = false;     // true mientras dura la animación de deslizamiento
 let editing = null;        // { id, index } mientras se edita/añade un Pokémon (index -1 = nuevo)
 let teamError = '';        // error al guardar un equipo
 let badges = {};           // { idJugador: máscara de bits (bit 0 = medalla 1 ... bit 8 = Liga) }
@@ -150,17 +157,17 @@ async function loadDex() {
     const data = await res.json();
     buildDex(data.results);
     try { localStorage.setItem('pokedex-v1', JSON.stringify(data.results)); } catch { /* ignorar */ }
-    if (!editing) render(); // para que aparezcan las imágenes de los equipos ya cargados
+    if (!editing && !viewing) render(); // para que aparezcan las imágenes de los equipos ya cargados
   } catch (err) {
     console.warn('No se pudo cargar la Pokédex:', err);
   }
 }
 
-function monImage(mon) {
+function monImage(mon, cls = 'mon-img') {
   const id = mon.dexId || dexLookup(mon.species)?.id;
   return id
-    ? `<img class="mon-img" src="${ARTWORK_URL(id)}" alt="${escapeHtml(mon.species)}" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'mon-img mon-img-empty',textContent:'?'}))">`
-    : `<div class="mon-img mon-img-empty">?</div>`;
+    ? `<img class="${cls}" src="${ARTWORK_URL(id)}" alt="${escapeHtml(mon.species)}" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'${cls} ${cls}-empty',textContent:'?'}))">`
+    : `<div class="${cls} ${cls}-empty">?</div>`;
 }
 
 function escapeHtml(str) {
@@ -173,20 +180,16 @@ function escapeHtml(str) {
 // Render
 // ---------------------------------------------------------------
 
-function monCard(mon, index, id) {
+function monDetail(mon, index, id) {
   const moves = mon.moves.filter(Boolean).map((m) => `<li>${escapeHtml(m)}</li>`).join('');
   return `
-    <div class="mon">
-      <div class="mon-head">
-        ${monImage(mon)}
-        <div class="mon-info">
-          <div class="mon-top">
-            <span class="mon-species">${escapeHtml(mon.species)}</span>
-            ${mon.nickname ? `<span class="mon-nick">“${escapeHtml(mon.nickname)}”</span>` : ''}
-          </div>
-          <div class="mon-ability"><span>Habilidad</span> ${escapeHtml(mon.ability)}</div>
-          ${mon.item ? `<div class="mon-ability"><span>Objeto</span> ${escapeHtml(mon.item)}</div>` : ''}
-        </div>
+    <div class="mon-detail">
+      ${monImage(mon, 'detail-img')}
+      <h2>${escapeHtml(mon.species)}</h2>
+      ${mon.nickname ? `<div class="mon-nick">“${escapeHtml(mon.nickname)}”</div>` : ''}
+      <div class="detail-rows">
+        <div class="mon-ability"><span>Habilidad</span> ${escapeHtml(mon.ability)}</div>
+        ${mon.item ? `<div class="mon-ability"><span>Objeto</span> ${escapeHtml(mon.item)}</div>` : ''}
       </div>
       <ul class="mon-moves">${moves}</ul>
       <div class="mon-actions">
@@ -223,55 +226,135 @@ function monForm(id, index) {
     </form>`;
 }
 
-function teamPanel(id) {
-  const team = teams[id] || [];
-  const cards = team
-    .map((mon, i) => (editing && editing.id === id && editing.index === i ? monForm(id, i) : monCard(mon, i, id)))
-    .join('');
+function currentPlayer() {
+  return players.find((p) => idOf(p) === currentId) || players[0] || null;
+}
 
-  const isAdding = editing && editing.id === id && editing.index === -1;
-  const addArea = isAdding
-    ? monForm(id, -1)
-    : team.length < MAX_TEAM
-      ? `<button type="button" class="add-btn small" data-action="add-mon" data-id="${encodeURIComponent(id)}">+ Añadir Pokémon</button>`
-      : `<p class="team-full">Equipo completo (${MAX_TEAM}/${MAX_TEAM})</p>`;
+function nameSize(name) {
+  const n = name.length;
+  return n <= 7 ? '2.1rem' : n <= 11 ? '1.6rem' : n <= 16 ? '1.25rem' : '1rem';
+}
+
+function circleHtml(player) {
+  const id = idOf(player);
+  const team = teams[id] || [];
+  const mask = badges[id] || 0;
+
+  const minis = Array.from({ length: MAX_TEAM }, (_, i) => {
+    const mon = team[i];
+    const angle = `style="--a:${i * 60}deg"`;
+    if (mon) {
+      const title = `${mon.species}${mon.nickname ? ` “${mon.nickname}”` : ''}`;
+      return `<button type="button" class="mini" ${angle} data-action="open-mon" data-id="${encodeURIComponent(id)}" data-index="${i}" title="${escapeHtml(title)}" aria-label="${escapeHtml(title)}">
+        <span class="mini-face">${monImage(mon, 'mini-img')}</span></button>`;
+    }
+    return `<button type="button" class="mini mini-empty" ${angle} data-action="add-mon" data-id="${encodeURIComponent(id)}" title="Añadir Pokémon" aria-label="Añadir Pokémon">
+      <span class="mini-face">+</span></button>`;
+  }).join('');
 
   return `
-    ${badgesBlock(id)}
-    <div class="team-grid">${cards || '<p class="team-empty">Este participante aún no ha añadido ningún Pokémon.</p>'}</div>
-    <div class="team-add">${addArea}</div>`;
+    <div class="circle">
+      <div class="circle-name">
+        <span class="circle-title" style="font-size:${nameSize(player.name)}">${escapeHtml(player.name)}${hasBadge(mask, LEAGUE) ? ' <span class="crown" title="Campeón de la Liga">🏆</span>' : ''}</span>
+        <span class="circle-sub">${team.length}/${MAX_TEAM} Pokémon</span>
+      </div>
+      ${minis}
+    </div>`;
 }
 
 function render() {
   countEl.textContent = players.length;
 
   if (!players.length) {
-    roster.innerHTML = '<li class="roster-empty">Todavía no hay nadie apuntado. ¡Sé el primero!</li>';
+    stage.innerHTML = '<p class="roster-empty">Todavía no hay nadie apuntado. ¡Sé el primero!</p>';
+    jump.innerHTML = '';
+    counterEl.textContent = '';
     return;
   }
 
-  roster.innerHTML = players
-    .map((p, i) => {
-      const id = idOf(p);
-      const open = openId === id;
-      const count = (teams[id] || []).length;
-      const mask = badges[id] || 0;
-      const dots = BADGES.map(
-        (b, k) => `<span class="mini-dot${hasBadge(mask, k) ? ' on' : ''}" style="--c:${b.color}"></span>`
-      ).join('');
-      return `
-        <li class="roster-item${open ? ' is-open' : ''}">
-          <button type="button" class="roster-head" data-action="toggle" data-id="${encodeURIComponent(id)}" aria-expanded="${open}">
-            <span class="roster-pos">${i + 1}</span>
-            <span class="roster-name">${escapeHtml(p.name)}${hasBadge(mask, LEAGUE) ? ' <span class="crown" title="Campeón de la Liga">🏆</span>' : ''}</span>
-            <span class="mini-dots" title="${countBadges(mask)}/${BADGES.length} medallas">${dots}</span>
-            <span class="team-badge">${count}/${MAX_TEAM}</span>
-            <span class="chevron" aria-hidden="true">▸</span>
-          </button>
-          ${open ? `<div class="team-panel">${teamPanel(id)}</div>` : ''}
-        </li>`;
-    })
+  const player = currentPlayer();
+  currentId = idOf(player);
+
+  stage.innerHTML = circleHtml(player) + badgesBlock(currentId);
+
+  const index = players.indexOf(player);
+  counterEl.textContent = `${index + 1} / ${players.length}`;
+  jump.innerHTML = players
+    .map((p, i) => `<option value="${i}"${i === index ? ' selected' : ''}>${escapeHtml(p.name)}</option>`)
     .join('');
+
+  document.getElementById('prev').disabled = players.length < 2;
+  document.getElementById('next').disabled = players.length < 2;
+}
+
+// Ventana emergente de un Pokémon (ver / editar / añadir)
+function renderPopup() {
+  if (!viewing && !editing) {
+    monModal.hidden = true;
+    return;
+  }
+
+  if (editing) {
+    monBody.innerHTML = `<h2 class="popup-title">${editing.index >= 0 ? 'Editar Pokémon' : 'Añadir Pokémon'}</h2>${monForm(editing.id, editing.index)}`;
+    monModal.hidden = false;
+    monBody.querySelector('input')?.focus();
+  } else {
+    const mon = teams[viewing.id]?.[viewing.index];
+    if (!mon) {
+      viewing = null;
+      monModal.hidden = true;
+      return;
+    }
+    monBody.innerHTML = monDetail(mon, viewing.index, viewing.id);
+    monModal.hidden = false;
+  }
+}
+
+function closePopup() {
+  viewing = null;
+  editing = null;
+  teamError = '';
+  renderPopup();
+}
+
+// Cambio de participante con animación de deslizamiento
+async function goTo(newIndex, dir) {
+  if (animating || players.length < 2) return;
+  animating = true;
+
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const dist = Math.min(window.innerWidth * 0.7, 700);
+  document.body.style.overflowX = 'hidden';
+
+  try {
+    if (!reduce) {
+      await slide.animate(
+        [{ transform: 'translateX(0)', opacity: 1 }, { transform: `translateX(${-dir * dist}px)`, opacity: 0 }],
+        { duration: 220, easing: 'ease-in', fill: 'forwards' }
+      ).finished;
+    }
+
+    currentId = idOf(players[newIndex]);
+    render();
+
+    if (!reduce) {
+      slide.getAnimations().forEach((a) => a.cancel());
+      await slide.animate(
+        [{ transform: `translateX(${dir * dist}px)`, opacity: 0 }, { transform: 'translateX(0)', opacity: 1 }],
+        { duration: 300, easing: 'cubic-bezier(.2,.8,.2,1)' }
+      ).finished;
+    }
+  } finally {
+    slide.getAnimations().forEach((a) => a.cancel());
+    document.body.style.overflowX = '';
+    animating = false;
+  }
+}
+
+function step(dir) {
+  if (!players.length) return;
+  const i = players.indexOf(currentPlayer());
+  goTo((i + dir + players.length) % players.length, dir);
 }
 
 // ---------------------------------------------------------------
@@ -280,7 +363,7 @@ function render() {
 
 async function loadAll() {
   // No refrescamos mientras alguien está rellenando un formulario.
-  if (editing || !modal.hidden) return;
+  if (editing || viewing || animating || !modal.hidden) return;
 
   try {
     const [pRes, tRes, bRes] = await Promise.all([
@@ -298,10 +381,10 @@ async function loadAll() {
     players = pData.players;
     teams = tData.teams;
     badges = bData.badges;
-    if (editing) return; // por si empezó a editar mientras cargaba
+    if (editing || viewing) return; // por si empezó a editar mientras cargaba
     render();
   } catch (err) {
-    roster.innerHTML = `<li class="roster-empty roster-error">No se pudo cargar la lista: ${escapeHtml(err.message)}</li>`;
+    stage.innerHTML = `<p class="roster-empty roster-error">No se pudo cargar la lista: ${escapeHtml(err.message)}</p>`;
     console.error(err);
   }
 }
@@ -358,7 +441,7 @@ function toggleBadge(id, i) {
 // Interacción con la lista (delegación de eventos)
 // ---------------------------------------------------------------
 
-roster.addEventListener('click', async (e) => {
+async function onAction(e) {
   const btn = e.target.closest('[data-action]');
   if (!btn) return;
 
@@ -368,28 +451,26 @@ roster.addEventListener('click', async (e) => {
 
   if (action === 'badge') {
     toggleBadge(id, index);
-  } else if (action === 'toggle') {
-    if (editing && editing.id === openId) return; // primero guardar o cancelar
-    openId = openId === id ? null : id;
-    teamError = '';
-    render();
+  } else if (action === 'open-mon') {
+    viewing = { id, index };
+    renderPopup();
   } else if (action === 'add-mon') {
+    if ((teams[id] || []).length >= MAX_TEAM) return;
     editing = { id, index: -1 };
     teamError = '';
-    render();
-    roster.querySelector('.mon-form input')?.focus();
+    renderPopup();
   } else if (action === 'edit-mon') {
-    if (editing) return;
     editing = { id, index };
+    viewing = null;
     teamError = '';
-    render();
-    roster.querySelector('.mon-form input')?.focus();
+    renderPopup();
   } else if (action === 'cancel-mon') {
+    const was = editing;
     editing = null;
     teamError = '';
-    render();
+    viewing = was && was.index >= 0 ? { id: was.id, index: was.index } : null;
+    renderPopup();
   } else if (action === 'delete-mon') {
-    if (editing) return;
     const mon = teams[id][index];
     if (!confirm(`¿Quitar a ${mon.nickname || mon.species} del equipo?`)) return;
     try {
@@ -397,11 +478,19 @@ roster.addEventListener('click', async (e) => {
     } catch (err) {
       alert(err.message);
     }
+    closePopup();
     render();
   }
-});
+}
 
-roster.addEventListener('submit', async (e) => {
+stage.addEventListener('click', onAction);
+monModal.addEventListener('click', (e) => {
+  if (e.target === monModal) closePopup();
+  else onAction(e);
+});
+document.getElementById('close-mon').addEventListener('click', closePopup);
+
+monModal.addEventListener('submit', async (e) => {
   e.preventDefault();
   const f = e.target;
   const id = decodeURIComponent(f.dataset.id);
@@ -429,12 +518,45 @@ roster.addEventListener('submit', async (e) => {
     await saveTeam(id, next);
     editing = null;
     teamError = '';
+    viewing = { id, index: index >= 0 ? index : teams[id].length - 1 };
     render();
+    renderPopup();
   } catch (err) {
     teamError = err.message;
     f.querySelector('.form-error').textContent = err.message;
     submit.disabled = false;
   }
+});
+
+// ---------------------------------------------------------------
+// Navegación entre participantes (flechas, teclado, deslizar, selector)
+// ---------------------------------------------------------------
+
+document.getElementById('prev').addEventListener('click', () => step(-1));
+document.getElementById('next').addEventListener('click', () => step(1));
+
+jump.addEventListener('change', () => {
+  const target = Number(jump.value);
+  const current = players.indexOf(currentPlayer());
+  if (target === current) return;
+  goTo(target, target > current ? 1 : -1);
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+  if (document.getElementById('tab-participantes').hidden) return;
+  if (!modal.hidden || !monModal.hidden || !notice.hidden) return;
+  if (/^(INPUT|SELECT|TEXTAREA)$/.test(document.activeElement?.tagName)) return;
+  step(e.key === 'ArrowRight' ? 1 : -1);
+});
+
+let touchX = null;
+slide.addEventListener('touchstart', (e) => { touchX = e.touches[0].clientX; }, { passive: true });
+slide.addEventListener('touchend', (e) => {
+  if (touchX == null) return;
+  const dx = e.changedTouches[0].clientX - touchX;
+  touchX = null;
+  if (Math.abs(dx) > 50) step(dx < 0 ? 1 : -1);
 });
 
 // ---------------------------------------------------------------
@@ -456,6 +578,7 @@ document.getElementById('open-modal').addEventListener('click', openModal);
 document.getElementById('close-modal').addEventListener('click', closeModal);
 modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !modal.hidden) closeModal(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !monModal.hidden) closePopup(); });
 
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -471,6 +594,7 @@ form.addEventListener('submit', async (e) => {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Error desconocido');
     players = data.players;
+    currentId = idOf(players[players.length - 1]); // mostramos al recién apuntado
     closeModal();
     render();
   } catch (err) {

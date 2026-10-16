@@ -48,16 +48,20 @@
       <button class="add-btn" id="open-modal" type="button">+ Añadir Participante</button>
     </div>
 
-    <div class="roster-wrap">
-      <div class="roster-rail" aria-hidden="true"></div>
-      <div class="roster-frame">
-        <span class="corner corner-tl" aria-hidden="true"></span>
-        <span class="corner corner-tr" aria-hidden="true"></span>
-        <span class="corner corner-bl" aria-hidden="true"></span>
-        <span class="corner corner-br" aria-hidden="true"></span>
-        <ol class="roster" id="roster">
-          <li class="roster-empty">Cargando participantes…</li>
-        </ol>
+    <div class="stage-wrap" id="stage-wrap">
+      <div class="stage-top">
+        <label class="jump">Ir a
+          <select id="jump" aria-label="Elegir participante"></select>
+        </label>
+        <span class="stage-counter" id="stage-counter"></span>
+      </div>
+
+      <div class="stage-row">
+        <button class="nav-arrow" id="prev" type="button" aria-label="Participante anterior">‹</button>
+        <div class="slide" id="slide">
+          <div id="stage" class="stage"><p class="roster-empty">Cargando participantes…</p></div>
+        </div>
+        <button class="nav-arrow" id="next" type="button" aria-label="Participante siguiente">›</button>
       </div>
     </div>
   </section>
@@ -215,6 +219,13 @@
       <button class="add-btn small ghost" id="notice-ok" type="button">Entendido</button>
     </div>
     <button class="link-btn notice-never" id="notice-never" type="button">No mostrar más</button>
+  </div>
+</div>
+
+<div class="modal" id="mon-modal" role="dialog" aria-modal="true" hidden>
+  <div class="modal-card mon-modal-card">
+    <button class="modal-close" id="close-mon" type="button" aria-label="Cerrar">&times;</button>
+    <div id="mon-modal-body"></div>
   </div>
 </div>
 

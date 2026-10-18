@@ -1,0 +1,88 @@
+// Resultados de la liga (todos contra todos). Gana quien reciba el clic: +3 puntos.
+// Los resultados se guardan en un hash de Redis:
+//   campo = pareja de jugadores en minúsculas y ordenados ("ana|luis"), valor = ganador en minúsculas.
+//
+// Opcional: si defines la variable de entorno LEAGUE_ADMIN_KEY en Vercel, solo quien
+// conozca esa clave podrá marcar o borrar resultados (los demás solo los verán).
+const crypto = require('crypto');
+const { redisConfig, redis } = require('./_redis');
+
+const LEAGUE_KEY = 'pokemon:league';
+
+// Participantes de la liga, en el orden en que se reparten los emparejamientos.
+const PLAYERS = [
+  'Lihone', 'Petea', 'Mertens', 'El compa', 'Pampert', 'Kekkan',
+  'Helbramn', 'Steven', 'AitoRLG', 'Dashlight', 'Beldiño', 'Leviathan',
+];
+
+const lc = (s) => String(s ?? '').replace(/\s+/g, ' ').trim().toLowerCase();
+const matchKey = (a, b) => [lc(a), lc(b)].sort().join('|');
+
+function adminOk(req) {
+  const expected = process.env.LEAGUE_ADMIN_KEY;
+  if (!expected) return true; // sin clave configurada, cualquiera puede marcar
+  const given = String(req.headers['x-admin-key'] ?? '');
+  const a = Buffer.from(given);
+  const b = Buffer.from(expected);
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
+
+module.exports = async function handler(req, res) {
+  res.setHeader('Cache-Control', 'no-store');
+
+  const cfg = redisConfig();
+  if (!cfg) {
+    res.status(500).json({ error: 'Falta conectar la base de datos (Upstash Redis) al proyecto en Vercel.' });
+    return;
+  }
+
+  try {
+    if (req.method === 'GET') {
+      const flat = await redis(cfg, ['HGETALL', LEAGUE_KEY]);
+      const results = {};
+      for (let i = 0; i < flat.length; i += 2) results[flat[i]] = flat[i + 1];
+      res.status(200).json({ players: PLAYERS, results, protected: Boolean(process.env.LEAGUE_ADMIN_KEY) });
+      return;
+    }
+
+    if (req.method === 'POST' || req.method === 'PUT') {
+      if (!adminOk(req)) {
+        res.status(401).json({ error: 'Clave de administrador incorrecta.', needKey: true });
+        return;
+      }
+
+      const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : req.body || {};
+      const a = lc(body.a);
+      const b = lc(body.b);
+      const known = PLAYERS.map(lc);
+
+      if (!known.includes(a) || !known.includes(b) || a === b) {
+        res.status(400).json({ error: 'Combate no válido.' });
+        return;
+      }
+
+      const key = matchKey(a, b);
+
+      if (body.winner == null) {
+        await redis(cfg, ['HDEL', LEAGUE_KEY, key]); // deshacer resultado
+        res.status(200).json({ key, winner: null });
+        return;
+      }
+
+      const winner = lc(body.winner);
+      if (winner !== a && winner !== b) {
+        res.status(400).json({ error: 'El ganador debe ser uno de los dos jugadores.' });
+        return;
+      }
+
+      await redis(cfg, ['HSET', LEAGUE_KEY, key, winner]);
+      res.status(200).json({ key, winner });
+      return;
+    }
+
+    res.setHeader('Allow', 'GET, POST, PUT');
+    res.status(405).json({ error: 'Método no permitido.' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};

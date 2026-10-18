@@ -7,11 +7,6 @@ const monBody = document.getElementById('mon-modal-body');
 const jump = document.getElementById('jump');
 const counterEl = document.getElementById('stage-counter');
 const countEl = document.getElementById('count');
-const modal = document.getElementById('modal');
-const form = document.getElementById('add-form');
-const input = document.getElementById('player-name');
-const errorEl = document.getElementById('form-error');
-const submitBtn = document.getElementById('submit-btn');
 
 // Estado de la pantalla
 let players = [];          // [{ name, at }]
@@ -207,6 +202,7 @@ async function loadDex() {
     const all = [...species, ...forms];
     buildDex(all);
     try { localStorage.setItem(DEX_CACHE_KEY, JSON.stringify(all)); } catch { /* ignorar */ }
+    renderLeague();
     if (!editing && !viewing) render(); // para que aparezcan las imágenes de los equipos ya cargados
   } catch (err) {
     console.warn('No se pudo cargar la Pokédex:', err);
@@ -320,7 +316,7 @@ function render() {
   countEl.textContent = players.length;
 
   if (!players.length) {
-    stage.innerHTML = '<p class="roster-empty">Todavía no hay nadie apuntado. ¡Sé el primero!</p>';
+    stage.innerHTML = '<p class="roster-empty">Todavía no hay participantes.</p>';
     jump.innerHTML = '';
     counterEl.textContent = '';
     return;
@@ -417,7 +413,7 @@ function step(dir) {
 
 async function loadAll() {
   // No refrescamos mientras alguien está rellenando un formulario.
-  if (editing || viewing || animating || !modal.hidden) return;
+  if (editing || viewing || animating) return;
 
   try {
     const [pRes, tRes, bRes] = await Promise.all([
@@ -435,6 +431,7 @@ async function loadAll() {
     players = pData.players;
     teams = tData.teams;
     badges = bData.badges;
+    renderLeague(); // los equipos alimentan las fotos de la liga
     if (editing || viewing) return; // por si empezó a editar mientras cargaba
     render();
   } catch (err) {
@@ -599,7 +596,7 @@ jump.addEventListener('change', () => {
 document.addEventListener('keydown', (e) => {
   if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
   if (document.getElementById('tab-participantes').hidden) return;
-  if (!modal.hidden || !monModal.hidden || !notice.hidden) return;
+  if (!monModal.hidden || !notice.hidden) return;
   if (/^(INPUT|SELECT|TEXTAREA)$/.test(document.activeElement?.tagName)) return;
   step(e.key === 'ArrowRight' ? 1 : -1);
 });
@@ -611,51 +608,6 @@ slide.addEventListener('touchend', (e) => {
   const dx = e.changedTouches[0].clientX - touchX;
   touchX = null;
   if (Math.abs(dx) > 50) step(dx < 0 ? 1 : -1);
-});
-
-// ---------------------------------------------------------------
-// Ventana "Añadir participante"
-// ---------------------------------------------------------------
-
-function openModal() {
-  errorEl.textContent = '';
-  form.reset();
-  modal.hidden = false;
-  input.focus();
-}
-
-function closeModal() {
-  modal.hidden = true;
-}
-
-document.getElementById('open-modal').addEventListener('click', openModal);
-document.getElementById('close-modal').addEventListener('click', closeModal);
-modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !modal.hidden) closeModal(); });
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !monModal.hidden) closePopup(); });
-
-form.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  errorEl.textContent = '';
-  submitBtn.disabled = true;
-
-  try {
-    const res = await fetch('/api/pokemon-players', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: input.value }),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Error desconocido');
-    players = data.players;
-    currentId = idOf(players[players.length - 1]); // mostramos al recién apuntado
-    closeModal();
-    render();
-  } catch (err) {
-    errorEl.textContent = err.message;
-  } finally {
-    submitBtn.disabled = false;
-  }
 });
 
 loadDex();
@@ -764,3 +716,273 @@ function updateDeadlineCountdown() {
 
 updateDeadlineCountdown();
 setInterval(updateDeadlineCountdown, 60 * 1000);
+
+
+// ============================================================
+// LIGA (todos contra todos)
+// ============================================================
+
+const POINTS_WIN = 3;   // puntos por victoria
+const QUALIFY = 8;      // los 8 primeros pasan al bracket
+const ADMIN_KEY_STORAGE = 'pokemon-league-admin-key';
+
+let leaguePlayers = [];     // nombres, en el orden del servidor
+let leagueResults = {};     // { 'ana|luis': 'ana' }  (ganador en minúsculas)
+let leagueProtected = false;
+let schedule = [];          // [{ round: 1, matches: [{ a, b, key }] }]
+let selectedRound = 0;      // índice de la jornada que se está viendo
+let roundChosen = false;    // true cuando el usuario elige una jornada a mano
+let leagueLoaded = false;
+let leagueError = '';
+
+const lcName = (s) => String(s).replace(/\s+/g, ' ').trim().toLowerCase();
+const matchKey = (a, b) => [lcName(a), lcName(b)].sort().join('|');
+
+// Método del círculo: en cada jornada todos juegan exactamente una vez
+// y, al final, todos se han enfrentado con todos.
+function buildSchedule(names) {
+  const arr = names.slice();
+  if (arr.length % 2) arr.push(null); // descanso si fueran impares
+  const n = arr.length;
+  const rounds = [];
+
+  for (let r = 0; r < n - 1; r++) {
+    const matches = [];
+    for (let i = 0; i < n / 2; i++) {
+      let a = arr[i];
+      let b = arr[n - 1 - i];
+      if (a == null || b == null) continue;
+      if (i === 0 && r % 2 === 1) [a, b] = [b, a]; // alterna el lado del jugador fijo
+      matches.push({ a, b, key: matchKey(a, b) });
+    }
+    rounds.push({ round: r + 1, matches });
+    arr.splice(1, 0, arr.pop()); // rotación
+  }
+  return rounds;
+}
+
+function computeStandings() {
+  const table = new Map(leaguePlayers.map((name) => [lcName(name), { name, pj: 0, v: 0, d: 0, pts: 0 }]));
+
+  schedule.forEach((rd) =>
+    rd.matches.forEach((m) => {
+      const winner = leagueResults[m.key];
+      if (!winner) return;
+      const loser = winner === lcName(m.a) ? lcName(m.b) : lcName(m.a);
+      const w = table.get(winner);
+      const l = table.get(loser);
+      if (!w || !l) return;
+      w.pj++; w.v++; w.pts += POINTS_WIN;
+      l.pj++; l.d++;
+    })
+  );
+
+  return [...table.values()].sort(
+    (x, y) => y.pts - x.pts || y.v - x.v || x.d - y.d || x.name.localeCompare(y.name, 'es')
+  );
+}
+
+function teamThumbs(name) {
+  const team = teams[lcName(name)] || [];
+  return Array.from({ length: MAX_TEAM }, (_, i) =>
+    team[i]
+      ? `<span class="thumb" title="${escapeHtml(team[i].species)}">${monImage(team[i], 'liga-img')}</span>`
+      : '<span class="thumb thumb-empty"></span>'
+  ).join('');
+}
+
+function sideHtml(name, other, key, state) {
+  const label = state === 'win' ? '🏆 Ganador · +3 pts' : state === 'lose' ? 'Derrota' : 'Elegir ganador';
+  return `
+    <button type="button" class="duel-side is-${state}" data-pick="${encodeURIComponent(name)}"
+      data-a="${encodeURIComponent(name)}" data-b="${encodeURIComponent(other)}" data-key="${escapeHtml(key)}"
+      aria-pressed="${state === 'win'}" title="${state === 'win' ? 'Clic para deshacer' : 'Clic para marcar como ganador'}">
+      <span class="duel-name">${escapeHtml(name)}</span>
+      <span class="duel-team">${teamThumbs(name)}</span>
+      <span class="duel-tag">${label}</span>
+    </button>`;
+}
+
+function duelHtml(m) {
+  const winner = leagueResults[m.key];
+  const stateOf = (name) => (!winner ? 'none' : winner === lcName(name) ? 'win' : 'lose');
+  return `
+    <article class="duel${winner ? ' is-played' : ''}">
+      ${sideHtml(m.a, m.b, m.key, stateOf(m.a))}
+      <div class="duel-vs" aria-hidden="true">VS</div>
+      ${sideHtml(m.b, m.a, m.key, stateOf(m.b))}
+    </article>`;
+}
+
+function roundStatus(rd) {
+  const done = rd.matches.filter((m) => leagueResults[m.key]).length;
+  return { done, total: rd.matches.length, complete: done === rd.matches.length };
+}
+
+function renderLeague() {
+  const root = document.getElementById('liga-root');
+  if (!root) return;
+
+  if (leagueError) {
+    root.innerHTML = `<p class="roster-empty roster-error">No se pudo cargar la liga: ${escapeHtml(leagueError)}</p>`;
+    return;
+  }
+  if (!leagueLoaded) return;
+
+  const standings = computeStandings();
+  const totalMatches = schedule.reduce((n, r) => n + r.matches.length, 0);
+  const played = schedule.reduce((n, r) => n + roundStatus(r).done, 0);
+
+  // Si el usuario no ha elegido jornada, mostramos la primera con combates pendientes.
+  if (!roundChosen) {
+    const firstPending = schedule.findIndex((r) => !roundStatus(r).complete);
+    selectedRound = firstPending === -1 ? schedule.length - 1 : firstPending;
+  }
+  const rd = schedule[selectedRound];
+
+  const rows = standings
+    .map((row, i) => {
+      const qualifies = played > 0 && i < QUALIFY;
+      const cut = played > 0 && i === QUALIFY - 1;
+      return `<tr class="${qualifies ? 'q' : ''}${cut ? ' q-cut' : ''}">
+        <td class="c-pos">${i + 1}</td>
+        <td class="c-name">${escapeHtml(row.name)}</td>
+        <td>${row.pj}</td><td>${row.v}</td><td>${row.d}</td>
+        <td class="c-pts">${row.pts}</td>
+      </tr>`;
+    })
+    .join('');
+
+  const pills = schedule
+    .map((r, i) => {
+      const st = roundStatus(r);
+      return `<button type="button" class="pill${i === selectedRound ? ' is-active' : ''}${st.complete ? ' is-done' : ''}" data-round="${i}"
+        title="Jornada ${r.round}: ${st.done}/${st.total} jugados">${r.round}</button>`;
+    })
+    .join('');
+
+  const st = roundStatus(rd);
+
+  root.innerHTML = `
+    <div class="liga-summary">
+      <span><strong>${played}</strong> / ${totalMatches} combates jugados</span>
+      <span class="liga-rule">Victoria = ${POINTS_WIN} puntos · Los ${QUALIFY} primeros pasan al bracket</span>
+    </div>
+
+    <div class="card liga-table-card">
+      <h2>Clasificación</h2>
+      <div class="table-scroll">
+        <table class="liga-table">
+          <thead><tr><th class="c-pos">#</th><th class="c-name">Participante</th><th title="Jugados">PJ</th><th title="Victorias">V</th><th title="Derrotas">D</th><th class="c-pts">Pts</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+      ${played > 0 ? `<p class="liga-note">Zona dorada: clasifican al bracket eliminatorio.</p>` : ''}
+    </div>
+
+    <div class="liga-rounds-head">
+      <h2>Combates</h2>
+      <div class="pills" role="group" aria-label="Jornadas">${pills}</div>
+    </div>
+
+    <div class="round-title">
+      <strong>Jornada ${rd.round}</strong> de ${schedule.length}
+      <span class="round-progress">${st.done}/${st.total} jugados</span>
+    </div>
+    <p class="liga-hint">Haz clic en un participante para marcarlo como ganador. Vuelve a pulsarlo para deshacerlo.</p>
+
+    <div class="duels">${rd.matches.map(duelHtml).join('')}</div>`;
+}
+
+async function loadLeague() {
+  try {
+    const res = await fetch('/api/pokemon-league');
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Error desconocido');
+
+    const first = !leagueLoaded;
+    leaguePlayers = data.players;
+    leagueResults = data.results;
+    leagueProtected = data.protected;
+    if (first) schedule = buildSchedule(leaguePlayers);
+    leagueLoaded = true;
+    leagueError = '';
+  } catch (err) {
+    leagueError = err.message;
+    console.error(err);
+  }
+  renderLeague();
+}
+
+// --- Guardar resultados (en cola, para que lleguen en orden) ---
+
+let leagueQueue = Promise.resolve();
+
+function getAdminKey() {
+  try { return sessionStorage.getItem(ADMIN_KEY_STORAGE) || ''; } catch { return ''; }
+}
+function setAdminKey(v) {
+  try { v ? sessionStorage.setItem(ADMIN_KEY_STORAGE, v) : sessionStorage.removeItem(ADMIN_KEY_STORAGE); } catch { /* ignorar */ }
+}
+
+async function sendResult(a, b, winner) {
+  const res = await fetch('/api/pokemon-league', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', 'X-Admin-Key': getAdminKey() },
+    body: JSON.stringify({ a, b, winner }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.error || 'Error desconocido');
+    err.needKey = res.status === 401;
+    throw err;
+  }
+}
+
+function setResult(a, b, key, winnerName) {
+  // Si el servidor está protegido con clave y aún no la tenemos, la pedimos.
+  if (leagueProtected && !getAdminKey()) {
+    const k = window.prompt('Solo el administrador puede marcar resultados. Introduce la clave:');
+    if (!k) return;
+    setAdminKey(k.trim());
+  }
+
+  const previous = leagueResults[key];
+  if (winnerName == null) delete leagueResults[key];
+  else leagueResults[key] = lcName(winnerName);
+  renderLeague(); // respuesta inmediata
+
+  leagueQueue = leagueQueue
+    .then(() => sendResult(a, b, winnerName))
+    .catch(async (err) => {
+      if (err.needKey) setAdminKey('');
+      alert(err.message);
+      if (previous) leagueResults[key] = previous;
+      else delete leagueResults[key];
+      await loadLeague(); // volvemos a lo que dice el servidor
+    });
+}
+
+document.getElementById('liga-root').addEventListener('click', (e) => {
+  const pill = e.target.closest('[data-round]');
+  if (pill) {
+    selectedRound = Number(pill.dataset.round);
+    roundChosen = true;
+    renderLeague();
+    return;
+  }
+
+  const side = e.target.closest('[data-pick]');
+  if (!side) return;
+
+  const pick = decodeURIComponent(side.dataset.pick);
+  const a = decodeURIComponent(side.dataset.a);
+  const b = decodeURIComponent(side.dataset.b);
+  const key = side.dataset.key;
+
+  // Pulsar de nuevo al ganador deshace el resultado; pulsar al otro lo cambia.
+  setResult(a, b, key, leagueResults[key] === lcName(pick) ? null : pick);
+});
+
+loadLeague();
+setInterval(loadLeague, 30 * 1000);

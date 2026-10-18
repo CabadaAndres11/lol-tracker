@@ -22,9 +22,9 @@
       <img src="/LogoPokemon.png" alt="Pokémon">
     </div>
     <div class="hero-content">
-      <div class="eyebrow">
+      <div class="eyebrow eyebrow-closed">
         <span class="pulse"></span>
-        <span>Inscripciones abiertas</span>
+        <span>Inscripciones cerradas</span>
       </div>
       <h1>TORNEO RANOMLOCKE <span class="title-spark">⚡</span></h1>
       <p class="subtitle">Domingo 15 de noviembre · 17:00 h</p>
@@ -53,6 +53,7 @@
 
 <nav class="tabs" role="tablist" aria-label="Secciones">
   <button class="tab is-active" role="tab" data-tab="participantes" aria-selected="true" type="button">Participantes</button>
+  <button class="tab" role="tab" data-tab="liga" aria-selected="false" type="button">Liga</button>
   <button class="tab" role="tab" data-tab="descarga" aria-selected="false" type="button">Descarga</button>
   <button class="tab" role="tab" data-tab="normas" aria-selected="false" type="button">Normas</button>
   <button class="tab" role="tab" data-tab="equipo" aria-selected="false" type="button">Equipo</button>
@@ -64,7 +65,6 @@
   <section class="panel is-active" id="tab-participantes" role="tabpanel">
     <div class="roster-top">
       <p class="roster-count"><strong id="count">0</strong> participantes</p>
-      <button class="add-btn" id="open-modal" type="button">+ Añadir Participante</button>
     </div>
 
     <div class="stage-wrap" id="stage-wrap">
@@ -83,6 +83,11 @@
         <button class="nav-arrow" id="next" type="button" aria-label="Participante siguiente">›</button>
       </div>
     </div>
+  </section>
+
+  <!-- ===================== LIGA ===================== -->
+  <section class="panel" id="tab-liga" role="tabpanel" hidden>
+    <div id="liga-root"><p class="roster-empty">Cargando la liga…</p></div>
   </section>
 
   <!-- ===================== DESCARGA ===================== -->
@@ -207,7 +212,7 @@
     <div class="card">
       <h2>Formato del torneo</h2>
       <ol class="steps">
-        <li><strong>Fase de liga:</strong> todos se enfrentan contra todos repartidos en distintas jornadas. Cada combate es a <strong>partida única</strong>.</li>
+        <li><strong>Fase de liga:</strong> todos se enfrentan contra todos repartidos en distintas jornadas (pestaña <em>Liga</em>). Cada combate es a <strong>partida única</strong> y la victoria suma <strong>3 puntos</strong>.</li>
         <li><strong>Clasificación:</strong> los <strong>8 mejores</strong> de la tabla pasan a la fase final.</li>
         <li><strong>Fase final:</strong> bracket de eliminación directa (cuartos, semifinales y final) donde el que pierde queda fuera. Cada enfrentamiento es al <strong>mejor de 3 (Bo3)</strong>.</li>
         <li><strong>Campeón:</strong> el ganador de la final se proclama campeón del torneo. 🏆</li>
@@ -218,8 +223,7 @@
       <h2>Pendiente de confirmar</h2>
       <p class="card-text">Estos detalles todavía no están definidos y se comunicarán más adelante:</p>
       <ul class="todo">
-        <li>Calendario de jornadas</li>
-        <li>Sistema de puntos y criterios de desempate</li>
+        <li>Criterios de desempate en la clasificación de la liga</li>
       </ul>
     </div>
 
@@ -247,19 +251,8 @@
   </div>
 </div>
 
-<div class="modal" id="modal" hidden>
-  <form class="modal-card" id="add-form" autocomplete="off">
-    <button class="modal-close" id="close-modal" type="button" aria-label="Cerrar">&times;</button>
-    <h2>Añadir participante</h2>
-    <label for="player-name">Nombre</label>
-    <input id="player-name" name="name" type="text" minlength="2" maxlength="24" required placeholder="Tu nombre o apodo" />
-    <p class="form-error" id="form-error" role="alert"></p>
-    <button class="add-btn" id="submit-btn" type="submit">Añadir</button>
-  </form>
-</div>
-
 <footer>
-  <p>Cualquiera puede apuntarse · la lista se comparte entre todos los visitantes</p>
+  <p>Torneo RanomLocke · inscripciones cerradas</p>
 </footer>
 
 <script src="/pokemon/script.js"></script>

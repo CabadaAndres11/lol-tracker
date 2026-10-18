@@ -254,7 +254,7 @@ function monForm(id, index) {
   const v = (x) => escapeHtml(x || '').replace(/"/g, '&quot;');
   const moveInputs = [0, 1, 2, 3]
     .map(
-      (i) => `<input name="move${i}" type="text" maxlength="30" placeholder="Movimiento ${i + 1}${i === 0 ? ' *' : ''}" value="${v(mon?.moves[i])}" ${i === 0 ? 'required' : ''} />`
+      (i) => `<input name="move${i}" type="text" maxlength="30" list="es-moves" autocomplete="off" placeholder="Movimiento ${i + 1}${i === 0 ? ' *' : ''}" value="${v(mon?.moves[i])}" ${i === 0 ? 'required' : ''} />`
     )
     .join('');
 
@@ -263,8 +263,8 @@ function monForm(id, index) {
       <div class="mon-form-grid">
         <label>Pokémon *<input name="species" type="text" maxlength="30" required list="pokemon-names" placeholder="Escribe en inglés…" value="${v(mon?.species)}" /></label>
         <label>Mote<input name="nickname" type="text" maxlength="30" value="${v(mon?.nickname)}" /></label>
-        <label>Habilidad *<input name="ability" type="text" maxlength="30" required value="${v(mon?.ability)}" /></label>
-        <label>Objeto equipado<input name="item" type="text" maxlength="30" value="${v(mon?.item)}" /></label>
+        <label>Habilidad *<input name="ability" type="text" maxlength="30" required list="es-abilities" autocomplete="off" value="${v(mon?.ability)}" /></label>
+        <label>Objeto equipado<input name="item" type="text" maxlength="30" list="es-items" autocomplete="off" value="${v(mon?.item)}" /></label>
       </div>
       <div class="mon-form-label">Movimientos (1 a 4)</div>
       <div class="mon-form-moves">${moveInputs}</div>
@@ -610,7 +610,27 @@ slide.addEventListener('touchend', (e) => {
   if (Math.abs(dx) > 50) step(dx < 0 ? 1 : -1);
 });
 
+// Sugerencias en español (generadas a partir de los datos oficiales de PokéAPI).
+async function loadEsData() {
+  try {
+    const res = await fetch('/pokemon/data/es.json');
+    if (!res.ok) return;
+    const data = await res.json();
+    const fill = (id, rows) => {
+      let dl = document.getElementById(id);
+      if (!dl) { dl = document.createElement('datalist'); dl.id = id; document.body.appendChild(dl); }
+      dl.innerHTML = rows
+        .map(([es, en]) => `<option value="${escapeHtml(es)}"${en && en !== es ? ` label="${escapeHtml(en)}"` : ''}></option>`)
+        .join('');
+    };
+    fill('es-moves', data.moves);
+    fill('es-abilities', data.abilities);
+    fill('es-items', data.items);
+  } catch { /* sin sugerencias: se puede escribir a mano */ }
+}
+
 loadDex();
+loadEsData();
 loadAll();
 // Refresca para ver los cambios de otros jugadores (se pausa mientras editas).
 setInterval(loadAll, 30 * 1000);

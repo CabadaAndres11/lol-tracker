@@ -730,3 +730,37 @@ document.getElementById('notice-download').addEventListener('click', () => {
 
 notice.addEventListener('click', (e) => { if (e.target === notice) closeNotice(); });
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !notice.hidden) closeNotice(); });
+
+
+// ============================================================
+// CUENTA ATRÁS DE LA ENTREGA
+// ============================================================
+
+// Horario de España peninsular en noviembre = UTC+1.
+const DELIVERY_DEADLINE = new Date('2026-11-11T23:59:00+01:00');
+const TOURNAMENT_START = new Date('2026-11-15T17:00:00+01:00');
+
+function updateDeadlineCountdown() {
+  const el = document.getElementById('deadline-countdown');
+  const now = new Date();
+  let text;
+
+  if (now < DELIVERY_DEADLINE) {
+    const mins = Math.floor((DELIVERY_DEADLINE - now) / 60000);
+    const d = Math.floor(mins / 1440);
+    const hh = Math.floor((mins % 1440) / 60);
+    const mm = mins % 60;
+    text = d > 0
+      ? `⏳ Quedan ${d} ${d === 1 ? 'día' : 'días'} y ${hh} h para entregar tu equipo`
+      : `⏳ ¡Último día! Quedan ${hh} h ${mm} min para entregar tu equipo`;
+  } else if (now < TOURNAMENT_START) {
+    text = '🔒 La entrega de equipos está cerrada';
+  } else {
+    text = '';
+  }
+
+  el.textContent = text;
+}
+
+updateDeadlineCountdown();
+setInterval(updateDeadlineCountdown, 60 * 1000);

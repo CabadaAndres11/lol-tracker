@@ -1454,3 +1454,5 @@ main { overflow-x: clip; }
   .duel-vs { justify-self: center; }
   .liga-table th, .liga-table td { padding: 0.5rem 0.35rem; }
 }
+
+.import-row { text-align: center; margin: 0.9rem 0 0.2rem; }

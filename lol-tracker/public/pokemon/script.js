@@ -325,7 +325,7 @@ function render() {
   const player = currentPlayer();
   currentId = idOf(player);
 
-  stage.innerHTML = circleHtml(player) + badgesBlock(currentId);
+  stage.innerHTML = circleHtml(player) + `<div class="import-row"><button type="button" class="link-btn" data-action="import-team" data-id="${encodeURIComponent(currentId)}">⬆ Importar equipo desde archivo (.txt)</button></div>` + badgesBlock(currentId);
 
   const index = players.indexOf(player);
   counterEl.textContent = `${index + 1} / ${players.length}`;
@@ -505,6 +505,9 @@ async function onAction(e) {
   } else if (action === 'open-mon') {
     viewing = { id, index };
     renderPopup();
+  } else if (action === 'import-team') {
+    importTarget = id;
+    importInput.click();
   } else if (action === 'add-mon') {
     if ((teams[id] || []).length >= MAX_TEAM) return;
     editing = { id, index: -1 };
@@ -610,12 +613,100 @@ slide.addEventListener('touchend', (e) => {
   if (Math.abs(dx) > 50) step(dx < 0 ? 1 : -1);
 });
 
+// ---------------------------------------------------------------
+// Importar equipo (formato de exportación tipo Showdown)
+// ---------------------------------------------------------------
+
+let importTarget = null;
+const importInput = Object.assign(document.createElement('input'), { type: 'file', accept: '.txt,text/plain', hidden: true });
+document.body.appendChild(importInput);
+
+const clean = (x) => String(x || '').replace(/[<>]/g, '').trim().slice(0, 30);
+
+// Traduce al español si el nombre en inglés está en nuestra lista; si no, lo deja igual.
+function toEs(kind, name) {
+  const hit = esMap[kind]?.get(String(name).toLowerCase());
+  return clean(hit || name);
+}
+
+function parseTeamText(text) {
+  const mons = [];
+  const skipped = [];
+  const blocks = text.replace(/\r/g, '').split(/\n\s*\n/).map((b) => b.trim()).filter(Boolean);
+
+  for (const block of blocks) {
+    const lines = block.split('\n').map((l) => l.trim()).filter(Boolean);
+    let head = lines[0];
+    let item = '';
+    const at = head.lastIndexOf(' @ ');
+    if (at >= 0) { item = head.slice(at + 3); head = head.slice(0, at); }
+    head = head.replace(/\s*\((M|F)\)\s*$/i, '').trim();
+
+    let nickname = '';
+    let species = head;
+    const m = head.match(/^(.*)\s\(([^()]+)\)$/);
+    if (m) { nickname = m[1].trim(); species = m[2].trim(); }
+
+    let ability = '';
+    const moves = [];
+    for (const l of lines.slice(1)) {
+      if (/^ability:/i.test(l)) ability = l.replace(/^ability:/i, '').trim();
+      else if (/^-\s*\S/.test(l)) moves.push(l.replace(/^-\s*/, '').trim());
+    }
+
+    const known = dexLookup(species);
+    const mon = {
+      species: clean(known ? known.name : species),
+      dexId: known ? known.id : undefined,
+      nickname: nickname && nickname.toLowerCase() !== species.toLowerCase() ? clean(nickname) : '',
+      ability: ability ? toEs('abilities', ability) : '',
+      item: item ? toEs('items', item) : '',
+      moves: [0, 1, 2, 3].map((i) => (moves[i] ? toEs('moves', moves[i]) : '')),
+    };
+    if (!mon.species || !mon.ability || !mon.moves[0]) { skipped.push(nickname || species || '(sin nombre)'); continue; }
+    mons.push(mon);
+  }
+  return { mons, skipped };
+}
+
+importInput.addEventListener('change', async () => {
+  const file = importInput.files[0];
+  const id = importTarget;
+  importInput.value = '';
+  if (!file || !id) return;
+  if (file.size > 100 * 1024) return alert('El archivo es demasiado grande para ser un equipo.');
+
+  await Promise.all([esReady, dexReady]);
+  const { mons, skipped } = parseTeamText(await file.text());
+  if (!mons.length) return alert('No he encontrado ningún Pokémon válido en ese archivo.');
+
+  const used = mons.slice(0, MAX_TEAM);
+  const player = players.find((p) => idOf(p) === id);
+  let msg = `Se van a importar ${used.length} Pokémon para ${player.name}:\n\n` +
+    used.map((x) => `• ${x.species}${x.nickname ? ` (${x.nickname})` : ''}`).join('\n');
+  if (mons.length > MAX_TEAM) msg += `\n\nEl equipo admite ${MAX_TEAM}: se ignoran ${mons.length - MAX_TEAM} más.`;
+  if (skipped.length) msg += `\n\nSin habilidad o movimientos, omitidos: ${skipped.join(', ')}.`;
+  if ((teams[id] || []).length) msg += `\n\n⚠ Esto REEMPLAZA el equipo actual.`;
+  if (!confirm(msg)) return;
+
+  try {
+    await saveTeam(id, used);
+  } catch (err) {
+    return alert(err.message);
+  }
+  render();
+});
+
 // Sugerencias en español (generadas a partir de los datos oficiales de PokéAPI).
+const esMap = {};
 async function loadEsData() {
   try {
     const res = await fetch('/pokemon/data/es.json');
     if (!res.ok) return;
     const data = await res.json();
+    for (const k of ['moves', 'abilities', 'items']) {
+      esMap[k] = new Map(data[k].map(([es, en]) => [en.toLowerCase(), es]));
+    }
     const fill = (id, rows) => {
       let dl = document.getElementById(id);
       if (!dl) { dl = document.createElement('datalist'); dl.id = id; document.body.appendChild(dl); }
@@ -629,8 +720,8 @@ async function loadEsData() {
   } catch { /* sin sugerencias: se puede escribir a mano */ }
 }
 
-loadDex();
-loadEsData();
+const dexReady = loadDex();
+const esReady = loadEsData();
 loadAll();
 // Refresca para ver los cambios de otros jugadores (se pausa mientras editas).
 setInterval(loadAll, 30 * 1000);

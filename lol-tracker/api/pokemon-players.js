@@ -2,6 +2,8 @@
 // (Upstash, vía la integración de Vercel Marketplace), porque Vercel no
 // permite escribir ficheros de forma persistente.
 const KEY = 'pokemon:players';
+// Inscripciones cerradas: poner a true para volver a permitir apuntarse.
+const REGISTRATION_OPEN = false;
 const MAX_PLAYERS = 64;
 const MIN_LEN = 2;
 const MAX_LEN = 24;
@@ -48,6 +50,11 @@ module.exports = async function handler(req, res) {
     }
 
     if (req.method === 'POST') {
+      if (!REGISTRATION_OPEN) {
+        res.status(403).json({ error: 'Las inscripciones están cerradas.' });
+        return;
+      }
+
       const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : req.body || {};
       const name = String(body.name ?? '').replace(/\s+/g, ' ').trim();
 

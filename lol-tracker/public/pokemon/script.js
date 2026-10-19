@@ -999,6 +999,53 @@ function roundStatus(rd) {
   return { done, total: rd.matches.length, complete: done === rd.matches.length };
 }
 
+// ---------- Bracket eliminatorio (cruces 1-8, 4-5, 2-7, 3-6; todo al mejor de 3) ----------
+
+let ligaView = 'liga';  // 'liga' | 'bracket'
+let paneAnim = '';      // dirección de la animación al cambiar de vista
+
+function bracketHtml(standings, played, totalMatches) {
+  const seeds = standings.slice(0, QUALIFY);
+
+  const slot = (n) =>
+    played > 0 && seeds[n - 1]
+      ? `<div class="bk-slot"><span class="bk-seed">${n}º</span>${avatarHtml(seeds[n - 1].name, 'row-avatar')}<span class="bk-name">${escapeHtml(seeds[n - 1].name)}</span></div>`
+      : `<div class="bk-slot bk-tbd"><span class="bk-seed">${n}º</span><span class="bk-name">Puesto ${n} de la Liga</span></div>`;
+  const wait = (text) => `<div class="bk-slot bk-tbd"><span class="bk-seed">?</span><span class="bk-name">${text}</span></div>`;
+
+  const card = (title, a, b) => `
+    <article class="bk-match">
+      <div class="bk-title">${title}<span>Mejor de 3</span></div>
+      ${a}<div class="bk-vs">VS</div>${b}
+    </article>`;
+
+  const quarters = [[1, 8], [4, 5], [2, 7], [3, 6]].map(([a, b], i) => card(`Cuartos ${i + 1}`, slot(a), slot(b))).join('');
+  const semis = [
+    card('Semifinal 1', wait('Ganador cuartos 1'), wait('Ganador cuartos 2')),
+    card('Semifinal 2', wait('Ganador cuartos 3'), wait('Ganador cuartos 4')),
+  ].join('');
+  const final = card('Final', wait('Ganador semifinal 1'), wait('Ganador semifinal 2'));
+
+  const note =
+    played === 0
+      ? 'Los cruces se rellenarán con la clasificación en cuanto haya resultados en la Liga.'
+      : played < totalMatches
+        ? `Cruces provisionales: se actualizan con cada resultado. Serán definitivos al jugarse los ${totalMatches} combates de la Liga.`
+        : 'Liga terminada: estos son los cruces definitivos.';
+
+  return `
+    <div class="liga-summary">
+      <span><strong>Bracket eliminatorio</strong> · los ${QUALIFY} primeros de la Liga</span>
+      <span class="liga-rule">Todos los cruces al mejor de 3</span>
+    </div>
+    <p class="liga-hint">${note}</p>
+    <div class="bracket">
+      <section class="bk-round"><h3>Cuartos de final</h3><div class="bk-cards">${quarters}</div></section>
+      <section class="bk-round"><h3>Semifinales</h3><div class="bk-cards">${semis}</div></section>
+      <section class="bk-round"><h3>Final</h3><div class="bk-cards">${final}</div></section>
+    </div>`;
+}
+
 function renderLeague() {
   const root = document.getElementById('liga-root');
   if (!root) return;
@@ -1043,7 +1090,7 @@ function renderLeague() {
 
   const st = roundStatus(rd);
 
-  root.innerHTML = `
+  const ligaPane = `
     <div class="liga-summary">
       <span><strong>${played}</strong> / ${totalMatches} combates jugados</span>
       <span class="liga-rule">Victoria = ${POINTS_WIN} puntos · Los ${QUALIFY} primeros pasan al bracket</span>
@@ -1072,6 +1119,15 @@ function renderLeague() {
     <p class="liga-hint">Haz clic en un participante para marcarlo como ganador. Vuelve a pulsarlo para deshacerlo.</p>
 
     <div class="duels">${rd.matches.map(duelHtml).join('')}</div>`;
+
+  const anim = paneAnim ? ` slide-${paneAnim}` : '';
+  paneAnim = '';
+  root.innerHTML = `
+    <div class="liga-switch" role="tablist" aria-label="Vista de la Liga">
+      <button type="button" role="tab" class="${ligaView === 'liga' ? 'is-active' : ''}" aria-selected="${ligaView === 'liga'}" data-view="liga">Clasificación y combates</button>
+      <button type="button" role="tab" class="${ligaView === 'bracket' ? 'is-active' : ''}" aria-selected="${ligaView === 'bracket'}" data-view="bracket">Bracket ›</button>
+    </div>
+    <div class="liga-pane${anim}">${ligaView === 'liga' ? ligaPane : bracketHtml(standings, played, totalMatches)}</div>`;
 }
 
 async function loadLeague() {
@@ -1143,7 +1199,35 @@ function setResult(a, b, key, winnerName) {
     });
 }
 
+function setLigaView(view) {
+  if (view === ligaView) return;
+  paneAnim = view === 'bracket' ? 'left' : 'right';
+  ligaView = view;
+  renderLeague();
+}
+
+// Deslizar el dedo a izquierda/derecha cambia entre Liga y Bracket.
+let ligaTouch = null;
+const ligaRoot = document.getElementById('liga-root');
+ligaRoot.addEventListener('touchstart', (e) => {
+  ligaTouch = e.target.closest('.table-scroll, .pills') ? null : { x: e.touches[0].clientX, y: e.touches[0].clientY };
+}, { passive: true });
+ligaRoot.addEventListener('touchend', (e) => {
+  if (!ligaTouch) return;
+  const dx = e.changedTouches[0].clientX - ligaTouch.x;
+  const dy = e.changedTouches[0].clientY - ligaTouch.y;
+  ligaTouch = null;
+  if (Math.abs(dx) < 70 || Math.abs(dy) > Math.abs(dx) * 0.6) return;
+  setLigaView(dx < 0 ? 'bracket' : 'liga');
+});
+
 document.getElementById('liga-root').addEventListener('click', (e) => {
+  const viewBtn = e.target.closest('[data-view]');
+  if (viewBtn) {
+    setLigaView(viewBtn.dataset.view);
+    return;
+  }
+
   const pill = e.target.closest('[data-round]');
   if (pill) {
     selectedRound = Number(pill.dataset.round);

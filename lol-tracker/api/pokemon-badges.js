@@ -2,6 +2,7 @@
 // Se guardan como un número (máscara de bits) en un hash de Redis:
 // campo = nombre del jugador en minúsculas, valor = máscara (0 a 511).
 const { redisConfig, redis } = require('./_redis');
+const { checkPin } = require('./_pin');
 
 const PLAYERS_KEY = 'pokemon:players';
 const BADGES_KEY = 'pokemon:badges';
@@ -53,6 +54,12 @@ module.exports = async function handler(req, res) {
       const players = (await redis(cfg, ['ZRANGE', PLAYERS_KEY, 0, -1])).map((s) => JSON.parse(s));
       if (!id || !players.some((p) => p.name.toLowerCase() === id)) {
         res.status(404).json({ error: 'Ese participante no existe.' });
+        return;
+      }
+
+      const denied = await checkPin(cfg, req, id);
+      if (denied) {
+        res.status(denied.status).json(denied.body);
         return;
       }
 

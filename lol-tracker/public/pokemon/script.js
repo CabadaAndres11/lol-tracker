@@ -281,8 +281,12 @@ function currentPlayer() {
 }
 
 // Avatares fijos: public/pokemon/avatars/<nombre>.png (minúsculas, sin tildes ni espacios).
+// Si alguien se apuntó con un nombre distinto al de la Liga, se enlaza aquí: 'nombre-apuntado': 'archivo'.
+const AVATAR_ALIAS = { beldinho: 'beldino' };
+
 function avatarSlug(name) {
-  return String(name).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  const slug = String(name).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  return AVATAR_ALIAS[slug] || slug;
 }
 
 // Si falta la imagen, se muestra un círculo con la inicial.

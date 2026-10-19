@@ -230,8 +230,26 @@ function escapeHtml(str) {
 // Render
 // ---------------------------------------------------------------
 
+// Tipos (ids de PokéAPI 1..18): nombre en español y color.
+const TYPES = {
+  1: ['Normal', '#A8A77A'], 2: ['Lucha', '#C22E28'], 3: ['Volador', '#A98FF3'], 4: ['Veneno', '#A33EA1'],
+  5: ['Tierra', '#E2BF65'], 6: ['Roca', '#B6A136'], 7: ['Bicho', '#A6B91A'], 8: ['Fantasma', '#735797'],
+  9: ['Acero', '#B7B7CE'], 10: ['Fuego', '#EE8130'], 11: ['Agua', '#6390F0'], 12: ['Planta', '#7AC74C'],
+  13: ['Eléctrico', '#F7D02C'], 14: ['Psíquico', '#F95587'], 15: ['Hielo', '#96D9D6'], 16: ['Dragón', '#6F35FC'],
+  17: ['Siniestro', '#705746'], 18: ['Hada', '#D685AD'],
+};
+
+// Fondo del movimiento según su tipo; texto claro u oscuro según el color.
+function moveLi(name) {
+  const t = TYPES[moveTypes[String(name).toLowerCase()]];
+  if (!t) return `<li>${escapeHtml(name)}</li>`;
+  const [r, g, b] = [1, 3, 5].map((i) => parseInt(t[1].slice(i, i + 2), 16));
+  const dark = (0.299 * r + 0.587 * g + 0.114 * b) > 150;
+  return `<li class="typed${dark ? ' typed-light' : ''}" style="--tc:${t[1]}" title="${t[0]}">${escapeHtml(name)}</li>`;
+}
+
 function monDetail(mon, index, id) {
-  const moves = mon.moves.filter(Boolean).map((m) => `<li>${escapeHtml(m)}</li>`).join('');
+  const moves = mon.moves.filter(Boolean).map(moveLi).join('');
   return `
     <div class="mon-detail">
       ${monImage(mon, 'detail-img')}
@@ -744,6 +762,7 @@ importInput.addEventListener('change', async () => {
 
 // Sugerencias en español (generadas a partir de los datos oficiales de PokéAPI).
 const esMap = {};
+const moveTypes = {}; // nombre del movimiento (es o en, minúsculas) -> id de tipo
 async function loadEsData() {
   try {
     const res = await fetch('/pokemon/data/es.json');
@@ -752,6 +771,10 @@ async function loadEsData() {
     for (const k of ['moves', 'abilities', 'items']) {
       esMap[k] = new Map(data[k].map(([es, en]) => [en.toLowerCase(), es]));
     }
+    data.moves.forEach(([es, en, type]) => {
+      if (type) { moveTypes[es.toLowerCase()] = type; moveTypes[en.toLowerCase()] = type; }
+    });
+    if (viewing) renderPopup(); // por si el detalle ya estaba abierto
     const fill = (id, rows) => {
       let dl = document.getElementById(id);
       if (!dl) { dl = document.createElement('datalist'); dl.id = id; document.body.appendChild(dl); }

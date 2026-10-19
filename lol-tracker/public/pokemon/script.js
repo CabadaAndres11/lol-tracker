@@ -440,15 +440,49 @@ async function loadAll() {
   }
 }
 
+// PIN por participante (se recuerda en este navegador tras acertarlo).
+const PIN_KEY = 'pokemon-pins-v1';
+function getPin(id) {
+  try { return JSON.parse(localStorage.getItem(PIN_KEY) || '{}')[id] || ''; } catch { return ''; }
+}
+function setPin(id, pin) {
+  try {
+    const o = JSON.parse(localStorage.getItem(PIN_KEY) || '{}');
+    if (pin) o[id] = pin; else delete o[id];
+    localStorage.setItem(PIN_KEY, JSON.stringify(o));
+  } catch { /* sin almacenamiento: se pedirá cada vez */ }
+}
+
+// PUT que pide el PIN del participante si el servidor lo exige.
+async function putWithPin(id, url, payload) {
+  const player = players.find((p) => idOf(p) === id);
+  let pin = getPin(id);
+  for (let attempt = 0; attempt < 4; attempt++) {
+    const res = await fetch(url, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', ...(pin ? { 'X-Pin': pin } : {}) },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (res.status === 401 && data.needPin) {
+      setPin(id, '');
+      const asked = prompt(
+        attempt ? `PIN incorrecto. Prueba otra vez (PIN de ${player.name}):` : `Introduce el PIN de ${player.name} (4 dígitos) para modificar sus datos:`
+      );
+      if (asked == null) throw Object.assign(new Error('Cancelado: hace falta el PIN.'), { cancelled: true });
+      pin = asked.trim();
+      continue;
+    }
+    if (!res.ok) throw new Error(data.error || 'Error desconocido');
+    if (pin) setPin(id, pin);
+    return data;
+  }
+  throw new Error('Demasiados intentos con PIN incorrecto.');
+}
+
 async function saveTeam(id, team) {
   const player = players.find((p) => idOf(p) === id);
-  const res = await fetch('/api/pokemon-team', {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ player: player.name, team }),
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || 'Error desconocido');
+  const data = await putWithPin(id, '/api/pokemon-team', { player: player.name, team });
   teams[id] = data.team;
 }
 
@@ -460,16 +494,10 @@ function saveBadges(id, mask) {
   const player = players.find((p) => idOf(p) === id);
   badgeQueue = badgeQueue
     .then(async () => {
-      const res = await fetch('/api/pokemon-badges', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ player: player.name, mask }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Error desconocido');
+      await putWithPin(id, '/api/pokemon-badges', { player: player.name, mask });
     })
     .catch(async (err) => {
-      alert(err.message);
+      if (!err.cancelled) alert(err.message);
       editing = null;
       await loadAll(); // volvemos a lo que dice el servidor
     });
@@ -530,7 +558,7 @@ async function onAction(e) {
     try {
       await saveTeam(id, teams[id].filter((_, i) => i !== index));
     } catch (err) {
-      alert(err.message);
+      if (!err.cancelled) alert(err.message);
     }
     closePopup();
     render();
@@ -692,7 +720,7 @@ importInput.addEventListener('change', async () => {
   try {
     await saveTeam(id, used);
   } catch (err) {
-    return alert(err.message);
+    return err.cancelled ? undefined : alert(err.message);
   }
   render();
 });

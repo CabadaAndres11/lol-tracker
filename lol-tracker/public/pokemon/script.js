@@ -1004,27 +1004,56 @@ function roundStatus(rd) {
 let ligaView = 'liga';  // 'liga' | 'bracket'
 let paneAnim = '';      // dirección de la animación al cambiar de vista
 
+const BK_QUARTERS = [['q1', 1, 8], ['q2', 4, 5], ['q3', 2, 7], ['q4', 3, 6]];
+
+function playedCount() {
+  return schedule.reduce((n, r) => n + roundStatus(r).done, 0);
+}
+
+// Calcula los cruces: quién juega cada uno y quién ha ganado (si el ganador guardado sigue siendo válido).
+function bracketModel(standings, played) {
+  const seed = (n) => (played > 0 && standings[n - 1] ? standings[n - 1].name : null);
+  const tie = (id, title, a, b, seedA, seedB) => {
+    const w = leagueResults['bk:' + id];
+    const winner = a && b && w ? (w === lcName(a) ? a : w === lcName(b) ? b : null) : null;
+    return { id, title, a, b, seedA, seedB, winner };
+  };
+  const q = BK_QUARTERS.map(([id, x, y], i) => tie(id, `Cuartos ${i + 1}`, seed(x), seed(y), x, y));
+  const s1 = tie('s1', 'Semifinal 1', q[0].winner, q[1].winner);
+  const s2 = tie('s2', 'Semifinal 2', q[2].winner, q[3].winner);
+  const f = tie('f', 'Final', s1.winner, s2.winner);
+  return { ties: [...q, s1, s2, f], q, semis: [s1, s2], final: f };
+}
+
 function bracketHtml(standings, played, totalMatches) {
-  const seeds = standings.slice(0, QUALIFY);
+  const model = bracketModel(standings, played);
 
-  const slot = (n) =>
-    played > 0 && seeds[n - 1]
-      ? `<div class="bk-slot"><span class="bk-seed">${n}º</span>${avatarHtml(seeds[n - 1].name, 'row-avatar')}<span class="bk-name">${escapeHtml(seeds[n - 1].name)}</span></div>`
-      : `<div class="bk-slot bk-tbd"><span class="bk-seed">${n}º</span><span class="bk-name">Puesto ${n} de la Liga</span></div>`;
-  const wait = (text) => `<div class="bk-slot bk-tbd"><span class="bk-seed">?</span><span class="bk-name">${text}</span></div>`;
+  const label = (t, side) => {
+    const prev = { s1: ['Ganador cuartos 1', 'Ganador cuartos 2'], s2: ['Ganador cuartos 3', 'Ganador cuartos 4'], f: ['Ganador semifinal 1', 'Ganador semifinal 2'] }[t.id];
+    return prev ? prev[side] : `Puesto ${side ? t.seedB : t.seedA} de la Liga`;
+  };
 
-  const card = (title, a, b) => `
-    <article class="bk-match">
-      <div class="bk-title">${title}<span>Mejor de 3</span></div>
-      ${a}<div class="bk-vs">VS</div>${b}
+  const slot = (t, side) => {
+    const name = side ? t.b : t.a;
+    const seed = t.seedA ? `${side ? t.seedB : t.seedA}º` : '?';
+    if (!name) return `<div class="bk-slot bk-tbd"><span class="bk-seed">${seed}</span><span class="bk-name">${label(t, side)}</span></div>`;
+    const ready = t.a && t.b;
+    const state = !t.winner ? 'none' : t.winner === name ? 'win' : 'lose';
+    const inner = `<span class="bk-seed">${seed}</span>${avatarHtml(name, 'row-avatar')}<span class="bk-name">${escapeHtml(name)}</span>${state === 'win' ? '<span class="bk-badge" title="Avanza de ronda">✔</span>' : ''}`;
+    return ready
+      ? `<button type="button" class="bk-slot bk-pick is-${state}" data-bk="${t.id}" data-name="${encodeURIComponent(name)}" aria-pressed="${state === 'win'}" title="${state === 'win' ? 'Clic para deshacer' : 'Clic para que avance'}">${inner}</button>`
+      : `<div class="bk-slot">${inner}</div>`;
+  };
+
+  const card = (t) => `
+    <article class="bk-match${t.winner ? ' is-played' : ''}">
+      <div class="bk-title">${t.title}<span>Mejor de 3</span></div>
+      ${slot(t, 0)}<div class="bk-vs">VS</div>${slot(t, 1)}
     </article>`;
 
-  const quarters = [[1, 8], [4, 5], [2, 7], [3, 6]].map(([a, b], i) => card(`Cuartos ${i + 1}`, slot(a), slot(b))).join('');
-  const semis = [
-    card('Semifinal 1', wait('Ganador cuartos 1'), wait('Ganador cuartos 2')),
-    card('Semifinal 2', wait('Ganador cuartos 3'), wait('Ganador cuartos 4')),
-  ].join('');
-  const final = card('Final', wait('Ganador semifinal 1'), wait('Ganador semifinal 2'));
+  const champion = model.final.winner
+    ? `<div class="bk-champion">🏆 Campeón del torneo: <strong>${avatarHtml(model.final.winner, 'row-avatar')}${escapeHtml(model.final.winner)}</strong></div>`
+    : '';
 
   const note =
     played === 0
@@ -1038,11 +1067,12 @@ function bracketHtml(standings, played, totalMatches) {
       <span><strong>Bracket eliminatorio</strong> · los ${QUALIFY} primeros de la Liga</span>
       <span class="liga-rule">Todos los cruces al mejor de 3</span>
     </div>
-    <p class="liga-hint">${note}</p>
+    <p class="liga-hint">${note} Haz clic en un participante para que avance de ronda (otro clic lo deshace).</p>
+    ${champion}
     <div class="bracket">
-      <section class="bk-round"><h3>Cuartos de final</h3><div class="bk-cards">${quarters}</div></section>
-      <section class="bk-round"><h3>Semifinales</h3><div class="bk-cards">${semis}</div></section>
-      <section class="bk-round"><h3>Final</h3><div class="bk-cards">${final}</div></section>
+      <section class="bk-round"><h3>Cuartos de final</h3><div class="bk-cards">${model.q.map(card).join('')}</div></section>
+      <section class="bk-round"><h3>Semifinales</h3><div class="bk-cards">${model.semis.map(card).join('')}</div></section>
+      <section class="bk-round"><h3>Final</h3><div class="bk-cards">${card(model.final)}</div></section>
     </div>`;
 }
 
@@ -1199,6 +1229,49 @@ function setResult(a, b, key, winnerName) {
     });
 }
 
+async function sendBracket(id, winner) {
+  const res = await fetch('/api/pokemon-league', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', 'X-Admin-Key': getAdminKey() },
+    body: JSON.stringify({ bracket: id, winner }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.error || 'Error desconocido');
+    err.needKey = res.status === 401;
+    throw err;
+  }
+}
+
+function setBracketWinner(id, name) {
+  if (leagueProtected && !getAdminKey()) {
+    const k = window.prompt('Solo el administrador puede marcar resultados. Introduce la clave:');
+    if (!k) return;
+    setAdminKey(k.trim());
+  }
+  const changes = [[id, name]];
+  if (name == null) delete leagueResults['bk:' + id];
+  else leagueResults['bk:' + id] = lcName(name);
+
+  // Si cambia un ganador, las rondas siguientes que dependían de él se limpian.
+  const model = bracketModel(computeStandings(), playedCount());
+  model.ties.forEach((t) => {
+    if (leagueResults['bk:' + t.id] && !t.winner) {
+      delete leagueResults['bk:' + t.id];
+      changes.push([t.id, null]);
+    }
+  });
+
+  renderLeague();
+  leagueQueue = leagueQueue
+    .then(async () => { for (const [cid, w] of changes) await sendBracket(cid, w); })
+    .catch(async (err) => {
+      if (err.needKey) setAdminKey('');
+      alert(err.message);
+      await loadLeague();
+    });
+}
+
 function setLigaView(view) {
   if (view === ligaView) return;
   paneAnim = view === 'bracket' ? 'left' : 'right';
@@ -1222,6 +1295,14 @@ ligaRoot.addEventListener('touchend', (e) => {
 });
 
 document.getElementById('liga-root').addEventListener('click', (e) => {
+  const bk = e.target.closest('[data-bk]');
+  if (bk) {
+    const name = decodeURIComponent(bk.dataset.name);
+    const current = leagueResults['bk:' + bk.dataset.bk];
+    setBracketWinner(bk.dataset.bk, current === lcName(name) ? null : name);
+    return;
+  }
+
   const viewBtn = e.target.closest('[data-view]');
   if (viewBtn) {
     setLigaView(viewBtn.dataset.view);

@@ -280,9 +280,21 @@ function currentPlayer() {
   return players.find((p) => idOf(p) === currentId) || players[0] || null;
 }
 
+// Avatares fijos: public/pokemon/avatars/<nombre>.png (minúsculas, sin tildes ni espacios).
+function avatarSlug(name) {
+  return String(name).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+}
+
+// Si falta la imagen, se muestra un círculo con la inicial.
+function avatarHtml(name, cls) {
+  const initial = escapeHtml(String(name).trim().charAt(0).toUpperCase() || '?');
+  const onerror = `this.replaceWith(Object.assign(document.createElement('span'),{className:'${cls} avatar-fallback',textContent:'${initial}'}))`;
+  return `<img class="${cls}" src="/pokemon/avatars/${avatarSlug(name)}.png" alt="" loading="lazy" draggable="false" onerror="${onerror}">`;
+}
+
 function nameSize(name) {
   const n = name.length;
-  return n <= 7 ? '2.1rem' : n <= 11 ? '1.6rem' : n <= 16 ? '1.25rem' : '1rem';
+  return n <= 7 ? '1.5rem' : n <= 11 ? '1.2rem' : n <= 16 ? '1rem' : '0.85rem';
 }
 
 function circleHtml(player) {
@@ -305,6 +317,7 @@ function circleHtml(player) {
   return `
     <div class="circle">
       <div class="circle-name">
+        ${avatarHtml(player.name, 'circle-avatar')}
         <span class="circle-title" style="font-size:${nameSize(player.name)}">${escapeHtml(player.name)}${hasBadge(mask, LEAGUE) ? ' <span class="crown" title="Campeón de la Liga">🏆</span>' : ''}</span>
         <span class="circle-sub">${team.length}/${MAX_TEAM} Pokémon</span>
       </div>
@@ -936,6 +949,7 @@ function sideHtml(name, other, key, state) {
     <button type="button" class="duel-side is-${state}" data-pick="${encodeURIComponent(name)}"
       data-a="${encodeURIComponent(name)}" data-b="${encodeURIComponent(other)}" data-key="${escapeHtml(key)}"
       aria-pressed="${state === 'win'}" title="${state === 'win' ? 'Clic para deshacer' : 'Clic para marcar como ganador'}">
+      ${avatarHtml(name, 'duel-avatar')}
       <span class="duel-name">${escapeHtml(name)}</span>
       <span class="duel-team">${teamThumbs(name)}</span>
       <span class="duel-tag">${label}</span>
@@ -985,7 +999,7 @@ function renderLeague() {
       const cut = played > 0 && i === QUALIFY - 1;
       return `<tr class="${qualifies ? 'q' : ''}${cut ? ' q-cut' : ''}">
         <td class="c-pos">${i + 1}</td>
-        <td class="c-name">${escapeHtml(row.name)}</td>
+        <td class="c-name">${avatarHtml(row.name, 'row-avatar')}${escapeHtml(row.name)}</td>
         <td>${row.pj}</td><td>${row.v}</td><td>${row.d}</td>
         <td class="c-pts">${row.pts}</td>
       </tr>`;

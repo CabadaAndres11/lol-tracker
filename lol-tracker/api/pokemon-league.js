@@ -15,6 +15,8 @@ const PLAYERS = [
   'Helbramn', 'Steven', 'AitoRLG', 'Dashlight', 'Beldiño', 'Leviathan',
 ];
 
+const BRACKET_IDS = ['q1', 'q2', 'q3', 'q4', 's1', 's2', 'f'];
+
 const lc = (s) => String(s ?? '').replace(/\s+/g, ' ').trim().toLowerCase();
 const matchKey = (a, b) => [lc(a), lc(b)].sort().join('|');
 
@@ -52,9 +54,32 @@ module.exports = async function handler(req, res) {
       }
 
       const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : req.body || {};
+      const known = PLAYERS.map(lc);
+
+      // Ganador de un cruce del bracket (cuartos q1-q4, semifinales s1-s2, final f).
+      if (body.bracket != null) {
+        const id = String(body.bracket);
+        if (!BRACKET_IDS.includes(id)) {
+          res.status(400).json({ error: 'Cruce no válido.' });
+          return;
+        }
+        if (body.winner == null) {
+          await redis(cfg, ['HDEL', LEAGUE_KEY, `bk:${id}`]);
+          res.status(200).json({ bracket: id, winner: null });
+          return;
+        }
+        const w = lc(body.winner);
+        if (!known.includes(w)) {
+          res.status(400).json({ error: 'Participante no válido.' });
+          return;
+        }
+        await redis(cfg, ['HSET', LEAGUE_KEY, `bk:${id}`, w]);
+        res.status(200).json({ bracket: id, winner: w });
+        return;
+      }
+
       const a = lc(body.a);
       const b = lc(body.b);
-      const known = PLAYERS.map(lc);
 
       if (!known.includes(a) || !known.includes(b) || a === b) {
         res.status(400).json({ error: 'Combate no válido.' });

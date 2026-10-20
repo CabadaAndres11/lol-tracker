@@ -56,6 +56,25 @@ module.exports = async function handler(req, res) {
       const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : req.body || {};
       const known = PLAYERS.map(lc);
 
+      // Reiniciar: 'league' borra todos los resultados (liga y bracket); 'bracket' solo el bracket.
+      // Solo se permite si hay clave de administrador configurada (adminOk ya la ha comprobado).
+      if (body.reset != null) {
+        if (!process.env.LEAGUE_ADMIN_KEY) {
+          res.status(403).json({ error: 'Para reiniciar hay que configurar LEAGUE_ADMIN_KEY en Vercel.' });
+          return;
+        }
+        if (body.reset === 'league') {
+          await redis(cfg, ['DEL', LEAGUE_KEY]);
+        } else if (body.reset === 'bracket') {
+          await redis(cfg, ['HDEL', LEAGUE_KEY, ...BRACKET_IDS.map((id) => `bk:${id}`)]);
+        } else {
+          res.status(400).json({ error: 'Reinicio no válido.' });
+          return;
+        }
+        res.status(200).json({ reset: body.reset });
+        return;
+      }
+
       // Ganador de un cruce del bracket (cuartos q1-q4, semifinales s1-s2, final f).
       if (body.bracket != null) {
         const id = String(body.bracket);

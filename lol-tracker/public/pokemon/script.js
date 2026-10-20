@@ -111,6 +111,20 @@ const FORM_MIN_ID = 10000; // en PokéAPI las formas alternativas tienen id >= 1
 const ARTWORK_URL = (id) =>
   `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
 
+const SHINY_URL = (id) =>
+  `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/shiny/${id}.png`;
+
+// Naturalezas: [español, inglés, sube, baja]  (stats: ATQ, DEF, ATQ.ESP, DEF.ESP, VEL)
+const NATURES = [
+  ['Fuerte', 'Hardy'], ['Huraña', 'Lonely', 'ATQ', 'DEF'], ['Audaz', 'Brave', 'ATQ', 'VEL'], ['Firme', 'Adamant', 'ATQ', 'ATQ.ESP'], ['Pícara', 'Naughty', 'ATQ', 'DEF.ESP'],
+  ['Osada', 'Bold', 'DEF', 'ATQ'], ['Dócil', 'Docile'], ['Plácida', 'Relaxed', 'DEF', 'VEL'], ['Agitada', 'Impish', 'DEF', 'ATQ.ESP'], ['Floja', 'Lax', 'DEF', 'DEF.ESP'],
+  ['Miedosa', 'Timid', 'VEL', 'ATQ'], ['Activa', 'Hasty', 'VEL', 'DEF'], ['Seria', 'Serious'], ['Alegre', 'Jolly', 'VEL', 'ATQ.ESP'], ['Ingenua', 'Naive', 'VEL', 'DEF.ESP'],
+  ['Modesta', 'Modest', 'ATQ.ESP', 'ATQ'], ['Afable', 'Mild', 'ATQ.ESP', 'DEF'], ['Mansa', 'Quiet', 'ATQ.ESP', 'VEL'], ['Tímida', 'Bashful'], ['Alocada', 'Rash', 'ATQ.ESP', 'DEF.ESP'],
+  ['Serena', 'Calm', 'DEF.ESP', 'ATQ'], ['Amable', 'Gentle', 'DEF.ESP', 'DEF'], ['Grosera', 'Sassy', 'DEF.ESP', 'VEL'], ['Cauta', 'Careful', 'DEF.ESP', 'ATQ.ESP'], ['Rara', 'Quirky'],
+];
+const natureText = (n) => (n[2] ? `${n[0]} (+${n[2]} −${n[3]})` : `${n[0]} (neutra)`);
+const natureByName = (name) => NATURES.find((n) => n[0] === name || n[1].toLowerCase() === String(name).toLowerCase());
+
 let dexByName = {};   // 'mr mime' | 'alolan raichu' | 'raichu alola' -> { id, name, baseId }
 let dexById = {};     // id -> { id, name, baseId }
 
@@ -213,11 +227,13 @@ function monImage(mon, cls = 'mon-img') {
   const id = mon.dexId || dexLookup(mon.species)?.id;
   if (!id) return `<div class="${cls} ${cls}-empty">?</div>`;
 
-  // Si una forma no tiene dibujo propio, probamos con el de su especie base.
+  // Orden de intentos: shiny (si toca) -> dibujo normal -> dibujo de la especie base.
   const fb = dexById[id]?.baseId;
-  const fbAttr = fb ? ` data-fb="${ARTWORK_URL(fb)}"` : '';
-  const onerror = `if(this.dataset.fb){this.src=this.dataset.fb;delete this.dataset.fb}else{this.replaceWith(Object.assign(document.createElement('div'),{className:'${cls} ${cls}-empty',textContent:'?'}))}`;
-  return `<img class="${cls}" src="${ARTWORK_URL(id)}"${fbAttr} alt="${escapeHtml(mon.species)}" loading="lazy" onerror="${onerror}">`;
+  const urls = [mon.shiny ? SHINY_URL(id) : null, ARTWORK_URL(id), fb ? ARTWORK_URL(fb) : null].filter(Boolean);
+  const [first, ...rest] = urls;
+  const fbAttr = rest.length ? ` data-fb="${rest.join('|')}"` : '';
+  const onerror = `var q=(this.dataset.fb||'').split('|').filter(Boolean);if(q.length){this.src=q.shift();this.dataset.fb=q.join('|')}else{this.replaceWith(Object.assign(document.createElement('div'),{className:'${cls} ${cls}-empty',textContent:'?'}))}`;
+  return `<img class="${cls}${mon.shiny ? ' is-shiny' : ''}" src="${first}"${fbAttr} alt="${escapeHtml(mon.species)}" loading="lazy" onerror="${onerror}">`;
 }
 
 function escapeHtml(str) {
@@ -253,10 +269,11 @@ function monDetail(mon, index, id) {
   return `
     <div class="mon-detail">
       ${monImage(mon, 'detail-img')}
-      <h2>${escapeHtml(mon.species)}</h2>
+      <h2>${escapeHtml(mon.species)}${mon.shiny ? ' <span class="shiny-star" title="Shiny">✨</span>' : ''}</h2>
       ${mon.nickname ? `<div class="mon-nick">“${escapeHtml(mon.nickname)}”</div>` : ''}
       <div class="detail-rows">
         <div class="mon-ability"><span>Habilidad</span> ${escapeHtml(mon.ability)}</div>
+        ${mon.nature ? `<div class="mon-ability"><span>Naturaleza</span> ${escapeHtml(natureByName(mon.nature) ? natureText(natureByName(mon.nature)) : mon.nature)}</div>` : ''}
         ${mon.item ? `<div class="mon-ability"><span>Objeto</span> ${escapeHtml(mon.item)}</div>` : ''}
       </div>
       <ul class="mon-moves">${moves}</ul>
@@ -283,6 +300,13 @@ function monForm(id, index) {
         <label>Mote<input name="nickname" type="text" maxlength="30" value="${v(mon?.nickname)}" /></label>
         <label>Habilidad *<input name="ability" type="text" maxlength="30" required list="es-abilities" autocomplete="off" value="${v(mon?.ability)}" /></label>
         <label>Objeto equipado<input name="item" type="text" maxlength="30" list="es-items" autocomplete="off" value="${v(mon?.item)}" /></label>
+        <label>Naturaleza
+          <select name="nature">
+            <option value="">— Sin indicar —</option>
+            ${NATURES.map((n) => `<option value="${n[0]}"${mon?.nature === n[0] ? ' selected' : ''}>${natureText(n)}</option>`).join('')}
+          </select>
+        </label>
+        <label class="check-label"><input type="checkbox" name="shiny"${mon?.shiny ? ' checked' : ''} /> ✨ Shiny</label>
       </div>
       <div class="mon-form-label">Movimientos (1 a 4)</div>
       <div class="mon-form-moves">${moveInputs}</div>
@@ -623,6 +647,8 @@ monModal.addEventListener('submit', async (e) => {
     nickname: fd.get('nickname'),
     ability: fd.get('ability'),
     item: fd.get('item'),
+    nature: fd.get('nature') || '',
+    shiny: fd.get('shiny') === 'on',
     moves: [0, 1, 2, 3].map((i) => fd.get(`move${i}`)),
   };
 
@@ -711,9 +737,13 @@ function parseTeamText(text) {
     if (m) { nickname = m[1].trim(); species = m[2].trim(); }
 
     let ability = '';
+    let nature = '';
+    let shiny = false;
     const moves = [];
     for (const l of lines.slice(1)) {
       if (/^ability:/i.test(l)) ability = l.replace(/^ability:/i, '').trim();
+      else if (/^shiny:\s*yes/i.test(l)) shiny = true;
+      else if (/^[A-Za-z]+\s+nature$/i.test(l)) nature = natureByName(l.replace(/\s+nature$/i, ''))?.[0] || '';
       else if (/^-\s*\S/.test(l)) moves.push(l.replace(/^-\s*/, '').trim());
     }
 
@@ -724,6 +754,8 @@ function parseTeamText(text) {
       nickname: nickname && nickname.toLowerCase() !== species.toLowerCase() ? clean(nickname) : '',
       ability: ability ? toEs('abilities', ability) : '',
       item: item ? toEs('items', item) : '',
+      nature,
+      shiny,
       moves: [0, 1, 2, 3].map((i) => (moves[i] ? toEs('moves', moves[i]) : '')),
     };
     if (!mon.species || !mon.ability || !mon.moves[0]) { skipped.push(nickname || species || '(sin nombre)'); continue; }

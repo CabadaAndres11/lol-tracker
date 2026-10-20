@@ -1603,3 +1603,5 @@ button.bk-slot:focus-visible { outline: 2px solid var(--neon-cyan); outline-offs
 }
 .bk-champion strong { color: var(--text); margin-left: 0.4rem; }
 .bk-champion .row-avatar { margin: 0 0.5rem 0 0; }
+
+.reset-row { text-align: center; margin: 2rem 0 0.5rem; }

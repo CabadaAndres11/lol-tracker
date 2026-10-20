@@ -7,6 +7,11 @@ const PLAYERS_KEY = 'pokemon:players';
 const TEAMS_KEY = 'pokemon:teams';
 const MAX_TEAM = 6;
 const MAX_FIELD = 30;
+const NATURES = [
+  'Fuerte', 'Huraña', 'Audaz', 'Firme', 'Pícara', 'Osada', 'Dócil', 'Plácida', 'Agitada', 'Floja',
+  'Miedosa', 'Activa', 'Seria', 'Alegre', 'Ingenua', 'Modesta', 'Afable', 'Mansa', 'Tímida', 'Alocada',
+  'Serena', 'Amable', 'Grosera', 'Cauta', 'Rara',
+];
 
 function redisConfig() {
   const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
@@ -55,7 +60,13 @@ function validateTeam(team) {
     // Número de la Pokédex (opcional): lo usa la web para mostrar la imagen.
     const dexId = Number.isInteger(mon?.dexId) && mon.dexId > 0 && mon.dexId < 20000 ? mon.dexId : undefined;
 
+    // Naturaleza (opcional, de la lista) y shiny (opcional).
+    const nature = clean(mon?.nature);
+    if (nature && !NATURES.includes(nature)) throw new Error(`Pokémon ${n}: naturaleza no válida.`);
+
     const out = { species, nickname, ability, item, moves };
+    if (nature) out.nature = nature;
+    if (mon?.shiny === true) out.shiny = true;
     if (dexId) out.dexId = dexId;
     return out;
   });

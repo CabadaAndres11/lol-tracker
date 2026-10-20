@@ -1605,3 +1605,18 @@ button.bk-slot:focus-visible { outline: 2px solid var(--neon-cyan); outline-offs
 .bk-champion .row-avatar { margin: 0 0.5rem 0 0; }
 
 .reset-row { text-align: center; margin: 2rem 0 0.5rem; }
+
+/* Naturaleza y shiny */
+.mon-form select {
+  width: 100%;
+  font: inherit;
+  padding: 0.55rem 0.6rem;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.mon-form select:focus { outline: none; border-color: var(--neon-cyan); }
+.mon-form .check-label { flex-direction: row; align-items: center; gap: 0.5rem; align-self: end; padding-bottom: 0.5rem; cursor: pointer; }
+.mon-form .check-label input { width: auto; }
+.shiny-star { font-size: 0.8em; filter: drop-shadow(0 0 6px rgba(255, 220, 120, 0.8)); }

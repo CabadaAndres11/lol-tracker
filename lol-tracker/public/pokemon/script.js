@@ -1073,7 +1073,8 @@ function bracketHtml(standings, played, totalMatches) {
       <section class="bk-round"><h3>Cuartos de final</h3><div class="bk-cards">${model.q.map(card).join('')}</div></section>
       <section class="bk-round"><h3>Semifinales</h3><div class="bk-cards">${model.semis.map(card).join('')}</div></section>
       <section class="bk-round"><h3>Final</h3><div class="bk-cards">${card(model.final)}</div></section>
-    </div>`;
+    </div>
+    <div class="reset-row"><button type="button" class="link-btn link-danger" data-reset="bracket">Reiniciar bracket</button></div>`;
 }
 
 function renderLeague() {
@@ -1148,7 +1149,8 @@ function renderLeague() {
     </div>
     <p class="liga-hint">Haz clic en un participante para marcarlo como ganador. Vuelve a pulsarlo para deshacerlo.</p>
 
-    <div class="duels">${rd.matches.map(duelHtml).join('')}</div>`;
+    <div class="duels">${rd.matches.map(duelHtml).join('')}</div>
+    <div class="reset-row"><button type="button" class="link-btn link-danger" data-reset="league">Reiniciar liga y bracket</button></div>`;
 
   const anim = paneAnim ? ` slide-${paneAnim}` : '';
   paneAnim = '';
@@ -1272,6 +1274,38 @@ function setBracketWinner(id, name) {
     });
 }
 
+async function resetLeague(scope) {
+  if (!leagueProtected) {
+    alert('Para poder reiniciar hay que proteger la Liga con una clave de administrador.\n\nEn Vercel: Settings → Environment Variables → crea LEAGUE_ADMIN_KEY con la clave que quieras y vuelve a desplegar.');
+    return;
+  }
+  const what = scope === 'league' ? 'TODOS los resultados de la Liga y del bracket' : 'todos los resultados del bracket';
+  if (!confirm(`¿Seguro que quieres borrar ${what}? Esta acción no se puede deshacer.`)) return;
+  if (!getAdminKey()) {
+    const k = window.prompt('Introduce la clave de administrador:');
+    if (!k) return;
+    setAdminKey(k.trim());
+  }
+  try {
+    const res = await fetch('/api/pokemon-league', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'X-Admin-Key': getAdminKey() },
+      body: JSON.stringify({ reset: scope }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      if (res.status === 401) setAdminKey('');
+      throw new Error(data.error || 'Error desconocido');
+    }
+    if (scope === 'league') leagueResults = {};
+    else Object.keys(leagueResults).filter((k) => k.startsWith('bk:')).forEach((k) => delete leagueResults[k]);
+    roundChosen = false;
+    renderLeague();
+  } catch (err) {
+    alert(err.message);
+  }
+}
+
 function setLigaView(view) {
   if (view === ligaView) return;
   paneAnim = view === 'bracket' ? 'left' : 'right';
@@ -1295,6 +1329,12 @@ ligaRoot.addEventListener('touchend', (e) => {
 });
 
 document.getElementById('liga-root').addEventListener('click', (e) => {
+  const reset = e.target.closest('[data-reset]');
+  if (reset) {
+    resetLeague(reset.dataset.reset);
+    return;
+  }
+
   const bk = e.target.closest('[data-bk]');
   if (bk) {
     const name = decodeURIComponent(bk.dataset.name);

@@ -223,6 +223,38 @@ async function loadDex() {
   }
 }
 
+// ---------------------------------------------------------------
+// Pokémon no permitidos para la entrega
+// ---------------------------------------------------------------
+
+const NOGUARD = [['No Guard', 'Indefenso']];                 // solo prohibido junto a un movimiento OHKO
+const BANNED_ABILITIES = [['Wonder Guard', 'Superguarda']];
+const BANNED_MOVES = [['Fissure', 'Fisura'], ['Guillotine', 'Guillotina'], ['Horn Drill', 'Perforador'], ['Sheer Cold', 'Frío Polar']];
+const BANNED_SPECIES = ['slaking'];
+
+const normText = (x) => String(x || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase();
+const bannedSet = (pairs) => new Set(pairs.flat().map(normText));
+const BAN_ABILITY_SET = bannedSet(BANNED_ABILITIES);
+const NOGUARD_SET = bannedSet(NOGUARD);
+const BAN_MOVE_SET = bannedSet(BANNED_MOVES);
+
+// Devuelve la lista de motivos por los que un Pokémon no vale (vacía si es válido).
+function banReasons(mon) {
+  const reasons = [];
+  if (BANNED_SPECIES.includes(normText(mon.species))) reasons.push('Slaking no está permitido');
+  if (BAN_ABILITY_SET.has(normText(mon.ability))) reasons.push(`la habilidad ${mon.ability} no está permitida`);
+  // Indefenso + movimiento OHKO: solo es ilegal la combinación (cada cosa por separado vale).
+  if (NOGUARD_SET.has(normText(mon.ability))) {
+    (mon.moves || []).filter(Boolean).forEach((m) => {
+      if (BAN_MOVE_SET.has(normText(m))) reasons.push(`Indefenso junto al movimiento OHKO ${m} no está permitido`);
+    });
+  }
+  return reasons;
+}
+
+const banAlert = (reasons) =>
+  `<div class="ban-alert" role="alert">⚠ Pokémon no permitido para la entrega: ${reasons.map(escapeHtml).join('; ')}.</div>`;
+
 function monImage(mon, cls = 'mon-img') {
   const id = mon.dexId || dexLookup(mon.species)?.id;
   if (!id) return `<div class="${cls} ${cls}-empty">?</div>`;
@@ -267,7 +299,8 @@ function moveLi(name) {
 function monDetail(mon, index, id) {
   const moves = mon.moves.filter(Boolean).map(moveLi).join('');
   return `
-    <div class="mon-detail">
+    <div class="mon-detail${banReasons(mon).length ? ' is-banned' : ''}">
+      ${banReasons(mon).length ? banAlert(banReasons(mon)) : ''}
       ${monImage(mon, 'detail-img')}
       <h2>${escapeHtml(mon.species)}${mon.shiny ? ' <span class="shiny-star" title="Shiny">✨</span>' : ''}</h2>
       ${mon.nickname ? `<div class="mon-nick">“${escapeHtml(mon.nickname)}”</div>` : ''}
@@ -310,6 +343,7 @@ function monForm(id, index) {
       </div>
       <div class="mon-form-label">Movimientos (1 a 4)</div>
       <div class="mon-form-moves">${moveInputs}</div>
+      <div class="form-ban" data-ban></div>
       <p class="form-error" role="alert">${escapeHtml(teamError)}</p>
       <div class="mon-form-actions">
         <button type="submit" class="add-btn small">Guardar</button>
@@ -352,8 +386,8 @@ function circleHtml(player) {
     const mon = team[i];
     const angle = `style="--a:${i * 60}deg"`;
     if (mon) {
-      const title = `${mon.species}${mon.nickname ? ` “${mon.nickname}”` : ''}`;
-      return `<button type="button" class="mini" ${angle} data-action="open-mon" data-id="${encodeURIComponent(id)}" data-index="${i}" title="${escapeHtml(title)}" aria-label="${escapeHtml(title)}">
+      const title = `${mon.species}${mon.nickname ? ` “${mon.nickname}”` : ''}${banReasons(mon).length ? ' — ⚠ NO PERMITIDO' : ''}`;
+      return `<button type="button" class="mini${banReasons(mon).length ? ' is-banned' : ''}" ${angle} data-action="open-mon" data-id="${encodeURIComponent(id)}" data-index="${i}" title="${escapeHtml(title)}" aria-label="${escapeHtml(title)}">
         <span class="mini-face">${monImage(mon, 'mini-img')}</span></button>`;
     }
     return `<button type="button" class="mini mini-empty" ${angle} data-action="add-mon" data-id="${encodeURIComponent(id)}" title="Añadir Pokémon" aria-label="Añadir Pokémon">
@@ -406,6 +440,8 @@ function renderPopup() {
   if (editing) {
     monBody.innerHTML = `<h2 class="popup-title">${editing.index >= 0 ? 'Editar Pokémon' : 'Añadir Pokémon'}</h2>${monForm(editing.id, editing.index)}`;
     monModal.hidden = false;
+    const formEl = monBody.querySelector('.mon-form');
+    if (formEl) updateFormBan(formEl);
     monBody.querySelector('input')?.focus();
   } else {
     const mon = teams[viewing.id]?.[viewing.index];
@@ -631,6 +667,26 @@ monModal.addEventListener('click', (e) => {
 });
 document.getElementById('close-mon').addEventListener('click', closePopup);
 
+// Aviso en vivo en el formulario (se puede guardar igualmente).
+function updateFormBan(form) {
+  const fd = new FormData(form);
+  const reasons = banReasons({
+    species: fd.get('species'),
+    ability: fd.get('ability'),
+    moves: [0, 1, 2, 3].map((i) => fd.get(`move${i}`)),
+  });
+  const box = form.querySelector('[data-ban]');
+  if (box) box.innerHTML = reasons.length ? banAlert(reasons) : '';
+}
+monModal.addEventListener('input', (e) => {
+  const f = e.target.closest('.mon-form');
+  if (f) updateFormBan(f);
+});
+monModal.addEventListener('change', (e) => {
+  const f = e.target.closest('.mon-form');
+  if (f) updateFormBan(f);
+});
+
 monModal.addEventListener('submit', async (e) => {
   e.preventDefault();
   const f = e.target;
@@ -807,6 +863,8 @@ async function loadEsData() {
       if (type) { moveTypes[es.toLowerCase()] = type; moveTypes[en.toLowerCase()] = type; }
     });
     if (viewing) renderPopup(); // por si el detalle ya estaba abierto
+    if (!editing && !viewing && players.length) render();
+    renderLeague();
     const fill = (id, rows) => {
       let dl = document.getElementById(id);
       if (!dl) { dl = document.createElement('datalist'); dl.id = id; document.body.appendChild(dl); }
@@ -997,7 +1055,7 @@ function teamThumbs(name) {
   const team = teams[lcName(name)] || [];
   return Array.from({ length: MAX_TEAM }, (_, i) =>
     team[i]
-      ? `<span class="thumb" title="${escapeHtml(team[i].species)}">${monImage(team[i], 'liga-img')}</span>`
+      ? `<span class="thumb${banReasons(team[i]).length ? ' is-banned' : ''}" title="${escapeHtml(team[i].species)}${banReasons(team[i]).length ? ' — ⚠ NO PERMITIDO' : ''}">${monImage(team[i], 'liga-img')}</span>`
       : '<span class="thumb thumb-empty"></span>'
   ).join('');
 }

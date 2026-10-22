@@ -394,8 +394,9 @@ function circleHtml(player) {
       <span class="mini-face">+</span></button>`;
   }).join('');
 
+  const fav = favInfo(player.name);
   return `
-    <div class="circle">
+    <div class="circle${fav ? ` is-fav fav-glow-${fav.rank + 1}` : ''}">
       <div class="circle-name">
         ${avatarHtml(player.name, 'circle-avatar')}
         <span class="circle-title" style="font-size:${nameSize(player.name)}">${escapeHtml(player.name)}${hasBadge(mask, LEAGUE) ? ' <span class="crown" title="Campeón de la Liga">🏆</span>' : ''}</span>
@@ -418,7 +419,7 @@ function render() {
   const player = currentPlayer();
   currentId = idOf(player);
 
-  stage.innerHTML = circleHtml(player) + `<div class="import-row"><button type="button" class="link-btn" data-action="import-team" data-id="${encodeURIComponent(currentId)}">⬆ Importar equipo desde archivo (.txt)</button></div>` + badgesBlock(currentId) + porraBlock(currentId);
+  stage.innerHTML = circleHtml(player) + favBlock(player.name) + `<div class="import-row"><button type="button" class="link-btn" data-action="import-team" data-id="${encodeURIComponent(currentId)}">⬆ Importar equipo desde archivo (.txt)</button></div>` + badgesBlock(currentId) + porraBlock(currentId);
   updatePorraBar();
 
   const index = players.indexOf(player);
@@ -508,6 +509,11 @@ function step(dir) {
 // ---------------------------------------------------------------
 
 let porras = {};            // { idJugador: { league: [8 nombres], top3: [3 nombres] } }
+let spectators = [];        // [{ name, league, top3, at }]  (porras de gente que no participa)
+const SPEC = '__spec';        // valor del selector "Soy espectador"
+const SPEC_STORE = 'pokemon-spec-v1';
+function getSpecId() { try { return JSON.parse(localStorage.getItem(SPEC_STORE) || '{}'); } catch { return {}; } }
+function setSpecId(v) { try { localStorage.setItem(SPEC_STORE, JSON.stringify(v)); } catch { /* sin almacenamiento */ } }
 let porraClosed = false;    // se cierra al empezar el torneo
 let porraDraft = null;      // borrador que se edita en el popup
 const porraModal = document.getElementById('porra-modal');
@@ -519,13 +525,148 @@ const POOL_SIZE = 8;
 function updatePorraBar() {
   const done = players.filter((p) => porras[idOf(p)]).length;
   const el = document.getElementById('porra-count');
-  if (el) el.textContent = players.length ? `${done}/${players.length} porras hechas` : '';
+  if (el) {
+    el.textContent = players.length
+      ? `${done}/${players.length} participantes${spectators.length ? ` · ${spectators.length} espectador${spectators.length === 1 ? '' : 'es'}` : ''} con porra`
+      : '';
+  }
   const btn = document.getElementById('open-porra');
   if (btn) {
     btn.disabled = porraClosed;
     btn.textContent = porraClosed ? '🎯 Porra cerrada' : '🎯 Haz tu porra';
   }
 }
+
+// Todas las porras (participantes + espectadores) en una sola lista
+function allPorras() {
+  const fromPlayers = players
+    .filter((p) => porras[idOf(p)])
+    .map((p) => ({ kind: 'player', key: idOf(p), name: p.name, ...porras[idOf(p)] }));
+  const fromSpec = spectators.map((s) => ({ kind: 'spec', key: s.name.toLowerCase(), ...s }));
+  return [...fromPlayers, ...fromSpec];
+}
+
+// Estadísticas de la porra: quién es favorito (más veces en el top 3, luego campeón, luego clasificado)
+function porraStats() {
+  const list = allPorras();
+  const map = new Map();
+  const get = (n) => {
+    const k = avatarSlug(n);
+    if (!map.has(k)) map.set(k, { name: n, champ: 0, top3: 0, qual: 0, posSum: 0 });
+    return map.get(k);
+  };
+  list.forEach((p) => {
+    p.league.forEach((n, i) => { const s = get(n); s.qual++; s.posSum += i + 1; });
+    p.top3.forEach((n, i) => { const s = get(n); s.top3++; if (i === 0) s.champ++; });
+  });
+  const rows = [...map.values()].sort(
+    (a, b) => b.top3 - a.top3 || b.champ - a.champ || b.qual - a.qual || a.name.localeCompare(b.name, 'es')
+  );
+  return { total: list.length, rows };
+}
+
+// Puesto de favorito (0, 1 o 2) de un participante, o -1 si no está entre los 3 más repetidos
+function favInfo(name, stats = porraStats()) {
+  const k = avatarSlug(name);
+  const i = stats.rows.slice(0, 3).findIndex((r) => r.top3 > 0 && avatarSlug(r.name) === k);
+  return i === -1 ? null : { rank: i, count: stats.rows[i].top3, total: stats.total };
+}
+
+function favBlock(name) {
+  const f = favInfo(name);
+  if (!f) return '';
+  return `<div class="fav-row"><span class="fav-tag fav-${f.rank + 1}" title="Está entre los 3 más repetidos en el top 3 de las porras">⭐ Favorito del público #${f.rank + 1} · en el top 3 de ${f.count} de ${f.total} porras</span></div>`;
+}
+
+// ---------- Pestaña "Porras" ----------
+const porrasTabOpen = new Set();
+
+function renderPorrasTab() {
+  const root = document.getElementById('porras-root');
+  if (!root) return;
+  if (!players.length && !spectators.length) {
+    root.innerHTML = '<p class="roster-empty">Cargando las porras…</p>';
+    return;
+  }
+
+  const list = allPorras();
+  const stats = porraStats();
+  const nPlayers = list.filter((p) => p.kind === 'player').length;
+  const nSpec = list.length - nPlayers;
+  const pending = players.filter((p) => !porras[idOf(p)]).map((p) => p.name);
+
+  const actions = porraClosed
+    ? '<p class="porra-note">🔒 La porra está cerrada: el torneo ya ha empezado.</p>'
+    : `<div class="porras-actions">
+         <button type="button" class="add-btn small" data-action="open-porra" data-id="">🎯 Haz tu porra</button>
+         <button type="button" class="add-btn small ghost" data-action="open-porra" data-id="${SPEC}">👀 Soy espectador</button>
+       </div>`;
+
+  const maxTop = Math.max(1, ...stats.rows.map((r) => r.top3));
+  const favRows = stats.rows
+    .map(
+      (r, i) => `<tr class="${i < 3 && r.top3 > 0 ? 'fav-top' : ''}">
+        <td class="c-pos">${i + 1}</td>
+        <td class="c-name">${avatarHtml(r.name, 'row-avatar')}${escapeHtml(r.name)}${i < 3 && r.top3 > 0 ? ' <span title="Favorito">⭐</span>' : ''}</td>
+        <td>${r.champ}</td>
+        <td class="c-bar"><span class="bar"><span style="width:${Math.round((r.top3 / maxTop) * 100)}%"></span></span><b>${r.top3}</b></td>
+        <td>${r.qual}/${stats.total}</td>
+        <td>${(r.posSum / r.qual).toFixed(1)}</td>
+      </tr>`
+    )
+    .join('');
+
+  const detail = (p) => {
+    const k = `${p.kind}:${p.key}`;
+    return `<details class="porra-details" data-k="${escapeHtml(k)}"${porrasTabOpen.has(k) ? ' open' : ''}>
+      <summary>
+        <span class="porras-who">${escapeHtml(p.name)} <em class="who-tag ${p.kind}">${p.kind === 'player' ? 'Participante' : 'Espectador'}</em></span>
+        <span class="porras-podium">${p.top3.map((n, i) => `${MEDALS[i]} ${escapeHtml(n)}`).join(' · ')}</span>
+      </summary>
+      <div class="porra-body"><h4>Clasificados de la Liga</h4>
+        <ol class="porra-list porra-list-inline">${p.league.map((n) => `<li>${personRow(n)}</li>`).join('')}</ol>
+      </div>
+    </details>`;
+  };
+
+  root.innerHTML = `
+    <div class="card porras-head">
+      <h2>Porras del torneo</h2>
+      <p class="card-text"><strong>${list.length}</strong> porra${list.length === 1 ? '' : 's'} hecha${list.length === 1 ? '' : 's'} (${nPlayers} de participantes${nSpec ? `, ${nSpec} de espectadores` : ''}).
+        Cada uno predice <strong>el orden de los 8 clasificados</strong> de la Liga y <strong>su top 3</strong> del bracket. ¡Cualquiera puede participar!</p>
+      ${actions}
+    </div>
+
+    <div class="card">
+      <h2>⭐ Favoritos</h2>
+      ${
+        stats.total
+          ? `<p class="card-text">Ordenados por las veces que aparecen en el top 3 de las porras. Los 3 primeros llevan el distintivo de favorito en la ventana Participantes.</p>
+             <div class="table-scroll"><table class="liga-table porras-table">
+               <thead><tr><th class="c-pos">#</th><th class="c-name">Participante</th><th title="Veces elegido campeón">🥇</th><th title="Veces en el top 3">Top 3</th><th title="Veces entre los 8 clasificados">Clasifica</th><th title="Posición media predicha en la Liga">Pos. media</th></tr></thead>
+               <tbody>${favRows}</tbody></table></div>`
+          : '<p class="porra-empty">Todavía no hay porras. ¡Sé el primero en hacer la tuya!</p>'
+      }
+    </div>
+
+    <div class="card">
+      <h2>Todas las porras</h2>
+      ${list.length ? list.map(detail).join('') : '<p class="porra-empty">Aquí aparecerán las porras en cuanto se vayan rellenando.</p>'}
+      ${pending.length && !porraClosed ? `<p class="porra-note porra-pending-list">🕒 Aún sin porra: ${pending.map(escapeHtml).join(', ')}.</p>` : ''}
+    </div>`;
+}
+
+document.getElementById('porras-root').addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-action="open-porra"]');
+  if (!btn) return;
+  const v = btn.dataset.id ? decodeURIComponent(btn.dataset.id) : '';
+  openPorra(v || undefined);
+});
+document.getElementById('porras-root').addEventListener('toggle', (e) => {
+  const d = e.target.closest?.('.porra-details');
+  if (!d) return;
+  if (d.open) porrasTabOpen.add(d.dataset.k); else porrasTabOpen.delete(d.dataset.k);
+}, true);
 
 const personRow = (name) => `${avatarHtml(name, 'row-avatar')}<span>${escapeHtml(name)}</span>`;
 
@@ -573,19 +714,37 @@ stage.addEventListener('toggle', (e) => {
   if (d.open) porraOpenIds.add(id); else porraOpenIds.delete(id);
 }, true);
 
+// Rellena el borrador de un espectador con lo que recuerda este navegador (nombre, PIN y su porra si ya existe).
+function loadSpecDraft(d) {
+  const saved = getSpecId();
+  d.name = saved.name || '';
+  d.pin = saved.pin || '';
+  const mine = d.name && spectators.find((x) => x.name.toLowerCase() === d.name.toLowerCase());
+  d.league = mine ? [...mine.league] : [];
+  d.top3 = mine ? [...mine.top3] : [];
+  d.step = 1;
+}
+
 async function openPorra(id) {
   if (porraClosed) return alert('La porra está cerrada: el torneo ya ha empezado.');
   if (!leaguePlayers.length) await loadLeague();
   if (!leaguePlayers.length) return alert('No se ha podido cargar la lista de la Liga. Inténtalo de nuevo.');
-  const who = id && players.some((p) => idOf(p) === id) ? id : currentId;
+  const spec = id === SPEC;
+  const who = spec ? SPEC : id && players.some((p) => idOf(p) === id) ? id : currentId;
   const prev = porras[who];
-  porraDraft = { id: who, step: 1, league: prev ? [...prev.league] : [], top3: prev ? [...prev.top3] : [], error: '', saving: false };
+  porraDraft = { id: who, mode: spec ? 'spec' : 'player', step: 1, league: prev ? [...prev.league] : [], top3: prev ? [...prev.top3] : [], name: '', pin: '', error: '', saving: false };
+  if (spec) loadSpecDraft(porraDraft);
   renderPorra();
 }
 
 function closePorra() {
   porraDraft = null;
   renderPorra();
+}
+
+function porraCanSave(d) {
+  if (d.top3.length !== 3 || d.saving) return false;
+  return d.mode !== 'spec' || (d.name.trim().length >= 2 && /^\d{4}$/.test(d.pin));
 }
 
 function renderPorra() {
@@ -597,10 +756,19 @@ function renderPorra() {
   const ctl = (act, i, label, title, disabled) =>
     `<button type="button" class="pick-btn" data-p="${act}" data-i="${i}" title="${title}" aria-label="${title}"${disabled ? ' disabled' : ''}>${label}</button>`;
 
+  const isSpec = d.mode === 'spec';
   const who = `
     <label class="porra-who">¿Quién eres?
-      <select data-p="who">${players.map((p) => `<option value="${encodeURIComponent(idOf(p))}"${idOf(p) === d.id ? ' selected' : ''}>${escapeHtml(p.name)}</option>`).join('')}</select>
-    </label>`;
+      <select data-p="who">${players.map((p) => `<option value="${encodeURIComponent(idOf(p))}"${!isSpec && idOf(p) === d.id ? ' selected' : ''}>${escapeHtml(p.name)}</option>`).join('')}
+        <option value="${SPEC}"${isSpec ? ' selected' : ''}>👀 Soy espectador (no participo)</option>
+      </select>
+    </label>
+    ${isSpec ? `
+    <div class="spec-fields">
+      <label>Tu nombre<input type="text" data-p="spec-name" maxlength="20" placeholder="Nombre o apodo" value="${escapeHtml(d.name).replace(/"/g, '&quot;')}" autocomplete="off"></label>
+      <label>Elige un PIN de 4 dígitos<input type="text" inputmode="numeric" data-p="spec-pin" maxlength="4" pattern="[0-9]{4}" placeholder="0000" value="${escapeHtml(d.pin)}" autocomplete="off"></label>
+      <p class="porra-note">Apunta tu PIN: lo necesitarás para cambiar tu porra más adelante.</p>
+    </div>` : ''}`;
 
   let content;
   if (d.step === 1) {
@@ -643,7 +811,7 @@ function renderPorra() {
       ? `<button type="button" class="add-btn small" data-p="next"${d.league.length === POOL_SIZE ? '' : ' disabled'}>Siguiente →</button>
          <button type="button" class="link-btn" data-p="clear">Vaciar</button>`
       : `<button type="button" class="link-btn" data-p="back">← Atrás</button>
-         <button type="button" class="add-btn small" data-p="save"${d.top3.length === 3 && !d.saving ? '' : ' disabled'}>${d.saving ? 'Guardando…' : 'Guardar porra'}</button>`;
+         <button type="button" class="add-btn small" data-p="save"${porraCanSave(d) ? '' : ' disabled'}>${d.saving ? 'Guardando…' : 'Guardar porra'}</button>`;
 
   porraBody.innerHTML = `
     <h2 id="porra-title">🎯 Haz tu porra</h2>
@@ -657,11 +825,33 @@ function renderPorra() {
 async function savePorra() {
   const d = porraDraft;
   if (!d || d.saving) return;
-  const player = players.find((p) => idOf(p) === d.id);
   d.saving = true;
   d.error = '';
   renderPorra();
   try {
+    if (d.mode === 'spec') {
+      const res = await fetch('/api/pokemon-porra', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ spectator: true, name: d.name, pin: d.pin, league: d.league, top3: d.top3 }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Error desconocido');
+      const i = spectators.findIndex((x) => x.name.toLowerCase() === data.porra.name.toLowerCase());
+      if (i >= 0) spectators[i] = data.porra; else spectators.push(data.porra);
+      setSpecId({ name: data.porra.name, pin: d.pin });
+      porrasTabOpen.add(`spec:${data.porra.name.toLowerCase()}`);
+      porraDraft = null;
+      renderPorra();
+      updatePorraBar();
+      render();
+      renderPorrasTab();
+      showTab('porras');
+      history.replaceState(null, '', '#porras');
+      return;
+    }
+
+    const player = players.find((p) => idOf(p) === d.id);
     const data = await putWithPin(d.id, '/api/pokemon-porra', { player: player.name, league: d.league, top3: d.top3 });
     porras[d.id] = data.porra;
     porraOpenIds.add(d.id);
@@ -669,6 +859,7 @@ async function savePorra() {
     porraDraft = null;
     renderPorra();
     render();
+    renderPorrasTab();
   } catch (err) {
     d.saving = false;
     d.error = err.cancelled ? '' : err.message;
@@ -680,7 +871,7 @@ porraModal.addEventListener('click', (e) => {
   if (e.target === porraModal) return closePorra();
   const btn = e.target.closest('[data-p]');
   const d = porraDraft;
-  if (!btn || !d || btn.tagName === 'SELECT') return;
+  if (!btn || !d || btn.tagName === 'SELECT' || btn.tagName === 'INPUT') return;
   const act = btn.dataset.p;
   const i = Number(btn.dataset.i);
   const name = btn.dataset.n ? decodeURIComponent(btn.dataset.n) : null;
@@ -703,15 +894,38 @@ porraModal.addEventListener('click', (e) => {
 
 porraModal.addEventListener('change', (e) => {
   if (e.target.dataset?.p !== 'who' || !porraDraft) return;
-  const id = decodeURIComponent(e.target.value);
-  porraDraft.id = id;
-  porraDraft.error = '';
-  // Si ya tenía porra, la cargamos para poder cambiarla; si no, empezamos de cero.
-  const prev = porras[id];
-  porraDraft.league = prev ? [...prev.league] : [];
-  porraDraft.top3 = prev ? [...prev.top3] : [];
-  porraDraft.step = 1;
+  const v = decodeURIComponent(e.target.value);
+  const d = porraDraft;
+  d.error = '';
+  d.step = 1;
+  if (v === SPEC) {
+    d.mode = 'spec';
+    d.id = SPEC;
+    loadSpecDraft(d);
+  } else {
+    d.mode = 'player';
+    d.id = v;
+    // Si ya tenía porra, la cargamos para poder cambiarla; si no, empezamos de cero.
+    const prev = porras[v];
+    d.league = prev ? [...prev.league] : [];
+    d.top3 = prev ? [...prev.top3] : [];
+  }
   renderPorra();
+});
+
+// Nombre y PIN del espectador: se actualizan sin repintar para no perder el foco.
+porraModal.addEventListener('input', (e) => {
+  const d = porraDraft;
+  const kind = e.target.dataset?.p;
+  if (!d || (kind !== 'spec-name' && kind !== 'spec-pin')) return;
+  if (kind === 'spec-name') d.name = e.target.value;
+  else {
+    e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4);
+    d.pin = e.target.value;
+  }
+  d.error = '';
+  const save = porraBody.querySelector('[data-p="save"]');
+  if (save) save.disabled = !porraCanSave(d);
 });
 
 document.getElementById('close-porra').addEventListener('click', closePorra);
@@ -745,9 +959,11 @@ async function loadAll() {
     if (prRes && prRes.ok) {
       const prData = await prRes.json();
       porras = prData.porras;
+      spectators = prData.spectators || [];
       porraClosed = prData.closed;
     }
     renderLeague(); // los equipos alimentan las fotos de la liga
+    renderPorrasTab();
     if (editing || viewing) return; // por si empezó a editar mientras cargaba
     render();
   } catch (err) {

@@ -706,8 +706,11 @@ porraModal.addEventListener('change', (e) => {
   const id = decodeURIComponent(e.target.value);
   porraDraft.id = id;
   porraDraft.error = '';
-  const prev = porras[id]; // si ya tenía porra, la cargamos para poder cambiarla
-  if (prev) { porraDraft.league = [...prev.league]; porraDraft.top3 = [...prev.top3]; porraDraft.step = 1; }
+  // Si ya tenía porra, la cargamos para poder cambiarla; si no, empezamos de cero.
+  const prev = porras[id];
+  porraDraft.league = prev ? [...prev.league] : [];
+  porraDraft.top3 = prev ? [...prev.top3] : [];
+  porraDraft.step = 1;
   renderPorra();
 });
 

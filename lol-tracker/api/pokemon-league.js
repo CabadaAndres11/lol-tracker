@@ -6,14 +6,10 @@
 // conozca esa clave podrá marcar o borrar resultados (los demás solo los verán).
 const crypto = require('crypto');
 const { redisConfig, redis } = require('./_redis');
+const { PLAYERS } = require('./_league');
 
 const LEAGUE_KEY = 'pokemon:league';
 
-// Participantes de la liga, en el orden en que se reparten los emparejamientos.
-const PLAYERS = [
-  'Lihone', 'Petea', 'Mertens', 'El compa', 'Pampert', 'Kekkan',
-  'Helbramn', 'Steven', 'AitoRLG', 'Dashlight', 'Beldiño', 'Leviathan',
-];
 
 const BRACKET_IDS = ['q1', 'q2', 'q3', 'q4', 's1', 's2', 'f'];
 

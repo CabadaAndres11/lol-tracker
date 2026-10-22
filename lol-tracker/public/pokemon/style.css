@@ -1749,3 +1749,45 @@ button.bk-slot:focus-visible { outline: 2px solid var(--neon-cyan); outline-offs
 .pick-btn:disabled { opacity: .3; cursor: default; }
 .porra-actions { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-top: 0.4rem; }
 .porra-actions .add-btn:disabled { opacity: .45; cursor: default; }
+
+/* ---------- Porras: espectadores, favoritos y pestaña ---------- */
+
+.spec-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; margin: 0.6rem 0 0.2rem; }
+.spec-fields label { display: flex; flex-direction: column; gap: 0.25rem; font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: .08em; text-transform: uppercase; color: var(--text-muted); }
+.spec-fields input {
+  padding: 0.5rem 0.7rem; font: inherit; font-size: 0.9rem; letter-spacing: normal; text-transform: none;
+  color: var(--text); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; width: 100%; min-width: 0;
+}
+.spec-fields input:focus { outline: none; border-color: var(--neon-cyan); box-shadow: 0 0 0 3px rgba(47, 230, 224, .15); }
+.spec-fields .porra-note { grid-column: 1 / -1; margin: 0; font-size: 0.8rem; color: var(--text-muted); }
+@media (max-width: 560px) { .spec-fields { grid-template-columns: 1fr; } }
+
+.porras-head .porras-actions { display: flex; flex-wrap: wrap; gap: 0.7rem; margin-top: 0.8rem; }
+.porras-table td, .porras-table th { text-align: center; }
+.porras-table .c-name { text-align: left; }
+.porras-table .c-bar { min-width: 120px; }
+.porras-table .c-bar .bar { display: inline-block; width: 70px; height: 8px; vertical-align: middle; margin-right: 0.5rem; background: var(--bg); border: 1px solid var(--line); border-radius: 99px; overflow: hidden; }
+.porras-table .c-bar .bar span { display: block; height: 100%; background: linear-gradient(90deg, var(--gold-soft), var(--gold)); }
+.porras-table tr.fav-top { background: rgba(201, 161, 90, 0.07); }
+
+.porras-who { flex: 1; min-width: 0; }
+.porras-podium { font-size: 0.8rem; color: var(--text-muted); font-weight: 400; text-align: right; }
+.who-tag { margin-left: 0.4rem; font-style: normal; font-family: var(--font-mono); font-size: 0.65rem; letter-spacing: .06em; text-transform: uppercase; padding: 0.1rem 0.4rem; border-radius: 99px; border: 1px solid var(--line); color: var(--text-muted); }
+.who-tag.player { color: var(--gold); border-color: var(--gold-soft); }
+.porra-list-inline { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 0.4rem 1rem; }
+.porra-pending-list { margin-top: 0.8rem; }
+@media (max-width: 640px) { .porras-podium { display: none; } }
+
+/* Favoritos en la ventana Participantes */
+.fav-row { text-align: center; margin: 0.8rem 0 0; }
+.fav-tag {
+  display: inline-block; padding: 0.35rem 0.8rem;
+  font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: .03em;
+  color: #1a1408; background: linear-gradient(90deg, #d9b56a, #f0d58b);
+  border-radius: 99px; box-shadow: 0 0 16px rgba(240, 213, 139, 0.35);
+}
+.fav-tag.fav-2 { background: linear-gradient(90deg, #aeb4bd, #dfe3e8); box-shadow: 0 0 14px rgba(223, 227, 232, 0.25); }
+.fav-tag.fav-3 { background: linear-gradient(90deg, #b9774a, #dca173); box-shadow: 0 0 14px rgba(220, 161, 115, 0.25); }
+.circle.fav-glow-1 { box-shadow: 0 0 0 7px rgba(240, 213, 139, 0.14), 0 0 56px rgba(240, 213, 139, 0.4), inset 0 0 46px rgba(0, 0, 0, 0.55); }
+.circle.fav-glow-2 { box-shadow: 0 0 0 7px rgba(223, 227, 232, 0.1), 0 0 46px rgba(223, 227, 232, 0.28), inset 0 0 46px rgba(0, 0, 0, 0.55); }
+.circle.fav-glow-3 { box-shadow: 0 0 0 7px rgba(220, 161, 115, 0.1), 0 0 46px rgba(220, 161, 115, 0.28), inset 0 0 46px rgba(0, 0, 0, 0.55); }

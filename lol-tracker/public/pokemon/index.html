@@ -67,6 +67,11 @@
       <p class="roster-count"><strong id="count">0</strong> participantes</p>
     </div>
 
+    <div class="porra-bar">
+      <button type="button" class="add-btn small" id="open-porra">🎯 Haz tu porra</button>
+      <span class="porra-count" id="porra-count"></span>
+    </div>
+
     <div class="stage-wrap" id="stage-wrap">
       <div class="stage-top">
         <label class="jump">Ir a
@@ -259,6 +264,13 @@
   <div class="modal-card mon-modal-card">
     <button class="modal-close" id="close-mon" type="button" aria-label="Cerrar">&times;</button>
     <div id="mon-modal-body"></div>
+  </div>
+</div>
+
+<div class="modal" id="porra-modal" role="dialog" aria-modal="true" aria-labelledby="porra-title" hidden>
+  <div class="modal-card porra-card">
+    <button class="modal-close" id="close-porra" type="button" aria-label="Cerrar">&times;</button>
+    <div id="porra-body"></div>
   </div>
 </div>
 

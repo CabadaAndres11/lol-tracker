@@ -418,7 +418,8 @@ function render() {
   const player = currentPlayer();
   currentId = idOf(player);
 
-  stage.innerHTML = circleHtml(player) + `<div class="import-row"><button type="button" class="link-btn" data-action="import-team" data-id="${encodeURIComponent(currentId)}">⬆ Importar equipo desde archivo (.txt)</button></div>` + badgesBlock(currentId);
+  stage.innerHTML = circleHtml(player) + `<div class="import-row"><button type="button" class="link-btn" data-action="import-team" data-id="${encodeURIComponent(currentId)}">⬆ Importar equipo desde archivo (.txt)</button></div>` + badgesBlock(currentId) + porraBlock(currentId);
+  updatePorraBar();
 
   const index = players.indexOf(player);
   counterEl.textContent = `${index + 1} / ${players.length}`;
@@ -503,6 +504,217 @@ function step(dir) {
 }
 
 // ---------------------------------------------------------------
+// Porra: orden de los 8 clasificados de la Liga + top 3 del bracket
+// ---------------------------------------------------------------
+
+let porras = {};            // { idJugador: { league: [8 nombres], top3: [3 nombres] } }
+let porraClosed = false;    // se cierra al empezar el torneo
+let porraDraft = null;      // borrador que se edita en el popup
+const porraModal = document.getElementById('porra-modal');
+const porraBody = document.getElementById('porra-body');
+const porraOpenIds = new Set(); // desplegables abiertos
+const MEDALS = ['🥇', '🥈', '🥉'];
+const POOL_SIZE = 8;
+
+function updatePorraBar() {
+  const done = players.filter((p) => porras[idOf(p)]).length;
+  const el = document.getElementById('porra-count');
+  if (el) el.textContent = players.length ? `${done}/${players.length} porras hechas` : '';
+  const btn = document.getElementById('open-porra');
+  if (btn) {
+    btn.disabled = porraClosed;
+    btn.textContent = porraClosed ? '🎯 Porra cerrada' : '🎯 Haz tu porra';
+  }
+}
+
+const personRow = (name) => `${avatarHtml(name, 'row-avatar')}<span>${escapeHtml(name)}</span>`;
+
+// Desplegable de la porra de cada participante (en la ventana Participantes)
+function porraBlock(id) {
+  const player = players.find((p) => idOf(p) === id);
+  const porra = porras[id];
+  const state = porra ? '<span class="porra-ok">✓ Hecha</span>' : '<span class="porra-pending">Pendiente</span>';
+
+  let body;
+  if (porra) {
+    body = `
+      <div class="porra-cols">
+        <div>
+          <h4>Clasificados de la Liga</h4>
+          <ol class="porra-list">${porra.league.map((n) => `<li>${personRow(n)}</li>`).join('')}</ol>
+        </div>
+        <div>
+          <h4>Top 3 del bracket</h4>
+          <ul class="porra-podium">${porra.top3.map((n, i) => `<li><span class="medal">${MEDALS[i]}</span>${personRow(n)}</li>`).join('')}</ul>
+        </div>
+      </div>
+      ${porraClosed ? '' : `<button type="button" class="link-btn" data-action="open-porra" data-id="${encodeURIComponent(id)}">Cambiar porra</button>`}`;
+  } else {
+    body = `
+      <div class="porra-empty">
+        <div class="porra-empty-icon" aria-hidden="true">🕒</div>
+        <p>${escapeHtml(player.name)} todavía no ha hecho su porra.</p>
+        ${porraClosed ? '<p class="porra-note">La porra ya está cerrada.</p>' : `<button type="button" class="add-btn small" data-action="open-porra" data-id="${encodeURIComponent(id)}">Hacer la porra de ${escapeHtml(player.name)}</button>`}
+      </div>`;
+  }
+
+  return `
+    <details class="porra-details${porra ? '' : ' is-empty'}" data-id="${encodeURIComponent(id)}"${porraOpenIds.has(id) ? ' open' : ''}>
+      <summary><span>🎯 Porra de ${escapeHtml(player.name)}</span>${state}</summary>
+      <div class="porra-body">${body}</div>
+    </details>`;
+}
+
+// Recordamos qué desplegables están abiertos entre refrescos.
+stage.addEventListener('toggle', (e) => {
+  const d = e.target.closest?.('.porra-details');
+  if (!d) return;
+  const id = decodeURIComponent(d.dataset.id);
+  if (d.open) porraOpenIds.add(id); else porraOpenIds.delete(id);
+}, true);
+
+async function openPorra(id) {
+  if (porraClosed) return alert('La porra está cerrada: el torneo ya ha empezado.');
+  if (!leaguePlayers.length) await loadLeague();
+  if (!leaguePlayers.length) return alert('No se ha podido cargar la lista de la Liga. Inténtalo de nuevo.');
+  const who = id && players.some((p) => idOf(p) === id) ? id : currentId;
+  const prev = porras[who];
+  porraDraft = { id: who, step: 1, league: prev ? [...prev.league] : [], top3: prev ? [...prev.top3] : [], error: '', saving: false };
+  renderPorra();
+}
+
+function closePorra() {
+  porraDraft = null;
+  renderPorra();
+}
+
+function renderPorra() {
+  if (!porraDraft) {
+    porraModal.hidden = true;
+    return;
+  }
+  const d = porraDraft;
+  const ctl = (act, i, label, title, disabled) =>
+    `<button type="button" class="pick-btn" data-p="${act}" data-i="${i}" title="${title}" aria-label="${title}"${disabled ? ' disabled' : ''}>${label}</button>`;
+
+  const who = `
+    <label class="porra-who">¿Quién eres?
+      <select data-p="who">${players.map((p) => `<option value="${encodeURIComponent(idOf(p))}"${idOf(p) === d.id ? ' selected' : ''}>${escapeHtml(p.name)}</option>`).join('')}</select>
+    </label>`;
+
+  let content;
+  if (d.step === 1) {
+    const rows = Array.from({ length: POOL_SIZE }, (_, i) => {
+      const n = d.league[i];
+      return n
+        ? `<li class="pick-row"><span class="pick-pos">${i + 1}</span><span class="pick-name">${personRow(n)}</span>
+            <span class="pick-ctl">${ctl('up', i, '↑', 'Subir', i === 0)}${ctl('down', i, '↓', 'Bajar', i === d.league.length - 1)}${ctl('rm', i, '✕', 'Quitar', false)}</span></li>`
+        : `<li class="pick-row pick-empty"><span class="pick-pos">${i + 1}</span><span class="pick-name">—</span></li>`;
+    }).join('');
+    const pool = leaguePlayers
+      .map((n) => `<button type="button" class="pk-chip" data-p="add" data-n="${encodeURIComponent(n)}"${d.league.includes(n) || d.league.length >= POOL_SIZE ? ' disabled' : ''}>${personRow(n)}</button>`)
+      .join('');
+    content = `
+      <p class="porra-help"><strong>Paso 1 de 2.</strong> Ordena a los <strong>${POOL_SIZE}</strong> que crees que se clasifican en la Liga, del 1.º al ${POOL_SIZE}.º. Pulsa en un nombre para añadirlo.</p>
+      <div class="porra-grid">
+        <div><h4>Participantes</h4><div class="pk-chips">${pool}</div></div>
+        <div><h4>Tu clasificación <span class="porra-counter">${d.league.length}/${POOL_SIZE}</span></h4><ol class="pick-list">${rows}</ol></div>
+      </div>`;
+  } else {
+    const slots = [0, 1, 2].map((i) => {
+      const n = d.top3[i];
+      return n
+        ? `<li class="pick-row"><span class="pick-pos">${MEDALS[i]}</span><span class="pick-name">${personRow(n)}</span><span class="pick-ctl">${ctl('top-rm', i, '✕', 'Quitar', false)}</span></li>`
+        : `<li class="pick-row pick-empty"><span class="pick-pos">${MEDALS[i]}</span><span class="pick-name">—</span></li>`;
+    }).join('');
+    const cands = d.league
+      .map((n, i) => `<button type="button" class="pk-chip" data-p="top-add" data-n="${encodeURIComponent(n)}"${d.top3.includes(n) || d.top3.length >= 3 ? ' disabled' : ''}><span class="pk-chip-seed">${i + 1}º</span>${personRow(n)}</button>`)
+      .join('');
+    content = `
+      <p class="porra-help"><strong>Paso 2 de 2.</strong> De esos ${POOL_SIZE}, ¿quiénes serán tu <strong>top 3 del bracket</strong>? Elige primero al campeón, luego al segundo y al tercero.</p>
+      <div class="porra-grid">
+        <div><h4>Tus ${POOL_SIZE} clasificados</h4><div class="pk-chips">${cands}</div></div>
+        <div><h4>Tu top 3 <span class="porra-counter">${d.top3.length}/3</span></h4><ol class="pick-list">${slots}</ol></div>
+      </div>`;
+  }
+
+  const actions =
+    d.step === 1
+      ? `<button type="button" class="add-btn small" data-p="next"${d.league.length === POOL_SIZE ? '' : ' disabled'}>Siguiente →</button>
+         <button type="button" class="link-btn" data-p="clear">Vaciar</button>`
+      : `<button type="button" class="link-btn" data-p="back">← Atrás</button>
+         <button type="button" class="add-btn small" data-p="save"${d.top3.length === 3 && !d.saving ? '' : ' disabled'}>${d.saving ? 'Guardando…' : 'Guardar porra'}</button>`;
+
+  porraBody.innerHTML = `
+    <h2 id="porra-title">🎯 Haz tu porra</h2>
+    ${who}
+    ${content}
+    <p class="form-error" role="alert">${escapeHtml(d.error)}</p>
+    <div class="porra-actions">${actions}</div>`;
+  porraModal.hidden = false;
+}
+
+async function savePorra() {
+  const d = porraDraft;
+  if (!d || d.saving) return;
+  const player = players.find((p) => idOf(p) === d.id);
+  d.saving = true;
+  d.error = '';
+  renderPorra();
+  try {
+    const data = await putWithPin(d.id, '/api/pokemon-porra', { player: player.name, league: d.league, top3: d.top3 });
+    porras[d.id] = data.porra;
+    porraOpenIds.add(d.id);
+    currentId = d.id; // mostramos al participante cuya porra se acaba de guardar
+    porraDraft = null;
+    renderPorra();
+    render();
+  } catch (err) {
+    d.saving = false;
+    d.error = err.cancelled ? '' : err.message;
+    renderPorra();
+  }
+}
+
+porraModal.addEventListener('click', (e) => {
+  if (e.target === porraModal) return closePorra();
+  const btn = e.target.closest('[data-p]');
+  const d = porraDraft;
+  if (!btn || !d || btn.tagName === 'SELECT') return;
+  const act = btn.dataset.p;
+  const i = Number(btn.dataset.i);
+  const name = btn.dataset.n ? decodeURIComponent(btn.dataset.n) : null;
+  d.error = '';
+
+  if (act === 'add' && d.league.length < POOL_SIZE && !d.league.includes(name)) d.league.push(name);
+  else if (act === 'rm') {
+    const [gone] = d.league.splice(i, 1);
+    d.top3 = d.top3.filter((n) => n !== gone);
+  } else if (act === 'up' && i > 0) [d.league[i - 1], d.league[i]] = [d.league[i], d.league[i - 1]];
+  else if (act === 'down' && i < d.league.length - 1) [d.league[i + 1], d.league[i]] = [d.league[i], d.league[i + 1]];
+  else if (act === 'clear') { d.league = []; d.top3 = []; }
+  else if (act === 'next' && d.league.length === POOL_SIZE) d.step = 2;
+  else if (act === 'back') d.step = 1;
+  else if (act === 'top-add' && d.top3.length < 3 && !d.top3.includes(name)) d.top3.push(name);
+  else if (act === 'top-rm') d.top3.splice(i, 1);
+  else if (act === 'save') return savePorra();
+  renderPorra();
+});
+
+porraModal.addEventListener('change', (e) => {
+  if (e.target.dataset?.p !== 'who' || !porraDraft) return;
+  const id = decodeURIComponent(e.target.value);
+  porraDraft.id = id;
+  porraDraft.error = '';
+  const prev = porras[id]; // si ya tenía porra, la cargamos para poder cambiarla
+  if (prev) { porraDraft.league = [...prev.league]; porraDraft.top3 = [...prev.top3]; porraDraft.step = 1; }
+  renderPorra();
+});
+
+document.getElementById('close-porra').addEventListener('click', closePorra);
+document.getElementById('open-porra').addEventListener('click', () => openPorra(currentId));
+
+// ---------------------------------------------------------------
 // Datos
 // ---------------------------------------------------------------
 
@@ -511,10 +723,11 @@ async function loadAll() {
   if (editing || viewing || animating) return;
 
   try {
-    const [pRes, tRes, bRes] = await Promise.all([
+    const [pRes, tRes, bRes, prRes] = await Promise.all([
       fetch('/api/pokemon-players'),
       fetch('/api/pokemon-team'),
       fetch('/api/pokemon-badges'),
+      fetch('/api/pokemon-porra').catch(() => null), // si falla, el resto de la página sigue funcionando
     ]);
     const pData = await pRes.json();
     const tData = await tRes.json();
@@ -526,6 +739,11 @@ async function loadAll() {
     players = pData.players;
     teams = tData.teams;
     badges = bData.badges;
+    if (prRes && prRes.ok) {
+      const prData = await prRes.json();
+      porras = prData.porras;
+      porraClosed = prData.closed;
+    }
     renderLeague(); // los equipos alimentan las fotos de la liga
     if (editing || viewing) return; // por si empezó a editar mientras cargaba
     render();
@@ -628,6 +846,8 @@ async function onAction(e) {
   } else if (action === 'open-mon') {
     viewing = { id, index };
     renderPopup();
+  } else if (action === 'open-porra') {
+    openPorra(id);
   } else if (action === 'import-team') {
     importTarget = id;
     importInput.click();
@@ -744,7 +964,7 @@ jump.addEventListener('change', () => {
 document.addEventListener('keydown', (e) => {
   if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
   if (document.getElementById('tab-participantes').hidden) return;
-  if (!monModal.hidden || !notice.hidden) return;
+  if (!monModal.hidden || !notice.hidden || !porraModal.hidden) return;
   if (/^(INPUT|SELECT|TEXTAREA)$/.test(document.activeElement?.tagName)) return;
   step(e.key === 'ArrowRight' ? 1 : -1);
 });

@@ -738,3 +738,9 @@ footer {
 }
 
 .back-home:hover { border-color: var(--gold-soft); color: var(--gold); }
+
+/* En pantallas estrechas el temporizador se compacta para no tapar el botón "← Juegos" */
+@media (max-width: 560px) {
+    #update-timer { padding: 8px 10px; gap: 8px; }
+    #update-timer .timer-label { display: none; }
+}

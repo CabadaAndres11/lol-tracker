@@ -7,7 +7,7 @@
 <link rel="icon" href="/LOGO.ico">
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="/lol/style.css" />
 </head>
 <body>
@@ -104,22 +104,25 @@
       <span class="corner corner-tr" aria-hidden="true"></span>
       <span class="corner corner-bl" aria-hidden="true"></span>
       <span class="corner corner-br" aria-hidden="true"></span>
+      <div class="ladder-scroll">
       <table class="ladder">
         <thead>
           <tr>
             <th class="col-pos">#</th>
             <th class="col-name">Invocador</th>
-            <th class="col-tier">Rango</th>
-            <th class="col-lp">LP</th>
-            <th class="col-gained">LP desde inicio</th>
-            <th class="col-start">Rango de inicio</th>
-            <th class="col-wr">Winrate</th>
+            <th class="col-tier" aria-sort="none"><button class="sort-btn" type="button" data-sort="rank" title="Ordenar por rango">Rango <span class="sort-arrow" aria-hidden="true"></span></button></th>
+            <th class="col-lp">LP actuales</th>
+            <th class="col-gained" aria-sort="descending"><button class="sort-btn" type="button" data-sort="gained" title="Ordenar por diferencia de LP">Diferencia de LP <span class="sort-arrow" aria-hidden="true"></span></button></th>
+            <th class="col-start">Rango inicial</th>
+            <th class="col-wr" aria-sort="none"><button class="sort-btn" type="button" data-sort="wr" title="Ordenar por winrate">Winrate <span class="sort-arrow" aria-hidden="true"></span></button></th>
+            <th class="col-form">Últimas 5</th>
           </tr>
         </thead>
         <tbody id="ladder-body">
-          <tr class="loading-row"><td colspan="7">Invocando la clasificación…</td></tr>
+          <tr class="loading-row"><td colspan="8">Invocando la clasificación…</td></tr>
         </tbody>
       </table>
+      </div>
     </div>
   </div>
 </main>

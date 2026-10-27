@@ -119,4 +119,4 @@ async function fetchPlayer(p, apiKey) {
   };
 }
 
-module.exports = { absoluteLP, fetchPlayer };
+module.exports = { absoluteLP, fetchPlayer, REGIONAL_ROUTING, riotFetch };

@@ -35,6 +35,170 @@ function opggUrl(name, tag, platform) {
   return `https://www.op.gg/summoners/${region}/${encodeURIComponent(name)}-${encodeURIComponent(tag)}`;
 }
 
+// ---------- Estado de la tabla ----------
+let lastPlayers = [];            // en el orden del servidor (diferencia de LP)
+let formMap = null;              // { 'Nombre#Tag': ['W','L',...] } (de más antigua a más reciente)
+let sortKey = 'gained';          // 'gained' | 'rank' | 'wr'
+let sortDir = 'desc';            // 'desc' | 'asc'
+let formRetries = 0;
+
+const SORTERS = {
+  gained: (p) => p.lpGained,
+  rank: (p) => p.absoluteLP,
+  wr: (p) => p.winrate,
+};
+
+function sortedPlayers() {
+  const ok = lastPlayers.filter((p) => !p.error);
+  const bad = lastPlayers.filter((p) => p.error);
+  const val = SORTERS[sortKey];
+  const dir = sortDir === 'desc' ? -1 : 1;
+  ok.sort((a, b) => {
+    const x = val(a), y = val(b);
+    if (x == null && y == null) return 0;
+    if (x == null) return 1;           // sin dato: siempre al final
+    if (y == null) return -1;
+    if (x !== y) return (x - y) * dir;
+    // Desempate: más diferencia de LP primero
+    return (b.lpGained ?? -Infinity) - (a.lpGained ?? -Infinity);
+  });
+  return [...ok, ...bad];
+}
+
+function formHtml(displayName) {
+  const arr = formMap ? formMap[displayName] : undefined;
+  const loading = formMap == null;
+  const slots = [];
+  const list = Array.isArray(arr) ? arr : [];
+  for (let i = 0; i < 5 - list.length; i++) slots.push(null); // huecos a la izquierda
+  list.forEach((r) => slots.push(r));
+  const last = slots.length - 1;
+  const label = { W: 'Victoria', L: 'Derrota', R: 'Remake' };
+  const txt = { W: 'V', L: 'D', R: '–' };
+  return `<span class="form${loading ? ' is-loading' : ''}" aria-label="Últimas 5 partidas">${slots
+    .map((r, i) => r
+      ? `<span class="fm fm-${r.toLowerCase()}${i === last ? ' fm-last' : ''}" title="${label[r]}${i === last ? ' (la más reciente)' : ''}">${txt[r]}</span>`
+      : `<span class="fm fm-none" title="Sin datos"></span>`)
+    .join('')}</span>`;
+}
+
+function updateSortHeaders() {
+  document.querySelectorAll('.ladder thead th').forEach((th) => {
+    const btn = th.querySelector('.sort-btn');
+    if (!btn) return;
+    const on = btn.dataset.sort === sortKey;
+    th.setAttribute('aria-sort', on ? (sortDir === 'desc' ? 'descending' : 'ascending') : 'none');
+    th.classList.toggle('is-sorted', on);
+    btn.querySelector('.sort-arrow').textContent = on ? (sortDir === 'desc' ? '▼' : '▲') : '↕';
+  });
+}
+
+function renderTable() {
+  const body = document.getElementById('ladder-body');
+  if (!lastPlayers.length) return;
+  const leader = lastPlayers.find((p) => !p.error)?.displayName; // quien va primero en el reto
+  const list = sortedPlayers();
+  body.innerHTML = '';
+  updateSortHeaders();
+
+  list.forEach((p, i) => {
+    const tr = document.createElement('tr');
+
+    if (p.error) {
+      tr.classList.add('error-row');
+      tr.innerHTML = `
+        <td>${i + 1}</td>
+        <td colspan="7">${escapeHtml(p.displayName)} — no se pudo cargar (${escapeHtml(p.error)})</td>`;
+      body.appendChild(tr);
+      return;
+    }
+
+    const isLeader = p.displayName === leader;
+    if (isLeader) tr.classList.add('rank-first');
+
+    const [name, tag] = p.displayName.split('#');
+    const color = TIER_COLORS[p.tier] || TIER_COLORS.UNRANKED;
+    tr.style.setProperty('--tc', color);
+
+    const wrClass = p.winrate == null ? '' : p.winrate >= 50 ? 'wr-high' : 'wr-low';
+    const tierLabel = p.tier === 'UNRANKED' ? 'Sin clasificar' : `${capitalize(p.tier)} ${p.rank}`.trim();
+
+    const startColor = TIER_COLORS[p.startTier] || TIER_COLORS.UNRANKED;
+    const startTierLabel = p.startTier ? `${capitalize(p.startTier)} ${p.startRank || ''}`.trim() : '—';
+
+    const deltaHtml = p.lpGained == null
+      ? '<span class="lp-delta">—</span>'
+      : `<span class="lp-delta ${p.lpGained > 0 ? 'up' : p.lpGained < 0 ? 'down' : ''}">${p.lpGained > 0 ? '▲ +' : p.lpGained < 0 ? '▼ ' : '= '}${p.lpGained}<small>LP</small></span>`;
+
+    const icon = p.iconUrl
+      ? `<img class="summoner-icon" src="${p.iconUrl}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">`
+      : `<span class="icon-wrap"></span>`;
+    const liveDot = p.isLive ? `<span class="live-dot" title="En partida ahora mismo"></span>` : '';
+    const crown = isLeader ? '<span class="crown" title="Va primero">👑</span>' : '';
+    const profileUrl = opggUrl(name, tag, p.platform);
+
+    tr.innerHTML = `
+      <td class="col-pos"><span class="pos-n">${i + 1}</span>${crown}</td>
+      <td class="col-name">
+        <span class="name-wrap">
+          ${icon}
+          <a class="player-link" href="${profileUrl}" target="_blank" rel="noopener noreferrer">${escapeHtml(name)} <span class="player-tag">#${escapeHtml(tag)}</span></a>
+          ${liveDot}
+        </span>
+      </td>
+      <td class="col-tier">
+        <span class="tier-badge">
+          <span class="crest" style="--c:${color}"><i></i></span>
+          <span class="tier-label" style="color:${color}">${escapeHtml(tierLabel)}</span>
+        </span>
+      </td>
+      <td class="col-lp">${p.tier === 'UNRANKED' ? '—' : `${p.lp}<small>LP</small>`}</td>
+      <td class="col-gained">${deltaHtml}</td>
+      <td class="col-start">
+        <span class="start-row">
+          <span class="tier-badge">
+            <span class="crest crest-sm" style="--c:${startColor}"><i></i></span>
+            <span class="tier-label" style="color:${startColor}">${escapeHtml(startTierLabel)}</span>
+          </span>
+          ${p.startLP != null ? `<span class="start-lp">${p.startLP} LP</span>` : ''}
+        </span>
+      </td>
+      <td class="col-wr ${wrClass}">
+        ${p.winrate == null ? '—' : `<span class="wr-num">${p.winrate}%</span><span class="wr-bar"><i style="width:${p.winrate}%"></i></span><span class="wr-sub">${p.wins}V · ${p.losses}D</span>`}
+      </td>
+      <td class="col-form">${formHtml(p.displayName)}</td>`;
+
+    body.appendChild(tr);
+  });
+}
+
+async function loadForm() {
+  try {
+    const res = await fetch('/api/lol-form');
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Error');
+    formMap = data.form || {};
+    renderTable();
+    // Si faltan partidas por consultar, volvemos a preguntar en unos segundos.
+    if (data.pending && formRetries < 8) {
+      formRetries++;
+      setTimeout(loadForm, 6000);
+    }
+  } catch (err) {
+    console.warn('No se pudieron cargar las últimas partidas:', err);
+    if (formMap == null) { formMap = {}; renderTable(); }
+  }
+}
+
+document.querySelector('.ladder thead').addEventListener('click', (e) => {
+  const btn = e.target.closest('.sort-btn');
+  if (!btn) return;
+  const key = btn.dataset.sort;
+  if (key === sortKey) sortDir = sortDir === 'desc' ? 'asc' : 'desc';
+  else { sortKey = key; sortDir = 'desc'; }
+  renderTable();
+});
+
 async function loadLeaderboard() {
   const body = document.getElementById('ladder-body');
   const statusText = document.getElementById('status-text');
@@ -45,168 +209,25 @@ async function loadLeaderboard() {
 
     if (!res.ok) throw new Error(data.error || 'Error desconocido');
 
-    body.innerHTML = '';
-
-    data.players.forEach((p, i) => {
-      const tr = document.createElement('tr');
-
-      if (i === 0 && !p.error) {
-        tr.classList.add('rank-first');
-      }
-
-      // Jugador con error
-      if (p.error) {
-        tr.classList.add('error-row');
-
-        tr.innerHTML = `
-          <td>${i + 1}</td>
-          <td colspan="6">
-            ${escapeHtml(p.displayName)} — no se pudo cargar (${escapeHtml(p.error)})
-          </td>
-        `;
-
-        body.appendChild(tr);
-        return;
-      }
-
-      const [name, tag] = p.displayName.split('#');
-
-      const color = TIER_COLORS[p.tier] || TIER_COLORS.UNRANKED;
-
-      const wrClass = p.winrate == null
-        ? ''
-        : p.winrate >= 50
-          ? 'wr-high'
-          : 'wr-low';
-
-      const tierLabel = p.tier === 'UNRANKED'
-        ? 'Aún sin invocar'
-        : `${capitalize(p.tier)} ${p.rank}`.trim();
-
-      const gainedClass = p.lpGained == null
-        ? ''
-        : p.lpGained >= 0
-          ? 'wr-high'
-          : 'wr-low';
-
-      const gainedText = p.lpGained == null
-        ? '—'
-        : `${p.lpGained > 0 ? '+' : ''}${p.lpGained} LP`;
-
-      // Rango con el que comenzó el reto
-      const startTierLabel = p.startTier
-        ? `${capitalize(p.startTier)} ${p.startRank || ''}`.trim()
-        : '—';
-
-      const icon = p.iconUrl
-        ? `<img class="summoner-icon" src="${p.iconUrl}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">`
-        : `<span class="icon-wrap"></span>`;
-
-      const liveDot = p.isLive
-        ? `<span class="live-dot" title="En partida ahora mismo"></span>`
-        : '';
-
-      const crown = i === 0
-        ? '<span class="crown" title="Va primero">👑</span>'
-        : '';
-
-      const profileUrl = opggUrl(name, tag, p.platform);
-
-      tr.innerHTML = `
-        <td class="col-pos">${crown}${i + 1}</td>
-
-        <td class="col-name">
-          ${icon}
-          <a
-            class="player-link"
-            href="${profileUrl}"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            ${escapeHtml(name)}
-            <span class="player-tag">#${escapeHtml(tag)}</span>
-          </a>
-          ${liveDot}
-        </td>
-
-        <td class="col-tier">
-          <span class="tier-badge">
-            <span
-              class="tier-hex"
-              style="background: radial-gradient(circle at 35% 30%, ${color}, ${color}66 70%); border: 1px solid ${color};"
-            ></span>
-
-            <span
-              class="tier-label"
-              style="color:${color}"
-            >
-              ${escapeHtml(tierLabel)}
-            </span>
-          </span>
-        </td>
-
-        <td class="col-lp">
-          ${p.tier === 'UNRANKED' ? '—' : `${p.lp} LP`}
-        </td>
-
-        <td class="col-gained ${gainedClass}">
-          ${gainedText}
-        </td>
-
-        <td class="col-start">
-          <span class="start-row">
-            <span class="tier-badge">
-              <span
-                class="tier-hex"
-                style="background: radial-gradient(circle at 35% 30%, ${TIER_COLORS[p.startTier] || TIER_COLORS.UNRANKED}, ${TIER_COLORS[p.startTier] || TIER_COLORS.UNRANKED}66 70%); border: 1px solid ${TIER_COLORS[p.startTier] || TIER_COLORS.UNRANKED};"
-              ></span>
-
-              <span
-                class="tier-label"
-                style="color:${TIER_COLORS[p.startTier] || TIER_COLORS.UNRANKED}"
-              >
-                ${escapeHtml(startTierLabel)}
-              </span>
-            </span>
-
-            ${p.startLP != null
-              ? `<span class="start-lp">${p.startLP} LP</span>`
-              : ''}
-          </span>
-        </td>
-
-        <td class="col-wr ${wrClass}">
-          ${p.winrate == null
-            ? '—'
-            : `${p.winrate}% (${p.wins}V/${p.losses}D)`}
-        </td>
-      `;
-
-      body.appendChild(tr);
-    });
-
+    lastPlayers = data.players;
+    renderTable();
     renderPodium(data.players);
 
     lastUpdateTime = new Date(data.updatedAt);
-
-    document.getElementById('updated-at').textContent =
-      lastUpdateTime.toLocaleTimeString('es-ES');
-
+    document.getElementById('updated-at').textContent = lastUpdateTime.toLocaleTimeString('es-ES');
     statusText.textContent = 'En vivo';
 
+    formRetries = 0;
+    loadForm();
   } catch (err) {
     statusText.textContent = 'Error al actualizar';
 
     if (!body.children.length || body.querySelector('.loading-row')) {
       body.innerHTML = `
         <tr class="error-row">
-          <td colspan="7">
-            No se pudo cargar la clasificación: ${escapeHtml(err.message)}
-          </td>
-        </tr>
-      `;
+          <td colspan="8">No se pudo cargar la clasificación: ${escapeHtml(err.message)}</td>
+        </tr>`;
     }
-
     console.error(err);
   }
 }

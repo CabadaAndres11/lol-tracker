@@ -65,6 +65,24 @@ function sortedPlayers() {
   return [...ok, ...bad];
 }
 
+// Emblemas oficiales de rango (CommunityDragon). Si una imagen no carga, se prueba una versión
+// antigua del parche y, como último recurso, el hexágono de color.
+const EMBLEM_BASES = [
+  'https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-static-assets/global/default/images/ranked-emblem/',
+  'https://raw.communitydragon.org/14.10/plugins/rcp-fe-lol-static-assets/global/default/images/ranked-emblem/',
+];
+const EMBLEM_TIERS = new Set(['iron', 'bronze', 'silver', 'gold', 'platinum', 'emerald', 'diamond', 'master', 'grandmaster', 'challenger']);
+
+function emblemHtml(tier, color, small) {
+  const t = String(tier || '').toLowerCase();
+  const crest = `<span class="crest${small ? ' crest-sm' : ''}" style="--c:${color}"><i></i></span>`;
+  if (!EMBLEM_TIERS.has(t)) return crest;
+  const urls = EMBLEM_BASES.map((b) => `${b}emblem-${t}.png`);
+  const fallbackCrest = crest.replace(/"/g, '&quot;');
+  const onerror = `var q=(this.dataset.fb||'').split('|').filter(Boolean);if(q.length){this.src=q.shift();this.dataset.fb=q.join('|')}else{this.outerHTML='${fallbackCrest}'}`;
+  return `<img class="emblem${small ? ' emblem-sm' : ''}" src="${urls[0]}" data-fb="${urls.slice(1).join('|')}" alt="${capitalize(t)}" loading="lazy" draggable="false" onerror="${onerror}">`;
+}
+
 function formHtml(displayName) {
   const arr = formMap ? formMap[displayName] : undefined;
   const loading = formMap == null;
@@ -148,7 +166,7 @@ function renderTable() {
       </td>
       <td class="col-tier">
         <span class="tier-badge">
-          <span class="crest" style="--c:${color}"><i></i></span>
+          ${emblemHtml(p.tier, color, false)}
           <span class="tier-label" style="color:${color}">${escapeHtml(tierLabel)}</span>
         </span>
       </td>
@@ -157,7 +175,7 @@ function renderTable() {
       <td class="col-start">
         <span class="start-row">
           <span class="tier-badge">
-            <span class="crest crest-sm" style="--c:${startColor}"><i></i></span>
+            ${emblemHtml(p.startTier, startColor, true)}
             <span class="tier-label" style="color:${startColor}">${escapeHtml(startTierLabel)}</span>
           </span>
           ${p.startLP != null ? `<span class="start-lp">${p.startLP} LP</span>` : ''}

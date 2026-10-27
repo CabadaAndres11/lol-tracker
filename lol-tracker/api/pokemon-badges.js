@@ -11,13 +11,12 @@ const FULL_MASK = (1 << TOTAL) - 1;
 
 const has = (mask, i) => (mask & (1 << i)) !== 0;
 
-// Regla: una medalla solo puede estar activa si la anterior también lo está,
-// pero solo se exige a las que se acaban de activar (quitar es libre).
+// Regla: las medallas se consiguen en orden, así que el resultado siempre debe ser
+// una serie seguida desde la primera (no se puede tener la 5 sin la 3).
 function validateChange(oldMask, newMask) {
   for (let i = 1; i < TOTAL; i++) {
-    const added = has(newMask, i) && !has(oldMask, i);
-    if (added && !has(newMask, i - 1)) {
-      return `No puedes activar la medalla ${i + 1} sin tener la anterior.`;
+    if (has(newMask, i) && !has(newMask, i - 1)) {
+      return `No puedes tener la medalla ${i + 1} sin la anterior.`;
     }
   }
   return null;

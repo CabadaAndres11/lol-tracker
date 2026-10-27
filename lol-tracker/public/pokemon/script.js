@@ -1195,7 +1195,7 @@ function toggleBadge(id, i) {
   if (editing) return; // primero guarda o cancela el formulario abierto
   const mask = badges[id] || 0;
   if (hasBadge(mask, i)) {
-    badges[id] = mask & ~bit(i); // quitar siempre se puede
+    badges[id] = mask & (bit(i) - 1); // al quitar una, se quitan también las posteriores
   } else {
     if (i > 0 && !hasBadge(mask, i - 1)) return; // bloqueada
     badges[id] = mask | bit(i);

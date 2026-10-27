@@ -2250,7 +2250,7 @@ function renderTipos() {
       <p class="card-text">Selecciona los tipos del Pokémon que <strong>recibe</strong> el ataque (1 o 2) y mira qué tipos le pegan x4, x2, x0.5, x0.25 o ni le hacen daño.</p>
       <div class="tp-pick" role="group" aria-label="Tipos seleccionados">${slots}${tiposSel.length ? '<button type="button" class="link-btn tp-clear" data-tipo-clear>Limpiar</button>' : ''}</div>
       <div class="tp-grid" role="group" aria-label="Elegir tipo">${buttons}</div>
-    </div>${tiposTeamsHtml()}
+    </div>
     <div class="card tp-card"><h2>Recibe daño de</h2>${results}</div>`;
 }
 

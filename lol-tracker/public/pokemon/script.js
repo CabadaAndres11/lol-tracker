@@ -16,6 +16,8 @@ let viewing = null;        // { id, index } Pokémon abierto en la ventana emerg
 let animating = false;     // true mientras dura la animación de deslizamiento
 let editing = null;        // { id, index } mientras se edita/añade un Pokémon (index -1 = nuevo)
 let teamError = '';        // error al guardar un equipo
+let rivals = {};           // { idJugador: { species, dexId?, shiny? } }  Pokémon rival de la escena de combate
+let leads = {};            // { idJugador: índice del Pokémon que está en el campo }
 let badges = {};           // { idJugador: máscara de bits (bit 0 = medalla 1 ... bit 8 = Liga) }
 
 const idOf = (p) => p.name.toLowerCase();
@@ -390,33 +392,157 @@ function nameSize(name) {
   return n <= 7 ? '1.5rem' : n <= 11 ? '1.2rem' : n <= 16 ? '1rem' : '0.85rem';
 }
 
+// ---- Tipos de cada especie (PokéAPI), con caché; solo se piden los que se ven en pantalla ----
+const TYPES_CACHE_KEY = 'pokemon-types-v1';
+let typeCache = {};
+try { typeCache = JSON.parse(localStorage.getItem(TYPES_CACHE_KEY) || '{}'); } catch { typeCache = {}; }
+const typePending = new Set();
+let typeRefreshTimer = null;
+
+function typesOf(mon) {
+  const id = mon.dexId || dexLookup(mon.species)?.id;
+  if (!id) return [];
+  if (typeCache[id]) return typeCache[id];
+  if (!typePending.has(id)) {
+    typePending.add(id);
+    fetch(`https://pokeapi.co/api/v2/pokemon/${id}`)
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(r.status))))
+      .then((d) => {
+        typeCache[id] = d.types.map((t) => idFromUrl(t.type.url));
+        try { localStorage.setItem(TYPES_CACHE_KEY, JSON.stringify(typeCache)); } catch { /* ignorar */ }
+        clearTimeout(typeRefreshTimer);
+        typeRefreshTimer = setTimeout(() => { if (!editing && !viewing && !animating) render(); }, 80);
+      })
+      .catch(() => { /* sin tipos: se muestra sin chips */ });
+  }
+  return [];
+}
+
+const isLightColor = (hex) => {
+  const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+  return (0.299 * r + 0.587 * g + 0.114 * b) > 150;
+};
+
+function moveBtn(name) {
+  if (!name) return '<div class="bt-mv empty">—</div>';
+  const t = TYPES[moveTypes[String(name).toLowerCase()]];
+  if (!t) return `<div class="bt-mv">${escapeHtml(name)}</div>`;
+  return `<div class="bt-mv${isLightColor(t[1]) ? ' light' : ''}" style="--tc:${t[1]}" title="${t[0]}"><span>${escapeHtml(name)}</span></div>`;
+}
+
+function leadIndex(id) {
+  const n = (teams[id] || []).length;
+  return Math.max(0, Math.min(leads[id] ?? 0, n - 1));
+}
+
+// Escena de combate: el equipo del participante frente al Pokémon rival que ha elegido.
 function circleHtml(player) {
   const id = idOf(player);
+  const eid = encodeURIComponent(id);
   const team = teams[id] || [];
   const mask = badges[id] || 0;
+  const li = leadIndex(id);
+  const lead = team[li];
+  const rival = rivals[id];
+  const banned = lead ? banReasons(lead) : [];
+  const leadTypes = lead ? typesOf(lead) : [];
+  const rivalTypes = rival ? typesOf(rival) : [];
+  const firstMoveType = lead ? TYPES[moveTypes[String(lead.moves[0] || '').toLowerCase()]] : null;
+  const tint = TYPES[leadTypes[0]]?.[1] || firstMoveType?.[1] || '#4cc9f0';
+  const chips = (ids) => ids.map((t) => TYPES[t] ? `<span class="bt-type${isLightColor(TYPES[t][1]) ? ' light' : ''}" style="--tc:${TYPES[t][1]}">${TYPES[t][0]}</span>` : '').join('');
+  const fav = favInfo(player.name);
 
-  const minis = Array.from({ length: MAX_TEAM }, (_, i) => {
+  const leadName = lead ? (lead.nickname || lead.species) : '';
+  const msg = lead ? `¡Adelante, ${leadName}!` : team.length ? '' : 'Todavía no hay Pokémon. ¡Añade el primero!';
+
+  const sparks = (on) => on ? '<i class="bt-spark" style="left:12%;top:14%"></i><i class="bt-spark" style="right:14%;top:26%;animation-delay:.4s"></i><i class="bt-spark" style="left:46%;top:4%;animation-delay:.8s"></i><i class="bt-spark" style="right:24%;bottom:22%;animation-delay:1.1s"></i>' : '';
+
+  const meHtml = lead
+    ? `<button type="button" class="bt-sprite" data-action="open-mon" data-id="${eid}" data-index="${li}" title="Ver detalles de ${escapeHtml(lead.species)}" aria-label="Ver detalles de ${escapeHtml(lead.species)}">${monImage(lead, 'bt-img')}${sparks(lead.shiny)}</button>`
+    : `<button type="button" class="bt-sprite" data-action="add-mon" data-id="${eid}" aria-label="Añadir Pokémon"><div class="bt-img bt-img-empty">+</div></button>`;
+
+  const foeHtml = rival
+    ? `${monImage(rival, 'bt-img')}${sparks(rival.shiny)}`
+    : '<div class="bt-img bt-img-empty">?</div>';
+
+  const parties = Array.from({ length: MAX_TEAM }, (_, i) => {
     const mon = team[i];
-    const angle = `style="--a:${i * 60}deg"`;
-    if (mon) {
-      const title = `${mon.species}${mon.nickname ? ` “${mon.nickname}”` : ''}${banReasons(mon).length ? ' — ⚠ NO PERMITIDO' : ''}`;
-      return `<button type="button" class="mini${banReasons(mon).length ? ' is-banned' : ''}" ${angle} data-action="open-mon" data-id="${encodeURIComponent(id)}" data-index="${i}" title="${escapeHtml(title)}" aria-label="${escapeHtml(title)}">
-        <span class="mini-face">${monImage(mon, 'mini-img')}</span></button>`;
-    }
-    return `<button type="button" class="mini mini-empty" ${angle} data-action="add-mon" data-id="${encodeURIComponent(id)}" title="Añadir Pokémon" aria-label="Añadir Pokémon">
-      <span class="mini-face">+</span></button>`;
+    if (!mon) return `<button type="button" class="bt-slot bt-slot-empty" data-action="add-mon" data-id="${eid}" title="Añadir Pokémon" aria-label="Añadir Pokémon">+</button>`;
+    const title = `${mon.species}${mon.nickname ? ` “${mon.nickname}”` : ''}${banReasons(mon).length ? ' — ⚠ NO PERMITIDO' : ''}`;
+    return `<button type="button" class="bt-slot${i === li ? ' is-on' : ''}${banReasons(mon).length ? ' is-banned' : ''}" data-action="set-lead" data-id="${eid}" data-index="${i}" title="${escapeHtml(title)}" aria-label="Sacar a ${escapeHtml(mon.species)}">${monImage(mon, 'bt-slot-img')}</button>`;
   }).join('');
 
-  const fav = favInfo(player.name);
+  const moves = lead ? [0, 1, 2, 3].map((i) => moveBtn(lead.moves[i])).join('') : [0, 1, 2, 3].map(() => moveBtn('')).join('');
+  const nat = lead?.nature ? (natureByName(lead.nature) ? natureText(natureByName(lead.nature)) : lead.nature) : '—';
+
   return `
-    <div class="circle${fav ? ` is-fav fav-glow-${fav.rank + 1}` : ''}">
-      <div class="circle-name">
-        ${avatarHtml(player.name, 'circle-avatar')}
-        <span class="circle-title" style="font-size:${nameSize(player.name)}">${escapeHtml(player.name)}${hasBadge(mask, LEAGUE) ? ' <span class="crown" title="Campeón de la Liga">🏆</span>' : ''}</span>
-        <span class="circle-sub">${team.length}/${MAX_TEAM} Pokémon</span>
+    <div class="battle${fav ? ` is-fav fav-glow-${fav.rank + 1}` : ''}">
+      <div class="bt-ghost" aria-hidden="true">${escapeHtml(player.name.toUpperCase())}</div>
+      <div class="bt-head">
+        ${avatarHtml(player.name, 'bt-avatar')}
+        <div>
+          <h2 class="bt-name">${escapeHtml(player.name)}${hasBadge(mask, LEAGUE) ? ' <span class="crown" title="Campeón de la Liga">🏆</span>' : ''}</h2>
+          <div class="bt-sub">${team.length}/${MAX_TEAM} Pokémon</div>
+        </div>
       </div>
-      ${minis}
+
+      <div class="bt-field" style="--tint:${tint}">
+        <div class="bt-plat bt-plat-foe"></div><div class="bt-plat bt-plat-me"></div>
+        <div class="bt-foe">${foeHtml}</div>
+        <div class="bt-me">${meHtml}</div>
+
+        <div class="bt-box bt-box-foe">
+          <div class="bt-nm"><span>${rival ? escapeHtml(rival.species) : 'Rival sin elegir'}</span><span class="bt-lv">VS</span></div>
+          <div class="bt-hp"><b>PS</b><div class="bt-hpbar"><div class="bt-hpfill"></div></div></div>
+          ${rivalTypes.length ? `<div class="bt-types">${chips(rivalTypes)}</div>` : ''}
+          <button type="button" class="bt-link" data-action="edit-rival" data-id="${eid}">⚔ ${rival ? 'Cambiar rival' : 'Elegir rival'}</button>
+        </div>
+
+        ${lead ? `<div class="bt-box bt-box-me${banned.length ? ' is-banned' : ''}">
+          <div class="bt-nm"><span>${escapeHtml(leadName)}</span><span class="bt-lv">${lead.shiny ? '✦ SHINY' : ''}</span></div>
+          <div class="bt-hp"><b>PS</b><div class="bt-hpbar"><div class="bt-hpfill"></div></div></div>
+          ${leadTypes.length ? `<div class="bt-types">${chips(leadTypes)}</div>` : ''}
+        </div>` : ''}
+
+        ${msg ? `<div class="bt-msg fx-type">${escapeHtml(msg)}</div>` : ''}
+      </div>
+
+      <div class="bt-cmd">
+        <div class="bt-moves">${moves}</div>
+        ${lead ? `<div class="bt-info">
+          ${banned.length ? banAlert(banned) : ''}
+          <div><span>Pokémon</span>${escapeHtml(lead.species)}</div>
+          <div><span>Habilidad</span>${escapeHtml(lead.ability)}</div>
+          <div><span>Objeto</span>${escapeHtml(lead.item || '—')}</div>
+          <div><span>Naturaleza</span>${escapeHtml(nat)}</div>
+          <button type="button" class="bt-link" data-action="open-mon" data-id="${eid}" data-index="${li}">Ver / editar este Pokémon</button>
+        </div>` : ''}
+      </div>
+
+      <div class="bt-party">${parties}</div>
+      <div class="bt-hint">Pulsa un Pokémon del equipo para sacarlo al campo</div>
     </div>`;
+}
+
+function trainersHtml() {
+  const cur = currentId;
+  return '<h3>ENTRENADORES</h3>' + players.map((p, i) => {
+    const id = idOf(p);
+    return `<button type="button" class="tr-row${id === cur ? ' is-on' : ''}" data-action="go-player" data-index="${i}">
+      ${avatarHtml(p.name, 'tr-avatar')}<span class="tr-name">${escapeHtml(p.name)}</span><span class="tr-count">${countBadges(badges[id] || 0)}/${BADGES.length}</span></button>`;
+  }).join('');
+}
+
+// ---- Efectos de pantalla (encendido + barrido de Poké Ball). Se desactivan con "reducir movimiento". ----
+const dexScreen = document.getElementById('dex-screen');
+const dexWipe = document.getElementById('dex-wipe');
+function playFx() {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  dexScreen.classList.remove('fx-boot');
+  dexWipe.classList.remove('fx-wipe-on');
+  void dexScreen.offsetWidth;
+  dexScreen.classList.add('fx-boot');
+  dexWipe.classList.add('fx-wipe-on');
 }
 
 function render() {
@@ -434,6 +560,7 @@ function render() {
 
   stage.innerHTML = circleHtml(player) + favBlock(player.name) + `<div class="import-row"><button type="button" class="link-btn" data-action="import-team" data-id="${encodeURIComponent(currentId)}">⬆ Importar equipo desde archivo (.txt)</button></div>` + badgesBlock(currentId) + porraBlock(currentId);
   updatePorraBar();
+  document.getElementById('trainers').innerHTML = trainersHtml();
 
   const index = players.indexOf(player);
   counterEl.textContent = `${index + 1} / ${players.length}`;
@@ -446,13 +573,34 @@ function render() {
 }
 
 // Ventana emergente de un Pokémon (ver / editar / añadir)
+function rivalFormHtml(id) {
+  const cur = rivals[id];
+  const v = (x) => escapeHtml(x || '').replace(/"/g, '&quot;');
+  return `<h2 class="popup-title">Pokémon rival</h2>
+    <p class="card-text small">El Pokémon que aparece enfrente de ti en tu escena de combate. Puede ser cualquiera.</p>
+    <form class="rival-form" data-id="${encodeURIComponent(id)}" autocomplete="off">
+      <label>Pokémon rival *<input name="species" type="text" maxlength="30" required list="pokemon-names" placeholder="Escribe en inglés…" value="${v(cur?.species)}" /></label>
+      <label class="check-label"><input type="checkbox" name="shiny"${cur?.shiny ? ' checked' : ''} /> ✨ Shiny</label>
+      <p class="form-error" role="alert">${escapeHtml(teamError)}</p>
+      <div class="rival-actions">
+        <button type="submit" class="add-btn small">Guardar</button>
+        ${cur ? '<button type="button" class="link-btn link-danger" data-action="clear-rival">Quitar rival</button>' : ''}
+        <button type="button" class="link-btn" data-action="cancel-mon">Cancelar</button>
+      </div>
+    </form>`;
+}
+
 function renderPopup() {
   if (!viewing && !editing) {
     monModal.hidden = true;
     return;
   }
 
-  if (editing) {
+  if (editing && editing.rival) {
+    monBody.innerHTML = rivalFormHtml(editing.id);
+    monModal.hidden = false;
+    monBody.querySelector('input')?.focus();
+  } else if (editing) {
     monBody.innerHTML = `<h2 class="popup-title">${editing.index >= 0 ? 'Editar Pokémon' : 'Añadir Pokémon'}</h2>${monForm(editing.id, editing.index)}`;
     monModal.hidden = false;
     const formEl = monBody.querySelector('.mon-form');
@@ -477,44 +625,18 @@ function closePopup() {
   renderPopup();
 }
 
-// Cambio de participante con animación de deslizamiento
-async function goTo(newIndex, dir) {
+// Cambio de participante (con el efecto de pantalla de la Pokédex)
+async function goTo(newIndex) {
   if (animating || players.length < 2) return;
-  animating = true;
-
-  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const dist = Math.min(window.innerWidth * 0.7, 700);
-  document.body.style.overflowX = 'hidden';
-
-  try {
-    if (!reduce) {
-      await slide.animate(
-        [{ transform: 'translateX(0)', opacity: 1 }, { transform: `translateX(${-dir * dist}px)`, opacity: 0 }],
-        { duration: 220, easing: 'ease-in', fill: 'forwards' }
-      ).finished;
-    }
-
-    currentId = idOf(players[newIndex]);
-    render();
-
-    if (!reduce) {
-      slide.getAnimations().forEach((a) => a.cancel());
-      await slide.animate(
-        [{ transform: `translateX(${dir * dist}px)`, opacity: 0 }, { transform: 'translateX(0)', opacity: 1 }],
-        { duration: 300, easing: 'cubic-bezier(.2,.8,.2,1)' }
-      ).finished;
-    }
-  } finally {
-    slide.getAnimations().forEach((a) => a.cancel());
-    document.body.style.overflowX = '';
-    animating = false;
-  }
+  playFx();
+  currentId = idOf(players[newIndex]);
+  render();
 }
 
 function step(dir) {
   if (!players.length) return;
   const i = players.indexOf(currentPlayer());
-  goTo((i + dir + players.length) % players.length, dir);
+  goTo((i + dir + players.length) % players.length);
 }
 
 // ---------------------------------------------------------------
@@ -953,11 +1075,12 @@ async function loadAll() {
   if (editing || viewing || animating) return;
 
   try {
-    const [pRes, tRes, bRes, prRes] = await Promise.all([
+    const [pRes, tRes, bRes, prRes, rvRes] = await Promise.all([
       fetch('/api/pokemon-players'),
       fetch('/api/pokemon-team'),
       fetch('/api/pokemon-badges'),
       fetch('/api/pokemon-porra').catch(() => null), // si falla, el resto de la página sigue funcionando
+      fetch('/api/pokemon-rival').catch(() => null),
     ]);
     const pData = await pRes.json();
     const tData = await tRes.json();
@@ -975,6 +1098,7 @@ async function loadAll() {
       spectators = prData.spectators || [];
       porraClosed = prData.closed;
     }
+    if (rvRes && rvRes.ok) rivals = (await rvRes.json()).rivals || {};
     renderLeague(); // los equipos alimentan las fotos de la liga
     renderPorrasTab();
     if (editing || viewing) return; // por si empezó a editar mientras cargaba
@@ -1023,6 +1147,12 @@ async function putWithPin(id, url, payload) {
     return data;
   }
   throw new Error('Demasiados intentos con PIN incorrecto.');
+}
+
+async function saveRival(id, rival) {
+  const player = players.find((p) => idOf(p) === id);
+  const data = await putWithPin(id, '/api/pokemon-rival', { player: player.name, rival });
+  if (data.rival) rivals[id] = data.rival; else delete rivals[id];
 }
 
 async function saveTeam(id, team) {
@@ -1075,6 +1205,18 @@ async function onAction(e) {
 
   if (action === 'badge') {
     toggleBadge(id, index);
+  } else if (action === 'go-player') {
+    goTo(index);
+  } else if (action === 'set-lead') {
+    leads[id] = index;
+    playFx();
+    render();
+  } else if (action === 'edit-rival') {
+    editing = { id, rival: true, index: -2 };
+    teamError = '';
+    renderPopup();
+  } else if (action === 'clear-rival') {
+    saveRival(editing.id, null).then(() => { closePopup(); render(); }).catch((err) => { if (!err.cancelled) alert(err.message); });
   } else if (action === 'open-mon') {
     viewing = { id, index };
     renderPopup();
@@ -1113,6 +1255,7 @@ async function onAction(e) {
 }
 
 stage.addEventListener('click', onAction);
+document.getElementById('trainers').addEventListener('click', onAction);
 monModal.addEventListener('click', (e) => {
   if (e.target === monModal) closePopup();
   else onAction(e);
@@ -1142,6 +1285,7 @@ monModal.addEventListener('change', (e) => {
 monModal.addEventListener('submit', async (e) => {
   e.preventDefault();
   const f = e.target;
+  if (f.classList.contains('rival-form')) return submitRival(f);
   const id = decodeURIComponent(f.dataset.id);
   const index = Number(f.dataset.index);
   const fd = new FormData(f);
@@ -1179,6 +1323,27 @@ monModal.addEventListener('submit', async (e) => {
   }
 });
 
+async function submitRival(f) {
+  const id = decodeURIComponent(f.dataset.id);
+  const fd = new FormData(f);
+  const known = dexLookup(String(fd.get('species')));
+  const rival = { species: known ? known.name : String(fd.get('species')).trim(), shiny: fd.get('shiny') === 'on' };
+  if (known) rival.dexId = known.id;
+  const submit = f.querySelector('button[type="submit"]');
+  submit.disabled = true;
+  try {
+    await saveRival(id, rival);
+    editing = null;
+    teamError = '';
+    renderPopup();
+    playFx();
+    render();
+  } catch (err) {
+    if (!err.cancelled) f.querySelector('.form-error').textContent = err.message;
+    submit.disabled = false;
+  }
+}
+
 // ---------------------------------------------------------------
 // Navegación entre participantes (flechas, teclado, deslizar, selector)
 // ---------------------------------------------------------------
@@ -1190,7 +1355,7 @@ jump.addEventListener('change', () => {
   const target = Number(jump.value);
   const current = players.indexOf(currentPlayer());
   if (target === current) return;
-  goTo(target, target > current ? 1 : -1);
+  goTo(target);
 });
 
 document.addEventListener('keydown', (e) => {
@@ -1344,8 +1509,11 @@ setInterval(loadAll, 30 * 1000);
 const tabs = document.querySelectorAll('.tab');
 const panels = document.querySelectorAll('.panel');
 
+let firstTab = true;
 function showTab(name) {
   if (!document.getElementById(`tab-${name}`)) name = 'participantes';
+  if (!firstTab) playFx();
+  firstTab = false;
 
   tabs.forEach((t) => {
     const active = t.dataset.tab === name;

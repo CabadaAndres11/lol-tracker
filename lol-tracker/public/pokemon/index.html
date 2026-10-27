@@ -7,7 +7,7 @@
 <link rel="icon" href="/LOGO.ico">
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&family=Bungee&family=Press+Start+2P&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="/pokemon/style.css" />
 </head>
 <body>
@@ -16,8 +16,12 @@
 
 <div class="hex-bg" aria-hidden="true"></div>
 
+<div class="dex">
+<div class="dex-word" aria-hidden="true">DEX</div>
+
 <header class="hero">
   <div class="hero-inner">
+    <div class="dex-lights" aria-hidden="true"><i class="dex-lens"></i><span class="dex-leds"><i class="led r"></i><i class="led y"></i><i class="led g"></i></span></div>
     <div class="hero-logo">
       <img src="/LogoPokemon.png" alt="Pokémon">
     </div>
@@ -60,7 +64,8 @@
   <button class="tab" role="tab" data-tab="equipo" aria-selected="false" type="button">Equipo</button>
 </nav>
 
-<main>
+<main id="dex-screen" class="dex-screen">
+<div class="fx-wipe" id="dex-wipe" aria-hidden="true"><i></i></div>
 
   <!-- ===================== PARTICIPANTES ===================== -->
   <section class="panel is-active" id="tab-participantes" role="tabpanel">
@@ -73,20 +78,24 @@
       <span class="porra-count" id="porra-count"></span>
     </div>
 
-    <div class="stage-wrap" id="stage-wrap">
-      <div class="stage-top">
-        <label class="jump">Ir a
-          <select id="jump" aria-label="Elegir participante"></select>
-        </label>
-        <span class="stage-counter" id="stage-counter"></span>
-      </div>
+    <div class="part-grid">
+      <aside class="trainers" id="trainers" aria-label="Participantes"></aside>
 
-      <div class="stage-row">
-        <button class="nav-arrow" id="prev" type="button" aria-label="Participante anterior">‹</button>
-        <div class="slide" id="slide">
-          <div id="stage" class="stage"><p class="roster-empty">Cargando participantes…</p></div>
+      <div class="stage-wrap" id="stage-wrap">
+        <div class="stage-top">
+          <label class="jump">Ir a
+            <select id="jump" aria-label="Elegir participante"></select>
+          </label>
+          <span class="stage-counter" id="stage-counter"></span>
         </div>
-        <button class="nav-arrow" id="next" type="button" aria-label="Participante siguiente">›</button>
+
+        <div class="stage-row">
+          <button class="nav-arrow" id="prev" type="button" aria-label="Participante anterior">‹</button>
+          <div class="slide" id="slide">
+            <div id="stage" class="stage"><p class="roster-empty">Cargando participantes…</p></div>
+          </div>
+          <button class="nav-arrow" id="next" type="button" aria-label="Participante siguiente">›</button>
+        </div>
       </div>
     </div>
   </section>
@@ -252,6 +261,7 @@
   </section>
 
 </main>
+</div><!-- /.dex -->
 
 <div class="modal" id="notice" role="dialog" aria-modal="true" aria-labelledby="notice-title" hidden>
   <div class="modal-card notice-card">

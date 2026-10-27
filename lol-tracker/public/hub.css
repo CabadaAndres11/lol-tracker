@@ -153,3 +153,8 @@ body {
   .install-btn { width: 100%; min-height: 60px; font-size: 1.05rem; border-radius: 16px; background: linear-gradient(135deg, #c8aa6e, #e3262f); color: #fff; border: 0; box-shadow: 0 8px 24px rgba(0, 0, 0, .45); }
   .install-hint { max-width: none; font-size: .95rem; padding: .9rem 1rem; border-radius: 14px; background: rgba(255, 255, 255, .07); border: 1px solid rgba(255, 255, 255, .2); color: #e6e9f0; }
 }
+
+/* En ordenador (ratón) no se ofrece instalar la app: solo en móviles y tablets */
+@media (hover: hover) and (pointer: fine) {
+  .hub-foot, .install-btn, .install-hint { display: none !important; }
+}

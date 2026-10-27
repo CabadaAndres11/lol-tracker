@@ -2137,11 +2137,11 @@ const tipoColor = (k) => TYPES[TYPE_IDS[k]][1];
 const tipoChip = (k, extra = '') => `<span class="tp-chip${isLightColor(tipoColor(k)) ? ' light' : ''}${extra}" style="--tc:${tipoColor(k)}">${tipoName(k)}</span>`;
 
 const TIPO_GROUPS = [
-  { mult: 4, label: 'x4', title: 'Daño x4', cls: 'x4' },
-  { mult: 2, label: 'x2', title: 'Daño x2', cls: 'x2' },
-  { mult: 0.5, label: 'x0.5', title: 'Daño x0.5', cls: 'x05' },
-  { mult: 0.25, label: 'x0.25', title: 'Daño x0.25', cls: 'x025' },
-  { mult: 0, label: 'x0', title: 'Inmune (x0)', cls: 'x0' },
+  { mult: 4, label: 'x4', text: 'Muy efectivo', cls: 'x4' },
+  { mult: 2, label: 'x2', text: 'Efectivo', cls: 'x2' },
+  { mult: 0.5, label: 'x0.5', text: 'Resistente', cls: 'x05' },
+  { mult: 0.25, label: 'x0.25', text: 'Muy resistente', cls: 'x025' },
+  { mult: 0, label: '', text: 'Inmune', cls: 'x0' },
 ];
 
 function renderTipos() {
@@ -2160,7 +2160,7 @@ function renderTipos() {
     const groups = TIPO_GROUPS.map((g) => {
       const list = keys.filter((a) => typeMultiplier(a, tiposSel) === g.mult);
       if (!list.length) return '';
-      return `<div class="tp-group tp-${g.cls}"><div class="tp-mult">${g.label}</div><div class="tp-list">${list.map((a) => tipoChip(a)).join('')}</div></div>`;
+      return `<div class="tp-group tp-${g.cls}"><div class="tp-mult">${g.label ? `<span class="tp-n">${g.label}</span>` : ''}<span class="tp-t">${g.text}</span></div><div class="tp-list">${list.map((a) => tipoChip(a)).join('')}</div></div>`;
     }).join('');
     results = `<div class="tp-results" aria-live="polite">${groups}</div>`;
   }

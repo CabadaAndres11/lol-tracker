@@ -2275,3 +2275,13 @@ footer { padding-bottom: calc(3rem + env(safe-area-inset-bottom)); }
 .badge:hover:not(.is-locked) .b-img { filter: grayscale(.6) brightness(.6); }
 .badge.is-on .b-img { opacity: 1; filter: drop-shadow(0 0 6px color-mix(in srgb, var(--c) 80%, transparent)) drop-shadow(0 2px 0 rgba(0, 0, 0, .5)); animation: badge-pop .35s ease-out; }
 @media (prefers-reduced-motion: reduce) { .badge.is-on .b-img { animation: none; } }
+
+/* Calculadora de Tipos: atajos a los Pokémon de los participantes */
+.tp-trainer { margin-top: 1rem; }
+.tp-trainer-name { font: 400 .62rem var(--font-pixel); color: var(--gold); letter-spacing: .06em; margin-bottom: .4rem; text-transform: uppercase; }
+.tp-quick-list { display: flex; flex-wrap: wrap; gap: .4rem; }
+.tp-quick { display: inline-flex; align-items: center; gap: .3rem; min-height: 48px; padding: .2rem .8rem .2rem .3rem; border-radius: 999px; background: rgba(255, 255, 255, .06); border: 2px solid rgba(255, 255, 255, .16); color: var(--text); font: 700 .82rem var(--font-body); cursor: pointer; transition: transform .12s ease, border-color .12s ease; }
+.tp-quick img { width: 40px; height: 40px; object-fit: contain; }
+.tp-quick:hover { border-color: var(--gold); transform: translateY(-1px); }
+.tp-quick.is-on { background: var(--dex-paper); color: var(--dex-ink); border-color: var(--gold); }
+.tp-quick:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }

@@ -239,6 +239,7 @@ async function loadDex() {
     buildDex(all);
     try { localStorage.setItem(DEX_CACHE_KEY, JSON.stringify(all)); } catch { /* ignorar */ }
     renderLeague();
+    renderTipos();
     if (!editing && !viewing) render(); // para que aparezcan las imágenes de los equipos ya cargados
   } catch (err) {
     console.warn('No se pudo cargar la Pokédex:', err);
@@ -1109,6 +1110,7 @@ async function loadAll() {
     }
     if (rvRes && rvRes.ok) rivals = (await rvRes.json()).rivals || {};
     renderLeague(); // los equipos alimentan las fotos de la liga
+    if (!tiposRoot.contains(document.activeElement)) renderTipos();
     renderPorrasTab();
     if (editing || viewing) return; // por si empezó a editar mientras cargaba
     // Solo se repinta si los datos han cambiado (así no se reinician las animaciones en cada sondeo).
@@ -2193,6 +2195,24 @@ function updateTipoOut() {
   if (out) out.innerHTML = tipoPokeHtml();
 }
 
+// Atajos: los Pokémon de los equipos de cada participante, para consultar rápido en los duelos
+function tiposTeamsHtml() {
+  const rows = players.map((p) => {
+    const mons = (teams[idOf(p)] || []).filter((m) => m && m.species);
+    if (!mons.length) return '';
+    const chips = mons.map((m) => {
+      const d = (m.dexId && dexById[m.dexId]) || dexLookup(m.species);
+      const name = d ? d.name : m.species;
+      const id = d ? d.id : m.dexId;
+      const on = tiposMode === 'pokemon' && dexLookup(tipoQuery)?.id === id && id;
+      return `<button type="button" class="tp-quick${on ? ' is-on' : ''}" data-tipopoke="${escapeHtml(name).replace(/"/g, '&quot;')}" title="Ver debilidades de ${escapeHtml(name)}">${id ? `<img src="${ARTWORK_URL(id)}" alt="" width="40" height="40" loading="lazy" onerror="this.style.visibility='hidden'">` : ''}<span>${escapeHtml(name)}</span></button>`;
+    }).join('');
+    return `<div class="tp-trainer"><div class="tp-trainer-name">${escapeHtml(p.name)}</div><div class="tp-quick-list">${chips}</div></div>`;
+  }).join('');
+  if (!rows) return '';
+  return `<div class="card tp-card"><h2>Pokémon de los participantes</h2><p class="card-text">Pulsa uno para ver sus debilidades al instante.</p>${rows}</div>`;
+}
+
 function renderTipos() {
   const keys = Object.keys(TYPE_IDS);
   const modes = `<div class="tp-modes" role="tablist" aria-label="Modo de la calculadora">
@@ -2206,7 +2226,7 @@ function renderTipos() {
         <h2>Calculadora de Tipos</h2>${modes}
         <p class="card-text">Escribe el Pokémon que <strong>recibe</strong> el ataque y verás sus tipos y de qué tipos recibe más o menos daño.</p>
         <label class="tp-search">Pokémon<input type="text" id="tp-q" list="pokemon-names" maxlength="40" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Ej. Charizard, Alolan Raichu…" value="${escapeHtml(tipoQuery).replace(/"/g, '&quot;')}"></label>
-      </div>
+      </div>${tiposTeamsHtml()}
       <div class="card tp-card"><h2>Recibe daño de</h2><div id="tp-out">${tipoPokeHtml()}</div></div>`;
     return;
   }
@@ -2230,11 +2250,17 @@ function renderTipos() {
       <p class="card-text">Selecciona los tipos del Pokémon que <strong>recibe</strong> el ataque (1 o 2) y mira qué tipos le pegan x4, x2, x0.5, x0.25 o ni le hacen daño.</p>
       <div class="tp-pick" role="group" aria-label="Tipos seleccionados">${slots}${tiposSel.length ? '<button type="button" class="link-btn tp-clear" data-tipo-clear>Limpiar</button>' : ''}</div>
       <div class="tp-grid" role="group" aria-label="Elegir tipo">${buttons}</div>
-    </div>
+    </div>${tiposTeamsHtml()}
     <div class="card tp-card"><h2>Recibe daño de</h2>${results}</div>`;
 }
 
 tiposRoot.addEventListener('click', (e) => {
+  const q = e.target.closest('[data-tipopoke]');
+  if (q) {
+    tiposMode = 'pokemon'; tipoQuery = q.dataset.tipopoke; renderTipos();
+    tiposRoot.querySelector('.tp-poke, #tp-out')?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    return;
+  }
   const m = e.target.closest('[data-tipomode]');
   if (m) { tiposMode = m.dataset.tipomode; renderTipos(); return; }
   if (e.target.closest('[data-tipo-clear]')) { tiposSel = []; renderTipos(); return; }

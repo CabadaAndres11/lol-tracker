@@ -7,21 +7,54 @@
 <link rel="icon" href="/LOGO.ico">
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600&family=Inter:wght@400&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;800&family=Bungee&family=Inter:wght@400;500;600&family=Press+Start+2P&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="/hub.css" />
 </head>
 <body>
 
-<h1 class="hub-title">Elige un juego</h1>
+<header class="hub-head">
+  <p class="hub-kicker">Torneos y retos</p>
+  <h1 class="hub-title">Elige tu reto</h1>
+</header>
 
 <main class="games">
-  <a class="game" href="/lol/" aria-label="League of Legends">
-    <img src="/LOGO.png" alt="League of Legends — SoloQ Challenge">
+  <a class="game game-lol" href="/lol/" aria-label="League of Legends: SoloQ Challenge">
+    <span class="game-bg" aria-hidden="true"></span>
+    <span class="game-body">
+      <img class="game-logo" src="/LOGO.png" alt="League of Legends — SoloQ Challenge">
+      <span class="game-name">SoloQ Challenge</span>
+      <span class="game-desc">Clasificación en vivo de la SoloQ: diferencia de LP, rangos, winrate y últimas partidas.</span>
+      <span class="game-status"><i class="dot" aria-hidden="true"></i><span>Clasificación en vivo</span></span>
+      <span class="game-cta">Entrar <b aria-hidden="true">→</b></span>
+    </span>
   </a>
-  <a class="game" href="/pokemon/" aria-label="Pokémon">
-    <img src="/LogoPokemon.png" alt="Pokémon">
+
+  <a class="game game-poke" href="/pokemon/" aria-label="Pokémon: Torneo RandomLocke">
+    <span class="game-bg" aria-hidden="true"></span>
+    <span class="game-body">
+      <img class="game-logo" src="/LogoPokemon.png" alt="Pokémon — Torneo RandomLocke">
+      <span class="game-name">Torneo RandomLocke</span>
+      <span class="game-desc">Equipos, liga, bracket y porras del torneo Pokémon. Domingo 15 de noviembre, 17:00.</span>
+      <span class="game-status"><i class="dot" aria-hidden="true"></i><span id="poke-status">Inscripciones cerradas</span></span>
+      <span class="game-cta">Entrar <b aria-hidden="true">→</b></span>
+    </span>
   </a>
 </main>
 
+<script>
+// Cuenta atrás del torneo Pokémon (solo decoración; si falla, queda el texto por defecto).
+(function () {
+  var el = document.getElementById('poke-status');
+  var start = new Date('2026-11-15T17:00:00+01:00').getTime();
+  function tick() {
+    var ms = start - Date.now();
+    if (ms <= 0) { el.textContent = 'Torneo en marcha'; return; }
+    var d = Math.floor(ms / 864e5), h = Math.floor(ms % 864e5 / 36e5);
+    el.textContent = 'Empieza en ' + d + ' d ' + h + ' h';
+  }
+  tick();
+  setInterval(tick, 60000);
+})();
+</script>
 </body>
 </html>

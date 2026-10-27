@@ -2144,8 +2144,73 @@ const TIPO_GROUPS = [
   { mult: 0, label: '', text: 'Inmune', cls: 'x0' },
 ];
 
+// Resultado (grupos de multiplicadores) para unos tipos defensores
+function tiposResultsHtml(def) {
+  const keys = Object.keys(TYPE_IDS);
+  const groups = TIPO_GROUPS.map((g) => {
+    const list = keys.filter((a) => typeMultiplier(a, def) === g.mult);
+    if (!list.length) return '';
+    return `<div class="tp-group tp-${g.cls}"><div class="tp-mult">${g.label ? `<span class="tp-n">${g.label}</span>` : ''}<span class="tp-t">${g.text}</span></div><div class="tp-list">${list.map((a) => tipoChip(a)).join('')}</div></div>`;
+  }).join('');
+  return `<div class="tp-results" aria-live="polite">${groups}</div>`;
+}
+
+// ---- Modo "Por Pokémon": busca la especie y consulta sus tipos en PokéAPI (caché compartida con el resto de la página) ----
+let tiposMode = 'tipos';     // 'tipos' | 'pokemon'
+let tipoQuery = '';
+const TYPE_KEY_BY_ID = Object.fromEntries(Object.entries(TYPE_IDS).map(([k, v]) => [v, k]));
+const tipoFailed = new Set();
+const tipoPokeId = () => dexLookup(tipoQuery)?.id || null;
+
+function tipoPokeFetch(id) {
+  if (typeCache[id] || typePending.has(id) || tipoFailed.has(id)) return;
+  typePending.add(id);
+  fetch(`https://pokeapi.co/api/v2/pokemon/${id}`)
+    .then((r) => (r.ok ? r.json() : Promise.reject(new Error(r.status))))
+    .then((d) => {
+      typeCache[id] = d.types.map((t) => idFromUrl(t.type.url));
+      try { localStorage.setItem(TYPES_CACHE_KEY, JSON.stringify(typeCache)); } catch { /* ignorar */ }
+    })
+    .catch(() => tipoFailed.add(id))
+    .finally(() => { typePending.delete(id); if (tiposMode === 'pokemon' && tipoPokeId() === id) updateTipoOut(); });
+}
+
+function tipoPokeHtml() {
+  if (!tipoQuery.trim()) return '<p class="tp-empty">Escribe el nombre de un Pokémon (en inglés, como en la Pokédex) y verás sus debilidades y resistencias.</p>';
+  const d = dexLookup(tipoQuery);
+  if (!d) return '<p class="tp-empty">No encuentro ese Pokémon. Elige uno de la lista de sugerencias.</p>';
+  const types = (typeCache[d.id] || []).map((t) => TYPE_KEY_BY_ID[t]).filter(Boolean);
+  const head = `<div class="tp-poke"><img src="${ARTWORK_URL(d.id)}" alt="" width="96" height="96" onerror="this.style.visibility='hidden'"><div><div class="tp-poke-name">${escapeHtml(d.name)}</div><div class="tp-list">${types.map((t) => tipoChip(t)).join('')}</div></div></div>`;
+  if (!types.length) {
+    tipoPokeFetch(d.id);
+    return head + (tipoFailed.has(d.id) ? '<p class="tp-empty">No se han podido cargar los tipos de este Pokémon. Inténtalo de nuevo más tarde.</p>' : '<p class="tp-empty">Cargando tipos…</p>');
+  }
+  return head + tiposResultsHtml(types);
+}
+
+function updateTipoOut() {
+  const out = document.getElementById('tp-out');
+  if (out) out.innerHTML = tipoPokeHtml();
+}
+
 function renderTipos() {
   const keys = Object.keys(TYPE_IDS);
+  const modes = `<div class="tp-modes" role="tablist" aria-label="Modo de la calculadora">
+      <button type="button" role="tab" class="tp-mode${tiposMode === 'tipos' ? ' is-on' : ''}" aria-selected="${tiposMode === 'tipos'}" data-tipomode="tipos">Por tipos</button>
+      <button type="button" role="tab" class="tp-mode${tiposMode === 'pokemon' ? ' is-on' : ''}" aria-selected="${tiposMode === 'pokemon'}" data-tipomode="pokemon">Por Pokémon</button>
+    </div>`;
+
+  if (tiposMode === 'pokemon') {
+    tiposRoot.innerHTML = `
+      <div class="card tp-card">
+        <h2>Calculadora de Tipos</h2>${modes}
+        <p class="card-text">Escribe el Pokémon que <strong>recibe</strong> el ataque y verás sus tipos y de qué tipos recibe más o menos daño.</p>
+        <label class="tp-search">Pokémon<input type="text" id="tp-q" list="pokemon-names" maxlength="40" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Ej. Charizard, Alolan Raichu…" value="${escapeHtml(tipoQuery).replace(/"/g, '&quot;')}"></label>
+      </div>
+      <div class="card tp-card"><h2>Recibe daño de</h2><div id="tp-out">${tipoPokeHtml()}</div></div>`;
+    return;
+  }
+
   const buttons = keys.map((k) => {
     const on = tiposSel.includes(k);
     return `<button type="button" class="tp-btn${isLightColor(tipoColor(k)) ? ' light' : ''}${on ? ' is-on' : ''}" style="--tc:${tipoColor(k)}" data-tipo="${k}" aria-pressed="${on}">${tipoName(k)}</button>`;
@@ -2155,19 +2220,13 @@ function renderTipos() {
     ? `<button type="button" class="tp-slot is-filled" data-tipo="${tiposSel[i]}" title="Quitar ${tipoName(tiposSel[i])}">${tipoChip(tiposSel[i])}<span class="tp-x" aria-hidden="true">×</span></button>`
     : `<span class="tp-slot">${i === 0 ? 'Tipo 1' : 'Tipo 2 (opcional)'}</span>`).join('<span class="tp-plus" aria-hidden="true">+</span>');
 
-  let results = '<p class="tp-empty">Elige el tipo (o los dos tipos) del Pokémon que defiende y verás de qué tipos recibe más o menos daño.</p>';
-  if (tiposSel.length) {
-    const groups = TIPO_GROUPS.map((g) => {
-      const list = keys.filter((a) => typeMultiplier(a, tiposSel) === g.mult);
-      if (!list.length) return '';
-      return `<div class="tp-group tp-${g.cls}"><div class="tp-mult">${g.label ? `<span class="tp-n">${g.label}</span>` : ''}<span class="tp-t">${g.text}</span></div><div class="tp-list">${list.map((a) => tipoChip(a)).join('')}</div></div>`;
-    }).join('');
-    results = `<div class="tp-results" aria-live="polite">${groups}</div>`;
-  }
+  const results = tiposSel.length
+    ? tiposResultsHtml(tiposSel)
+    : '<p class="tp-empty">Elige el tipo (o los dos tipos) del Pokémon que defiende y verás de qué tipos recibe más o menos daño.</p>';
 
   tiposRoot.innerHTML = `
     <div class="card tp-card">
-      <h2>Calculadora de Tipos</h2>
+      <h2>Calculadora de Tipos</h2>${modes}
       <p class="card-text">Selecciona los tipos del Pokémon que <strong>recibe</strong> el ataque (1 o 2) y mira qué tipos le pegan x4, x2, x0.5, x0.25 o ni le hacen daño.</p>
       <div class="tp-pick" role="group" aria-label="Tipos seleccionados">${slots}${tiposSel.length ? '<button type="button" class="link-btn tp-clear" data-tipo-clear>Limpiar</button>' : ''}</div>
       <div class="tp-grid" role="group" aria-label="Elegir tipo">${buttons}</div>
@@ -2176,6 +2235,8 @@ function renderTipos() {
 }
 
 tiposRoot.addEventListener('click', (e) => {
+  const m = e.target.closest('[data-tipomode]');
+  if (m) { tiposMode = m.dataset.tipomode; renderTipos(); return; }
   if (e.target.closest('[data-tipo-clear]')) { tiposSel = []; renderTipos(); return; }
   const btn = e.target.closest('[data-tipo]');
   if (!btn) return;
@@ -2183,5 +2244,10 @@ tiposRoot.addEventListener('click', (e) => {
   if (tiposSel.includes(k)) tiposSel = tiposSel.filter((t) => t !== k);
   else tiposSel = [...tiposSel, k].slice(-2); // con un tercero, sale el más antiguo
   renderTipos();
+});
+tiposRoot.addEventListener('input', (e) => {
+  if (e.target.id !== 'tp-q') return;
+  tipoQuery = e.target.value;
+  updateTipoOut();
 });
 renderTipos();

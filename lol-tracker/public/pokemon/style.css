@@ -2257,3 +2257,15 @@ footer { padding-bottom: calc(3rem + env(safe-area-inset-bottom)); }
   .tp-slot { min-width: 0; flex: 1 1 130px; }
 }
 @media (max-width: 700px) { .tp-btn { font-size: .68rem; padding: .5rem .15rem; letter-spacing: 0; } }
+
+/* Calculadora de Tipos: modos y buscador por Pokémon */
+.tp-modes { display: inline-flex; gap: .4rem; margin: .4rem 0 1rem; padding: .3rem; border-radius: 14px; background: rgba(0, 0, 0, .35); border: 2px solid rgba(255, 255, 255, .12); }
+.tp-mode { min-height: 44px; padding: .5rem 1.1rem; border: 0; border-radius: 10px; background: transparent; color: var(--text-muted); font: 700 .78rem var(--font-pixel); cursor: pointer; }
+.tp-mode.is-on { background: var(--dex-paper); color: var(--dex-ink); box-shadow: 0 3px 0 rgba(0, 0, 0, .45); }
+.tp-mode:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+.tp-search { display: grid; gap: .4rem; font-weight: 700; margin-top: .6rem; }
+.tp-search input { min-height: 48px; font-size: 1rem; }
+.tp-poke { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+.tp-poke img { width: 96px; height: 96px; object-fit: contain; flex: none; filter: drop-shadow(0 4px 6px rgba(0, 0, 0, .5)); }
+.tp-poke-name { font: 400 1.5rem var(--font-title); margin-bottom: .4rem; }
+@media (max-width: 700px) { .tp-modes { display: flex; } .tp-mode { flex: 1; padding: .5rem .3rem; } }

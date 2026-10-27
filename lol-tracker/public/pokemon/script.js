@@ -2094,3 +2094,94 @@ document.getElementById('liga-root').addEventListener('click', (e) => {
 
 loadLeague();
 setInterval(loadLeague, 30 * 1000);
+
+
+// ============================================================
+// CALCULADORA DE TIPOS
+// ============================================================
+
+// Tabla de tipos (generación 6 en adelante). Para cada tipo atacante:
+// [súper eficaz contra, poco eficaz contra, sin efecto contra]. Nombres en inglés = claves de TYPE_IDS.
+const TYPE_IDS = { normal: 1, fighting: 2, flying: 3, poison: 4, ground: 5, rock: 6, bug: 7, ghost: 8, steel: 9, fire: 10, water: 11, grass: 12, electric: 13, psychic: 14, ice: 15, dragon: 16, dark: 17, fairy: 18 };
+const TYPE_CHART = {
+  normal:   [[], ['rock', 'steel'], ['ghost']],
+  fire:     [['grass', 'ice', 'bug', 'steel'], ['fire', 'water', 'rock', 'dragon'], []],
+  water:    [['fire', 'ground', 'rock'], ['water', 'grass', 'dragon'], []],
+  electric: [['water', 'flying'], ['electric', 'grass', 'dragon'], ['ground']],
+  grass:    [['water', 'ground', 'rock'], ['fire', 'grass', 'poison', 'flying', 'bug', 'dragon', 'steel'], []],
+  ice:      [['grass', 'ground', 'flying', 'dragon'], ['fire', 'water', 'ice', 'steel'], []],
+  fighting: [['normal', 'ice', 'rock', 'dark', 'steel'], ['poison', 'flying', 'psychic', 'bug', 'fairy'], ['ghost']],
+  poison:   [['grass', 'fairy'], ['poison', 'ground', 'rock', 'ghost'], ['steel']],
+  ground:   [['fire', 'electric', 'poison', 'rock', 'steel'], ['grass', 'bug'], ['flying']],
+  flying:   [['grass', 'fighting', 'bug'], ['electric', 'rock', 'steel'], []],
+  psychic:  [['fighting', 'poison'], ['psychic', 'steel'], ['dark']],
+  bug:      [['grass', 'psychic', 'dark'], ['fire', 'fighting', 'poison', 'flying', 'ghost', 'steel', 'fairy'], []],
+  rock:     [['fire', 'ice', 'flying', 'bug'], ['fighting', 'ground', 'steel'], []],
+  ghost:    [['psychic', 'ghost'], ['dark'], ['normal']],
+  dragon:   [['dragon'], ['steel'], ['fairy']],
+  dark:     [['psychic', 'ghost'], ['fighting', 'dark', 'fairy'], []],
+  steel:    [['ice', 'rock', 'fairy'], ['fire', 'water', 'electric', 'steel'], []],
+  fairy:    [['fighting', 'dragon', 'dark'], ['fire', 'poison', 'steel'], []],
+};
+
+// Multiplicador con el que un tipo atacante golpea a un Pokémon con los tipos defensores indicados.
+function typeMultiplier(attacker, defenders) {
+  const [se, nve, imm] = TYPE_CHART[attacker];
+  return defenders.reduce((m, d) => m * (imm.includes(d) ? 0 : se.includes(d) ? 2 : nve.includes(d) ? 0.5 : 1), 1);
+}
+
+let tiposSel = [];   // hasta 2 tipos defensores seleccionados (claves en inglés)
+const tiposRoot = document.getElementById('tipos-root');
+const tipoName = (k) => TYPES[TYPE_IDS[k]][0];
+const tipoColor = (k) => TYPES[TYPE_IDS[k]][1];
+const tipoChip = (k, extra = '') => `<span class="tp-chip${isLightColor(tipoColor(k)) ? ' light' : ''}${extra}" style="--tc:${tipoColor(k)}">${tipoName(k)}</span>`;
+
+const TIPO_GROUPS = [
+  { mult: 4, label: 'x4', title: 'Daño x4', cls: 'x4' },
+  { mult: 2, label: 'x2', title: 'Daño x2', cls: 'x2' },
+  { mult: 0.5, label: 'x0.5', title: 'Daño x0.5', cls: 'x05' },
+  { mult: 0.25, label: 'x0.25', title: 'Daño x0.25', cls: 'x025' },
+  { mult: 0, label: 'x0', title: 'Inmune (x0)', cls: 'x0' },
+];
+
+function renderTipos() {
+  const keys = Object.keys(TYPE_IDS);
+  const buttons = keys.map((k) => {
+    const on = tiposSel.includes(k);
+    return `<button type="button" class="tp-btn${isLightColor(tipoColor(k)) ? ' light' : ''}${on ? ' is-on' : ''}" style="--tc:${tipoColor(k)}" data-tipo="${k}" aria-pressed="${on}">${tipoName(k)}</button>`;
+  }).join('');
+
+  const slots = [0, 1].map((i) => tiposSel[i]
+    ? `<button type="button" class="tp-slot is-filled" data-tipo="${tiposSel[i]}" title="Quitar ${tipoName(tiposSel[i])}">${tipoChip(tiposSel[i])}<span class="tp-x" aria-hidden="true">×</span></button>`
+    : `<span class="tp-slot">${i === 0 ? 'Tipo 1' : 'Tipo 2 (opcional)'}</span>`).join('<span class="tp-plus" aria-hidden="true">+</span>');
+
+  let results = '<p class="tp-empty">Elige el tipo (o los dos tipos) del Pokémon que defiende y verás de qué tipos recibe más o menos daño.</p>';
+  if (tiposSel.length) {
+    const groups = TIPO_GROUPS.map((g) => {
+      const list = keys.filter((a) => typeMultiplier(a, tiposSel) === g.mult);
+      if (!list.length) return '';
+      return `<div class="tp-group tp-${g.cls}"><div class="tp-mult">${g.label}</div><div class="tp-list">${list.map((a) => tipoChip(a)).join('')}</div></div>`;
+    }).join('');
+    results = `<div class="tp-results" aria-live="polite">${groups}</div>`;
+  }
+
+  tiposRoot.innerHTML = `
+    <div class="card tp-card">
+      <h2>Calculadora de Tipos</h2>
+      <p class="card-text">Selecciona los tipos del Pokémon que <strong>recibe</strong> el ataque (1 o 2) y mira qué tipos le pegan x4, x2, x0.5, x0.25 o ni le hacen daño.</p>
+      <div class="tp-pick" role="group" aria-label="Tipos seleccionados">${slots}${tiposSel.length ? '<button type="button" class="link-btn tp-clear" data-tipo-clear>Limpiar</button>' : ''}</div>
+      <div class="tp-grid" role="group" aria-label="Elegir tipo">${buttons}</div>
+    </div>
+    <div class="card tp-card"><h2>Recibe daño de</h2>${results}</div>`;
+}
+
+tiposRoot.addEventListener('click', (e) => {
+  if (e.target.closest('[data-tipo-clear]')) { tiposSel = []; renderTipos(); return; }
+  const btn = e.target.closest('[data-tipo]');
+  if (!btn) return;
+  const k = btn.dataset.tipo;
+  if (tiposSel.includes(k)) tiposSel = tiposSel.filter((t) => t !== k);
+  else tiposSel = [...tiposSel, k].slice(-2); // con un tercero, sale el más antiguo
+  renderTipos();
+});
+renderTipos();

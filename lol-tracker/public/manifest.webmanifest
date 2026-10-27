@@ -1,7 +1,7 @@
 {
-  "name": "Retos — SoloQ Challenge y Torneo RandomLocke",
-  "short_name": "Retos",
-  "description": "Clasificación en vivo de la SoloQ y torneo Pokémon RandomLocke.",
+  "name": "Challenge Arena",
+  "short_name": "Arena",
+  "description": "La arena de los retos: SoloQ Challenge y Torneo RandomLocke.",
   "lang": "es",
   "start_url": "/",
   "scope": "/",

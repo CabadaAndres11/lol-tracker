@@ -1,6 +1,6 @@
 // Service worker: permite instalar la web como app y abrirla (con los últimos datos vistos) sin conexión.
 // Estrategia "red primero": con conexión siempre se ve la versión más reciente; sin conexión, la última guardada.
-const VERSION = 'retos-v1';
+const VERSION = 'retos-v2';
 const PAGES = `${VERSION}-pages`;
 const IMAGES = `${VERSION}-img`;
 const SHELL = ['/', '/hub.css', '/manifest.webmanifest', '/icons/icon-192.png', '/lol/', '/lol/style.css', '/lol/script.js', '/pokemon/', '/pokemon/style.css', '/pokemon/script.js'];

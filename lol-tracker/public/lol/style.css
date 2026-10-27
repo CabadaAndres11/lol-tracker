@@ -997,3 +997,12 @@ tbody tr:hover .emblem { filter: drop-shadow(0 0 8px var(--tc)); }
 @media (max-width: 560px) {
   .emblem { width: 46px; height: 46px; margin: -8px -4px; }
 }
+
+/* Emblemas más grandes */
+.emblem { width: 84px; height: 84px; margin: -16px -4px -16px -8px; }
+.emblem-sm { width: 58px; height: 58px; margin: -10px 0 -10px -4px; }
+.col-tier .tier-badge { gap: .6rem; }
+@media (max-width: 560px) {
+  .emblem { width: 72px; height: 72px; margin: -14px -4px -14px -8px; }
+}
+.col-tier .tier-label, .col-start .tier-label { white-space: nowrap; }

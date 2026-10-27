@@ -107,12 +107,27 @@ body {
 .game-poke .game-cta { font-family: 'Press Start 2P', monospace; font-size: .62rem; letter-spacing: 0; color: #1a1a24; background: #f7f2ee; border: 3px solid #1a1a24; border-radius: 999px; box-shadow: 0 4px 0 #1a1a24; }
 .game-poke:hover .game-cta { background: #fff3b0; transform: translateY(-1px); box-shadow: 0 5px 0 #1a1a24; }
 
-/* ---------- Móvil: uno encima del otro ---------- */
+/* ---------- Móvil: dos cuadrados lado a lado ---------- */
 @media (max-width: 800px) {
-  .games { flex-direction: column; }
-  .game { min-height: 380px; flex: none; }
-  .games:hover .game, .games .game:hover { flex-grow: 0; }
-  .game-logo { width: clamp(130px, 40vw, 200px); }
+  .hub-head { padding-bottom: 1rem; }
+  .games { flex: none; flex-direction: row; gap: .7rem; }
+  .game { flex: 1 1 0; min-height: 0; aspect-ratio: 1 / 1; border-radius: 18px; }
+  .games:hover .game, .games .game:hover, .games .game:focus-visible { flex-grow: 1; }
+  .game:hover .game-body, .game:hover .game-logo, .game:hover .game-bg { transform: none; }
+  .game-body { gap: .55rem; padding: .8rem .5rem; width: 100%; }
+  .game-logo { width: 62%; max-width: 150px; }
+  .game-desc, .game-cta { display: none; }
+  .game-name { font-size: .95rem; }
+  .game-status { padding: .3rem .6rem; font-size: .58rem; letter-spacing: .06em; }
+  .game-poke { border-width: 4px; box-shadow: 0 0 0 3px #1a1a24; }
+  .game-poke .game-name { font-size: .85rem; }
+  .game-poke .game-status { font-size: .46rem; }
+  .game-poke::before { width: 260px; height: 260px; right: -90px; bottom: -100px; border-width: 10px; }
+
+  /* Botón de instalar: grande y justo debajo */
+  .hub-foot { padding: .9rem clamp(.6rem, 2vw, 1.5rem) calc(1.4rem + env(safe-area-inset-bottom)); }
+  .install-btn { width: 100%; min-height: 60px; font-size: 1.05rem; border-radius: 16px; background: linear-gradient(135deg, #c8aa6e, #e3262f); color: #fff; border: 0; box-shadow: 0 8px 24px rgba(0, 0, 0, .45); }
+  .install-hint { max-width: none; font-size: .95rem; padding: .9rem 1rem; border-radius: 14px; background: rgba(255, 255, 255, .07); border: 1px solid rgba(255, 255, 255, .2); color: #e6e9f0; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -129,3 +144,12 @@ body {
 .install-hint { margin: .6rem auto 0; max-width: 34ch; font-size: .82rem; line-height: 1.5; color: #aeb6c4; }
 .hub-head { padding-top: calc(2.2rem + env(safe-area-inset-top)); }
 @media (max-width: 800px) { .games { padding-left: max(.6rem, env(safe-area-inset-left)); padding-right: max(.6rem, env(safe-area-inset-right)); } }
+
+/* Móvil: botón de instalar grande (va al final para ganar a los estilos base) */
+@media (max-width: 800px) {
+  .game-status { display: none; }
+  .game-logo { width: 68%; max-width: 160px; }
+  .game-body { gap: .7rem; }
+  .install-btn { width: 100%; min-height: 60px; font-size: 1.05rem; border-radius: 16px; background: linear-gradient(135deg, #c8aa6e, #e3262f); color: #fff; border: 0; box-shadow: 0 8px 24px rgba(0, 0, 0, .45); }
+  .install-hint { max-width: none; font-size: .95rem; padding: .9rem 1rem; border-radius: 14px; background: rgba(255, 255, 255, .07); border: 1px solid rgba(255, 255, 255, .2); color: #e6e9f0; }
+}

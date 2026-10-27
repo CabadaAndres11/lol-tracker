@@ -2,10 +2,16 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>Retos · Elige tu juego</title>
 <link rel="icon" href="/hub-icon.svg" type="image/svg+xml">
 <meta name="theme-color" content="#05070d">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Retos">
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;800&family=Bungee&family=Inter:wght@400;500;600&family=Press+Start+2P&display=swap" rel="stylesheet" />
@@ -42,6 +48,25 @@
   </a>
 </main>
 
+<footer class="hub-foot">
+  <button class="install-btn" id="install-btn" type="button" hidden>📲 Instalar app</button>
+  <p class="install-hint" id="install-hint" hidden>Para instalarla en iPhone: pulsa <strong>Compartir</strong> y después <strong>«Añadir a pantalla de inicio»</strong>.</p>
+</footer>
+
+<script>
+// Botón «Instalar app» (Android/Chrome) o pista para iPhone. No se muestra si ya está instalada.
+(function () {
+  var standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+  if (standalone) return;
+  var btn = document.getElementById('install-btn'), hint = document.getElementById('install-hint'), deferred = null;
+  window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); deferred = e; btn.hidden = false; });
+  btn.addEventListener('click', function () { if (!deferred) return; deferred.prompt(); deferred.userChoice.then(function () { deferred = null; btn.hidden = true; }); });
+  window.addEventListener('appinstalled', function () { btn.hidden = true; hint.hidden = true; });
+  var ios = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+  if (ios) hint.hidden = false;
+})();
+</script>
+
 <script>
 // Cuenta atrás del torneo Pokémon (solo decoración; si falla, queda el texto por defecto).
 (function () {
@@ -56,6 +81,9 @@
   tick();
   setInterval(tick, 60000);
 })();
+</script>
+<script>
+if ('serviceWorker' in navigator) window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
 </script>
 </body>
 </html>

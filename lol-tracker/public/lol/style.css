@@ -1034,3 +1034,16 @@ tbody td { padding: .6rem .6rem; }
   thead th { font-size: .62rem; letter-spacing: .08em; padding-left: .35rem; padding-right: .35rem; }
   tbody td { padding: .6rem .35rem; }
 }
+
+/* ---------- Móvil / app instalada: zonas seguras (muesca y barra inferior) ---------- */
+.back-home, #update-timer { top: calc(20px + env(safe-area-inset-top)); }
+.back-home { left: calc(20px + env(safe-area-inset-left)); }
+#update-timer { right: calc(20px + env(safe-area-inset-right)); }
+.winner-popup { bottom: calc(20px + env(safe-area-inset-bottom)); }
+footer { padding-bottom: calc(3rem + env(safe-area-inset-bottom)); }
+@media (max-width: 560px) {
+  .back-home { left: calc(12px + env(safe-area-inset-left)); }
+  #update-timer { right: calc(12px + env(safe-area-inset-right)); }
+  .winner-popup { bottom: calc(12px + env(safe-area-inset-bottom)); }
+  .hero { padding-top: calc(4.5rem + env(safe-area-inset-top)); }
+}

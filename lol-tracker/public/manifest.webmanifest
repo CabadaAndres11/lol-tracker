@@ -1,0 +1,21 @@
+{
+  "name": "Retos — SoloQ Challenge y Torneo RandomLocke",
+  "short_name": "Retos",
+  "description": "Clasificación en vivo de la SoloQ y torneo Pokémon RandomLocke.",
+  "lang": "es",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#05070d",
+  "theme_color": "#05070d",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "SoloQ Challenge", "short_name": "LoL", "url": "/lol/", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Torneo RandomLocke", "short_name": "Pokémon", "url": "/pokemon/", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] }
+  ]
+}

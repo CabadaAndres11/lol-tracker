@@ -2,10 +2,16 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>Torneo RandomLocke · Pokémon</title>
 <link rel="icon" href="/LogoPokemon.ico?v=2">
 <meta name="theme-color" content="#b3121f">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="RandomLocke">
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&family=Bungee&family=Press+Start+2P&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet" />
@@ -296,5 +302,8 @@
 </footer>
 
 <script src="/pokemon/script.js"></script>
+<script>
+if ('serviceWorker' in navigator) window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
+</script>
 </body>
 </html>

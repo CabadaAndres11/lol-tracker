@@ -68,16 +68,16 @@ function sortedPlayers() {
 // Emblemas oficiales de rango (CommunityDragon). Si una imagen no carga, se prueba una versión
 // antigua del parche y, como último recurso, el hexágono de color.
 const EMBLEM_BASES = [
-  'https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-static-assets/global/default/images/ranked-emblem/',
-  'https://raw.communitydragon.org/14.10/plugins/rcp-fe-lol-static-assets/global/default/images/ranked-emblem/',
+  'https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-static-assets/global/default/images/ranked-mini-crests/',
+  'https://raw.communitydragon.org/14.10/plugins/rcp-fe-lol-static-assets/global/default/images/ranked-mini-crests/',
 ];
-const EMBLEM_TIERS = new Set(['iron', 'bronze', 'silver', 'gold', 'platinum', 'emerald', 'diamond', 'master', 'grandmaster', 'challenger']);
+const EMBLEM_TIERS = new Set(['unranked', 'iron', 'bronze', 'silver', 'gold', 'platinum', 'emerald', 'diamond', 'master', 'grandmaster', 'challenger']);
 
 function emblemHtml(tier, color, small) {
   const t = String(tier || '').toLowerCase();
   const crest = `<span class="crest${small ? ' crest-sm' : ''}" style="--c:${color}"><i></i></span>`;
   if (!EMBLEM_TIERS.has(t)) return crest;
-  const urls = EMBLEM_BASES.map((b) => `${b}emblem-${t}.png`);
+  const urls = EMBLEM_BASES.map((b) => `${b}${t}.svg`);
   const fallbackCrest = crest.replace(/"/g, '&quot;');
   const onerror = `var q=(this.dataset.fb||'').split('|').filter(Boolean);if(q.length){this.src=q.shift();this.dataset.fb=q.join('|')}else{this.outerHTML='${fallbackCrest}'}`;
   return `<img class="emblem${small ? ' emblem-sm' : ''}" src="${urls[0]}" data-fb="${urls.slice(1).join('|')}" alt="${capitalize(t)}" loading="lazy" draggable="false" onerror="${onerror}">`;
@@ -126,7 +126,7 @@ function renderTable() {
       tr.classList.add('error-row');
       tr.innerHTML = `
         <td>${i + 1}</td>
-        <td colspan="7">${escapeHtml(p.displayName)} — no se pudo cargar (${escapeHtml(p.error)})</td>`;
+        <td colspan="6">${escapeHtml(p.displayName)} — no se pudo cargar (${escapeHtml(p.error)})</td>`;
       body.appendChild(tr);
       return;
     }
@@ -167,18 +167,22 @@ function renderTable() {
       <td class="col-tier">
         <span class="tier-badge">
           ${emblemHtml(p.tier, color, false)}
-          <span class="tier-label" style="color:${color}">${escapeHtml(tierLabel)}</span>
+          <span class="tier-text">
+            <span class="tier-label" style="color:${color}">${escapeHtml(tierLabel)}</span>
+            ${p.tier === 'UNRANKED' ? '' : `<span class="tier-lp">${p.lp} LP</span>`}
+          </span>
         </span>
       </td>
-      <td class="col-lp">${p.tier === 'UNRANKED' ? '—' : `${p.lp}<small>LP</small>`}</td>
       <td class="col-gained">${deltaHtml}</td>
       <td class="col-start">
         <span class="start-row">
           <span class="tier-badge">
             ${emblemHtml(p.startTier, startColor, true)}
-            <span class="tier-label" style="color:${startColor}">${escapeHtml(startTierLabel)}</span>
+            <span class="tier-text">
+              <span class="tier-label" style="color:${startColor}">${escapeHtml(startTierLabel)}</span>
+              ${p.startLP != null ? `<span class="tier-lp">${p.startLP} LP</span>` : ''}
+            </span>
           </span>
-          ${p.startLP != null ? `<span class="start-lp">${p.startLP} LP</span>` : ''}
         </span>
       </td>
       <td class="col-wr ${wrClass}">
@@ -243,7 +247,7 @@ async function loadLeaderboard() {
     if (!body.children.length || body.querySelector('.loading-row')) {
       body.innerHTML = `
         <tr class="error-row">
-          <td colspan="8">No se pudo cargar la clasificación: ${escapeHtml(err.message)}</td>
+          <td colspan="7">No se pudo cargar la clasificación: ${escapeHtml(err.message)}</td>
         </tr>`;
     }
     console.error(err);

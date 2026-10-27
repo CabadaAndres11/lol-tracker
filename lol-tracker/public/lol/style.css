@@ -903,3 +903,89 @@ footer { color: var(--text-muted); }
   .form.is-loading .fm, .pulse, .title-spark { animation: none !important; }
   tbody tr { transition: none; }
 }
+
+
+/* ============================================================
+   TEMA HEXTECH: cronómetro, ganador, aviso de reto y botón de volver
+   ============================================================ */
+
+/* Panel Hextech común: fondo azul marino, filo dorado, esquinas rectas */
+#update-timer, .back-home, .winner-popup, #challenge-countdown {
+  background: linear-gradient(180deg, rgba(12, 30, 58, .96), rgba(1, 10, 19, .96));
+  border: 1px solid transparent;
+  border-image: linear-gradient(160deg, #f0e6d2, #c8aa6e 30%, #785a28 70%, #c8aa6e) 1;
+  border-radius: 0;
+  box-shadow: inset 0 1px 0 rgba(240, 230, 210, .14), 0 6px 22px rgba(0, 0, 0, .55);
+  color: var(--text);
+}
+
+/* Cronómetro */
+#update-timer { gap: 12px; padding: 8px 14px 8px 18px; font-family: var(--font-body); }
+#update-text { display: flex; flex-direction: column; align-items: flex-end; line-height: 1.1; }
+#update-timer .timer-label {
+  font-family: var(--font-display); font-size: .62rem; font-weight: 700; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--gold);
+}
+#update-countdown { font-family: var(--font-mono); font-size: 1.15rem; font-weight: 600; color: var(--gold-bright); letter-spacing: .04em; margin-top: 2px; }
+.timer-ring-bg { stroke: #1e2d3d; stroke-width: 3; }
+.timer-ring-progress { stroke: var(--neon-cyan); stroke-width: 3; filter: drop-shadow(0 0 4px rgba(10, 200, 185, .8)); }
+
+/* Botón volver */
+.back-home {
+  display: inline-flex; align-items: center; gap: .45rem; padding: 11px 18px;
+  font-family: var(--font-display); font-size: .78rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--gold); transition: color .15s, box-shadow .15s, background .15s;
+}
+.back-home:hover {
+  color: var(--gold-bright); border-image: linear-gradient(160deg, #0ac8b9, #c8aa6e) 1;
+  box-shadow: inset 0 0 18px rgba(10, 200, 185, .15), 0 0 18px rgba(10, 200, 185, .3);
+}
+.back-home:focus-visible { outline: 2px solid var(--neon-cyan); outline-offset: 3px; }
+
+/* Ganador del último reto */
+.winner-popup { gap: 14px; padding: 14px 44px 14px 14px; box-shadow: inset 0 1px 0 rgba(240, 230, 210, .14), 0 10px 34px rgba(0, 0, 0, .6), 0 0 26px rgba(200, 170, 110, .18); }
+.winner-popup::before {
+  content: ""; position: absolute; left: 0; right: 0; top: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--neon-cyan), var(--gold), transparent);
+}
+.winner-trophy {
+  width: 46px; height: 52px; flex: none; display: grid; place-items: center; font-size: 22px;
+  background: linear-gradient(160deg, #f0e6d2, #785a28);
+  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%); position: relative;
+}
+.winner-trophy::before {
+  content: ""; position: absolute; inset: 3px; z-index: -1; background: radial-gradient(circle at 35% 25%, #14325a, #010a13);
+  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+}
+.winner-trophy { isolation: isolate; }
+.winner-label { font-size: .62rem; letter-spacing: .2em; color: var(--neon-cyan); }
+.winner-name {
+  margin-top: 3px; font-size: 1.3rem; font-weight: 800; letter-spacing: .03em;
+  background: linear-gradient(180deg, #f0e6d2, #c8aa6e); -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.winner-name span { -webkit-text-fill-color: var(--text-muted); font-family: var(--font-body); font-size: .8rem; font-weight: 500; }
+.winner-name:hover { text-decoration: none; filter: drop-shadow(0 0 8px rgba(200, 170, 110, .6)); }
+.winner-close { top: 8px; right: 8px; width: 26px; height: 26px; border-radius: 0; border: 1px solid rgba(200, 170, 110, .4); color: var(--gold); font-size: 17px; }
+.winner-close:hover { background: rgba(200, 170, 110, .15); color: var(--gold-bright); }
+
+/* Aviso de reto */
+#challenge-countdown {
+  position: relative; margin: 16px 0 6px; padding: 11px 34px; min-width: 0;
+  font-family: var(--font-display); font-size: .85rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--text); text-align: center; backdrop-filter: none;
+}
+#challenge-countdown::before, #challenge-countdown::after {
+  content: ""; position: absolute; top: 50%; width: 8px; height: 8px; margin-top: -4px;
+  background: var(--gold); transform: rotate(45deg); box-shadow: 0 0 8px rgba(200, 170, 110, .7);
+}
+#challenge-countdown::before { left: 12px; }
+#challenge-countdown::after { right: 12px; }
+#days-left { color: var(--neon-cyan); font-size: 1.15rem; text-shadow: 0 0 10px rgba(10, 200, 185, .5); }
+
+@media (max-width: 560px) {
+  #update-timer { padding: 6px 8px; gap: 8px; }
+  .back-home { padding: 10px 12px; letter-spacing: .1em; }
+  #challenge-countdown { padding: 10px 26px; font-size: .74rem; letter-spacing: .08em; }
+  #challenge-countdown::before { left: 9px; } #challenge-countdown::after { right: 9px; }
+  .winner-popup { left: 12px; right: 12px; bottom: 12px; max-width: none; }
+}

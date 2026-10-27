@@ -2226,8 +2226,8 @@ function renderTipos() {
         <h2>Calculadora de Tipos</h2>${modes}
         <p class="card-text">Escribe el Pokémon que <strong>recibe</strong> el ataque y verás sus tipos y de qué tipos recibe más o menos daño.</p>
         <label class="tp-search">Pokémon<input type="text" id="tp-q" list="pokemon-names" maxlength="40" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Ej. Charizard, Alolan Raichu…" value="${escapeHtml(tipoQuery).replace(/"/g, '&quot;')}"></label>
-      </div>${tiposTeamsHtml()}
-      <div class="card tp-card"><h2>Recibe daño de</h2><div id="tp-out">${tipoPokeHtml()}</div></div>`;
+      </div>
+      <div class="card tp-card"><h2>Recibe daño de</h2><div id="tp-out">${tipoPokeHtml()}</div></div>${tiposTeamsHtml()}`;
     return;
   }
 
@@ -2258,7 +2258,7 @@ tiposRoot.addEventListener('click', (e) => {
   const q = e.target.closest('[data-tipopoke]');
   if (q) {
     tiposMode = 'pokemon'; tipoQuery = q.dataset.tipopoke; renderTipos();
-    tiposRoot.querySelector('.tp-poke, #tp-out')?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    tiposRoot.querySelector('.tp-poke, #tp-out')?.scrollIntoView({ block: 'start', behavior: 'smooth' });
     return;
   }
   const m = e.target.closest('[data-tipomode]');

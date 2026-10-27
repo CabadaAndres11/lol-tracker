@@ -2269,3 +2269,9 @@ footer { padding-bottom: calc(3rem + env(safe-area-inset-bottom)); }
 .tp-poke img { width: 96px; height: 96px; object-fit: contain; flex: none; filter: drop-shadow(0 4px 6px rgba(0, 0, 0, .5)); }
 .tp-poke-name { font: 400 1.5rem var(--font-title); margin-bottom: .4rem; }
 @media (max-width: 700px) { .tp-modes { display: flex; } .tp-mode { flex: 1; padding: .5rem .3rem; } }
+
+/* Medallas con la imagen real del juego */
+.badge .b-img { width: var(--size); height: var(--size); object-fit: contain; display: block; user-select: none; -webkit-user-drag: none; transition: filter .25s ease, opacity .25s ease; filter: grayscale(1) brightness(.35) contrast(1.1); opacity: .75; }
+.badge:hover:not(.is-locked) .b-img { filter: grayscale(.6) brightness(.6); }
+.badge.is-on .b-img { opacity: 1; filter: drop-shadow(0 0 6px color-mix(in srgb, var(--c) 80%, transparent)) drop-shadow(0 2px 0 rgba(0, 0, 0, .5)); animation: badge-pop .35s ease-out; }
+@media (prefers-reduced-motion: reduce) { .badge.is-on .b-img { animation: none; } }

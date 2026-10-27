@@ -28,14 +28,14 @@ const idOf = (p) => p.name.toLowerCase();
 // ---------------------------------------------------------------
 
 const BADGES = [
-  { name: 'Medalla 1', color: '#9aa4b2', shape: { type: 'path', d: 'M50 5 L90 50 L50 95 L10 50 Z M50 5 L50 95 M10 50 L90 50' } },   // octaedro gris
-  { name: 'Medalla 2', color: '#5ec8ff', shape: { type: 'path', d: 'M50 5 C50 5 18 42 18 63 A32 32 0 0 0 82 63 C82 42 50 5 50 5 Z' } }, // gota azul celeste
-  { name: 'Medalla 3', color: '#ffa726', shape: { type: 'star', points: 16, inner: 0.62 } },                                             // sol
-  { name: 'Medalla 4', color: '#c58bff', shape: { type: 'flower', petals: 8 } },                                                          // flor de 8 pétalos
-  { name: 'Medalla 5', color: '#ff6fae', shape: { type: 'path', d: 'M50 90 C20 68 7 48 7 31 C7 18 17 10 29 10 C39 10 47 16 50 25 C53 16 61 10 71 10 C83 10 93 18 93 31 C93 48 80 68 50 90 Z' } }, // corazón rosa
-  { name: 'Medalla 6', color: '#ffd23f', shape: { type: 'poly', sides: 40 } },                                                            // círculo amarillo
-  { name: 'Medalla 7', color: '#ff4b3a', shape: { type: 'path', d: 'M50 4 C57 22 80 34 80 60 C80 78 67 94 50 94 C33 94 20 80 20 62 C20 50 26 41 33 34 C33 44 39 49 44 49 C40 34 43 18 50 4 Z' } }, // llama roja
-  { name: 'Medalla 8', color: '#52d681', shape: { type: 'path', d: 'M88 8 C46 10 16 34 14 70 C14 78 16 84 20 90 C58 90 86 58 88 8 Z M20 90 L8 98 M20 90 L66 38' } }, // pluma verde
+  { name: 'Medalla Roca', img: 'badges/1.png', color: '#9aa4b2', shape: { type: 'path', d: 'M50 5 L90 50 L50 95 L10 50 Z M50 5 L50 95 M10 50 L90 50' } },   // octaedro gris
+  { name: 'Medalla Cascada', img: 'badges/2.png', color: '#5ec8ff', shape: { type: 'path', d: 'M50 5 C50 5 18 42 18 63 A32 32 0 0 0 82 63 C82 42 50 5 50 5 Z' } }, // gota azul celeste
+  { name: 'Medalla Trueno', img: 'badges/3.png', color: '#ffa726', shape: { type: 'star', points: 16, inner: 0.62 } },                                             // sol
+  { name: 'Medalla Arcoíris', img: 'badges/4.png', color: '#c58bff', shape: { type: 'flower', petals: 8 } },                                                          // flor de 8 pétalos
+  { name: 'Medalla Alma', img: 'badges/5.png', color: '#ff6fae', shape: { type: 'path', d: 'M50 90 C20 68 7 48 7 31 C7 18 17 10 29 10 C39 10 47 16 50 25 C53 16 61 10 71 10 C83 10 93 18 93 31 C93 48 80 68 50 90 Z' } }, // corazón rosa
+  { name: 'Medalla Pantano', img: 'badges/6.png', color: '#ffd23f', shape: { type: 'poly', sides: 40 } },                                                            // círculo amarillo
+  { name: 'Medalla Volcán', img: 'badges/7.png', color: '#ff4b3a', shape: { type: 'path', d: 'M50 4 C57 22 80 34 80 60 C80 78 67 94 50 94 C33 94 20 80 20 62 C20 50 26 41 33 34 C33 44 39 49 44 49 C40 34 43 18 50 4 Z' } }, // llama roja
+  { name: 'Medalla Tierra', img: 'badges/8.png', color: '#52d681', shape: { type: 'path', d: 'M88 8 C46 10 16 34 14 70 C14 78 16 84 20 90 C58 90 86 58 88 8 Z M20 90 L8 98 M20 90 L66 38' } }, // pluma verde
   { name: 'Liga Pokémon', color: '#f4c874', shape: { type: 'star', points: 12, inner: 0.72 } }, // sol dorado
 ];
 
@@ -100,7 +100,7 @@ function badgesBlock(id, compact = false) {
       <button type="button" class="badge${on ? ' is-on' : ''}${locked ? ' is-locked' : ''}${i === LEAGUE ? ' badge-league' : ''}"
         style="--c:${b.color}" data-action="badge" data-id="${encodeURIComponent(id)}" data-index="${i}"
         aria-pressed="${on}" ${locked ? 'aria-disabled="true"' : ''} title="${escapeHtml(label)}">
-        ${badgeSvg(b.shape)}
+        ${b.img ? `<img class="b-img" src="${b.img}" alt="" draggable="false" loading="lazy">` : badgeSvg(b.shape)}
         <span class="badge-label">${i === LEAGUE ? 'LIGA' : i + 1}</span>
       </button>`;
   }).join('');

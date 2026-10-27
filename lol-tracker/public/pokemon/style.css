@@ -2035,3 +2035,97 @@ main.dex-screen.fx-boot { animation: dex-boot .7s ease-out; }
 @media (prefers-reduced-motion: reduce) {
   .dex *, .dex *::before, .dex *::after { animation: none !important; transition: none !important; }
 }
+
+
+/* ============================================================
+   AJUSTES: medallas en cabecera, ventanas emergentes Pokédex, avisos
+   ============================================================ */
+
+/* Medallas arriba a la derecha de cada participante */
+.bt-head { flex-wrap: wrap; }
+.bt-medals { margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+.bt-medals .badges-row { gap: .3rem; justify-content: flex-end; flex-wrap: wrap; }
+.bt-medals .badge { --size: 34px; gap: 0; }
+.bt-medals .badge-league { --size: 44px; margin-left: .3rem; }
+.bt-medals .badge-label { display: none; }
+.bt-medal-count { font-family: var(--font-pixel); font-size: .45rem; color: var(--text-muted); letter-spacing: .5px; }
+.bt-medals.is-champion .bt-medal-count { color: var(--gold); }
+@media (max-width: 700px) {
+  .bt-medals { margin-left: 0; align-items: flex-start; width: 100%; }
+  .bt-medals .badges-row { justify-content: flex-start; }
+}
+
+/* Ventanas emergentes con marco Pokédex */
+.modal { background: rgba(5, 7, 16, .8); }
+.modal-card {
+  background: #0e1730;
+  border: 6px solid var(--dex-paper);
+  border-radius: 22px;
+  box-shadow: 0 0 0 5px var(--dex-ink), 0 24px 60px rgba(0, 0, 0, .7), inset 0 0 40px rgba(0, 0, 0, .6);
+  overflow: hidden;
+}
+.modal-card::before {
+  content: ""; position: absolute; left: 0; right: 0; top: 0; height: 12px;
+  background: linear-gradient(90deg, var(--dex-red), #b3121f); border-bottom: 3px solid var(--dex-ink);
+}
+.modal-card > :first-child { margin-top: 12px; }
+.modal-card::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: repeating-linear-gradient(0deg, transparent 0 3px, rgba(0, 0, 0, .1) 3px 4px);
+}
+.modal-card h2 { font-family: var(--font-title); font-weight: 400; }
+.modal-card input, .mon-form select, .mon-form input { border: 2px solid #3b3b52; background: #0b1020; }
+.modal-card input[type="checkbox"] { width: 18px; height: 18px; padding: 0; accent-color: var(--gold); flex: none; }
+.modal-close {
+  z-index: 3; top: 18px; right: 12px; width: 32px; height: 32px; border-radius: 50%;
+  background: var(--dex-red); color: #fff; border: 2px solid var(--dex-paper); font-size: 20px;
+}
+.modal-close:hover { background: #ff4a52; color: #fff; }
+.notice-card { border-color: var(--dex-paper); }
+.notice-card h2 { color: var(--gold); }
+.add-btn { border: 3px solid var(--dex-ink); box-shadow: 0 4px 0 var(--dex-ink); }
+.add-btn:hover { transform: translateY(-1px); box-shadow: 0 5px 0 var(--dex-ink); }
+.add-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--dex-ink); }
+.add-btn.ghost { background: transparent; border: 3px solid var(--dex-paper); box-shadow: none; }
+
+/* Ficha de Pokémon como "pantalla de resumen" */
+.mon-modal-card { width: min(440px, 100%); }
+.mon-detail { position: relative; z-index: 1; }
+.detail-img { filter: drop-shadow(0 8px 8px rgba(0, 0, 0, .55)); }
+.mon-detail > .detail-img, .mon-detail > .detail-img-empty {
+  background: radial-gradient(ellipse at 50% 85%, rgba(255, 255, 255, .22), transparent 60%);
+  border-radius: 14px; padding: .4rem;
+}
+.mon-detail h2 { margin-top: .4rem; }
+.detail-rows {
+  width: 100%; background: #f4f1e6; color: var(--dex-ink); border: 4px solid #3b3b52;
+  border-radius: 12px 12px 12px 22px; padding: .6rem .9rem; text-align: left; gap: .35rem;
+}
+.detail-rows .mon-ability { color: var(--dex-ink); font-weight: 600; }
+.detail-rows .mon-ability span { color: #4a4a62; font-weight: 500; }
+.mon-detail .mon-moves { gap: .5rem; }
+.mon-moves li {
+  background: var(--tc, #2c2c3c); color: #fff; font-weight: 700; font-size: .85rem;
+  border: 3px solid #111; border-radius: 10px; padding: .55rem .7rem; box-shadow: 0 3px 0 rgba(0, 0, 0, .45);
+}
+.mon-moves li.typed-light { color: #111; }
+.mon-actions .link-btn { color: var(--text); font-weight: 600; }
+.mon-detail .mon-actions { gap: 1.4rem; }
+.mon-form label, .mon-form-label { color: var(--text-muted); }
+
+/* Check del rival / shiny bien alineado */
+.rival-form label.check-label, .mon-form label.check-label { display: flex; flex-direction: row; align-items: center; gap: .55rem; cursor: pointer; }
+
+/* Aviso de Pokémon no permitido: muy visible sobre fondo claro u oscuro */
+.ban-alert {
+  display: block; margin: 0 0 .8rem; padding: .6rem .8rem; font-size: .85rem; font-weight: 700; line-height: 1.35; text-align: left;
+  color: #fff; background: #d62828; border: 3px solid #fff; border-radius: 8px;
+  box-shadow: 0 0 0 3px #7a0f0f, 0 0 16px rgba(255, 60, 60, .7);
+  animation: ban-pulse 1.6s ease-in-out infinite;
+}
+@keyframes ban-pulse { 0%, 100% { box-shadow: 0 0 0 3px #7a0f0f, 0 0 10px rgba(255, 60, 60, .5); } 50% { box-shadow: 0 0 0 3px #7a0f0f, 0 0 22px rgba(255, 60, 60, .95); } }
+.bt-info .ban-alert { font-size: .78rem; margin: 0 3px 3px; }
+.form-ban .ban-alert { margin: .8rem 3px 3px; }
+.mon-modal-card { padding-top: 2.6rem; }
+.mon-modal-card .modal-close { top: 20px; }
+.mon-detail > .ban-alert { margin: 0 0 .8rem; width: 100%; }

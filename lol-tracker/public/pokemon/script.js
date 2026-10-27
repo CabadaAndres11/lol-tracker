@@ -83,7 +83,7 @@ function badgeSvg(shape) {
   </svg>`;
 }
 
-function badgesBlock(id) {
+function badgesBlock(id, compact = false) {
   const mask = badges[id] || 0;
   const total = countBadges(mask);
   const champion = hasBadge(mask, LEAGUE);
@@ -104,6 +104,13 @@ function badgesBlock(id) {
         <span class="badge-label">${i === LEAGUE ? 'LIGA' : i + 1}</span>
       </button>`;
   }).join('');
+
+  if (compact) {
+    return `<div class="bt-medals${champion ? ' is-champion' : ''}" role="group" aria-label="Medallas: ${total} de ${BADGES.length}" title="Medallas ${total}/${BADGES.length}">
+      <div class="badges-row">${buttons}</div>
+      <div class="bt-medal-count">MEDALLAS ${total}/${BADGES.length}</div>
+    </div>`;
+  }
 
   return `
     <div class="badges${champion ? ' is-champion' : ''}">
@@ -484,6 +491,7 @@ function circleHtml(player) {
           <h2 class="bt-name">${escapeHtml(player.name)}${hasBadge(mask, LEAGUE) ? ' <span class="crown" title="Campeón de la Liga">🏆</span>' : ''}</h2>
           <div class="bt-sub">${team.length}/${MAX_TEAM} Pokémon</div>
         </div>
+        ${badgesBlock(id, true)}
       </div>
 
       <div class="bt-field" style="--tint:${tint}">
@@ -558,7 +566,7 @@ function render() {
   const player = currentPlayer();
   currentId = idOf(player);
 
-  stage.innerHTML = circleHtml(player) + favBlock(player.name) + `<div class="import-row"><button type="button" class="link-btn" data-action="import-team" data-id="${encodeURIComponent(currentId)}">⬆ Importar equipo desde archivo (.txt)</button></div>` + badgesBlock(currentId) + porraBlock(currentId);
+  stage.innerHTML = circleHtml(player) + favBlock(player.name) + `<div class="import-row"><button type="button" class="link-btn" data-action="import-team" data-id="${encodeURIComponent(currentId)}">⬆ Importar equipo desde archivo (.txt)</button></div>` + porraBlock(currentId);
   updatePorraBar();
   document.getElementById('trainers').innerHTML = trainersHtml();
 
@@ -1070,6 +1078,7 @@ document.getElementById('open-porra').addEventListener('click', () => openPorra(
 // Datos
 // ---------------------------------------------------------------
 
+let lastSig = '';
 async function loadAll() {
   // No refrescamos mientras alguien está rellenando un formulario.
   if (editing || viewing || animating) return;
@@ -1102,6 +1111,10 @@ async function loadAll() {
     renderLeague(); // los equipos alimentan las fotos de la liga
     renderPorrasTab();
     if (editing || viewing) return; // por si empezó a editar mientras cargaba
+    // Solo se repinta si los datos han cambiado (así no se reinician las animaciones en cada sondeo).
+    const sig = JSON.stringify([players, teams, badges, rivals, porras, spectators, porraClosed]);
+    if (sig === lastSig && stage.querySelector('.battle')) return;
+    lastSig = sig;
     render();
   } catch (err) {
     stage.innerHTML = `<p class="roster-empty roster-error">No se pudo cargar la lista: ${escapeHtml(err.message)}</p>`;

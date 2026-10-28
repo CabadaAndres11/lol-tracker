@@ -2291,3 +2291,12 @@ footer { padding-bottom: calc(3rem + env(safe-area-inset-bottom)); }
 .tp-quick { width: 100%; min-width: 0; justify-content: flex-start; border-radius: 14px; }
 .tp-quick span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 @media (max-width: 700px) { .tp-quick-list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* Botones importar / exportar equipo */
+.import-row { display: flex; justify-content: center; flex-wrap: wrap; gap: .7rem; }
+.dex-btn { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; min-height: 48px; padding: .6rem 1.3rem; border-radius: 12px; border: 3px solid var(--dex-ink); background: var(--dex-paper); color: var(--dex-ink); font: 700 .72rem var(--font-pixel); letter-spacing: .04em; text-transform: uppercase; cursor: pointer; box-shadow: 0 4px 0 rgba(0, 0, 0, .55); transition: transform .1s ease, filter .15s ease, box-shadow .1s ease; }
+.dex-btn:hover:not(:disabled) { filter: brightness(1.06); transform: translateY(-1px); }
+.dex-btn:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0, 0, 0, .55); }
+.dex-btn:disabled { opacity: .45; cursor: not-allowed; }
+.dex-btn:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+@media (max-width: 700px) { .import-row .dex-btn { flex: 1 1 140px; } }

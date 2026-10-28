@@ -567,7 +567,7 @@ function render() {
   const player = currentPlayer();
   currentId = idOf(player);
 
-  stage.innerHTML = circleHtml(player) + favBlock(player.name) + `<div class="import-row"><button type="button" class="link-btn" data-action="import-team" data-id="${encodeURIComponent(currentId)}">⬆ Importar equipo desde archivo (.txt)</button></div>` + porraBlock(currentId);
+  stage.innerHTML = circleHtml(player) + favBlock(player.name) + `<div class="import-row"><button type="button" class="dex-btn" data-action="import-team" data-id="${encodeURIComponent(currentId)}"><span aria-hidden="true">⬆</span> Importar equipo</button><button type="button" class="dex-btn" data-action="export-team" data-id="${encodeURIComponent(currentId)}"${(teams[currentId] || []).length ? '' : ' disabled title="Este participante aún no tiene equipo"'}><span aria-hidden="true">⬇</span> Exportar equipo</button></div>` + porraBlock(currentId);
   updatePorraBar();
   document.getElementById('trainers').innerHTML = trainersHtml();
 
@@ -1237,6 +1237,8 @@ async function onAction(e) {
     renderPopup();
   } else if (action === 'open-porra') {
     openPorra(id);
+  } else if (action === 'export-team') {
+    exportTeam(id);
   } else if (action === 'import-team') {
     importTarget = id;
     importInput.click();
@@ -1450,6 +1452,42 @@ function parseTeamText(text) {
     mons.push(mon);
   }
   return { mons, skipped };
+}
+
+// Exportar equipo en formato Showdown (traduce movimientos, habilidades y objetos al inglés)
+const toEn = (kind, name) => {
+  const map = esMap[kind];
+  if (!map || !name) return name;
+  const low = String(name).toLowerCase();
+  for (const [en, es] of map) if (es.toLowerCase() === low) return en.replace(/(^|[\s-])([a-z])/g, (m, a, b, off) => (off > 0 && /^(of|the|and|in|on)$/.test(en.slice(off + a.length).split(/[\s-]/)[0]) ? m : a + b.toUpperCase()));
+  return name;
+};
+
+function teamToText(team) {
+  return team.map((m) => {
+    const head = m.nickname && m.nickname.toLowerCase() !== m.species.toLowerCase() ? `${m.nickname} (${m.species})` : m.species;
+    const nat = m.nature ? natureByName(m.nature)?.[1] : '';
+    return [
+      head + (m.item ? ` @ ${toEn('items', m.item)}` : ''),
+      m.ability ? `Ability: ${toEn('abilities', m.ability)}` : '',
+      m.shiny ? 'Shiny: Yes' : '',
+      nat ? `${nat} Nature` : '',
+      ...m.moves.filter(Boolean).map((mv) => `- ${toEn('moves', mv)}`),
+    ].filter(Boolean).join('\n');
+  }).join('\n\n') + '\n';
+}
+
+async function exportTeam(id) {
+  const team = teams[id] || [];
+  const player = players.find((p) => idOf(p) === id);
+  if (!team.length || !player) return;
+  await esReady;
+  const url = URL.createObjectURL(new Blob([teamToText(team)], { type: 'text/plain;charset=utf-8' }));
+  const a = Object.assign(document.createElement('a'), { href: url, download: `equipo-${player.name.replace(/[^\w-]+/g, '_')}.txt` });
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
 }
 
 importInput.addEventListener('change', async () => {

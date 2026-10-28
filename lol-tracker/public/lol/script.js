@@ -36,6 +36,27 @@ function opggUrl(name, tag, platform) {
 }
 
 // ---------- Estado de la tabla ----------
+// Temática según quién va primero (nombre de invocador en minúsculas -> campeón)
+const THEMES = {
+  aitorlg: { id: 'renata', champ: 'Renata Glasc', tag: 'La Matriarca Química' },
+  lihone: { id: 'viego', champ: 'Viego', tag: 'El Rey Arruinado' },
+};
+
+function applyTheme(players) {
+  const first = (players || []).find((p) => !p.error);
+  const key = first ? first.displayName.split('#')[0].toLowerCase() : '';
+  const t = THEMES[key];
+  const line = document.getElementById('theme-line');
+  if (t) {
+    document.body.dataset.theme = t.id;
+    line.textContent = `${first.displayName.split('#')[0]} lidera · ${t.champ}, ${t.tag}`;
+    line.hidden = false;
+  } else {
+    delete document.body.dataset.theme;
+    line.hidden = true;
+  }
+}
+
 let lastPlayers = [];            // en el orden del servidor (diferencia de LP)
 let formMap = null;              // { 'Nombre#Tag': ['W','L',...] } (de más antigua a más reciente)
 let sortKey = 'gained';          // 'gained' | 'rank' | 'wr'
@@ -234,6 +255,7 @@ async function loadLeaderboard() {
     lastPlayers = data.players;
     renderTable();
     renderPodium(data.players);
+    applyTheme(data.players);
 
     lastUpdateTime = new Date(data.updatedAt);
     document.getElementById('updated-at').textContent = lastUpdateTime.toLocaleTimeString('es-ES');

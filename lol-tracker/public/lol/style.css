@@ -1047,3 +1047,70 @@ footer { padding-bottom: calc(3rem + env(safe-area-inset-bottom)); }
   .winner-popup { bottom: calc(12px + env(safe-area-inset-bottom)); }
   .hero { padding-top: calc(4.5rem + env(safe-area-inset-top)); }
 }
+
+
+/* ============================================================
+   TEMÁTICA SEGÚN EL LÍDER (Renata / Viego)
+   ============================================================ */
+.champ-bg { position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: 0; transition: opacity 1.2s ease; overflow: hidden; }
+body[data-theme] .champ-bg { opacity: 1; }
+.champ-art { position: absolute; inset: -2%; background-size: cover; background-position: 55% 18%; background-repeat: no-repeat; opacity: .62; filter: blur(2.5px) saturate(1.05); transform: scale(1.04); animation: champ-drift 40s ease-in-out infinite alternate; }
+.champ-art::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 35%, var(--bg) 92%), radial-gradient(ellipse at 55% 25%, transparent 30%, var(--bg) 100%); }
+.champ-fx { position: absolute; inset: 0; mix-blend-mode: screen; }
+@keyframes champ-drift { from { transform: scale(1.04) translate3d(0, 0, 0); } to { transform: scale(1.1) translate3d(-1.5%, 1%, 0); } }
+.theme-line { margin: .5rem 0 0; font: 600 .78rem var(--font-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--gold); text-shadow: 0 0 14px color-mix(in srgb, var(--gold) 55%, transparent); }
+.hero, .hero-inner { position: relative; z-index: 1; }
+.hex-bg { transition: opacity 1s ease; }
+body[data-theme] .hex-bg { opacity: .18; }
+
+/* ---- Renata Glasc: púrpura químico, magenta y oro ---- */
+body[data-theme="renata"] {
+  --bg: #08060c; --surface: #150d1a; --surface-alt: #1f1226; --line: #3d2447;
+  --text: #f6eef7; --text-muted: #b9a6bf;
+  --gold: #ff5db8; --gold-bright: #ffd3ee; --gold-soft: #8a2a62;
+  --rise: #a6f24b; --neon-cyan: #b6f55a; --neon-purple: #e0409a;
+}
+body[data-theme="renata"] .champ-art { background-image: url('/lol/themes/renata.jpg'); }
+body[data-theme="renata"] .champ-fx {
+  background:
+    radial-gradient(40vw 30vw at 15% 85%, rgba(224, 64, 154, .26), transparent 70%),
+    radial-gradient(35vw 28vw at 88% 15%, rgba(166, 242, 75, .16), transparent 70%),
+    radial-gradient(30vw 22vw at 60% 70%, rgba(255, 93, 184, .16), transparent 70%);
+  animation: renata-pulse 9s ease-in-out infinite alternate;
+}
+@keyframes renata-pulse { from { opacity: .55; transform: scale(1); } to { opacity: 1; transform: scale(1.06); } }
+body[data-theme="renata"] .hero { background: radial-gradient(ellipse at top, rgba(224, 64, 154, .2), transparent 62%), linear-gradient(180deg, rgba(8, 6, 12, .35), transparent); }
+body[data-theme="renata"] h1 { background-image: linear-gradient(90deg, #ffd3ee, #ff5db8 50%, #b6f55a); }
+
+/* ---- Viego: niebla espectral verde sobre negro azabache ---- */
+body[data-theme="viego"] {
+  --bg: #040b10; --surface: #09181f; --surface-alt: #0e2530; --line: #1c4048;
+  --text: #e6fbf6; --text-muted: #93b6b4;
+  --gold: #5ff2c3; --gold-bright: #c9ffee; --gold-soft: #1f7a62;
+  --rise: #3ef0b0; --neon-cyan: #2fe0b4; --neon-purple: #4a86a8;
+}
+body[data-theme="viego"] .champ-art { background-image: url('/lol/themes/viego.jpg'); filter: saturate(1.1) contrast(1.05); }
+body[data-theme="viego"] .champ-fx {
+  background:
+    radial-gradient(50vw 24vw at 10% 95%, rgba(63, 240, 176, .25), transparent 70%),
+    radial-gradient(45vw 22vw at 90% 85%, rgba(46, 200, 160, .2), transparent 70%),
+    radial-gradient(60vw 16vw at 50% 100%, rgba(120, 255, 210, .14), transparent 70%);
+  animation: viego-mist 14s ease-in-out infinite alternate;
+}
+@keyframes viego-mist { from { opacity: .5; transform: translate3d(-2%, 0, 0); } to { opacity: 1; transform: translate3d(2%, -2%, 0); } }
+body[data-theme="viego"] .hero { background: radial-gradient(ellipse at top, rgba(63, 240, 176, .14), transparent 62%), linear-gradient(180deg, rgba(4, 11, 16, .3), transparent); }
+body[data-theme="viego"] h1 { background-image: linear-gradient(90deg, #c9ffee, #3ef0b0 55%, #2a8f86); }
+
+/* filas, bordes y paneles con los colores del tema */
+body[data-theme="renata"] tbody tr { background: linear-gradient(90deg, rgba(21, 13, 26, .9), rgba(31, 18, 38, .9)); }
+body[data-theme="renata"] tbody tr:hover { background: linear-gradient(90deg, #1f1226, #331b3f); box-shadow: 0 0 0 1px rgba(255, 93, 184, .65), 0 8px 24px rgba(0, 0, 0, .5); }
+body[data-theme="renata"] tbody tr.rank-first { background: linear-gradient(90deg, rgba(110, 28, 78, .9), rgba(31, 18, 38, .9) 60%); box-shadow: 0 0 0 1px rgba(255, 211, 238, .45), 0 0 30px rgba(255, 93, 184, .3); }
+body[data-theme="viego"] tbody tr { background: linear-gradient(90deg, rgba(7, 25, 26, .92), rgba(11, 38, 38, .92)); }
+body[data-theme="viego"] tbody tr:hover { background: linear-gradient(90deg, #0b2626, #0f3a36); box-shadow: 0 0 0 1px rgba(62, 240, 176, .6), 0 8px 24px rgba(0, 0, 0, .5); }
+body[data-theme="viego"] tbody tr.rank-first { background: linear-gradient(90deg, rgba(14, 70, 56, .92), rgba(7, 28, 28, .92) 60%); box-shadow: 0 0 0 1px rgba(201, 255, 238, .4), 0 0 30px rgba(62, 240, 176, .28); }
+body[data-theme] tbody td { border-top-color: color-mix(in srgb, var(--gold) 22%, transparent); border-bottom-color: color-mix(in srgb, var(--gold) 22%, transparent); }
+body[data-theme] tbody td:last-child { border-right-color: color-mix(in srgb, var(--gold) 22%, transparent); }
+body[data-theme] .hero { border-bottom-color: color-mix(in srgb, var(--gold) 40%, transparent); }
+
+@media (max-width: 700px) { .champ-art { background-position: 58% 0; opacity: .45; } }
+@media (prefers-reduced-motion: reduce) { .champ-art, .champ-fx { animation: none !important; } }

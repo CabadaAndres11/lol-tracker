@@ -109,10 +109,15 @@
       '<div class="btnrow"><button class="btn" data-act="login">Entrar</button><button class="btn sec" data-act="register">Crear cuenta nueva</button></div>' +
       '<p class="mut" style="margin:.6rem 0 0">Al crear la cuenta recibes ' + 150 + ' monedas y todas las cartas Comunes.</p></div></div>';
   }
+  function bpkHtml(cls) {
+    return '<div class="bpk ' + (cls || '') + '"><div class="bpk-glow"></div><div class="bpk-rays"></div><div class="bpk-main"><span>🃏</span><b>SOBRE</b><i>' + (ui.acct ? ui.acct.packSize : 5) + ' cartas</i></div><div class="bpk-lid"></div></div>';
+  }
+  var GEM = { 'Común': '●', 'Rara': '◆', 'Épica': '✦', 'Legendaria': '★' };
+  var RANK = ['Común', 'Rara', 'Épica', 'Legendaria'];
   function renderPacks() {
     var a = ui.acct, total = D.cards.length + D.actions.length, can = a.coins >= a.packCost && !ui.pack;
     var h = head('packs', '🎁 Sobres') + '<div class="packs-grid">' +
-      '<div class="panel packbox"><div class="bigpack"><span>🃏</span><b>SOBRE</b><i>' + a.packSize + ' cartas</i></div><h2>Sobre estándar</h2><p class="mut">' + a.packSize + ' cartas al azar de todo el juego (tropas y acciones). La última siempre es Rara o mejor. Las cartas que ya tengas se cambian por monedas.</p>' +
+      '<div class="panel packbox">' + bpkHtml('') + '<h2>Sobre estándar</h2><p class="mut">' + a.packSize + ' cartas al azar de todo el juego (tropas y acciones). La última siempre es Rara o mejor. Las cartas que ya tengas se cambian por monedas.</p>' +
       '<button class="btn cta big" data-act="openpack"' + (can ? '' : ' disabled') + '>' + (a.packCost ? 'Abrir sobre · ' + a.packCost + ' 🪙' : 'Abrir sobre · gratis') + '</button>' + (a.coins < a.packCost ? '<p class="mut">Te faltan ' + (a.packCost - a.coins) + ' monedas.</p>' : '') + (ui.msg ? '<div class="hint" style="color:var(--bad)">' + esc(ui.msg) + '</div>' : '') + '</div>' +
       '<div class="panel"><h2>Tus monedas</h2><div class="coinbig">🪙 ' + a.coins + '</div>' +
       '<div class="dailybox">' + (a.dailyAvailable ? '<button class="btn" data-act="daily">🎁 Recompensa diaria · +' + a.dailyCoins + ' 🪙</button>' : '<p class="mut">✔ Ya cobraste la recompensa de hoy. Vuelve mañana.</p>') + '</div>' +
@@ -121,15 +126,18 @@
       '<button class="btn sec" data-act="nav" data-to="deck">🃏 Ir al mazo</button></div></div>';
     app.innerHTML = h + packOverlay() + '</div>';
   }
+  function RIP_MS(pk) { return pk.cards.some(function (c) { return CARD[c.id].rarity === 'Legendaria'; }) ? 2300 : 1750; }
   function packOverlay() {
     var pk = ui.pack; if (!pk) return '';
-    if (!pk.cards) return '<div class="packov"><div class="bigpack tearing"><span>🃏</span><b>SOBRE</b></div></div>';
+    if (!pk.cards) return '<div class="packov">' + bpkHtml('shake best-Común') + '</div>';
+    var best = pk.cards.reduce(function (b, c) { var r = CARD[c.id].rarity; return RANK.indexOf(r) > RANK.indexOf(b) ? r : b; }, 'Común');
+    if (pk.stage === 'rip') return '<div class="packov' + (best === 'Legendaria' ? ' rainbow' : '') + '">' + bpkHtml('rip best-' + best) + '</div>';
     var gain = pk.cards.reduce(function (n, c) { return n + c.dupCoins; }, 0);
-    return '<div class="packov"><div class="pcards">' + pk.cards.map(function (c, i) {
+    return '<div class="packov' + (best === 'Legendaria' ? ' rainbowpost' : '') + '"><div class="pcards">' + pk.cards.map(function (c, i) {
       var cd = CARD[c.id];
-      return '<div class="pcard r-' + cd.rarity + (pk.rev[i] ? ' flipped' : '') + '" data-act="flipcard" data-i="' + i + '" style="--d:' + i * 0.12 + 's"><div class="pin"><div class="pback"><span>🃏</span></div><div class="pfront">' + cardHtml(cd, {}) +
+      return '<div class="pcard r-' + cd.rarity + (pk.rev[i] ? ' flipped' : '') + '" data-act="flipcard" data-i="' + i + '" style="--d:' + i * 0.12 + 's"><div class="pin"><div class="pback"><span>' + GEM[cd.rarity] + '</span></div><div class="pfront">' + cardHtml(cd, {}) +
         (c.isNew ? '<span class="pnew">¡NUEVA!</span>' : '<span class="pdup">Repetida +' + c.dupCoins + ' 🪙</span>') + '</div></div></div>';
-    }).join('') + '</div><div class="pactions"><button class="btn sec" data-act="flipall">Girar todas</button><button class="btn" data-act="closepack">' + (gain ? 'Listo · +' + gain + ' 🪙 por repetidas' : 'Listo') + '</button></div><p class="pmsg">Pulsa cada carta para girarla</p></div>';
+    }).join('') + '</div><div class="pactions"><button class="btn sec" data-act="flipall">Girar todas</button><button class="btn" data-act="closepack">' + (gain ? 'Listo · +' + gain + ' 🪙 por repetidas' : 'Listo') + '</button></div><p class="pmsg">Pulsa cada carta para girarla · el color del reverso te dice su rareza</p></div>';
   }
   function renderModes() {
     var modes = [
@@ -579,7 +587,8 @@
         setTimeout(function () {
           if (ui.pack !== pk0) return;
           if (!r.ok) { ui.pack = null; ui.msg = (r.data && r.data.error) || 'No se pudo abrir.'; if (r.data && r.data.user) setAcct(r.data.user); return render(); }
-          pk0.cards = r.data.cards; pk0.rev = r.data.cards.map(function () { return false; }); setAcct(r.data.user); render();
+          pk0.cards = r.data.cards; pk0.rev = r.data.cards.map(function () { return false; }); pk0.stage = 'rip'; setAcct(r.data.user); render();
+          setTimeout(function () { if (ui.pack === pk0) { pk0.stage = 'reveal'; render(); } }, RIP_MS(pk0));
         }, wait);
       });
     }

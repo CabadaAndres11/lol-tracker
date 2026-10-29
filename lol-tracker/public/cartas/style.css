@@ -810,3 +810,10 @@ input:focus, select:focus { outline: none; border-color: var(--acc); box-shadow:
 .adminst { grid-column: 1 / -1; order: -1; } .adminst .starters { grid-template-columns: repeat(6, 1fr); }
 @media (max-width: 1100px) { .adminst .starters { grid-template-columns: repeat(3, 1fr); } }
 .adminst .hint { color: var(--acc2); margin-top: .6rem; }
+
+/* logos de sinergia */
+.tic { width: 1.25em; height: 1.25em; margin: 0 .25em 0 -.15em; vertical-align: -.28em; filter: none; }
+.tag .tic { filter: drop-shadow(0 0 1px rgba(255,255,255,.6)); }
+.starter .si .tic { width: 2.4rem; height: 2.4rem; margin: 0; }
+.syn-row .si b .tic { width: 1.3em; height: 1.3em; }
+.chip .tic { width: 1.3em; height: 1.3em; }

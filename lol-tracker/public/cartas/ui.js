@@ -40,7 +40,8 @@
     var x = p(a), y = p(b);
     return '#' + x.map(function (v, i) { return ('0' + Math.round(v * (1 - t) + y[i] * t).toString(16)).slice(-2); }).join('');
   }
-  function tagHtml(t) { return '<span class="tag" style="--tc:' + D.themes[t].color + '">' + esc(t) + '</span>'; }
+  function tic(t) { return ic('t-' + t, 'tic'); }
+  function tagHtml(t) { return '<span class="tag" style="--tc:' + D.themes[t].color + '">' + tic(t) + esc(t) + '</span>'; }
   function pips(n) { var h = ''; for (var k = 0; k < 3; k++) h += '<i' + (k < n ? ' class="on"' : '') + '></i>'; return h; }
   var AICON = { entrenamiento: 'espadas', arenga: 'megafono', armadura: 'escudo', banquete: 'carne', intimidacion: 'enfado', 'mal-de-ojo': 'ojo', 'golpe-certero': 'diana', lluvia: 'arco',
     'bola-extra': 'beisbol', 'segundo-aliento': 'viento', 'cambio-de-linea': 'cambio', parche: 'disquete', 'horas-extra': 'maletin', 'capitulo-especial': 'tele', 'segunda-temporada': 'trofeo', 'remate-doble': 'voley', 'cita-sorpresa': 'corazon', 'rabia-contenida': 'enfado', 'fiesta-del-pueblo': 'fiesta', 'hermano-del-alma': 'duo', 'sofa-compartido': 'sofa', madrugon: 'reloj' };
@@ -110,11 +111,11 @@
       '<div class="btnrow"><button class="btn" data-act="login">Entrar</button><button class="btn sec" data-act="register">Crear cuenta nueva</button></div>' +
       '<p class="mut" style="margin:.6rem 0 0">Al crear la cuenta recibes ' + 150 + ' monedas y un mazo inicial a tu elección.</p></div></div>';
   }
-  var STARTERS = [['Pokémon', 'beisbol'], ['Informático', 'robot'], ['Trabajo', 'maletin'], ['Lol', 'espadas'], ['Comebacker', 'fuego'], ['KOI', 'trofeo']];
+  var STARTERS = ['Pokémon', 'Informático', 'Trabajo', 'Lol', 'Comebacker', 'KOI'];
   function starterCards(act) {
     return STARTERS.map(function (t) {
-      var th = D.themes[t[0]], n = D.cards.filter(function (c) { return c.themes.indexOf(t[0]) >= 0; }).length;
-      return '<button class="starter" style="--tc:' + th.color + '" data-act="' + act + '" data-t="' + t[0] + '"><span class="si">' + ic(t[1]) + '</span><b>' + t[0] + '</b><span class="mut">' + n + ' tropas · ' + esc(th.tx[0]) + '</span></button>';
+      var th = D.themes[t], n = D.cards.filter(function (c) { return c.themes.indexOf(t) >= 0; }).length;
+      return '<button class="starter" style="--tc:' + th.color + '" data-act="' + act + '" data-t="' + t + '"><span class="si">' + tic(t) + '</span><b>' + t + '</b><span class="mut">' + n + ' tropas · ' + esc(th.tx[0]) + '</span></button>';
     }).join('');
   }
   function adminStarters() {
@@ -254,7 +255,7 @@
     h += '<div class="deck-layout"><div class="deck-main">';
     var cnt = function (t) { return themeCards(t).length; };
     h += '<div class="chips filt"><button class="chip' + (!ui.filters.length ? ' on' : '') + '" data-act="filterset" data-t="">Todas</button>' +
-      Object.keys(D.themes).map(function (t) { return '<button class="chip' + (ui.filters.indexOf(t) >= 0 ? ' on' : '') + '" style="--tc:' + D.themes[t].color + '" data-act="filter" data-t="' + esc(t) + '">' + esc(t) + ' ' + cnt(t) + '</button>'; }).join('') +
+      Object.keys(D.themes).map(function (t) { return '<button class="chip' + (ui.filters.indexOf(t) >= 0 ? ' on' : '') + '" style="--tc:' + D.themes[t].color + '" data-act="filter" data-t="' + esc(t) + '">' + tic(t) + esc(t) + ' ' + cnt(t) + '</button>'; }).join('') +
       '<button class="chip' + (ui.filters.indexOf('__act') >= 0 ? ' on' : '') + '" data-act="filter" data-t="__act">Acciones</button></div>';
     h += '<div class="bar" style="margin:.2rem 0 .6rem"><label class="grp"><input type="checkbox" data-act="group"' + (ui.group ? ' checked' : '') + '> Agrupar por sinergia</label><label class="grp"><input type="checkbox" data-act="onlyowned"' + (ui.onlyOwned ? ' checked' : '') + '> Solo mis cartas (' + ui.acct.owned.length + '/' + (D.cards.length + D.actions.length) + ')</label>';
     if (ui.filters.length > 1) h += '<span class="seg"><button class="' + (ui.fmode === 'any' ? 'on' : '') + '" data-act="fmode" data-m="any">Cualquiera de las elegidas</button><button class="' + (ui.fmode === 'all' ? 'on' : '') + '" data-act="fmode" data-m="all">Todas a la vez</button></span>';

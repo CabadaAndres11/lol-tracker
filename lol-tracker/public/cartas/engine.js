@@ -108,7 +108,7 @@
   }
 
   function newGame(deckA, deckB, seed) {
-    var s = { rng: mulberry32(seed == null ? (Date.now() & 0xffffff) : seed), uid: 1, round: 0, shops: 0, phase: 'prep', shopOpen: false, first: 0, over: false, winner: -1, reason: '', log: [], frames: [], p: [newPlayer(deckA), newPlayer(deckB)], lastBall: [null, null], refreshN: [0, 0], err: '' };
+    var s = { rng: mulberry32(seed == null ? (Date.now() & 0xffffff) : seed), uid: 1, round: 0, shops: 0, phase: 'prep', shopOpen: false, first: 0, over: false, winner: -1, reason: '', log: [], frames: [], p: [newPlayer(deckA), newPlayer(deckB)], lastBall: [null, null], refreshN: [0, 0], err: '', acts: [] };
     startRound(s);
     return s;
   }
@@ -327,6 +327,7 @@
     P.hand.splice(handIdx, 1); P.grave.push(i);
     var res = ACT[c.id].run(s, p, tgt);
     say(s, (p === 0 ? 'Juegas ' : 'El rival juega ') + c.name + (tgt ? ' sobre ' + card(tgt).name : '') + ': ' + res + '.');
+    s.acts.push({ p: p, id: c.id, res: res, tgt: tgt ? tgt.uid : null });
     return true;
   }
   function setTarget(s, p, uid, targetUid) {

@@ -255,7 +255,7 @@
     } else if (prep) {
       var msg = ui.hint || (!P.mesa.some(Boolean) ? 'Coloca tropas de tu mano en la mesa.' : pend ? 'Pulsa una tropa tuya y después la rival a la que atacará.' : 'Todos los objetivos elegidos.');
       if (pend && P.mesa.some(Boolean)) msg = (ui.hint ? ui.hint + ' · ' : '') + 'Faltan ' + pend + ' por elegir objetivo.';
-      acts = '<div class="hint">' + esc(msg) + '</div><div class="btnrow"><button class="btn big" data-act="fight"' + (pend || (!P.mesa.some(Boolean) && E.mesaTroops(R).length) ? ' disabled' : '') + '>⚔ ¡Combatir!</button><button class="btn sec" data-act="undo"' + (hasT ? '' : ' disabled') + ' title="Quitar todos los objetivos elegidos">↩ Deshacer objetivos</button></div>';
+      acts = '<div class="hint">' + esc(msg) + '</div><div class="btnrow"><button class="btn big" data-act="fight"' + (pend || (!P.mesa.some(Boolean) && E.mesaTroops(R).length) ? ' disabled' : '') + '>⚔ ¡Combatir!</button><button class="btn sec sm" data-act="undo"' + (hasT ? '' : ' disabled') + ' title="Quitar todos los objetivos elegidos">↩ Deshacer</button></div>';
     } else if (s.phase === 'post') acts = ui.busy ? '' : '<div class="hint">Puedes ceder estadísticas Anime antes de seguir.</div><button class="btn big" data-act="next">Continuar ▶</button>';
     h += '<div class="hud bottom">' + orb('life', view.life[0], CFG.life, 'Tu vida', 0) + orb('gold', P.gold, 0, 'Tu oro') + '<div class="acts">' + acts + '</div></div></div>';
 
@@ -303,7 +303,23 @@
     document.body.classList.toggle('shopbg', !!shopMode);
     ui.landed = null;
     var lg = document.getElementById('log'); if (lg) lg.scrollTop = lg.scrollHeight;
-    strikeVars(); drawArrows(); fxBanner(); applyFloats();
+    strikeVars(); drawArrows(); fxBanner(); applyFloats(); flushActs();
+  }
+
+  // ---------- Anuncio de acciones jugadas (tuyas y del rival) ----------
+  function flushActs() {
+    var s = ui.s; if (!s || !s.acts || !s.acts.length) return;
+    var q = s.acts.splice(0), t = Math.max(0, (ui.splashUntil || 0) - Date.now());
+    q.forEach(function (a, k) {
+      setTimeout(function () { if (ui.s === s && ui.screen === 'game') showActFx(a); }, t + k * 1500);
+    });
+  }
+  function showActFx(a) {
+    var c = CARD[a.id], el = document.createElement('div');
+    el.className = 'actfx ' + (c.foe ? 'foe' : 'ally') + (a.p === 0 ? ' mine' : ' theirs');
+    el.innerHTML = '<div class="afburst"></div><div class="afw">' + cardHtml(c, {}) + '</div><div class="aft">' + (a.p === 0 ? 'Juegas ' : 'El rival juega ') + esc(c.name) + '</div><div class="afs">' + esc(a.res) + '</div>';
+    document.body.appendChild(el);
+    setTimeout(function () { el.remove(); }, 1500);
   }
 
   // ---------- Temporizador de objetivos ----------
@@ -415,7 +431,7 @@
     var el = document.getElementById('splash');
     if (!el) { el = document.createElement('div'); el.id = 'splash'; document.body.appendChild(el); }
     el.className = 'splash k-' + o.kind; el.innerHTML = '<div class="band"><div class="st">' + o.title + '</div><div class="ss">' + (o.sub || '') + '</div></div>';
-    void el.offsetWidth; el.classList.add('show');
+    void el.offsetWidth; el.classList.add('show'); ui.splashUntil = Date.now() + 1500;
   }
   function announce() {
     var s = ui.s; if (!s || s.over) { ui.deadline = null; return; }

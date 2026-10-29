@@ -68,7 +68,7 @@
     var n = Object.keys(D.themes).length;
     var h = head('home') + '<div class="hero">' + heroCards() + '<img src="/cartas/logo.svg" alt="" class="hero-logo"><h1>Juego de Cartas</h1><p class="mut">Mazos con sinergias combinables, combates por rondas y memes de la pandilla.</p><button class="btn big cta" data-act="nav" data-to="play">⚔ ¡Jugar ahora!</button></div>';
     h += '<div class="menu">' + [
-      ['play', '⚔', 'Jugar', 'Duelo 1 contra 1 contra la IA con tu mazo.'],
+      ['play', '⚔', 'Jugar', 'Elige modo: contra la IA, jugador contra jugador o versus de 4.'],
       ['deck', '🃏', 'Mazo', 'Elige tus cartas (' + deckSize() + '/' + CFG.deckBudget + ') y guarda hasta 3 mazos.'],
       ['themes', '✨', 'Sinergias', n + ' sinergias con sus niveles y cartas.'],
       ['rules', '📖', 'Normas', 'Cómo funcionan las rondas, la tienda y el combate.'],
@@ -77,6 +77,18 @@
     app.innerHTML = h;
   }
 
+  function renderModes() {
+    var modes = [
+      ['ai', '🤖', 'Contra la IA', 'Duelo 1 contra 1 con tu mazo. Disponible ahora.', true],
+      ['pvp', '⚔️', 'Jugador contra jugador', 'Reta a otro jugador en un duelo 1 contra 1.', false],
+      ['vs4', '👥', 'Versus de 4', 'Cuatro jugadores en la misma partida.', false],
+    ];
+    app.innerHTML = head('play', '⚔ Elige modo de juego') + '<p class="mut">Tu mazo actual (' + deckSize() + '/' + CFG.deckBudget + ') se usará en cualquier modo.</p><div class="modes">' +
+      modes.map(function (m) {
+        return '<button class="mode m-' + m[0] + (m[4] ? '' : ' off') + '"' + (m[4] ? ' data-act="startai"' : ' disabled aria-disabled="true"') + '><span class="mi">' + m[1] + '</span><b>' + m[2] + '</b><span class="mut">' + m[3] + '</span>' +
+          (m[4] ? '<span class="go">¡Jugar!</span>' : '<span class="soon">🔒 Próximamente</span>') + '</button>';
+      }).join('') + '</div></div>';
+  }
   function renderRules() {
     var sec = function (t, items) { return '<div class="panel"><h2>' + t + '</h2><ul class="rules">' + items.map(function (i) { return '<li>' + i + '</li>'; }).join('') + '</ul></div>'; };
     app.innerHTML = head('rules', '📖 Normas') +
@@ -424,7 +436,7 @@
 
   function render() {
     document.body.classList.remove('shopbg');
-    var f = { home: renderHome, deck: renderDeck, rules: renderRules, themes: renderThemes }[ui.screen];
+    var f = { home: renderHome, deck: renderDeck, rules: renderRules, themes: renderThemes, modes: renderModes }[ui.screen];
     if (f) f(); else renderGame();
   }
 
@@ -485,7 +497,7 @@
     if (act === 'lock') return window.cartasLock();
     if (act === 'nav') {
       clearTimeout(timer); ui.playing = false;
-      if (el.dataset.to === 'play') { if (deckError()) { ui.screen = 'deck'; return render(); } saveDeck(); return startGame(); }
+      if (el.dataset.to === 'play') { if (deckError()) { ui.screen = 'deck'; return render(); } saveDeck(); ui.screen = 'modes'; window.scrollTo(0, 0); return render(); }
       ui.screen = el.dataset.to; ui.msg = ''; window.scrollTo(0, 0); return render();
     }
     if (act === 'filter') { var t = el.dataset.t, k0 = ui.filters.indexOf(t); if (k0 >= 0) ui.filters.splice(k0, 1); else ui.filters.push(t); ui.screen = 'deck'; var y0 = window.scrollY; renderDeck(); window.scrollTo(0, y0); return; }
@@ -509,6 +521,7 @@
     if (act === 'slot-load') { var sl = ui.slots[+el.dataset.i]; if (sl) { ui.deck = sl.ids.slice(); saveDeck(); ui.slotTo = +el.dataset.i; ui.msg = 'Cargado «' + sl.name + '».'; } return renderDeck(); }
     if (act === 'slot-del') { var di = +el.dataset.i; if (ui.slots[di]) { ui.msg = 'Borrado «' + ui.slots[di].name + '».'; ui.slots[di] = null; saveSlots(); } return renderDeck(); }
     if (act === 'menu') { clearTimeout(timer); ui.playing = false; ui.screen = el.dataset.to || 'home'; return render(); }
+    if (act === 'startai') { if (deckError()) { ui.screen = 'deck'; return render(); } saveDeck(); return startGame(); }
     if (act === 'play') { if (deckError()) { ui.screen = 'deck'; return render(); } saveDeck(); return startGame(); }
     if (act === 'skip') { clearTimeout(timer); ui.shown = ui.frames.length; return stopPlay(); }
     if (!s || ui.playing) return;

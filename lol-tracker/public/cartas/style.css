@@ -495,3 +495,17 @@ body.shopbg::before { background: radial-gradient(circle, rgba(255,255,255,.55) 
 .actfx.foe .afburst { border-color: #ff5d73; } .actfx.ally .afburst { border-color: #5be0a2; }
 @keyframes afburst { 0%, 24% { opacity: 0; transform: translate(-50%, -50%) scale(.2); } 30% { opacity: .9; } 70% { opacity: 0; transform: translate(-50%, -50%) scale(14); } 100% { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .actfx .afw, .actfx .afburst { animation-duration: .01s; } }
+
+/* v10 · selección de modo */
+.modes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 1rem 0; }
+.mode { position: relative; display: flex; flex-direction: column; gap: .4rem; align-items: flex-start; text-align: left; padding: 1.3rem 1.1rem 1.1rem; min-height: 230px; background: #fff; border: 3px solid #fff; border-radius: 24px; box-shadow: 0 6px 0 var(--edge), 0 12px 22px rgba(60,90,160,.15); color: var(--ink); overflow: hidden; transition: transform .12s, box-shadow .12s; }
+.mode .mi { font-size: 3rem; line-height: 1; } .mode b { font-size: 1.3rem; }
+.mode::after { content: ''; position: absolute; right: -30px; top: -30px; width: 120px; height: 120px; border-radius: 50%; background: var(--mc, #e6edff); opacity: .6; }
+.mode.m-ai { --mc: #c6f1dc; } .mode.m-pvp { --mc: #ffd1c7; } .mode.m-vs4 { --mc: #cdd9ff; }
+.mode .go { margin-top: auto; align-self: stretch; text-align: center; padding: .6rem; border-radius: 14px; color: #5a3600; font-weight: 700; background: linear-gradient(180deg, #ffd45e, #ffb703); box-shadow: 0 4px 0 #c98600; }
+.mode:not(.off):hover { transform: translateY(-4px); box-shadow: 0 10px 0 var(--edge), 0 18px 26px rgba(60,90,160,.2); }
+.mode:not(.off):active { transform: translateY(2px); box-shadow: 0 2px 0 var(--edge); }
+.mode.off { cursor: not-allowed; background: #eef1fa; box-shadow: 0 4px 0 #cdd5ec; }
+.mode.off .mi, .mode.off b { opacity: .55; filter: grayscale(.6); }
+.mode .soon { margin-top: auto; align-self: stretch; text-align: center; padding: .55rem; border-radius: 14px; background: #dde3f5; color: #7683b3; font-weight: 700; }
+@media (max-width: 800px) { .modes { grid-template-columns: 1fr; } .mode { min-height: 0; } }

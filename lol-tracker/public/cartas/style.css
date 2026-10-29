@@ -333,3 +333,8 @@ body.shopbg { background: radial-gradient(ellipse 90% 60% at 50% 0, #7a4a12 0, #
 .foesyn .synside { margin: 0; border-color: #ff5a5a; background: linear-gradient(180deg, rgba(255,70,70,.12), transparent 60%), var(--panel, rgba(20,20,30,.8)); }
 .foesyn .synside h2 { color: #ff8a8a; }
 .gr .tip { right: calc(100% + 10px); left: auto; }
+
+/* v7 · las tropas caídas desaparecen del tablero (así nunca parece que se ataca a un cadáver) */
+.card.dead:not(.hit) { opacity: 0; visibility: hidden; pointer-events: none; }
+.card.dead.hit { animation: hurt .5s .34s both, vanish .3s .62s forwards; }
+@keyframes vanish { to { opacity: 0; transform: scale(.8); } }

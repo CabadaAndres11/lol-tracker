@@ -33,7 +33,7 @@
     if (troop) {
       var a = o.atk != null ? o.atk : c.atk, hp = o.hp != null ? o.hp : c.hp, mx = o.max != null ? o.max : hp;
       h += '<div class="mono">' + esc(c.person.charAt(0)) + '</div><div class="tags">' + c.themes.map(tagHtml).join('') + '</div>';
-      h += '<span class="sc a' + (a > c.atk ? ' up' : '') + '" title="Ataque"><b>' + a + '</b></span><span class="sc h' + (mx > c.hp ? ' up' : '') + '" title="Vida"><b>' + hp + '</b>' + (mx !== hp ? '<s>/' + mx + '</s>' : '') + '</span>';
+      h += '<span class="sc a' + (a > c.atk ? ' up' : '') + '" title="Ataque"><b>' + a + '</b></span><span class="sc h' + (mx > c.hp ? ' up' : '') + (hp < mx ? ' low' : '') + '" title="Vida' + (hp < mx ? ' (' + hp + '/' + mx + ')' : '') + '"><b>' + hp + '</b></span>';
     } else {
       h += '<div class="mono ico">' + (AICON[c.id] || '✨') + '</div><div class="adesc">' + esc(c.text) + '</div>';
     }
@@ -171,8 +171,8 @@
   function startGame() {
     var seed = Math.floor(Math.random() * 1e9), r = E.mulberry32(seed + 7);
     ui.s = E.newGame(ui.deck, E.randomDeck(r), seed);
-    ui.screen = 'game'; ui.sel = null; ui.view = null; ui.playing = false; ui.hint = ''; ui.landed = null;
-    render();
+    ui.screen = 'game'; ui.sel = null; ui.view = null; ui.playing = false; ui.hint = ''; ui.landed = null; ui.busy = false;
+    announce(); render();
   }
   function orb(kind, val, max, label) {
     var p = max ? Math.max(0, Math.min(100, val / max * 100)) : 100;
@@ -193,7 +193,7 @@
   function mesaRow(side, view, s, mine) {
     var P = s.p[side], prep = s.phase === 'prep' && !ui.playing && !s.shopOpen, shop = s.shopOpen && !ui.playing, sel = ui.sel;
     var aim = {}; Object.keys(s.p[0].target).forEach(function (k) { var t = s.p[0].target[k]; aim[t] = (aim[t] || 0) + 1; });
-    var h = '<div class="row4">';
+    var h = '<div class="row4 side' + side + '">';
     view.mesa[side].forEach(function (v, k) {
       if (!v) {
         var free = mine && s.phase === 'prep' && !ui.playing && sel && sel.k === 'hand' && E.isTroop(P.hand[sel.i]);
@@ -243,10 +243,10 @@
       var any = P.mesa.some(Boolean) || P.hand.length;
       acts = '<div class="hint">' + esc(ui.hint || (any ? 'Pulsa una carta de la tienda para comprarla.' : 'Compra al menos una tropa.')) + '</div><button class="btn big" data-act="endshop"' + (any ? '' : ' disabled') + '>Terminar tienda ▶</button>';
     } else if (prep) {
-      var msg = ui.hint || (!P.mesa.some(Boolean) ? 'Coloca tropas de tu mano en la mesa.' : pend ? 'Elige una tropa tuya y luego la rival a la que atacará.' : 'Todos los objetivos elegidos.');
+      var msg = ui.hint || (!P.mesa.some(Boolean) ? 'Coloca tropas de tu mano en la mesa.' : pend ? 'Pulsa una tropa tuya y después la rival a la que atacará.' : 'Todos los objetivos elegidos.');
       if (pend && P.mesa.some(Boolean)) msg = (ui.hint ? ui.hint + ' · ' : '') + 'Faltan ' + pend + ' por elegir objetivo.';
       acts = '<div class="hint">' + esc(msg) + '</div><div class="btnrow"><button class="btn big" data-act="fight"' + (pend || (!P.mesa.some(Boolean) && E.mesaTroops(R).length) ? ' disabled' : '') + '>⚔ ¡Combatir!</button><button class="btn sec" data-act="undo"' + (hasT ? '' : ' disabled') + ' title="Quitar todos los objetivos elegidos">↩ Deshacer objetivos</button></div>';
-    } else if (s.phase === 'post') acts = '<button class="btn big" data-act="next">Siguiente ronda →</button>';
+    } else if (s.phase === 'post') acts = ui.busy ? '' : '<div class="hint">Puedes ceder estadísticas Anime antes de seguir.</div><button class="btn big" data-act="next">Continuar ▶</button>';
     h += '<div class="hud bottom">' + orb('life', view.life[0], CFG.life, 'Tu vida') + orb('gold', P.gold, 0, 'Tu oro') + '<div class="acts">' + acts + '</div></div></div>';
 
     // Mano
@@ -288,6 +288,7 @@
     }
     h += '</div>';
     app.innerHTML = h;
+    document.body.classList.toggle('shopbg', !!shopMode);
     ui.landed = null;
     var lg = document.getElementById('log'); if (lg) lg.scrollTop = lg.scrollHeight;
     strikeVars(); drawArrows();
@@ -308,8 +309,7 @@
   function drawArrows() {
     var b = document.getElementById('board'); if (!b || !ui.s) return;
     var s = ui.s, pairs = [];
-    if (ui.playing && ui.hl && ui.hl.att && ui.hl.tgt) pairs.push([ui.hl.att, ui.hl.tgt, 'hit']);
-    else if (s.phase === 'prep' && !s.shopOpen && !ui.playing) Object.keys(s.p[0].target).forEach(function (k) { pairs.push([+k, s.p[0].target[k], 'plan']); });
+    if (s.phase === 'prep' && !s.shopOpen && !ui.playing) Object.keys(s.p[0].target).forEach(function (k) { pairs.push([+k, s.p[0].target[k], 'plan']); });
     if (!pairs.length) return;
     var br = b.getBoundingClientRect(), ns = 'http://www.w3.org/2000/svg', svg = document.createElementNS(ns, 'svg');
     svg.setAttribute('class', 'arrows'); svg.setAttribute('width', br.width); svg.setAttribute('height', br.height);
@@ -320,7 +320,8 @@
       var x1 = ra.left + ra.width / 2 - br.left + off, y1 = (mine ? ra.top : ra.bottom) - br.top;
       var x2 = rt.left + rt.width / 2 - br.left + off, y2 = rt.top + rt.height * .42 - br.top;
       var d = Math.hypot(x2 - x1, y2 - y1), bulge = 55 + d * .28 + (n % 3) * 10;
-      var cx = (x1 + x2) / 2, cy = (mine ? Math.min(y1, y2) : Math.max(y1, y2)) + (mine ? -bulge : bulge);
+      var lat = Math.abs(x2 - x1) < ra.width * .6 ? (x1 < br.width / 2 ? 1 : -1) * ra.width * (.75 + (n % 3) * .12) : 0;
+      var cx = (x1 + x2) / 2 + lat, cy = (mine ? Math.min(y1, y2) : Math.max(y1, y2)) + (mine ? -bulge : bulge);
       var l = document.createElementNS(ns, 'path');
       l.setAttribute('d', 'M' + x1 + ',' + y1 + ' Q' + cx + ',' + cy + ' ' + x2 + ',' + y2);
       l.setAttribute('class', 'ln ' + p[2]); l.setAttribute('fill', 'none'); l.setAttribute('marker-end', 'url(#ah)'); svg.appendChild(l);
@@ -330,12 +331,24 @@
   window.addEventListener('resize', function () { var o = document.querySelector('#board svg.arrows'); if (o) o.remove(); drawArrows(); });
 
   function render() {
+    document.body.classList.remove('shopbg');
     var f = { home: renderHome, deck: renderDeck, rules: renderRules, themes: renderThemes }[ui.screen];
     if (f) f(); else renderGame();
   }
 
   // ---------- Animación del combate ----------
   var timer = null;
+  function showSplash(o) {
+    var el = document.getElementById('splash');
+    if (!el) { el = document.createElement('div'); el.id = 'splash'; document.body.appendChild(el); }
+    el.className = 'splash k-' + o.kind; el.innerHTML = '<div class="band"><div class="st">' + o.title + '</div><div class="ss">' + (o.sub || '') + '</div></div>';
+    void el.offsetWidth; el.classList.add('show');
+  }
+  function announce() {
+    var s = ui.s; if (!s || s.over) return;
+    if (s.shopOpen) showSplash({ kind: 'shop', title: '🛒 ¡RONDA DE TIENDA!', sub: s.round === 1 ? 'Compra tus primeras tropas · no hay combate' : 'Compra, coloca y retira tropas · no hay combate' });
+    else showSplash({ kind: 'combat', title: '⚔ RONDA ' + s.round, sub: s.first === 0 ? 'Atacas primero' : 'Ataca primero el rival' });
+  }
   function play() {
     ui.frames = ui.s.frames.slice(); ui.shown = 0; ui.playing = true; ui.sel = null;
     clearInterval(timer); step(); timer = setInterval(step, 750);
@@ -347,18 +360,31 @@
     var lg = document.getElementById('log');
     if (lg) lg.innerHTML = '<div class="cur">' + esc(f.text) + '</div>' + ui.frames.slice(0, ui.shown - 1).reverse().slice(0, 7).map(function (x) { return '<div>' + esc(x.text) + '</div>'; }).join('');
   }
-  function stopPlay() { clearInterval(timer); timer = null; ui.playing = false; ui.view = null; ui.hl = null; render(); }
+  function stopPlay() {
+    clearInterval(timer); timer = null; ui.playing = false; ui.view = null; ui.hl = null;
+    var s = ui.s;
+    if (s.phase === 'post' && !s.over && s.p[0].anime <= 0) {
+      ui.busy = true;
+      var a = E.mesaTroops(s.p[0]).length, b = E.mesaTroops(s.p[1]).length;
+      showSplash({ kind: 'end', title: 'FIN DE LA RONDA ' + s.round, sub: 'Tropas en pie: tú ' + a + ' · rival ' + b });
+      render();
+      setTimeout(function () {
+        ui.busy = false;
+        if (ui.s !== s || ui.screen !== 'game') return;
+        E.nextRound(s); ui.sel = null; ui.hint = ''; announce(); render();
+      }, 1500);
+      return;
+    }
+    render();
+  }
 
   // ---------- Eventos ----------
   app.addEventListener('input', function (e) { if (e.target.id === 'slot-name') ui.slotName = e.target.value; });
   app.addEventListener('change', function (e) { if (e.target.id === 'slot-to') ui.slotTo = +e.target.value; });
   var noClick = 0;
-  function nextPending(s) {
-    var p = E.pendingTargets(s)[0];
-    ui.sel = p ? { k: 'mine', uid: p.uid } : null;
-  }
+  function nextPending() { ui.sel = null; } // el objetivo siempre se elige a mano
   app.addEventListener('click', function (e) {
-    if (Date.now() - noClick < 350) return;
+    if (Date.now() - noClick < 350 || ui.busy) return;
     var el = e.target.closest('[data-act]'); if (!el) return;
     var act = el.dataset.act, s = ui.s, P = s && s.p[0];
     if (act === 'lock') return window.cartasLock();
@@ -393,8 +419,8 @@
     if (!s || ui.playing) return;
 
     if (act === 'fight') { if (E.fight(s) === false) return; ui.sel = null; ui.hint = ''; return play(); }
-    if (act === 'endshop') { E.endShop(s); ui.sel = null; ui.hint = ''; render(); return nextPending(s), render(); }
-    if (act === 'next') { E.nextRound(s); ui.sel = null; ui.hint = ''; if (!s.shopOpen && !s.over) nextPending(s); return render(); }
+    if (act === 'endshop') { E.endShop(s); ui.sel = null; ui.hint = ''; announce(); return render(); }
+    if (act === 'next') { E.nextRound(s); ui.sel = null; ui.hint = ''; announce(); return render(); }
     if (act === 'cede') {
       var ok = E.cede(s, +document.getElementById('an-from').value, +document.getElementById('an-to').value, el.dataset.stat);
       ui.hint = ok ? '' : 'Elige dos tropas Anime distintas.'; return render();
@@ -443,7 +469,7 @@
   var drag = null;
   app.addEventListener('pointerdown', function (e) {
     var el = e.target.closest('.hand [data-act="hand"]');
-    if (!el || !ui.s || ui.playing || ui.s.phase !== 'prep' || (e.button && e.button > 0)) return;
+    if (!el || !ui.s || ui.playing || ui.busy || ui.s.phase !== 'prep' || (e.button && e.button > 0)) return;
     drag = { i: +el.dataset.i, x: e.clientX, y: e.clientY, active: false, ghost: null, w: 0, h: 0 };
   });
   document.addEventListener('pointermove', function (e) {

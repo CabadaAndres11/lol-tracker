@@ -229,3 +229,40 @@ svg.arrows .ln.hit { stroke: #fbbf24; stroke-width: 5; }
   .orb { width: 64px; height: 64px; } .orb b { font-size: 1.3rem; } .acts { max-width: none; align-items: center; text-align: center; }
   .hand .hcard:hover { transform: none; box-shadow: none; }
 }
+
+/* ======== v4: ambiente de tienda, separación de bandos, vida en rojo, splash ======== */
+.gwrap { --ch: clamp(110px, calc((100vh - var(--hh) - 340px) / 2), 230px); }
+.gwrap.shopmode { --ch: clamp(110px, calc(100vh - var(--hh) * 2 - 300px), 230px); }
+/* Bandos separados */
+.row4.side0, .row4.side1 { padding: .55rem .7rem; border-radius: 20px; }
+.row4.side1 { background: linear-gradient(180deg, rgba(220,38,38,.14), rgba(220,38,38,.03)); border: 1px solid rgba(248,113,113,.22); }
+.row4.side0 { background: linear-gradient(0deg, rgba(59,130,246,.14), rgba(59,130,246,.03)); border: 1px solid rgba(96,165,250,.25); }
+.gap { height: 2.1rem; display: flex; align-items: center; justify-content: center; position: relative; }
+.gap::before { content: ''; position: absolute; left: 6%; right: 6%; top: 50%; height: 2px; background: linear-gradient(90deg, transparent, rgba(255,255,255,.35), transparent); }
+.gap::after { content: '⚔'; position: relative; background: var(--bg); padding: 0 .7rem; color: var(--mut); font-size: 1.1rem; }
+/* Vida actual en rojo si está dañada */
+.sc.h.low b { color: #ff3030; -webkit-text-stroke: .6px #fff; paint-order: stroke fill; text-shadow: 0 0 4px #fff; }
+/* Sinergias: el detalle se abre hacia la derecha */
+.gl .tip { left: calc(100% + 10px); right: auto; }
+/* Ambiente de tienda */
+body.shopbg { background: radial-gradient(ellipse 90% 60% at 50% 0, #7a4a12 0, #2a1708 45%, #120a05 100%) fixed; }
+.shopmode .top h1 { font-size: 1.25rem; color: #fde68a; }
+.shopmode .synside, .shopmode .logp { border-color: rgba(251,191,36,.3); }
+.shopwrap { position: relative; border: 3px solid #fbbf24; border-radius: 20px; background: linear-gradient(180deg, rgba(251,191,36,.2), rgba(120,53,15,.4)); padding: 1.5rem 1.2rem .8rem; margin-top: .5rem;
+  box-shadow: inset 0 0 40px rgba(251,191,36,.15), 0 0 30px rgba(251,191,36,.25), 0 10px 30px rgba(0,0,0,.5); }
+.shopwrap::before { content: ''; position: absolute; left: -3px; right: -3px; top: -14px; height: 22px; border-radius: 14px 14px 0 0; border: 3px solid #fbbf24; border-bottom: 0;
+  background: repeating-linear-gradient(90deg, #dc2626 0 28px, #fef3c7 28px 56px); box-shadow: 0 4px 10px rgba(0,0,0,.4); }
+.shopwrap .hl { color: #fde68a; font-weight: 800; font-size: .85rem; letter-spacing: .14em; }
+.shopwrap .slot { border-color: rgba(251,191,36,.35); background: rgba(0,0,0,.25); }
+.shopwrap .card.offer { box-shadow: 0 0 0 2px rgba(251,191,36,.7), 0 6px 16px rgba(0,0,0,.5); }
+.shopwrap .card.offer.cant { box-shadow: none; }
+/* Cartel de ronda */
+.splash { position: fixed; inset: 0; z-index: 900; display: grid; place-items: center; pointer-events: none; opacity: 0; }
+.splash.show { animation: splash 1.5s ease both; }
+.splash .band { width: 100%; text-align: center; padding: 1.3rem 1rem; border-block: 4px solid; backdrop-filter: blur(3px); }
+.splash .st { font-size: clamp(1.6rem, 5vw, 3rem); font-weight: 900; letter-spacing: .1em; text-shadow: 0 4px 0 rgba(0,0,0,.4); }
+.splash .ss { margin-top: .3rem; font-size: clamp(.9rem, 2.4vw, 1.2rem); opacity: .9; }
+.splash.k-shop .band { background: linear-gradient(90deg, rgba(120,53,15,.92), rgba(217,119,6,.92), rgba(120,53,15,.92)); border-color: #fbbf24; color: #fff3b0; }
+.splash.k-combat .band { background: linear-gradient(90deg, rgba(127,29,29,.9), rgba(220,38,38,.9), rgba(127,29,29,.9)); border-color: #fecaca; color: #fff; }
+.splash.k-end .band { background: linear-gradient(90deg, rgba(46,16,101,.92), rgba(109,40,217,.92), rgba(46,16,101,.92)); border-color: #c4b5fd; color: #fff; }
+@keyframes splash { 0% { opacity: 0; transform: scale(.7) translateX(-6%); } 18% { opacity: 1; transform: scale(1) translateX(0); } 78% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(1.06) translateX(4%); } }

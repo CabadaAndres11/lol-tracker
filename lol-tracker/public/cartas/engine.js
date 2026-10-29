@@ -7,7 +7,7 @@
   var CFG = {
     slots: 4, handMax: 5, life: 12, gold: 4, income: 2, shopEvery: 3, shopOffers: 4,
     refreshCost: 1, deckBudget: 20, maxRounds: 40,
-    hpMult: 1.1, hpGrow: 1.25, // vida base de las tropas: x hpMult x hpGrow^(coste-1)
+    hpMult: 1.1, hpGrow: 1.25, hpMin: 5, // vida base de las tropas: x hpMult x hpGrow^(coste-1)
     rarityWeight: { 'Común': 50, 'Rara': 30, 'Épica': 15, 'Legendaria': 5 },
   };
   var FX = {
@@ -32,7 +32,7 @@
   };
 
   if (!DATA.hpScaled) {
-    DATA.cards.forEach(function (c) { c.hp = Math.max(1, Math.round(c.hp * CFG.hpMult * Math.pow(CFG.hpGrow, c.cost - 1))); });
+    DATA.cards.forEach(function (c) { c.hp = Math.max(CFG.hpMin, Math.round(c.hp * CFG.hpMult * Math.pow(CFG.hpGrow, c.cost - 1))); });
     DATA.hpScaled = true;
   }
   var CARD = {};

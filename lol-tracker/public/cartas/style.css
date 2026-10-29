@@ -314,3 +314,6 @@ body.shopbg { background: radial-gradient(ellipse 90% 60% at 50% 0, #7a4a12 0, #
 .gl { position: relative; z-index: 60; }
 .side-themes { position: relative; z-index: 60; }
 .synside { position: relative; top: auto; }
+
+.shoprow { grid-template-columns: repeat(5, minmax(0, calc(var(--hh) * 5 / 7))) auto; }
+@media (max-width: 1000px) { .shoprow { grid-template-columns: repeat(5, minmax(0, 1fr)); } }

@@ -5,23 +5,23 @@
 
   // ---------- Ajustes de balance (todo en un sitio para tocarlo fácil) ----------
   var CFG = {
-    slots: 4, handMax: 5, life: 12, gold: 4, income: 2, shopEvery: 3, shopOffers: 4,
+    aiBonus: 1, aiBonusRounds: 6, slots: 4, handMax: 5, life: 12, gold: 8, income: 2, shopEvery: 3, shopOffers: 5,
     refreshCost: 1, deckBudget: 20, maxRounds: 40,
     hpMult: 1.1, hpGrow: 1.25, hpMin: 5, // vida base de las tropas: x hpMult x hpGrow^(coste-1)
     rarityWeight: { 'Común': 50, 'Rara': 30, 'Épica': 15, 'Legendaria': 5 },
   };
   var FX = {
-    pokemon: { probs: [[70, 25, 5], [45, 40, 15], [25, 45, 30]], bonus: [1, 2, 3], names: ['Pokéball', 'Superball', 'Ultraball'] },
-    comebacker: { atk: [1, 2, 2], others: [0, 0, 1] },
+    pokemon: { cap: 10, probs: [[70, 25, 5], [45, 40, 15], [25, 45, 30]], bonus: [1, 2, 3], names: ['Pokéball', 'Superball', 'Ultraball'] },
+    comebacker: { atk: [1, 2, 2], others: [0, 0, 1], cap: 8 },
     lol: { atk: [1, 1, 2], hp: [0, 1, 2], cap: [4, 6, 8] },
     trabajo: { shop: [0, 0, 2] },
     anime: { cede: [1, 2, 3] },
-    koi: { atk: [1, 2, 3] },
-    voley: { atk: [1, 2, 3], red: [1, 1, 2] },
-    novia: { p: [0.6, 0.75, 0.9], up: [1, 2, 3], down: 1 },
-    tilt: { hit: [1, 1, 2], perm: [1, 2, 2], cap: 6 },
+    koi: { atk: [1, 2, 3], cap: 8 },
+    voley: { atk: [1, 2, 3], red: [1, 1, 2], cap: 8 },
+    novia: { p: [0.6, 0.75, 0.9], up: [1, 2, 3], down: 1, cap: 10 },
+    tilt: { hit: [1, 1, 2], perm: [1, 2, 2], cap: 8 },
     pueblo: { per: [1, 2], cap: [4, 8] },
-    duo: { stat: 3, death: 2 },
+    duo: { stat: 2, death: 2, cap: 12 },
     nini: { per: 2, cap: 8 },
     pelayos: { cap: 10 },
   };
@@ -50,7 +50,7 @@
   // ---------- Instancias ----------
   function mk(s, id, owner) {
     var c = CARD[id];
-    var i = { uid: s.uid++, id: id, owner: owner, perm: { atk: 0, hp: 0 }, tmp: { atk: 0, hp: 0, red: 0 }, dead: false, caps: { lol: 0, pueblo: 0, nini: 0, pel: 0, tilt: 0 } };
+    var i = { uid: s.uid++, id: id, owner: owner, perm: { atk: 0, hp: 0 }, tmp: { atk: 0, hp: 0, red: 0 }, dead: false, caps: { lol: 0, pueblo: 0, nini: 0, pel: 0, tilt: 0, pk: 0, duo: 0, nov: 0, cb: 0, vol: 0, koi: 0 } };
     i.hp = c.hp || 0;
     return i;
   }
@@ -140,6 +140,7 @@
       if (tw === 1 && s.round % 2 === 0) extra = 1;
       else if (tw >= 2) extra = 1;
     }
+    if (p === 1 && s.round <= CFG.aiBonusRounds) g += CFG.aiBonus; // ayuda de dificultad para la IA al principio
     P.gold += g + extra;
     return g + extra;
   }
@@ -278,17 +279,19 @@
   function aiShop(s, p) {
     var P = s.p[p];
     if (!s.shopOpen) return;
-    var guard = 0;
-    while (guard++ < 8) {
-      var best = -1, bestScore = -1;
+    var guard = 0, refreshes = 0;
+    while (guard++ < 14) {
+      var best = -1, bestScore = -1, troopsHeld = P.hand.filter(isTroop).length + mesaTroops(P).length;
       P.offers.forEach(function (id, k) {
         var c = CARD[id];
-        if (c.cost > P.gold || P.hand.length >= CFG.handMax) return;
-        var score = (c.type === 'tropa' ? 10 : 2) + c.cost * 2 + (c.atk || 0) * 0.3 + s.rng();
+        if (!c || c.cost > P.gold || P.hand.length >= CFG.handMax) return;
+        var score = c.type === 'tropa' ? (c.atk + c.hp * 0.45) / (1 + c.cost * 0.25) + (troopsHeld < 4 ? 6 : 0) : 1.5;
+        score += s.rng() * 0.8;
         if (score > bestScore) { bestScore = score; best = k; }
       });
-      if (best < 0) break;
-      buy(s, p, best);
+      if (best >= 0) { buy(s, p, best); continue; }
+      if (troopsHeld < 4 && refreshes < 3 && P.gold >= refreshCost(s, p) + 1 && P.hand.length < CFG.handMax) { if (refresh(s, p)) { refreshes++; continue; } }
+      break;
     }
   }
   function aiPrep(s, p) {
@@ -318,15 +321,28 @@
     // Voley: ataca salvo que esté en desventaja numérica
     mesaTroops(P).forEach(function (i) { if (has(i, 'Voley')) P.voley[i.uid] = s.rng() < 0.7 ? 'atk' : 'def'; });
   }
+  // Reparto coordinado: concentra el daño para rematar tropas (primero las más peligrosas).
   function aiTargets(s, p) {
-    var P = s.p[p], foes = mesaTroops(s.p[1 - p]);
-    mesaTroops(P).forEach(function (i) {
-      if (!foes.length) return;
-      var kill = foes.filter(function (f) { return atk(i) >= f.hp; }).sort(function (a, b) { return atk(b) - atk(a); });
-      var tgt = kill.length ? kill[0] : foes.slice().sort(function (a, b) { return a.hp - b.hp; })[0];
-      if (s.rng() < 0.2) tgt = foes[Math.floor(s.rng() * foes.length)];
-      P.target[i.uid] = tgt.uid;
+    var P = s.p[p], foes = mesaTroops(s.p[1 - p]).map(function (f) { return { f: f, rem: f.hp }; });
+    if (!foes.length) return;
+    mesaTroops(P).sort(function (a, b) { return atk(b) - atk(a); }).forEach(function (i) {
+      var a = atk(i);
+      var kills = foes.filter(function (x) { return x.rem > 0 && a >= x.rem; }).sort(function (x, y) { return atk(y.f) - atk(x.f); });
+      var alive = foes.filter(function (x) { return x.rem > 0; }).sort(function (x, y) { return x.rem - y.rem; });
+      var pick = kills[0] || alive[0] || foes[0];
+      pick.rem -= a; P.target[i.uid] = pick.f.uid;
     });
+  }
+  // Mazo de la IA: elige 3 temáticas y llena el mazo con las cartas que más encajan.
+  function aiDeck(rng) {
+    var themes = Object.keys(DATA.themes), pick = [];
+    while (pick.length < 3) { var t = themes[Math.floor(rng() * themes.length)]; if (pick.indexOf(t) < 0) pick.push(t); }
+    var sc = DATA.cards.map(function (c) { return { c: c, v: c.themes.filter(function (t) { return pick.indexOf(t) >= 0; }).length * 10 + rng() * 6 }; }).sort(function (a, b) { return b.v - a.v; });
+    var com = sc.filter(function (x) { return x.c.rarity === 'Común'; }).slice(0, 2);
+    var order = com.concat(sc.filter(function (x) { return com.indexOf(x) < 0; })), deck = [], used = 0;
+    order.forEach(function (x) { if (used + x.c.size <= CFG.deckBudget - 2) { deck.push(x.c.id); used += x.c.size; } });
+    DATA.actions.slice().sort(function () { return rng() - .5; }).forEach(function (a) { if (used + a.size <= CFG.deckBudget && deck.length < 20) { deck.push(a.id); used += a.size; } });
+    return deck;
   }
 
   // ---------- Combate ----------
@@ -346,6 +362,15 @@
   function fxFrame(s, p, type, title, sub, uids, neg) {
     frame(s, (p === 0 ? '' : 'Rival · ') + title + (sub ? ' ' + sub : ''), { fx: { type: type, side: p, title: title, sub: sub || '', uids: uids || [], neg: !!neg } });
   }
+  // Ganancia permanente con tope por tropa y temática. stat: 'atk' | 'hp' | 'both'. Devuelve lo realmente ganado.
+  function gainCap(i, key, stat, n, cap) {
+    var g = Math.min(n, cap - (i.caps[key] || 0));
+    if (g <= 0) return 0;
+    i.caps[key] = (i.caps[key] || 0) + g;
+    if (stat !== 'hp') grow(i, 'atk', g);
+    if (stat !== 'atk') grow(i, 'hp', g);
+    return g;
+  }
   function grow(i, stat, n) {
     if (stat === 'atk') i.perm.atk += n;
     else { i.perm.hp += n; i.hp += n; }
@@ -360,8 +385,8 @@
       if ((t['Dúo Inseparable'] || 0) >= 1) {
         var duos = troops.filter(function (i) { return has(i, 'Dúo Inseparable'); });
         if (duos.length >= 2) {
-          duos.forEach(function (i) { i.tmp.atk += FX.duo.stat; i.tmp.hp += FX.duo.stat; i.hp += FX.duo.stat; });
-          fxFrame(s, p, 'duo', 'Dúo Inseparable', '+' + FX.duo.stat + '/+' + FX.duo.stat, duos.map(function (i) { return i.uid; }));
+          var du = duos.filter(function (i) { return gainCap(i, 'duo', 'both', FX.duo.stat, FX.duo.cap) > 0; });
+          if (du.length) fxFrame(s, p, 'duo', 'Dúo Inseparable', '+' + FX.duo.stat + '/+' + FX.duo.stat + ' permanente', du.map(function (i) { return i.uid; }));
         }
 
       }
@@ -372,22 +397,21 @@
         if (r < probs[0]) ball = 0; else if (r < probs[0] + probs[1]) ball = 1; else ball = 2;
         s.lastBall[p] = ball;
         var b = FX.pokemon.bonus[ball];
-        pk.forEach(function (i) { i.tmp.atk += b; i.tmp.hp += b; i.hp += b; });
-        if (pk.length) fxFrame(s, p, 'pokemon', FX.pokemon.names[ball], '+' + b + '/+' + b + ' a las Pokémon', pk.map(function (i) { return i.uid; }));
-        if (pk.length) s.frames[s.frames.length - 1].hl.fx.ball = ball;
+        pk = pk.filter(function (i) { return gainCap(i, 'pk', 'both', b, FX.pokemon.cap) > 0; });
+        if (pk.length) { fxFrame(s, p, 'pokemon', FX.pokemon.names[ball], '+' + b + '/+' + b + ' permanente a las Pokémon', pk.map(function (i) { return i.uid; })); s.frames[s.frames.length - 1].hl.fx.ball = ball; }
       }
       // Novia
       if (t['Novia'] && troops.length) {
         var nt = t['Novia'] - 1, up = s.rng() < FX.novia.p[nt];
         troops.forEach(function (i) {
-          if (up) { i.tmp.atk += FX.novia.up[nt]; i.tmp.hp += FX.novia.up[nt]; i.hp += FX.novia.up[nt]; }
+          if (up) gainCap(i, 'nov', 'both', FX.novia.up[nt], FX.novia.cap);
           else {
             var da = Math.min(FX.novia.down, atk(i) - 1), dh = Math.min(FX.novia.down, maxHp(i) - 1);
             if (da > 0) i.tmp.atk -= da;
             if (dh > 0) { i.tmp.hp -= dh; i.hp = Math.min(i.hp, maxHp(i)); }
           }
         });
-        fxFrame(s, p, 'novia', up ? '¡Tu novia te apoya!' : '¡Tu novia te regaña!', up ? '+' + FX.novia.up[nt] + '/+' + FX.novia.up[nt] + ' a todas' : '-1/-1 a todas', troops.map(function (i) { return i.uid; }), !up);
+        fxFrame(s, p, 'novia', up ? '¡Tu novia te apoya!' : '¡Tu novia te regaña!', up ? '+' + FX.novia.up[nt] + '/+' + FX.novia.up[nt] + ' permanente a todas' : '-1/-1 esta ronda a todas', troops.map(function (i) { return i.uid; }), !up);
       }
       // Pueblo
       if (t['Pueblo']) {
@@ -414,10 +438,10 @@
         var vo = [], vd = 0, va = 0;
         troops.filter(function (i) { return has(i, 'Voley'); }).forEach(function (i) {
           var mode = P.voley[i.uid] || 'atk';
-          if (mode === 'atk') { i.tmp.atk += FX.voley.atk[vt]; va++; } else { i.tmp.red += FX.voley.red[vt]; vd++; }
+          if (mode === 'atk') { gainCap(i, 'vol', 'atk', FX.voley.atk[vt], FX.voley.cap); va++; } else { i.tmp.red += FX.voley.red[vt]; vd++; }
           vo.push(i.uid);
         });
-        if (vo.length) fxFrame(s, p, 'voley', 'Voley', (va ? '+' + FX.voley.atk[vt] + ' ataque en ' + va : '') + (va && vd ? ' · ' : '') + (vd ? '-' + FX.voley.red[vt] + ' daño recibido en ' + vd : ''), vo);
+        if (vo.length) fxFrame(s, p, 'voley', 'Voley', (va ? '+' + FX.voley.atk[vt] + ' ataque permanente en ' + va : '') + (va && vd ? ' · ' : '') + (vd ? '-' + FX.voley.red[vt] + ' daño recibido en ' + vd : ''), vo);
       }
     });
     // Comebacker (con los números ya modificados)
@@ -428,10 +452,10 @@
       if (sums[p] < sums[1 - p]) {
         var ct = t['Comebacker'] - 1;
         mesaTroops(s.p[p]).forEach(function (i) {
-          if (has(i, 'Comebacker')) i.tmp.atk += FX.comebacker.atk[ct];
-          else if (FX.comebacker.others[ct]) i.tmp.atk += FX.comebacker.others[ct];
+          if (has(i, 'Comebacker')) gainCap(i, 'cb', 'atk', FX.comebacker.atk[ct], FX.comebacker.cap);
+          else if (FX.comebacker.others[ct]) gainCap(i, 'cb', 'atk', FX.comebacker.others[ct], FX.comebacker.cap);
         });
-        fxFrame(s, p, 'comeback', '¡Remontada!', '+' + FX.comebacker.atk[ct] + ' ataque a las Comebacker', mesaTroops(s.p[p]).filter(function (i) { return has(i, 'Comebacker'); }).map(function (i) { return i.uid; }));
+        fxFrame(s, p, 'comeback', '¡Remontada!', '+' + FX.comebacker.atk[ct] + ' ataque permanente a las Comebacker', mesaTroops(s.p[p]).filter(function (i) { return has(i, 'Comebacker'); }).map(function (i) { return i.uid; }));
       }
     });
   }
@@ -498,8 +522,7 @@
           if (gp > 0) { a.caps.pel += gp; grow(a, 'atk', gp); grow(a, 'hp', gp); line += ' +' + gp + '/+' + gp + ' (Pelayos)'; }
         }
         if (has(tgt, 'Tilt') && tt['Tilt']) {
-          var th = FX.tilt.hit[tt['Tilt'] - 1];
-          tgt.tmp.atk += th;
+          gainCap(tgt, 'tilt', 'atk', FX.tilt.hit[tt['Tilt'] - 1], FX.tilt.cap);
         }
       }
       if (tgt.hp <= 0) {
@@ -507,13 +530,13 @@
         var tt2 = s.tiers[tgt.owner];
         if (has(tgt, 'KOI') && tt2['KOI']) {
           var kb = FX.koi.atk[tt2['KOI'] - 1];
-          mesaTroops(E).forEach(function (i) { i.tmp.atk += kb; });
+          mesaTroops(E).forEach(function (i) { gainCap(i, 'koi', 'atk', kb, FX.koi.cap); });
           line += ' KOI anima al equipo: +' + kb + ' de ataque.';
-          fxk = { type: 'koi', side: tgt.owner, title: '¡KOI anima al equipo!', sub: '+' + kb + ' ataque', uids: mesaTroops(E).map(function (i) { return i.uid; }), neg: false };
+          fxk = { type: 'koi', side: tgt.owner, title: '¡KOI anima al equipo!', sub: '+' + kb + ' ataque permanente', uids: mesaTroops(E).map(function (i) { return i.uid; }), neg: false };
         }
         if (has(tgt, 'Dúo Inseparable') && tt2['Dúo Inseparable']) {
           var dd = mesaTroops(E).filter(function (i) { return has(i, 'Dúo Inseparable'); });
-          dd.forEach(function (i) { i.tmp.atk += FX.duo.death; });
+          dd.forEach(function (i) { gainCap(i, 'duo', 'atk', FX.duo.death, FX.duo.cap); });
           if (dd.length && !fxk) fxk = { type: 'duo', side: tgt.owner, title: 'Su dúo se ha roto', sub: '+' + FX.duo.death + ' ataque', uids: dd.map(function (i) { return i.uid; }), neg: false };
         }
       }
@@ -526,8 +549,7 @@
         var t = s.tiers[p];
         if (t['Tilt'] && al[p] < al[1 - p]) {
           mesaTroops(s.p[p]).filter(function (i) { return has(i, 'Tilt'); }).forEach(function (i) {
-            var g = Math.min(FX.tilt.perm[t['Tilt'] - 1], FX.tilt.cap - i.caps.tilt);
-            if (g > 0) { i.caps.tilt += g; grow(i, 'atk', g); }
+            gainCap(i, 'tilt', 'atk', FX.tilt.perm[t['Tilt'] - 1], FX.tilt.cap);
           });
           fxFrame(s, p, 'tilt', 'Tilt', 'conservan ataque tras perder la ronda', mesaTroops(s.p[p]).filter(function (i) { return has(i, 'Tilt'); }).map(function (i) { return i.uid; }));
         }
@@ -603,7 +625,7 @@
     newGame: newGame, randomDeck: randomDeck, deckSize: deckSize, mulberry32: mulberry32,
     place: place, playAction: playAction, setTarget: setTarget, clearTargets: clearTargets, setVoley: setVoley,
     buy: buy, refresh: refresh, refreshCost: refreshCost, pickFromDeck: pickFromDeck, retire: retire,
-    aiShop: aiShop, aiPrep: aiPrep, aiTargets: aiTargets, fight: fight, endShop: endShop, pendingTargets: pendingTargets, cede: cede, nextRound: nextRound,
+    aiDeck: aiDeck, aiShop: aiShop, aiPrep: aiPrep, aiTargets: aiTargets, fight: fight, endShop: endShop, pendingTargets: pendingTargets, cede: cede, nextRound: nextRound,
     themeCounts: themeCounts, tiers: tiers, tierOf: tierOf, atk: atk, maxHp: maxHp, card: card, isTroop: isTroop, has: has, mesaTroops: mesaTroops, viewOf: viewOf,
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.CartasEngine = API;

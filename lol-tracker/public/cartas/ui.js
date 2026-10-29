@@ -78,11 +78,11 @@
       sec('Objetivo', ['Es un 1 contra 1. Empiezas con <b>12 de vida</b>; gana quien deje la vida del rival a 0.']) +
       sec('Tu mazo', ['El mazo tiene un <b>presupuesto de espacio de ' + CFG.deckBudget + '</b>: las tropas baratas ocupan 1, las medias 2 y las de coste 5 ocupan 3; las acciones ocupan 1. Lo ves en los cuadraditos de la esquina de cada carta.', 'No hay cartas duplicadas en el mazo, pero una misma carta puede salir varias veces en la tienda.', 'Necesitas al menos una tropa <b>Común</b>.']) +
       sec('Cartas', ['El <b>círculo dorado</b> es lo que cuesta comprarla en oro.', 'El <b>círculo naranja</b> es el ataque y el <b>verde</b> la vida.', 'El color de la carta mezcla los de sus temáticas y el borde indica la rareza (gris Común, azul Rara, morado Épica, dorado Legendaria).']) +
-      sec('Primera ronda', ['La partida empieza con una <b>tienda</b>: ambos jugadores tienen <b>6 de oro</b> y solo salen tropas Comunes de tu mazo. Pulsa una carta para comprarla, colócala (pulsando o arrastrándola) y termina la tienda.']) +
+      sec('Primera ronda', ['La partida empieza con una <b>tienda</b>: ambos jugadores tienen <b>' + (CFG.gold + CFG.income) + ' de oro</b> y solo salen tropas Comunes de tu mazo. Pulsa una carta para comprarla, colócala (pulsando o arrastrándola) y termina la tienda.']) +
       sec('Una ronda de combate', ['Cada ronda ganas <b>2 de oro</b> (se reinicia cada partida y es distinto de las monedas de los sobres).', 'Tienes <b>4 huecos en mesa</b> y una <b>mano de 5</b>.', 'En la preparación colocas tropas (pulsando o arrastrando desde la mano), juegas acciones y <b>debes elegir objetivo para cada una de tus tropas</b>: no se puede combatir hasta que todas tengan uno. Puedes deshacerlos todos con el botón «Deshacer objetivos». El rival no ve tus objetivos.']) +
       sec('Tienda', ['Hay tienda <b>cada 3 rondas</b> (rondas 1, 4, 7…). En una ronda de tienda <b>no hay combate</b>.', 'La tienda ofrece 4 cartas al azar de tu propio mazo; pulsa una para comprarla. El botón redondo ↻ la actualiza por 1 de oro.', '<b>Solo en las rondas de tienda</b> puedes retirar tropas de la mesa; el resto del tiempo puedes colocar si hay hueco, pero no quitar.', 'Las tropas de coste 5 aparecen a partir de la segunda tienda.']) +
       sec('Combate', ['Los ataques se resuelven de uno en uno, alternando bandos de izquierda a derecha. Cada tropa ataca <b>una vez por ronda</b>. El bando que empieza se alterna cada ronda.', 'Si el objetivo ya murió, el ataque va a una tropa rival viva al azar.', 'No se puede atacar al jugador directamente: <b>recibes daño solo si todas tus tropas han muerto</b> y a tu rival le quedan tropas por atacar; el daño es igual a su ataque.', '<b>Las tropas no se curan entre rondas</b>: el daño se acumula. Solo se curan del todo al volver a tu mano (retirándolas en la tienda). Las muertas liberan su hueco y los bonus de «esta ronda» desaparecen.', 'Si en una ronda sin tienda no tienes tropas ni en mesa ni en mano, <b>pierdes automáticamente</b>.']) +
-      sec('Temáticas', ['Cada tropa tiene 1 o 2 temáticas. Cuentan las <b>cartas distintas</b> de cada temática entre mesa y mano (las copias no suman; las acciones no tienen temática).', 'Al llegar a ciertos números (niveles) la temática da su bonificación. En la partida ves a un lado cuántas llevas y cuántas necesitas.']) +
+      sec('Temáticas', ['Cada tropa tiene 1 o 2 temáticas. Cuentan las <b>cartas distintas</b> de cada temática entre mesa y mano (las copias no suman; las acciones no tienen temática).', 'Al llegar a ciertos números (niveles) la temática da su bonificación. <b>Las mejoras de estadísticas son permanentes</b> (con un tope por tropa), así que tus tropas se hacen más fuertes con la partida. En la partida ves a un lado cuántas llevas y cuántas necesitas.', 'Voley solo funciona con 2 o más cartas distintas de Voley entre mesa y mano; hasta entonces no puedes elegir ataque o defensa.']) +
       sec('Todavía por llegar', ['Pasivas en las tropas de coste 5, más acciones, sobres y monedas, y partidas contra otros jugadores.']) + '</div>';
   }
 
@@ -173,7 +173,7 @@
   function inst(P, uid) { return P.mesa.filter(function (i) { return i && i.uid === uid; })[0]; }
   function startGame() {
     var seed = Math.floor(Math.random() * 1e9), r = E.mulberry32(seed + 7);
-    ui.s = E.newGame(ui.deck, E.randomDeck(r), seed);
+    ui.s = E.newGame(ui.deck, E.aiDeck(r), seed);
     ui.screen = 'game'; ui.sel = null; ui.view = null; ui.playing = false; ui.hint = ''; ui.landed = null; ui.busy = false;
     announce(); render();
   }
@@ -216,7 +216,7 @@
         if (pending) o.cls += ' notgt';
         o.attrs += ' data-act="mine"';
         if (sel && sel.k === 'act' && CARD[P0.hand[sel.i].id].target === 'ally') o.cls += ' tgtable';
-        if (s.phase === 'prep' && !ui.playing && I && E.has(I, 'Voley') && !s.shopOpen) {
+        if (s.phase === 'prep' && !ui.playing && I && E.has(I, 'Voley') && !s.shopOpen && (E.tiers(P0).Voley || 0) >= 1) {
           var m = P0.voley[v.uid] || 'atk';
           under += '<div class="mini"><button data-act="voley" data-uid="' + v.uid + '" data-m="atk" class="' + (m === 'atk' ? 'on' : '') + '">⚔ Ataque</button><button data-act="voley" data-uid="' + v.uid + '" data-m="def" class="' + (m === 'def' ? 'on' : '') + '">🛡 Defensa</button></div>';
         }

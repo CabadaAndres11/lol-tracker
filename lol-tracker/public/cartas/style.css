@@ -817,3 +817,6 @@ input:focus, select:focus { outline: none; border-color: var(--acc); box-shadow:
 .starter .si .tic { width: 2.4rem; height: 2.4rem; margin: 0; }
 .syn-row .si b .tic { width: 1.3em; height: 1.3em; }
 .chip .tic { width: 1.3em; height: 1.3em; }
+img.timg { object-fit: contain; filter: drop-shadow(0 1px 2px rgba(0,0,0,.5)); }
+.tag img.timg { filter: drop-shadow(0 0 1px rgba(255,255,255,.7)) drop-shadow(0 1px 1px rgba(0,0,0,.4)); }
+.starter .si img.timg { width: 2.6rem; height: 2.6rem; }

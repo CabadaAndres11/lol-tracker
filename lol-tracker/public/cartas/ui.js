@@ -40,7 +40,8 @@
     var x = p(a), y = p(b);
     return '#' + x.map(function (v, i) { return ('0' + Math.round(v * (1 - t) + y[i] * t).toString(16)).slice(-2); }).join('');
   }
-  function tic(t) { return ic('t-' + t, 'tic'); }
+  var TIMG = { 'Pokémon': 'pokemon', 'Lol': 'lol', 'KOI': 'koi' };
+  function tic(t) { return TIMG[t] ? '<img class="ic tic timg" src="/cartas/img/' + TIMG[t] + '.png" alt="">' : ic('t-' + t, 'tic'); }
   function tagHtml(t) { return '<span class="tag" style="--tc:' + D.themes[t].color + '">' + tic(t) + esc(t) + '</span>'; }
   function pips(n) { var h = ''; for (var k = 0; k < 3; k++) h += '<i' + (k < n ? ' class="on"' : '') + '></i>'; return h; }
   var AICON = { entrenamiento: 'espadas', arenga: 'megafono', armadura: 'escudo', banquete: 'carne', intimidacion: 'enfado', 'mal-de-ojo': 'ojo', 'golpe-certero': 'diana', lluvia: 'arco',

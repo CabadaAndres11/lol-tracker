@@ -84,7 +84,7 @@
   }
 
   function heroCards() {
-    var pick = ['Rara', 'Legendaria', 'Épica'].map(function (r) { return D.cards.filter(function (c) { return c.rarity === r; })[0]; }).filter(Boolean);
+    var pick = ['Rara', 'Legendaria', 'Épica'].map(function (r) { return D.cards.filter(function (c) { return c.rarity === r && (r !== 'Rara' || c.person === 'AitoRLG'); })[0] || D.cards.filter(function (c) { return c.rarity === r; })[0]; }).filter(Boolean);
     return '<div class="fan">' + pick.map(function (c, k) { return '<div class="fc f' + k + '">' + cardHtml(c, { atk: c.atk, hp: c.hp, max: c.hp, cls: '' }) + '</div>'; }).join('') + '</div>';
   }
   function renderHome() {
@@ -97,7 +97,7 @@
       ['themes', '✨', 'Sinergias', n + ' sinergias con sus niveles y cartas.'],
       ['rules', '📖', 'Normas', 'Cómo funcionan las rondas, la tienda y el combate.'],
     ].map(function (m) { return '<button class="menu-i m-' + m[0] + '" data-act="nav" data-to="' + m[0] + '"><span class="mi">' + m[1] + '</span><b>' + m[2] + '</b><span class="mut">' + m[3] + '</span></button>'; }).join('') + '</div>';
-    h += '<p class="mut" style="text-align:center">' + D.cards.length + ' tropas · ' + D.actions.length + ' acciones · versión prototipo (sobres y monedas, próximamente)</p></div>';
+    h += '<p class="mut" style="text-align:center">' + D.cards.length + ' tropas · ' + D.actions.length + ' acciones · prototipo</p></div>';
     app.innerHTML = h;
   }
 

@@ -72,7 +72,7 @@
   var NAV = [['home', '🏠 Inicio'], ['play', '⚔ Jugar'], ['deck', '🃏 Mazo'], ['packs', '🎁 Sobres'], ['themes', '✨ Sinergias'], ['rules', '📖 Normas']];
   function navHtml(cur) {
     return '<nav class="nav">' + NAV.map(function (n) { return '<button class="navb' + (n[0] === cur ? ' on' : '') + '" data-act="nav" data-to="' + n[0] + '">' + n[1] + '</button>'; }).join('') +
-      '<span class="navsp"></span>' + (ui.acct ? '<button class="navb coinpill" data-act="nav" data-to="packs" title="Tus monedas">🪙 ' + ui.acct.coins + '</button><span class="navb who" title="Tu cuenta">👤 ' + esc(ui.acct.name) + '</span>' : '') + '<a class="navb" href="/">← Hub</a><button class="navb" data-act="logout" title="Cambiar de cuenta">Salir</button><button class="navb" data-act="lock" title="Bloquear">🔒</button></nav>';
+      '<span class="navsp"></span>' + (ui.acct ? '<button class="navb coinpill" data-act="nav" data-to="packs" title="Tus monedas">🪙 ' + ui.acct.coins + '</button><span class="acctw"><button class="navb who" data-act="acctmenu" title="Tu cuenta">👤 ' + esc(ui.acct.name) + ' ▾</button><div class="acctmenu"><div class="am-name">Sesión de <b>' + esc(ui.acct.name) + '</b></div><button data-act="logout">🚪 Cerrar sesión</button></div></span>' : '') + '<a class="navb" href="/">← Hub</a><button class="navb" data-act="lock" title="Bloquear">🔒</button></nav>';
   }
   function head(cur, title) { return '<div class="wrap">' + navHtml(cur) + (title ? '<h1 class="ptitle">' + title + '</h1>' : ''); }
   function deckSize() { return E.deckSize(ui.deck); }
@@ -93,6 +93,7 @@
     h += '<div class="menu">' + [
       ['play', '⚔', 'Jugar', 'Elige modo: contra la IA, jugador contra jugador o versus de 4.'],
       ['deck', '🃏', 'Mazo', 'Elige tus cartas (' + deckSize() + '/' + CFG.deckBudget + ') y guarda hasta 3 mazos.'],
+      ['packs', '🎁', 'Sobres', 'Abre sobres con tus monedas (' + (ui.acct ? ui.acct.coins : 0) + ' 🪙) y amplía tu colección.'],
       ['themes', '✨', 'Sinergias', n + ' sinergias con sus niveles y cartas.'],
       ['rules', '📖', 'Normas', 'Cómo funcionan las rondas, la tienda y el combate.'],
     ].map(function (m) { return '<button class="menu-i m-' + m[0] + '" data-act="nav" data-to="' + m[0] + '"><span class="mi">' + m[1] + '</span><b>' + m[2] + '</b><span class="mut">' + m[3] + '</span></button>'; }).join('') + '</div>';
@@ -569,6 +570,7 @@
     var el = e.target.closest('[data-act]'); if (!el) return;
     var act = el.dataset.act, s = ui.s, P = s && s.p[0];
     if (act === 'lock') return window.cartasLock();
+    if (act === 'acctmenu') { var w = el.closest('.acctw'); if (w) w.classList.toggle('open'); return; }
     if (act === 'logout') return logout();
     if (act === 'login' || act === 'register') {
       var nm = document.getElementById('lg-name').value, pn = document.getElementById('lg-pin').value; ui.lgName = nm;
@@ -741,6 +743,7 @@
   }
 
   window.CartasUI = ui; window.CartasRender = render; // depuración
+  document.addEventListener('click', function (e) { if (!e.target.closest || !e.target.closest('.acctw')) { var o = document.querySelector('.acctw.open'); if (o) o.classList.remove('open'); } });
   app.addEventListener('keydown', function (e) { if (e.key === 'Enter' && ui.screen === 'login' && e.target.id && e.target.id.indexOf('lg-') === 0) { var b = app.querySelector('[data-act=login]'); if (b) b.click(); } });
   render();
   if (!getTok()) { ui.screen = 'login'; render(); }

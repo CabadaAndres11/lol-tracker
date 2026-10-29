@@ -268,7 +268,6 @@
     'mal-de-ojo': { ok: function (s, p) { return mesaTroops(s.p[1 - p]).length ? '' : 'El rival no tiene tropas.'; }, run: function (s, p) { mesaTroops(s.p[1 - p]).forEach(function (i) { i.perm.atk -= 1; }); return '-1 ataque permanente a todas las rivales'; } },
     'golpe-certero': { run: function (s, p, t) { t.hp -= 6; if (t.hp <= 0) dropDead(s, 1 - p, t); return '6 de daño'; } },
     lluvia: { ok: function (s, p) { return mesaTroops(s.p[1 - p]).length ? '' : 'El rival no tiene tropas.'; }, run: function (s, p) { mesaTroops(s.p[1 - p]).forEach(function (i) { i.hp -= 2; if (i.hp <= 0) dropDead(s, 1 - p, i); }); return '2 de daño a todas las rivales'; } },
-    cafe: { run: function (s, p) { s.p[p].gold += 2; return '+2 de oro'; } },
     'bola-extra': { ok: function (s, p) { return (tiers(s.p[p])['Pokémon'] || 0) >= 1 ? '' : 'Necesitas el nivel 1 de Pokémon (2 cartas distintas).'; }, run: function (s, p) { s.p[p].fl.pk = (s.p[p].fl.pk || 0) + 1; return 'bola extra esta ronda'; } },
     'segundo-aliento': {
       ok: function (s, p) { return mesaTroops(s.p[p]).some(function (i) { return has(i, 'Comebacker') && i.hp < maxHp(i); }) ? '' : 'Ninguna Comebacker en mesa está herida.'; },

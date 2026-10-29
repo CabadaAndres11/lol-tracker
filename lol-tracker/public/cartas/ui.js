@@ -19,7 +19,7 @@
   }
   function tagHtml(t) { return '<span class="tag" style="--tc:' + D.themes[t].color + '">' + esc(t) + '</span>'; }
   function pips(n) { var h = ''; for (var k = 0; k < 3; k++) h += '<i' + (k < n ? ' class="on"' : '') + '></i>'; return h; }
-  var AICON = { entrenamiento: '⚔️', arenga: '📣', armadura: '🛡️', banquete: '🍖', intimidacion: '😠', 'mal-de-ojo': '🧿', 'golpe-certero': '🎯', lluvia: '🏹', cafe: '☕',
+  var AICON = { entrenamiento: '⚔️', arenga: '📣', armadura: '🛡️', banquete: '🍖', intimidacion: '😠', 'mal-de-ojo': '🧿', 'golpe-certero': '🎯', lluvia: '🏹',
     'bola-extra': '⚾', 'segundo-aliento': '💨', 'cambio-de-linea': '🔄', parche: '💾', 'horas-extra': '💼', 'capitulo-especial': '📺', 'segunda-temporada': '🏆', 'remate-doble': '🏐', 'cita-sorpresa': '💕', 'rabia-contenida': '😡', 'fiesta-del-pueblo': '🎉', 'hermano-del-alma': '👯', 'sofa-compartido': '🛋️', madrugon: '⏰' };
   function cardHtml(c, o) {
     o = o || {};

@@ -610,16 +610,7 @@ var D={
    "text": "Hace 2 de daño a todas las tropas rivales.",
    "foe": true
   },
-  {
-   "id": "cafe",
-   "name": "Café",
-   "cost": 1,
-   "rarity": "Común",
-   "type": "accion",
-   "size": 1,
-   "target": "none",
-   "text": "Ganas 2 de oro ahora."
-  },
+
   {
    "id": "bola-extra",
    "name": "Bola extra",

@@ -41,11 +41,23 @@
       return ((t ^ t >>> 14) >>> 0) / 4294967296;
     };
   }
+  // RNG con estado guardado en la partida (s.rs): permite serializarla (modo 1 vs 1 en el servidor).
+  function bindRng(s) {
+    s.rng = function () {
+      s.rs = s.rs + 0x6D2B79F5 | 0;
+      var t = Math.imul(s.rs ^ s.rs >>> 15, 1 | s.rs);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+    return s;
+  }
+  // Texto según quién lo lee. En 1 vs 1 se guarda un marcador que cada jugador resuelve en su copia.
+  function pv(s, p, mine, theirs) { return s.pvp ? '\u0001' + p + '\u0002' + mine + '\u0002' + theirs + '\u0003' : (p === 0 ? mine : theirs); }
 
   // ---------- Instancias ----------
   function mk(s, id, owner) {
     var c = CARD[id];
-    var i = { uid: s.uid++, id: id, owner: owner, perm: { atk: 0, hp: 0 }, tmp: { atk: 0, hp: 0, red: 0 }, dead: false, caps: { lol: 0, pueblo: 0, nini: 0, pel: 0, tilt: 0, pk: 0, duo: 0, nov: 0, cb: 0, vol: 0, koi: 0 } };
+    var i = { uid: (s.uidn[owner]++) * 2 + owner, id: id, owner: owner, perm: { atk: 0, hp: 0 }, tmp: { atk: 0, hp: 0, red: 0 }, dead: false, caps: { lol: 0, pueblo: 0, nini: 0, pel: 0, tilt: 0, pk: 0, duo: 0, nov: 0, cb: 0, vol: 0, koi: 0 } };
     i.hp = c.hp || 0;
     return i;
   }
@@ -107,8 +119,10 @@
     return { life: CFG.life, gold: CFG.gold, deck: deck.slice(), hand: [], mesa: [null, null, null, null], grave: [], target: {}, voley: {}, fl: {}, offers: [], refreshes: 0, pickUsed: false, anime: 0, lost: false };
   }
 
-  function newGame(deckA, deckB, seed) {
-    var s = { rng: mulberry32(seed == null ? (Date.now() & 0xffffff) : seed), uid: 1, round: 0, shops: 0, phase: 'prep', shopOpen: false, first: 0, over: false, winner: -1, reason: '', log: [], frames: [], p: [newPlayer(deckA), newPlayer(deckB)], lastBall: [null, null], refreshN: [0, 0], err: '', acts: [] };
+  function newGame(deckA, deckB, seed, opts) {
+    var s = { rs: (seed == null ? (Date.now() & 0xffffff) : seed) | 0, uidn: [1, 1], fightN: 0, round: 0, shops: 0, phase: 'prep', shopOpen: false, first: 0, over: false, winner: -1, reason: '', log: [], frames: [], p: [newPlayer(deckA), newPlayer(deckB)], lastBall: [null, null], refreshN: [0, 0], err: '', acts: [] };
+    bindRng(s);
+    if (opts && opts.pvp) s.pvp = true;
     startRound(s);
     return s;
   }
@@ -146,7 +160,7 @@
     s.shopOpen = false;
     [0, 1].forEach(function (p) {
       var got = income(s, p);
-      if (p === 0) say(s, 'Ronda ' + s.round + ': +' + got + ' de oro.');
+      if (p === 0 || s.pvp) say(s, pv(s, p, 'Ronda ' + s.round + ': +' + got + ' de oro.', 'El rival cobra +' + got + ' de oro.'));
       s.p[p].target = {}; s.p[p].anime = 0; s.p[p].fl = {};
     });
     if (s.round % CFG.shopEvery === 1) {
@@ -162,13 +176,12 @@
         s.over = true; s.phase = 'over';
         s.winner = s.p[0].lost && s.p[1].lost ? 1 : (s.p[0].lost ? 1 : 0);
         s.reason = 'Se quedó sin tropas antes de la tienda.';
-        say(s, (s.winner === 0 ? 'El rival' : 'Tú') + ' no tenías tropas: derrota automática.');
+        say(s, pv(s, s.winner, 'El rival se quedó sin tropas: derrota automática.', 'Te quedaste sin tropas: derrota automática.'));
         return;
       }
     }
     s.phase = 'prep';
-    aiShop(s, 1);
-    aiPrep(s, 1);
+    if (!s.pvp) { aiShop(s, 1); aiPrep(s, 1); }
     if (s.shopOpen) checkShop(s);
   }
 
@@ -213,7 +226,7 @@
   }
   function checkShop(s) {
     [0, 1].forEach(function (p) {
-      if (shopStuck(s, p)) forfeit(s, p, (p === 0 ? 'Te quedaste' : 'El rival se quedó') + ' sin oro y sin tropas en la tienda.');
+      if (shopStuck(s, p)) forfeit(s, p, pv(s, p, 'Te quedaste', 'El rival se quedó') + ' sin oro y sin tropas en la tienda.');
     });
   }
   function openShop(s, p) {
@@ -224,7 +237,7 @@
     if (mesaTroops(P).some(function (i) { return has(i, 'Trabajo'); }) && FX.trabajo.shop[(t['Trabajo'] || 0) - 1]) {
       var b = FX.trabajo.shop[(t['Trabajo'] || 0) - 1];
       P.gold += b;
-      if (p === 0) say(s, 'Trabajo: +' + b + ' de oro al abrir la tienda.');
+      if (p === 0 || s.pvp) say(s, pv(s, p, 'Trabajo: +' + b + ' de oro al abrir la tienda.', 'El rival cobra Trabajo: +' + b + ' de oro.'));
     }
   }
   function refreshCost(s, p) {
@@ -353,8 +366,8 @@
     if (why) { s.err = why; return false; }
     P.hand.splice(handIdx, 1); P.grave.push(i);
     var res = ACT[c.id].run(s, p, tgt);
-    say(s, (p === 0 ? 'Juegas ' : 'El rival juega ') + c.name + (tgt ? ' sobre ' + card(tgt).name : '') + ': ' + res + '.');
-    s.acts.push({ p: p, id: c.id, res: res, tgt: tgt ? tgt.uid : null });
+    say(s, pv(s, p, 'Juegas ', 'El rival juega ') + c.name + (tgt ? ' sobre ' + card(tgt).name : '') + ': ' + res + '.');
+    s.acts.push({ n: (s.actN = (s.actN || 0) + 1), p: p, id: c.id, res: res, tgt: tgt ? tgt.uid : null });
     return true;
   }
   function setTarget(s, p, uid, targetUid) {
@@ -455,7 +468,7 @@
   function frame(s, text, hl) { s.frames.push({ text: text, view: viewOf(s), hl: hl || null }); say(s, text); }
 
   function fxFrame(s, p, type, title, sub, uids, neg) {
-    frame(s, (p === 0 ? '' : 'Rival · ') + title + (sub ? ' ' + sub : ''), { fx: { type: type, side: p, title: title, sub: sub || '', uids: uids || [], neg: !!neg } });
+    frame(s, pv(s, p, '', 'Rival · ') + title + (sub ? ' ' + sub : ''), { fx: { type: type, side: p, title: title, sub: sub || '', uids: uids || [], neg: !!neg } });
   }
   // Ganancia permanente con tope por tropa y temática. stat: 'atk' | 'hp' | 'both'. Devuelve lo realmente ganado.
   function gainCap(i, key, stat, n, cap) {
@@ -580,20 +593,22 @@
     return seq;
   }
 
-  function pendingTargets(s) {
-    var foes = mesaTroops(s.p[1]);
+  function pendingTargets(s, p) {
+    p = p || 0;
+    var foes = mesaTroops(s.p[1 - p]);
     if (!foes.length) return [];
-    var T = s.p[0].target;
-    return mesaTroops(s.p[0]).filter(function (i) { return !(T[i.uid] && foes.some(function (f) { return f.uid === T[i.uid]; })); });
+    var T = s.p[p].target;
+    return mesaTroops(s.p[p]).filter(function (i) { return !(T[i.uid] && foes.some(function (f) { return f.uid === T[i.uid]; })); });
   }
 
   function fight(s) {
     if (s.phase !== 'prep' || s.over || s.shopOpen) return false;
-    if (pendingTargets(s).length) return false;
+    if (pendingTargets(s, 0).length || (s.pvp && pendingTargets(s, 1).length)) return false;
     s.shopOpen = false;
     s.frames = [];
-    aiTargets(s, 1);
-    frame(s, 'Empieza el combate. ' + (s.first === 0 ? 'Atacas primero.' : 'Ataca primero el rival.'), null);
+    s.fightN = (s.fightN || 0) + 1;
+    if (!s.pvp) aiTargets(s, 1);
+    frame(s, 'Empieza el combate. ' + pv(s, s.first, 'Atacas primero.', 'Ataca primero el rival.'), null);
     startEffects(s);
     var seq = order(s);
     // Madrugón: las Pelayos de quien lo jugó atacan las primeras
@@ -619,7 +634,7 @@
       var dmg = atk(a);
       if (!tgt) {
         E.life -= dmg;
-        frame(s, card(a).name + ' golpea directamente: ' + dmg + ' de daño a ' + (a.owner === 0 ? 'la vida del rival' : 'tu vida') + '.', { att: a.uid, life: 1 - a.owner, dmg: dmg });
+        frame(s, card(a).name + ' golpea directamente: ' + dmg + ' de daño a ' + pv(s, a.owner, 'la vida del rival', 'tu vida') + '.', { att: a.uid, life: 1 - a.owner, dmg: dmg });
         if (E.life <= 0) { s.over = true; s.phase = 'over'; s.winner = a.owner; s.reason = 'Vida a cero.'; break; }
         continue;
       }
@@ -682,11 +697,14 @@
       cleanup(s);
       frame(s, 'Fin de la ronda ' + s.round + '.', null);
       s.phase = 'post';
-      var t0 = tiers(s.p[0]);
-      var an = t0['Anime'] ? FX.anime.cede[t0['Anime'] - 1] : 0;
-      s.p[0].anime = mesaTroops(s.p[0]).filter(function (i) { return has(i, 'Anime'); }).length >= 2 ? an : 0;
+      [0, 1].forEach(function (p) {
+        if (p === 1 && !s.pvp) return;
+        var t0 = tiers(s.p[p]);
+        var an = t0['Anime'] ? FX.anime.cede[t0['Anime'] - 1] : 0;
+        s.p[p].anime = mesaTroops(s.p[p]).filter(function (i) { return has(i, 'Anime'); }).length >= 2 ? an : 0;
+      });
     } else {
-      frame(s, s.winner === 0 ? '¡Has ganado!' : 'Has perdido.', null);
+      frame(s, pv(s, s.winner, '¡Has ganado!', 'Has perdido.'), null);
     }
   }
 
@@ -703,8 +721,8 @@
   }
 
   // ---------- Anime: ceder estadísticas al final de la ronda ----------
-  function cede(s, from, to, stat) {
-    var P = s.p[0];
+  function cede(s, from, to, stat, seat) {
+    var P = s.p[seat || 0];
     if (s.phase !== 'post' || P.anime <= 0 || from === to) return false;
     var a = P.mesa.filter(function (i) { return i && i.uid === from && has(i, 'Anime'); })[0];
     var b = P.mesa.filter(function (i) { return i && i.uid === to && has(i, 'Anime'); })[0];
@@ -744,10 +762,50 @@
     startRound(s);
   }
 
+  // ---------- 1 vs 1 online: copia de la partida vista desde un asiento ----------
+  // La partida canónica vive en el servidor. mirror(s, seat) devuelve una copia en la que "tú" siempre eres p[0]
+  // (para asiento 1 se intercambian bandos y se invierte el bit bajo de los uid, que codifica el dueño).
+  function revive(s) { return bindRng(s); }
+  function mirror(s, seat) {
+    var c = JSON.parse(JSON.stringify(s, function (k, v) { return k === 'rng' ? undefined : v; }));
+    var sw = seat === 1;
+    function txt(x) { return typeof x !== 'string' ? x : x.replace(/\u0001(\d)\u0002([^\u0002]*)\u0002([^\u0003]*)\u0003/g, function (m, p, a, b) { return +p === seat ? a : b; }); }
+    function fu(u) { return sw && typeof u === 'number' ? u ^ 1 : u; }
+    function fobj(o) { if (!sw) return o; var r = {}; Object.keys(o).forEach(function (k) { r[fu(+k)] = o[k]; }); return r; }
+    c.log.forEach(function (l) { l.text = txt(l.text); });
+    c.reason = txt(c.reason);
+    c.frames.forEach(function (f) { f.text = txt(f.text); });
+    if (sw) {
+      c.p.reverse();
+      ['lastBall', 'refreshN', 'tiers', 'uidn'].forEach(function (k) { if (c[k]) c[k].reverse(); });
+      c.first = 1 - c.first;
+      if (c.winner >= 0) c.winner = 1 - c.winner;
+      c.p.forEach(function (P) {
+        ['mesa', 'hand', 'grave'].forEach(function (z) { P[z].forEach(function (i) { if (i) { i.uid = fu(i.uid); i.owner = 1 - i.owner; } }); });
+        var tg = {}; Object.keys(P.target).forEach(function (k) { tg[fu(+k)] = fu(P.target[k]); }); P.target = tg;
+        P.voley = fobj(P.voley);
+      });
+      c.frames.forEach(function (f) {
+        f.view.life.reverse(); f.view.mesa.reverse();
+        f.view.mesa.forEach(function (row) { row.forEach(function (i) { if (i) i.uid = fu(i.uid); }); });
+        var h = f.hl; if (!h) return;
+        if (h.att != null) h.att = fu(h.att);
+        if (h.tgt != null) h.tgt = fu(h.tgt);
+        if (h.life != null) h.life = 1 - h.life;
+        if (h.fx) { h.fx.side = 1 - h.fx.side; h.fx.uids = (h.fx.uids || []).map(fu); }
+      });
+      (c.acts || []).forEach(function (a) { a.p = 1 - a.p; if (a.tgt != null) a.tgt = fu(a.tgt); });
+    }
+    // lo que el rival no debe ver
+    c.p[1].deck = []; c.p[1].offers = []; c.p[1].target = {}; c.p[1].voley = {};
+    c.me = seat;
+    return bindRng(c);
+  }
+
   // ---------- Utilidades para la interfaz ----------
   var API = {
     _mk: mk, _startEffects: startEffects, _tiers: tiers,
-    CFG: CFG, FX: FX, CARD: CARD, DATA: DATA,
+    bindRng: bindRng, revive: revive, mirror: mirror, pv: pv, CFG: CFG, FX: FX, CARD: CARD, DATA: DATA,
     newGame: newGame, randomDeck: randomDeck, deckSize: deckSize, mulberry32: mulberry32,
     place: place, playAction: playAction, setTarget: setTarget, clearTargets: clearTargets, forfeit: forfeit, setVoley: setVoley, actionBlock: actionBlock, validTarget: validTarget,
     buy: buy, refresh: refresh, refreshCost: refreshCost, pickFromDeck: pickFromDeck, retire: retire,

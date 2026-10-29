@@ -167,12 +167,12 @@
   function renderModes() {
     var modes = [
       ['ai', ic('robot'), 'Contra la IA', 'Duelo 1 contra 1 con tu mazo. Disponible ahora.', true],
-      ['pvp', ic('espadas'), 'Jugador contra jugador', 'Reta a otro jugador en un duelo 1 contra 1.', false],
+      ['pvp', ic('espadas'), 'Jugador contra jugador', 'Reta a otro jugador en un duelo 1 contra 1. Sala con código o búsqueda automática.', true],
       ['vs4', ic('grupo'), 'Versus de 4', 'Cuatro jugadores en la misma partida.', false],
     ];
     app.innerHTML = head('play', '' + ic('espadas') + ' Elige modo de juego') + '<p class="mut">Tu mazo actual (' + deckSize() + '/' + CFG.deckBudget + ') se usará en cualquier modo.</p><div class="modes">' +
       modes.map(function (m) {
-        return '<button class="mode m-' + m[0] + (m[4] ? '' : ' off') + '"' + (m[4] ? ' data-act="startai"' : ' disabled aria-disabled="true"') + '><span class="mi">' + m[1] + '</span><b>' + m[2] + '</b><span class="mut">' + m[3] + '</span>' +
+        return '<button class="mode m-' + m[0] + (m[4] ? '' : ' off') + '"' + (m[4] ? ' data-act="' + (m[0] === 'pvp' ? 'openpvp' : 'startai') + '"' : ' disabled aria-disabled="true"') + '><span class="mi">' + m[1] + '</span><b>' + m[2] + '</b><span class="mut">' + m[3] + '</span>' +
           (m[4] ? '<span class="go">¡Jugar!</span>' : '<span class="soon">' + ic('candado') + ' Próximamente</span>') + '</button>';
       }).join('') + '</div></div>';
   }
@@ -186,6 +186,7 @@
       sec('Una ronda de combate', ['Cada ronda ganas <b>2 de oro</b> (se reinicia cada partida y es distinto de las monedas de los sobres).', 'Tienes <b>4 huecos en mesa</b> y una <b>mano de 5</b>.', 'En la preparación colocas tropas (pulsando o arrastrando desde la mano), juegas acciones y <b>debes elegir objetivo para cada una de tus tropas</b>: no se puede combatir hasta que todas tengan uno. Puedes deshacerlos todos con el botón «Deshacer objetivos». El rival no ve tus objetivos.', '<b>La tienda dura 1 minuto</b>: al acabarse se cierra sola y pasas al combate. <b>Tienes 45 segundos</b> por ronda de combate (el reloj se ve arriba). Si se acaban y faltan objetivos por elegir, <b>pierdes la partida</b>; si ya estaban todos elegidos, el combate empieza solo.']) +
       sec('Tienda', ['Hay tienda <b>cada 3 rondas</b> (rondas 1, 4, 7…). En una ronda de tienda <b>no hay combate</b>.', 'La tienda ofrece 5 cartas al azar de tu propio mazo; pulsa una para comprarla. El botón redondo ' + ic('cambio') + ' la actualiza por 1 de oro.', '<b>Solo en las rondas de tienda</b> puedes retirar tropas de la mesa; el resto del tiempo puedes colocar si hay hueco, pero no quitar.', 'Las tropas de coste 5 aparecen a partir de la segunda tienda.']) +
       sec('Combate', ['Los ataques se resuelven de uno en uno, alternando bandos de izquierda a derecha. Cada tropa ataca <b>una vez por ronda</b>. El bando que empieza se alterna cada ronda.', 'Si el objetivo ya murió, el ataque va a una tropa rival viva al azar.', 'No se puede atacar al jugador directamente: <b>recibes daño solo si todas tus tropas han muerto</b> y a tu rival le quedan tropas por atacar; el daño es igual a su ataque.', '<b>Las tropas no se curan entre rondas</b>: el daño se acumula. Solo se curan del todo al volver a tu mano (retirándolas en la tienda). Las muertas liberan su hueco y los bonus de «esta ronda» desaparecen.', 'Si en una ronda sin tienda no tienes tropas ni en mesa ni en mano, <b>pierdes automáticamente</b>.']) +
+      sec('Jugador contra jugador', ['Crea una sala y pasa el <b>código de 5 letras</b> a un amigo, o usa <b>Buscar rival</b> para emparejarte con cualquiera.', 'Las dos tiendas y los combates son simultáneos: cada ronda la partida avanza cuando <b>los dos pulsáis listo</b> o se acaba el tiempo (45 s en combate, 60 s en tienda).', 'Ganas <b>15 monedas</b> por partida y <b>40 más</b> si ganas (con el mismo límite diario que contra la IA). Si abandonas o pasas <b>más de 60 s desconectado</b>, pierdes y no cobras.']) +
       sec('Sinergias', ['Cada tropa tiene 1 o 2 sinergias. Cuentan las <b>cartas distintas</b> de cada sinergia entre mesa y mano (las copias no suman; las acciones no cuentan para la sinergia, aunque las de color pertenecen a una).', 'Al llegar a ciertos números (niveles) la sinergia da su bonificación. <b>Las mejoras de estadísticas son permanentes</b> (con un tope por tropa), salvo las de Voley, que solo duran la ronda, así que tus tropas se hacen más fuertes con la partida. En la partida ves a un lado cuántas llevas y cuántas necesitas.', 'Voley solo funciona con 2 o más cartas distintas de Voley entre mesa y mano; hasta entonces no puedes elegir ataque o defensa.']) +
       sec('Acciones', ['Se juegan en las <b>rondas de combate</b> (no en la tienda) y ocupan 1 de espacio. Las mejoras de estadísticas de las acciones son <b>permanentes</b>.', 'Generales: dar ataque o vida a una tropa o a todas las tuyas, y quitar ataque o hacer daño a una tropa rival o a todas.', 'Las de color son de una sinergia concreta y algunas piden condiciones (p. ej. tener el nivel 1 de esa sinergia); si no se cumplen, la carta te dice qué falta y no se gasta.', 'Comebacker compara la <b>vida actual</b> de las tropas en mesa, no la máxima.']) +
       sec('Todavía por llegar', ['Pasivas en las tropas de coste 5, sobres y monedas, y partidas contra otros jugadores.']) + '</div>';
@@ -274,6 +275,104 @@
     app.innerHTML = h;
   }
 
+  // ---------- 1 vs 1 online ----------
+  // El servidor guarda la partida; aquí se aplican tus acciones al momento y se envían en cola. Cada respuesta del servidor
+  // trae tu vista (tú siempre eres p[0]) y sustituye a la copia local.
+  var PV = { on: false, id: null, seat: 0, v: 0, rdy: [false, false], q: [], busy: false, tm: null, wait: null, seenFight: 0, seenAct: 0, names: ['Tú', 'Rival'], pend: null };
+  function pvpReset() { clearTimeout(PV.tm); PV.on = false; PV.id = null; PV.q = []; PV.busy = false; PV.wait = null; PV.pend = null; PV.v = 0; PV.rdy = [false, false]; }
+  function pvpSchedule(ms) { clearTimeout(PV.tm); PV.tm = setTimeout(pvpTick, ms); }
+  function pvpTick() {
+    var call;
+    if (PV.on && ui.screen === 'game') {
+      if (PV.busy || PV.q.length) return pvpSchedule(600);
+      call = api('pvpPoll', { id: PV.id, v: PV.v });
+    } else if (ui.screen === 'pvp' && PV.wait) {
+      call = PV.wait.kind === 'search' ? api('pvpSearch', { deck: ui.deck }) : api('pvpPoll', {});
+    } else return;
+    call.then(pvpGot);
+  }
+  function pvpCancelWait() { PV.wait = null; clearTimeout(PV.tm); api('pvpCancel'); }
+  function pvpLeaveGame() { var s = ui.s; if (PV.id && s && !s.over) api('pvpLeave', { id: PV.id }); pvpReset(); }
+  function pvs(op, a) { if (PV.on) pvpSend(op, a); }
+  function pvpSend(op, a) { PV.q.push({ op: op, a: a || [] }); pvpPump(); }
+  function pvpPump() {
+    if (PV.busy || !PV.q.length) return;
+    PV.busy = true;
+    var m = PV.q.shift();
+    api('pvpOp', { id: PV.id, op: m.op, a: m.a }).then(function (r) {
+      PV.busy = false;
+      if (PV.q.length) return pvpPump();
+      pvpGot(r);
+    });
+  }
+  function pvpGot(r) {
+    var d = r.data || {};
+    if (!r.ok) {
+      if (PV.on) { if (d.error) ui.hint = d.error; return pvpSchedule(2500); }
+      PV.wait = null; ui.msg = d.error || 'Sin conexión con el servidor.'; if (ui.screen === 'pvp') render(); return;
+    }
+    if (d.none) {
+      if (PV.on) { pvpReset(); ui.hint = ''; ui.screen = 'home'; return render(); }
+      return pvpSchedule(PV.wait && PV.wait.kind === 'search' ? 2000 : 1500);
+    }
+    if (d.wait) {
+      if (!PV.wait) PV.wait = { kind: d.code ? 'code' : 'search' };
+      if (d.code && PV.wait.code !== d.code) { PV.wait.code = d.code; if (ui.screen === 'pvp') render(); }
+      return pvpSchedule(PV.wait.kind === 'search' ? 2000 : 1500);
+    }
+    if (d.same) {
+      var ch = PV.rdy[0] !== d.rdy[0] || PV.rdy[1] !== d.rdy[1];
+      PV.rdy = d.rdy; if (d.dl && !ui.playing) ui.deadline = Date.now() + d.dl;
+      if (ch && !ui.playing && !ui.busy) render();
+      return pvpSchedule(1200);
+    }
+    if (d.s) { if (!PV.on) pvpBegin(d); else pvpAdopt(d); pvpSchedule(1200); }
+  }
+  function pvpBegin(d) {
+    pvpReset(); PV.on = true; PV.id = d.id; PV.seat = d.seat; PV.names = d.names; PV.rdy = d.rdy; PV.v = d.v;
+    PV.seenFight = d.s.fightN || 0; PV.seenAct = 0;
+    d.s.acts.forEach(function (a) { PV.seenAct = Math.max(PV.seenAct, a.n); }); d.s.acts = [];
+    ui.s = d.s; ui.screen = 'game'; ui.reward = d.reward || null; ui.sel = null; ui.view = null; ui.playing = false; ui.hint = ''; ui.landed = null; ui.busy = false;
+    announce(); ui.deadline = d.dl && !d.s.over ? Date.now() + d.dl : null; render(); pvpSchedule(1200);
+  }
+  function pvpAdopt(d) {
+    if (PV.busy || PV.q.length) return;
+    if (ui.playing || ui.busy) { PV.pend = d; return; }
+    pvpApply(d);
+  }
+  function pvpApply(d) {
+    var old = ui.s, ns = d.s; PV.pend = null; PV.v = d.v; PV.rdy = d.rdy; PV.names = d.names;
+    ns.acts = ns.acts.filter(function (a) { return a.n > PV.seenAct; });
+    ns.acts.forEach(function (a) { PV.seenAct = Math.max(PV.seenAct, a.n); });
+    if (d.hint) ui.hint = d.hint;
+    var newFight = (ns.fightN || 0) > PV.seenFight;
+    var newRound = !old || ns.round !== old.round || ns.shopOpen !== old.shopOpen || (old.phase === 'post' && ns.phase === 'prep');
+    ui.s = ns; if (d.reward) ui.reward = d.reward;
+    ui.deadline = d.dl && !ns.over ? Date.now() + d.dl : null;
+    if (ns.over && old && !old.over) api('me').then(function (r) { if (r.ok) setAcct(r.data.user); });
+    if (newFight && ns.frames.length) { PV.seenFight = ns.fightN; ui.sel = null; ui.hint = ''; ui.deadline = null; return play(); }
+    PV.seenFight = Math.max(PV.seenFight, ns.fightN || 0);
+    if (newRound && !ns.over) { ui.sel = null; ui.hint = d.hint || ''; announce(); ui.deadline = d.dl ? Date.now() + d.dl : null; }
+    render();
+  }
+  function renderPvp() {
+    var w = PV.wait, h = head('play', '' + ic('espadas') + ' Jugador contra jugador');
+    if (w) {
+      h += '<div class="panel pvpwait">' + (w.kind === 'code'
+        ? '<h2>Sala creada</h2><p class="mut">Pásale este código a tu rival. Cuando lo escriba, la partida empieza sola.</p><div class="pvpcode">' + esc(w.code || '·····') + '</div>'
+        : '<h2>Buscando rival…</h2><p class="mut">Te emparejaremos con el primero que busque partida.</p>') +
+        '<div class="waitdots"><i></i><i></i><i></i></div><button class="btn sec" data-act="pvpcancel">Cancelar</button></div></div>';
+      app.innerHTML = h; return;
+    }
+    h += '<p class="mut">Usarás tu mazo actual (' + deckSize() + '/' + CFG.deckBudget + '). Ganas <b>+15</b> monedas por partida y <b>+40</b> más si ganas. Si abandonas o pierdes la conexión más de 60 s, pierdes.</p>' +
+      (ui.msg ? '<p class="err">' + esc(ui.msg) + '</p>' : '') + '<div class="pvpgrid">' +
+      '<div class="panel"><h2>' + ic('dado') + ' Buscar rival</h2><p class="mut">Emparejamiento automático con cualquier jugador que esté buscando.</p><button class="btn big" data-act="pvpsearch">Buscar partida</button></div>' +
+      '<div class="panel"><h2>' + ic('espadas') + ' Crear sala</h2><p class="mut">Te damos un código para que tu amigo se una.</p><button class="btn big" data-act="pvpcreate">Crear sala</button></div>' +
+      '<div class="panel"><h2>' + ic('puerta') + ' Unirme con código</h2><p class="mut">Escribe el código de 5 letras que te han pasado.</p><input id="pvp-code" class="pvpin" maxlength="5" autocomplete="off" placeholder="ABCDE"><button class="btn big" data-act="pvpjoin">Unirme</button></div>' +
+      '</div></div>';
+    app.innerHTML = h;
+  }
+
   // ---------- Partida ----------
   function inst(P, uid) { return P.mesa.filter(function (i) { return i && i.uid === uid; })[0]; }
   function startGame() {
@@ -343,12 +442,13 @@
     var pend = prep ? E.pendingTargets(s).length : 0, hasT = Object.keys(P.target).length > 0;
     var h = '<div class="gwrap' + (shopMode ? ' shopmode' : '') + '"><div class="top"><div><h1>Ronda ' + s.round + ' · ' + (s.shopOpen ? '' + ic('carrito') + ' Tienda' + (s.round === 1 ? ' inicial' : '') : '' + ic('espadas') + ' Combate') + (!s.shopOpen ? ' <span class="mut">· ' + (s.first === 0 ? 'atacas primero' : 'ataca primero el rival') + '</span>' : '') + '</h1></div><div><button class="lnk" data-act="menu" data-to="deck">' + ic('cartas') + ' Mazo</button> · <button class="lnk" data-act="menu" data-to="home">' + ic('casa') + ' Menú</button></div></div>' + timerHtml(prep || shop) + '';
     h += '<div class="gmain"><aside class="gl">' + synergyHtml(P) + '</aside><section class="gc"><div class="board" id="board">';
-    if (!shopMode) h += '<div class="hud top">' + orb('life', view.life[1], CFG.life, 'Rival', 1) + '</div>' + mesaRow(1, view, s, false) + '<div class="gap"></div>';
+    if (!shopMode) h += '<div class="hud top">' + orb('life', view.life[1], CFG.life, PV.on ? esc(PV.names[1]) : 'Rival', 1) + '</div>' + mesaRow(1, view, s, false) + '<div class="gap"></div>';
     h += mesaRow(0, view, s, true);
     // HUD inferior: vida, oro y acciones
     var acts = '';
     if (ui.playing) acts = '<button class="btn sec" data-act="skip">' + ic('avance') + ' Saltar animación</button>';
     else if (s.phase === 'over') acts = '';
+    else if (PV.on && PV.rdy[0]) acts = '<div class="hint">' + ic('reloj') + ' Esperando al rival…</div><div class="waitdots"><i></i><i></i><i></i></div>';
     else if (shop) {
       var any = P.mesa.some(Boolean) || P.hand.length;
       acts = '<div class="hint">' + esc(ui.hint || (any ? 'Pulsa una carta para comprarla. Arrastra una tropa de la mesa a tu mano para retirarla.' : 'Compra al menos una tropa.')) + '</div><button class="btn big" data-act="endshop"' + (any ? '' : ' disabled') + '>Finalizar fase de compra ▶</button>';
@@ -357,6 +457,7 @@
       if (pend && P.mesa.some(Boolean)) msg = (ui.hint ? ui.hint + ' · ' : '') + 'Faltan ' + pend + ' por elegir objetivo.';
       acts = '<div class="hint">' + esc(msg) + '</div><div class="btnrow"><button class="btn big" data-act="fight"' + (pend || (!P.mesa.some(Boolean) && E.mesaTroops(R).length) ? ' disabled' : '') + '>' + ic('espadas') + ' ¡Combatir!</button><button class="btn sec sm" data-act="undo"' + (hasT ? '' : ' disabled') + ' title="Quitar todos los objetivos elegidos">' + ic('deshacer') + ' Deshacer</button></div>';
     } else if (s.phase === 'post') acts = ui.busy ? '' : '<div class="hint">Puedes ceder estadísticas Anime antes de seguir.</div><button class="btn big" data-act="next">Continuar ▶</button>';
+    if (PV.on && PV.rdy[1] && !PV.rdy[0] && (shop || prep || s.phase === 'post')) acts = '<div class="hint rivrdy">' + ic('aviso') + ' El rival ya está listo.</div>' + acts;
     h += '<div class="hud bottom">' + orb('life', view.life[0], CFG.life, 'Tu vida', 0) + orb('gold', P.gold, 0, 'Tu oro') + '<div class="acts">' + acts + '</div></div></div>';
 
     // Mano
@@ -395,6 +496,7 @@
     h += '<div class="panel logp"><h2>Registro</h2><div class="log" id="log">' + shown.map(function (l, n) { return '<div' + (n === shown.length - 1 ? ' class="cur"' : '') + '>' + esc(l.text) + '</div>'; }).join('') + '</div></div></aside></div>';
     if (s.phase === 'over' && !ui.playing) {
       var win = s.winner === 0;
+      if (!s.rep && PV.on) s.rep = 1;
       if (!s.rep) {
         s.rep = 1; ui.reward = null;
         api('gameFinish', { won: win, rounds: s.round }).then(function (r) {
@@ -405,7 +507,7 @@
       }
       var rw = ui.reward ? (ui.reward.gained > 0 ? '<p class="reward">+' + ui.reward.gained + ' ' + ic('moneda') + ' monedas</p>' : '<p class="mut">Sin monedas esta vez (partida muy corta o límite diario alcanzado).</p>') : '<p class="mut">Calculando recompensa…</p>';
       var conf = ''; if (win) for (var q = 0; q < 36; q++) conf += '<i style="left:' + (q * 2.8 + (q % 3)) + '%;--d:' + ((q * 37) % 100) / 100 * 1.2 + 's;--c:' + ['#ffc533', '#ff6b8b', '#4f9dff', '#38d39f', '#a78bfa'][q % 5] + '"></i>';
-      h += '<div class="overlay ' + (win ? 'owin' : 'olose') + '">' + (win ? '<div class="confetti">' + conf + '</div>' : '') + '<div class="panel over"><div class="obig">' + (win ? '' + ic('trofeo') + '' : '' + ic('corazonroto') + '') + '</div><h2>' + (win ? '¡Victoria!' : 'Derrota') + '</h2><p class="mut">' + esc(s.reason) + ' · ronda ' + s.round + '</p>' + rw + '<button class="btn big" data-act="play">Jugar otra vez</button> <button class="btn sec" data-act="menu" data-to="deck">Cambiar mazo</button> <button class="btn sec" data-act="menu" data-to="home">Menú</button></div></div>';
+      h += '<div class="overlay ' + (win ? 'owin' : 'olose') + '">' + (win ? '<div class="confetti">' + conf + '</div>' : '') + '<div class="panel over"><div class="obig">' + (win ? '' + ic('trofeo') + '' : '' + ic('corazonroto') + '') + '</div><h2>' + (win ? '¡Victoria!' : 'Derrota') + '</h2><p class="mut">' + esc(s.reason) + ' · ronda ' + s.round + '</p>' + rw + '<button class="btn big" data-act="' + (PV.on ? 'openpvp' : 'play') + '">' + (PV.on ? 'Otra partida' : 'Jugar otra vez') + '</button> <button class="btn sec" data-act="menu" data-to="deck">Cambiar mazo</button> <button class="btn sec" data-act="menu" data-to="home">Menú</button></div></div>';
     }
     h += '</div>';
     app.innerHTML = h;
@@ -445,6 +547,7 @@
   }
   function timeUp() {
     var s = ui.s; ui.deadline = null;
+    if (PV.on) { pvpSchedule(50); return; }
     if (!s || s.over || s.phase !== 'prep') return;
     if (s.shopOpen) { E.endShop(s); ui.sel = null; ui.hint = ''; showSplash({ kind: 'end', title: ic('reloj') + ' ¡TIEMPO!', sub: 'Se cierra la tienda' }); announce(); return render(); }
     if (E.pendingTargets(s).length) { E.forfeit(s, 0, 'Se acabó el tiempo para elegir objetivos.'); ui.sel = null; showSplash({ kind: 'combat', title: ic('reloj') + ' ¡TIEMPO AGOTADO!', sub: 'No elegiste objetivos a tiempo' }); render(); return; }
@@ -535,7 +638,8 @@
 
   function render() {
     document.body.classList.remove('shopbg');
-    var f = { home: renderHome, deck: renderDeck, rules: renderRules, themes: renderThemes, modes: renderModes, login: renderLogin, starter: renderStarter, packs: renderPacks, boot: renderBoot }[ui.screen];
+    if (PV.wait && ui.screen !== 'pvp') pvpCancelWait();
+    var f = { home: renderHome, deck: renderDeck, rules: renderRules, themes: renderThemes, modes: renderModes, pvp: renderPvp, login: renderLogin, starter: renderStarter, packs: renderPacks, boot: renderBoot }[ui.screen];
     if (f) f(); else renderGame();
   }
 
@@ -577,11 +681,13 @@
       setTimeout(function () {
         ui.busy = false;
         if (ui.s !== s || ui.screen !== 'game') return;
+        if (PV.on) { PV.rdy[0] = true; ui.sel = null; pvpSend('ready'); if (PV.pend) { PV.pend.rdy = [true, PV.pend.rdy[1]]; return pvpApply(PV.pend); } return render(); }
         E.nextRound(s); ui.sel = null; ui.hint = ''; announce(); render();
       }, 1500);
       return;
     }
     render();
+    if (PV.on && PV.pend) pvpApply(PV.pend);
   }
 
   // ---------- Eventos ----------
@@ -662,25 +768,41 @@
     }
     if (act === 'slot-load') { var sl = ui.slots[+el.dataset.i]; if (sl) { ui.deck = sl.ids.filter(owns); saveDeck(); ui.slotTo = +el.dataset.i; ui.msg = 'Cargado «' + sl.name + '».'; } return renderDeck(); }
     if (act === 'slot-del') { var di = +el.dataset.i; if (ui.slots[di]) { ui.msg = 'Borrado «' + ui.slots[di].name + '».'; ui.slots[di] = null; saveSlots(); } return renderDeck(); }
-    if (act === 'menu') { clearTimeout(timer); ui.playing = false; ui.screen = el.dataset.to || 'home'; return render(); }
+    if (act === 'menu') { if (PV.on) { if (s && !s.over && !window.confirm('Si sales ahora pierdes la partida. ¿Salir?')) return; pvpLeaveGame(); } clearTimeout(timer); ui.playing = false; ui.screen = el.dataset.to || 'home'; return render(); }
+    if (act === 'openpvp') {
+      if (deckError()) { ui.screen = 'deck'; return render(); }
+      saveDeck(); if (PV.on) pvpLeaveGame(); ui.msg = ''; PV.wait = null;
+      return api('pvpPoll', {}).then(function (r) { if (r.ok && r.data.s && !r.data.s.over) return pvpBegin(r.data); ui.screen = 'pvp'; window.scrollTo(0, 0); render(); });
+    }
+    if (act === 'pvpsearch') { PV.wait = { kind: 'search' }; ui.msg = ''; render(); return api('pvpSearch', { deck: ui.deck }).then(pvpGot); }
+    if (act === 'pvpcreate') { PV.wait = { kind: 'code', code: '' }; ui.msg = ''; render(); return api('pvpCreate', { deck: ui.deck }).then(pvpGot); }
+    if (act === 'pvpjoin') { var jc = (document.getElementById('pvp-code').value || '').trim(); if (jc.length !== 5) { ui.msg = 'El código tiene 5 letras.'; return render(); } ui.msg = ''; return api('pvpJoin', { deck: ui.deck, code: jc }).then(pvpGot); }
+    if (act === 'pvpcancel') { pvpCancelWait(); return render(); }
     if (act === 'startai') { if (deckError()) { ui.screen = 'deck'; return render(); } saveDeck(); return startGame(); }
     if (act === 'play') { if (deckError()) { ui.screen = 'deck'; return render(); } saveDeck(); return startGame(); }
     if (act === 'skip') { clearTimeout(timer); ui.shown = ui.frames.length; return stopPlay(); }
     if (!s || ui.playing) return;
-
+    if (PV.on && PV.rdy[0]) return;
+    if (PV.on && (PV.busy || PV.q.length) && (act === 'buy' || act === 'refresh' || act === 'pick')) return;
+    if (PV.on && (act === 'fight' || act === 'endshop' || act === 'next')) {
+      if (act === 'fight' && (E.pendingTargets(s).length || (!P.mesa.some(Boolean) && E.mesaTroops(s.p[1]).length))) return;
+      PV.rdy[0] = true; ui.sel = null; ui.hint = ''; pvpSend('ready'); return render();
+    }
     if (act === 'fight') { if (E.fight(s) === false) return; ui.deadline = null; ui.sel = null; ui.hint = ''; return play(); }
     if (act === 'endshop') { E.endShop(s); ui.sel = null; ui.hint = ''; announce(); return render(); }
     if (act === 'next') { E.nextRound(s); ui.sel = null; ui.hint = ''; announce(); return render(); }
     if (act === 'cede') {
-      var ok = E.cede(s, +document.getElementById('an-from').value, +document.getElementById('an-to').value, el.dataset.stat);
+      var cf = +document.getElementById('an-from').value, ct = +document.getElementById('an-to').value;
+      var ok = E.cede(s, cf, ct, el.dataset.stat);
+      if (ok) pvs('cede', [cf, ct, el.dataset.stat]);
       ui.hint = ok ? '' : 'Elige dos tropas Anime distintas.'; return render();
     }
-    if (act === 'buy') { var bi = +el.dataset.i, bc = CARD[P.offers[bi]]; if (!E.buy(s, 0, bi)) ui.hint = bc && P.gold < bc.cost ? 'No tienes oro suficiente.' : 'Tu mano está llena.'; else ui.hint = ''; return render(); }
-    if (act === 'undo') { E.clearTargets(s, 0); ui.hint = ''; nextPending(s); return render(); }
-    if (act === 'refresh') { E.refresh(s, 0); return render(); }
-    if (act === 'pick') { E.pickFromDeck(s, 0, document.getElementById('pick-sel').value); return render(); }
-    if (act === 'voley') { E.setVoley(s, 0, +el.dataset.uid, el.dataset.m); return render(); }
-    if (act === 'retire') { e.stopPropagation(); E.retire(s, 0, +el.dataset.slot); ui.sel = null; return render(); }
+    if (act === 'buy') { var bi = +el.dataset.i, bc = CARD[P.offers[bi]]; if (!E.buy(s, 0, bi)) ui.hint = bc && P.gold < bc.cost ? 'No tienes oro suficiente.' : 'Tu mano está llena.'; else { ui.hint = ''; pvs('buy', [bi]); } return render(); }
+    if (act === 'undo') { E.clearTargets(s, 0); pvs('clear'); ui.hint = ''; nextPending(s); return render(); }
+    if (act === 'refresh') { if (PV.on) { pvpSend('refresh'); ui.hint = 'Actualizando tienda…'; return render(); } E.refresh(s, 0); return render(); }
+    if (act === 'pick') { var pk = document.getElementById('pick-sel').value; if (E.pickFromDeck(s, 0, pk)) pvs('pick', [pk]); return render(); }
+    if (act === 'voley') { E.setVoley(s, 0, +el.dataset.uid, el.dataset.m); pvs('voley', [+el.dataset.uid, el.dataset.m]); return render(); }
+    if (act === 'retire') { e.stopPropagation(); if (E.retire(s, 0, +el.dataset.slot)) pvs('retire', [+el.dataset.slot]); ui.sel = null; return render(); }
     if (s.phase !== 'prep') return;
 
     if (act === 'hand') {
@@ -690,27 +812,27 @@
         if (!P.mesa.some(function (x) { return !x; })) { ui.hint = 'La mesa está llena: solo puedes retirar tropas en la tienda.'; ui.sel = null; }
         else { ui.sel = { k: 'hand', i: i }; ui.hint = 'Pulsa un hueco libre para colocarla.'; }
       } else if (s.shopOpen) { ui.hint = 'Las acciones se juegan en las rondas de combate.'; ui.sel = null; }
-      else if (c.target === 'none') { ui.hint = E.playAction(s, 0, i, null) ? '' : s.err; ui.sel = null; }
+      else if (c.target === 'none') { ui.hint = E.playAction(s, 0, i, null) ? (pvs('action', [i, null]), '') : s.err; ui.sel = null; }
       else { ui.sel = { k: 'act', i: i }; ui.hint = c.target === 'ally' ? 'Elige una tropa tuya en la mesa.' : 'Elige una tropa rival.'; }
       return render();
     }
     if (act === 'slot') {
-      if (ui.sel && ui.sel.k === 'hand') { var sl2 = +el.dataset.i; if (E.place(s, 0, ui.sel.i, sl2)) ui.landed = s.p[0].mesa[sl2].uid; }
+      if (ui.sel && ui.sel.k === 'hand') { var sl2 = +el.dataset.i; if (E.place(s, 0, ui.sel.i, sl2)) { ui.landed = s.p[0].mesa[sl2].uid; pvs('place', [ui.sel.i, sl2]); } }
       ui.sel = null; ui.hint = '';
       if (!s.shopOpen) nextPending(s);
       return render();
     }
     if (act === 'mine') {
       var uid = +el.dataset.cuid;
-      if (ui.sel && ui.sel.k === 'act') { if (E.playAction(s, 0, ui.sel.i, uid)) { ui.sel = null; ui.hint = ''; } else ui.hint = s.err || 'Esa acción no va sobre una tropa tuya.'; return render(); }
+      if (ui.sel && ui.sel.k === 'act') { if (E.playAction(s, 0, ui.sel.i, uid)) { pvs('action', [ui.sel.i, uid]); ui.sel = null; ui.hint = ''; } else ui.hint = s.err || 'Esa acción no va sobre una tropa tuya.'; return render(); }
       if (s.shopOpen) return;
       if (ui.sel && ui.sel.k === 'mine' && ui.sel.uid === uid) { ui.sel = null; ui.hint = ''; return render(); }
       ui.sel = { k: 'mine', uid: uid }; ui.hint = 'Ahora pulsa la tropa rival a la que atacará.'; return render();
     }
     if (act === 'foe') {
       var fu = +el.dataset.cuid;
-      if (ui.sel && ui.sel.k === 'act') { if (E.playAction(s, 0, ui.sel.i, fu)) { ui.sel = null; ui.hint = ''; } else ui.hint = s.err || 'Esa acción no va sobre una tropa rival.'; return render(); }
-      if (ui.sel && ui.sel.k === 'mine') { E.setTarget(s, 0, ui.sel.uid, fu); ui.hint = ''; nextPending(s); return render(); }
+      if (ui.sel && ui.sel.k === 'act') { if (E.playAction(s, 0, ui.sel.i, fu)) { pvs('action', [ui.sel.i, fu]); ui.sel = null; ui.hint = ''; } else ui.hint = s.err || 'Esa acción no va sobre una tropa rival.'; return render(); }
+      if (ui.sel && ui.sel.k === 'mine') { E.setTarget(s, 0, ui.sel.uid, fu); pvs('target', [ui.sel.uid, fu]); ui.hint = ''; nextPending(s); return render(); }
     }
   });
 
@@ -720,7 +842,7 @@
   app.addEventListener('pointerdown', function (e) {
     var el = e.target.closest('.hand [data-act="hand"]'), mel = null;
     if (!el && ui.s && ui.s.shopOpen) mel = e.target.closest('.row4.side0 [data-act="mine"]');
-    if ((!el && !mel) || !ui.s || ui.playing || ui.busy || ui.s.phase !== 'prep' || (e.button && e.button > 0)) return;
+    if ((!el && !mel) || !ui.s || ui.playing || ui.busy || ui.s.phase !== 'prep' || (PV.on && PV.rdy[0]) || (e.button && e.button > 0)) return;
     drag = { kind: mel ? 'mesa' : 'hand', uid: mel ? +mel.dataset.cuid : 0, i: el ? +el.dataset.i : 0, x: e.clientX, y: e.clientY, active: false, ghost: null, w: 0, h: 0 };
   });
   document.addEventListener('pointermove', function (e) {
@@ -765,15 +887,15 @@
     var inst0 = P.hand[drag.i], ok = false, c = inst0 ? CARD[inst0.id] : null;
     if (drag.kind === 'mesa') {
       ui.dragMesa = false;
-      if (t && t.closest('.handwrap')) { var sl = P.mesa.findIndex(function (x) { return x && x.uid === drag.uid; }); ok = sl >= 0 && E.retire(s, 0, sl); }
+      if (t && t.closest('.handwrap')) { var sl = P.mesa.findIndex(function (x) { return x && x.uid === drag.uid; }); ok = sl >= 0 && E.retire(s, 0, sl); if (ok) pvs('retire', [sl]); }
       ui.sel = null; ui.hint = ok ? '' : 'No se pudo retirar.'; render(); return;
     }
     if (t && inst0) {
       if (c.type === 'tropa') {
         var slotEl = t.closest('.slot.free'), onBoard = t.closest('#board'), idx = slotEl ? +slotEl.dataset.i : (onBoard ? P.mesa.indexOf(null) : -1);
-        if (idx >= 0 && E.place(s, 0, drag.i, idx)) { ok = true; ui.landed = P.mesa[idx].uid; }
-      } else if (c.target === 'none') { if (t.closest('#board')) ok = E.playAction(s, 0, drag.i, null); }
-      else { var cd = t.closest('[data-cuid]'); if (cd && cd.dataset.side === (c.target === 'ally' ? '0' : '1')) ok = E.playAction(s, 0, drag.i, +cd.dataset.cuid); }
+        if (idx >= 0 && E.place(s, 0, drag.i, idx)) { ok = true; ui.landed = P.mesa[idx].uid; pvs('place', [drag.i, idx]); }
+      } else if (c.target === 'none') { if (t.closest('#board')) { ok = E.playAction(s, 0, drag.i, null); if (ok) pvs('action', [drag.i, null]); } }
+      else { var cd = t.closest('[data-cuid]'); if (cd && cd.dataset.side === (c.target === 'ally' ? '0' : '1')) { ok = E.playAction(s, 0, drag.i, +cd.dataset.cuid); if (ok) pvs('action', [drag.i, +cd.dataset.cuid]); } }
     }
     ui.sel = null; ui.hint = ok ? '' : (s.err && c && c.type !== 'tropa' ? s.err : 'No se pudo soltar ahí.');
     if (ok && !s.shopOpen) nextPending(s);

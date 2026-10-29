@@ -442,10 +442,10 @@
         var vo = [], vd = 0, va = 0;
         troops.filter(function (i) { return has(i, 'Voley'); }).forEach(function (i) {
           var mode = P.voley[i.uid] || 'atk';
-          if (mode === 'atk') { gainCap(i, 'vol', 'atk', FX.voley.atk[vt], FX.voley.cap); va++; } else { i.tmp.red += FX.voley.red[vt]; vd++; }
+          if (mode === 'atk') { i.tmp.atk += FX.voley.atk[vt]; va++; } else { i.tmp.red += FX.voley.red[vt]; vd++; }
           vo.push(i.uid);
         });
-        if (vo.length) fxFrame(s, p, 'voley', 'Voley', (va ? '+' + FX.voley.atk[vt] + ' ataque permanente en ' + va : '') + (va && vd ? ' · ' : '') + (vd ? '-' + FX.voley.red[vt] + ' daño recibido en ' + vd : ''), vo);
+        if (vo.length) fxFrame(s, p, 'voley', 'Voley', (va ? '+' + FX.voley.atk[vt] + ' ataque esta ronda en ' + va : '') + (va && vd ? ' · ' : '') + (vd ? '-' + FX.voley.red[vt] + ' daño recibido esta ronda en ' + vd : ''), vo);
       }
     });
     // Comebacker (con los números ya modificados)

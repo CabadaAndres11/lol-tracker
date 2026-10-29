@@ -45,7 +45,7 @@
   }
 
   // ---------- Navegación ----------
-  var NAV = [['home', '🏠 Inicio'], ['play', '⚔ Jugar'], ['deck', '🃏 Mazo'], ['themes', '✨ Temáticas'], ['rules', '📖 Normas']];
+  var NAV = [['home', '🏠 Inicio'], ['play', '⚔ Jugar'], ['deck', '🃏 Mazo'], ['themes', '✨ Sinergias'], ['rules', '📖 Normas']];
   function navHtml(cur) {
     return '<nav class="nav">' + NAV.map(function (n) { return '<button class="navb' + (n[0] === cur ? ' on' : '') + '" data-act="nav" data-to="' + n[0] + '">' + n[1] + '</button>'; }).join('') +
       '<span class="navsp"></span><a class="navb" href="/">← Hub</a><button class="navb" data-act="lock">🔒 Bloquear</button></nav>';
@@ -61,11 +61,11 @@
 
   function renderHome() {
     var n = Object.keys(D.themes).length;
-    var h = head('home') + '<div class="hero"><img src="/cartas/logo.svg" alt="" class="hero-logo"><h1>Juego de Cartas</h1><p class="mut">Mazos con temáticas combinables, combates por rondas y memes de la pandilla.</p></div>';
+    var h = head('home') + '<div class="hero"><img src="/cartas/logo.svg" alt="" class="hero-logo"><h1>Juego de Cartas</h1><p class="mut">Mazos con sinergias combinables, combates por rondas y memes de la pandilla.</p></div>';
     h += '<div class="menu">' + [
       ['play', '⚔', 'Jugar', 'Duelo 1 contra 1 contra la IA con tu mazo.'],
       ['deck', '🃏', 'Mazo', 'Elige tus cartas (' + deckSize() + '/' + CFG.deckBudget + ') y guarda hasta 3 mazos.'],
-      ['themes', '✨', 'Temáticas', n + ' temáticas con sus niveles y cartas.'],
+      ['themes', '✨', 'Sinergias', n + ' sinergias con sus niveles y cartas.'],
       ['rules', '📖', 'Normas', 'Cómo funcionan las rondas, la tienda y el combate.'],
     ].map(function (m) { return '<button class="menu-i" data-act="nav" data-to="' + m[0] + '"><span class="mi">' + m[1] + '</span><b>' + m[2] + '</b><span class="mut">' + m[3] + '</span></button>'; }).join('') + '</div>';
     h += '<p class="mut" style="text-align:center">' + D.cards.length + ' tropas · ' + D.actions.length + ' acciones · versión prototipo (sobres y monedas, próximamente)</p></div>';
@@ -77,18 +77,18 @@
     app.innerHTML = head('rules', '📖 Normas') +
       sec('Objetivo', ['Es un 1 contra 1. Empiezas con <b>12 de vida</b>; gana quien deje la vida del rival a 0.']) +
       sec('Tu mazo', ['El mazo tiene un <b>presupuesto de espacio de ' + CFG.deckBudget + '</b>: las tropas baratas ocupan 1, las medias 2 y las de coste 5 ocupan 3; las acciones ocupan 1. Lo ves en los cuadraditos de la esquina de cada carta.', 'No hay cartas duplicadas en el mazo, pero una misma carta puede salir varias veces en la tienda.', 'Necesitas al menos una tropa <b>Común</b>.']) +
-      sec('Cartas', ['El <b>círculo dorado</b> es lo que cuesta comprarla en oro.', 'El <b>círculo naranja</b> es el ataque y el <b>verde</b> la vida.', 'El color de la carta mezcla los de sus temáticas y el borde indica la rareza (gris Común, azul Rara, morado Épica, dorado Legendaria).']) +
+      sec('Cartas', ['El <b>círculo dorado</b> es lo que cuesta comprarla en oro.', 'El <b>círculo naranja</b> es el ataque y el <b>verde</b> la vida.', 'El color de la carta mezcla los de sus sinergias y el borde indica la rareza (gris Común, azul Rara, morado Épica, dorado Legendaria).']) +
       sec('Primera ronda', ['La partida empieza con una <b>tienda</b>: ambos jugadores tienen <b>' + (CFG.gold + CFG.income) + ' de oro</b> y solo salen tropas Comunes de tu mazo. Pulsa una carta para comprarla, colócala (pulsando o arrastrándola) y termina la tienda.']) +
       sec('Una ronda de combate', ['Cada ronda ganas <b>2 de oro</b> (se reinicia cada partida y es distinto de las monedas de los sobres).', 'Tienes <b>4 huecos en mesa</b> y una <b>mano de 5</b>.', 'En la preparación colocas tropas (pulsando o arrastrando desde la mano), juegas acciones y <b>debes elegir objetivo para cada una de tus tropas</b>: no se puede combatir hasta que todas tengan uno. Puedes deshacerlos todos con el botón «Deshacer objetivos». El rival no ve tus objetivos.', '<b>Tienes 45 segundos</b> por ronda de combate (el reloj se ve arriba). Si se acaban y faltan objetivos por elegir, <b>pierdes la partida</b>; si ya estaban todos elegidos, el combate empieza solo.']) +
       sec('Tienda', ['Hay tienda <b>cada 3 rondas</b> (rondas 1, 4, 7…). En una ronda de tienda <b>no hay combate</b>.', 'La tienda ofrece 4 cartas al azar de tu propio mazo; pulsa una para comprarla. El botón redondo ↻ la actualiza por 1 de oro.', '<b>Solo en las rondas de tienda</b> puedes retirar tropas de la mesa; el resto del tiempo puedes colocar si hay hueco, pero no quitar.', 'Las tropas de coste 5 aparecen a partir de la segunda tienda.']) +
       sec('Combate', ['Los ataques se resuelven de uno en uno, alternando bandos de izquierda a derecha. Cada tropa ataca <b>una vez por ronda</b>. El bando que empieza se alterna cada ronda.', 'Si el objetivo ya murió, el ataque va a una tropa rival viva al azar.', 'No se puede atacar al jugador directamente: <b>recibes daño solo si todas tus tropas han muerto</b> y a tu rival le quedan tropas por atacar; el daño es igual a su ataque.', '<b>Las tropas no se curan entre rondas</b>: el daño se acumula. Solo se curan del todo al volver a tu mano (retirándolas en la tienda). Las muertas liberan su hueco y los bonus de «esta ronda» desaparecen.', 'Si en una ronda sin tienda no tienes tropas ni en mesa ni en mano, <b>pierdes automáticamente</b>.']) +
-      sec('Temáticas', ['Cada tropa tiene 1 o 2 temáticas. Cuentan las <b>cartas distintas</b> de cada temática entre mesa y mano (las copias no suman; las acciones no tienen temática).', 'Al llegar a ciertos números (niveles) la temática da su bonificación. <b>Las mejoras de estadísticas son permanentes</b> (con un tope por tropa), así que tus tropas se hacen más fuertes con la partida. En la partida ves a un lado cuántas llevas y cuántas necesitas.', 'Voley solo funciona con 2 o más cartas distintas de Voley entre mesa y mano; hasta entonces no puedes elegir ataque o defensa.']) +
+      sec('Sinergias', ['Cada tropa tiene 1 o 2 sinergias. Cuentan las <b>cartas distintas</b> de cada sinergia entre mesa y mano (las copias no suman; las acciones no tienen sinergia).', 'Al llegar a ciertos números (niveles) la sinergia da su bonificación. <b>Las mejoras de estadísticas son permanentes</b> (con un tope por tropa), salvo las de Voley, que solo duran la ronda, así que tus tropas se hacen más fuertes con la partida. En la partida ves a un lado cuántas llevas y cuántas necesitas.', 'Voley solo funciona con 2 o más cartas distintas de Voley entre mesa y mano; hasta entonces no puedes elegir ataque o defensa.']) +
       sec('Todavía por llegar', ['Pasivas en las tropas de coste 5, más acciones, sobres y monedas, y partidas contra otros jugadores.']) + '</div>';
   }
 
   function themeCards(t) { return D.cards.filter(function (c) { return c.themes.indexOf(t) >= 0; }); }
   function renderThemes() {
-    var h = head('themes', '✨ Temáticas') + '<p class="mut">Pulsa «Ver en el mazo» para filtrar las cartas de esa temática.</p>';
+    var h = head('themes', '✨ Sinergias') + '<p class="mut">Pulsa «Ver en el mazo» para filtrar las cartas de esa sinergia.</p>';
     Object.keys(D.themes).forEach(function (t) {
       var T = D.themes[t], cs = themeCards(t);
       h += '<div class="panel"><h2>' + tagHtml(t) + ' <span class="mut" style="letter-spacing:0;text-transform:none">· ' + cs.length + ' cartas</span></h2>' +
@@ -119,7 +119,7 @@
   function themeSide() {
     var inDeck = {};
     ui.deck.forEach(function (id) { var c = CARD[id]; (c.themes || []).forEach(function (t) { inDeck[t] = (inDeck[t] || 0) + 1; }); });
-    return '<aside class="side-themes panel"><h2>Temáticas</h2><p class="mut" style="margin:0 0 .4rem">Pasa el cursor para ver el detalle. Pulsa para añadirla o quitarla del filtro.</p>' +
+    return '<aside class="side-themes panel"><h2>Sinergias</h2><p class="mut" style="margin:0 0 .4rem">Pasa el cursor para ver el detalle. Pulsa para añadirla o quitarla del filtro.</p>' +
       Object.keys(D.themes).map(function (t) {
         var T = D.themes[t], on = ui.filters.indexOf(t) >= 0;
         var tip = '<div class="tip"><b>' + esc(t) + '</b>' + T.tx.map(function (x, k) { return '<p><b>' + T.th[k] + ' cartas:</b> ' + esc(x) + '</p>'; }).join('') + '</div>';
@@ -155,7 +155,7 @@
     h += '<div class="chips filt"><button class="chip' + (!ui.filters.length ? ' on' : '') + '" data-act="filterset" data-t="">Todas</button>' +
       Object.keys(D.themes).map(function (t) { return '<button class="chip' + (ui.filters.indexOf(t) >= 0 ? ' on' : '') + '" style="--tc:' + D.themes[t].color + '" data-act="filter" data-t="' + esc(t) + '">' + esc(t) + ' ' + cnt(t) + '</button>'; }).join('') +
       '<button class="chip' + (ui.filters.indexOf('__act') >= 0 ? ' on' : '') + '" data-act="filter" data-t="__act">Acciones</button></div>';
-    h += '<div class="bar" style="margin:.2rem 0 .6rem"><label class="grp"><input type="checkbox" data-act="group"' + (ui.group ? ' checked' : '') + '> Agrupar por temática</label>';
+    h += '<div class="bar" style="margin:.2rem 0 .6rem"><label class="grp"><input type="checkbox" data-act="group"' + (ui.group ? ' checked' : '') + '> Agrupar por sinergia</label>';
     if (ui.filters.length > 1) h += '<span class="seg"><button class="' + (ui.fmode === 'any' ? 'on' : '') + '" data-act="fmode" data-m="any">Cualquiera de las elegidas</button><button class="' + (ui.fmode === 'all' ? 'on' : '') + '" data-act="fmode" data-m="all">Todas a la vez</button></span>';
     h += '</div>';
     if (ui.group && !ui.filters.length) {
@@ -163,7 +163,7 @@
       h += '<h3 class="gh">Acciones</h3><div class="deckgrid">' + D.actions.map(deckCard).join('') + '</div>';
     } else {
       var list = filtered();
-      h += list.length ? '<div class="deckgrid">' + list.map(deckCard).join('') + '</div>' : '<p class="mut">Ninguna carta cumple todas las temáticas elegidas.</p>';
+      h += list.length ? '<div class="deckgrid">' + list.map(deckCard).join('') + '</div>' : '<p class="mut">Ninguna carta cumple todas las sinergias elegidas.</p>';
     }
     h += '</div>' + themeSide() + '</div></div>';
     app.innerHTML = h;
@@ -181,10 +181,10 @@
     var p = max ? Math.max(0, Math.min(100, val / max * 100)) : 100;
     return '<div class="orb ' + kind + '" data-orb="' + (idx == null ? '' : idx) + '" style="--p:' + p + '%" title="' + label + '"><b>' + Math.max(0, val) + '</b><span>' + label + '</span></div>';
   }
-  function synergyHtml(P) {
-    var c = E.themeCounts(P), keys = Object.keys(c).sort(function (a, b) { return E.tierOf(b, c[b]) - E.tierOf(a, c[a]) || c[b] - c[a]; });
-    var h = '<div class="synside panel"><h2>Sinergias</h2>';
-    if (!keys.length) return h + '<p class="mut">Coloca tropas en mesa o mano.</p></div>';
+  function synergyHtml(P, foe) {
+    var c = E.themeCounts(P), keys = Object.keys(c).filter(function (t) { return !foe || E.tierOf(t, c[t]) > 0; }).sort(function (a, b) { return E.tierOf(b, c[b]) - E.tierOf(a, c[a]) || c[b] - c[a]; });
+    var h = '<div class="synside panel' + (foe ? ' foe' : '') + '"><h2>' + (foe ? '⚠ Sinergias del RIVAL' : 'Sinergias') + '</h2>';
+    if (!keys.length) return h + '<p class="mut">' + (foe ? 'El rival no tiene sinergias activas.' : 'Coloca tropas en mesa o mano.') + '</p></div>';
     h += '<div class="synlist">' + keys.map(function (t) {
       var T = D.themes[t], tier = E.tierOf(t, c[t]), nxt = T.th[tier];
       var tip = '<div class="tip"><b>' + esc(t) + '</b>' + T.tx.map(function (x, k) { return '<p' + (k + 1 === tier ? ' class="cur"' : '') + '><b>' + T.th[k] + ' cartas:</b> ' + esc(x) + '</p>'; }).join('') + '</div>';
@@ -284,6 +284,7 @@
       var opts = an.map(function (i) { return '<option value="' + i.uid + '">' + esc(CARD[i.id].name) + ' (' + E.atk(i) + '/' + E.maxHp(i) + ')</option>'; }).join('');
       h += '<div class="panel"><h2>Anime · ceder (' + P.anime + ')</h2><div class="bar"><select id="an-from">' + opts + '</select><span>→</span><select id="an-to">' + opts + '</select></div><div class="bar"><button class="btn sec sm" data-act="cede" data-stat="atk">Ceder ataque</button><button class="btn sec sm" data-act="cede" data-stat="hp">Ceder vida</button></div></div>';
     } else h += '<div></div>';
+    h += '<div class="foesyn">' + synergyHtml(R, true) + '</div>';
     var shown = s.log.slice(-14);
     h += '<div class="panel logp"><h2>Registro</h2><div class="log" id="log">' + shown.map(function (l, n) { return '<div' + (n === shown.length - 1 ? ' class="cur"' : '') + '>' + esc(l.text) + '</div>'; }).join('') + '</div></div></aside></div>';
     if (s.phase === 'over' && !ui.playing) {
@@ -331,7 +332,7 @@
     a.style.setProperty('--dx', (dx * .72) + 'px'); a.style.setProperty('--dy', (dy * .72) + 'px');
   }
 
-    // ---------- Efectos de temática: cartel, bola, números flotantes ----------
+    // ---------- Efectos de sinergia: cartel, bola, números flotantes ----------
   var FXICON = { duo: '👯', novia: '💕', pueblo: '🏘️', nini: '🛋️', voley: '🏐', comeback: '🔥', tilt: '😡', koi: '🏆' };
   function fxBanner() {
     var fx = ui.playing && ui.hl && ui.hl.fx; if (!fx) return;

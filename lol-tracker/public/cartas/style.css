@@ -327,3 +327,9 @@ body.shopbg { background: radial-gradient(ellipse 90% 60% at 50% 0, #7a4a12 0, #
 .timer.low .tbar i{background:#ff4d4d}
 .timer.low b{animation:tpulse .6s infinite alternate}
 @keyframes tpulse{to{transform:scale(1.25)}}
+
+/* v7 · sinergias del rival (derecha) */
+.gr { position: relative; z-index: 50; }
+.foesyn .synside { margin: 0; border-color: #ff5a5a; background: linear-gradient(180deg, rgba(255,70,70,.12), transparent 60%), var(--panel, rgba(20,20,30,.8)); }
+.foesyn .synside h2 { color: #ff8a8a; }
+.gr .tip { right: calc(100% + 10px); left: auto; }

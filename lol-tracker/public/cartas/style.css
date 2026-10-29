@@ -600,3 +600,13 @@ body.shopbg::before { background: radial-gradient(circle, rgba(255,255,255,.55) 
 .acctmenu button:hover { background: #ffdde3; }
 .menu .menu-i.m-packs { --mc: #ffe0f0; }
 .menu .menu-i:last-child:nth-child(odd) { grid-column: 1 / -1; }
+
+/* v13b · el sobre intacto es una sola pieza; la tira solo se separa al abrir */
+.bpk-lid, .bpk-main { top: 0; bottom: 0; height: auto; left: 0; right: 0; background-size: 100% 100%; }
+.bpk-lid { clip-path: polygon(0.0% 0.0%,3.6% 2.2%,7.1% 0.0%,10.7% 2.2%,14.3% 0.0%,17.9% 2.2%,21.4% 0.0%,25.0% 2.2%,28.6% 0.0%,32.1% 2.2%,35.7% 0.0%,39.3% 2.2%,42.9% 0.0%,46.4% 2.2%,50.0% 0.0%,53.6% 2.2%,57.1% 0.0%,60.7% 2.2%,64.3% 0.0%,67.9% 2.2%,71.4% 0.0%,75.0% 2.2%,78.6% 0.0%,82.1% 2.2%,85.7% 0.0%,89.3% 2.2%,92.9% 0.0%,96.4% 2.2%,100.0% 0.0%,100.0% 18.5%,91.7% 19.0%,83.3% 19.0%,75.0% 16.0%,66.7% 18.5%,58.3% 16.0%,50.0% 21.0%,41.7% 21.0%,33.3% 18.5%,25.0% 18.5%,16.7% 16.0%,8.3% 18.5%,0.0% 21.0%); transform-origin: 8% 18%; }
+.bpk-main { clip-path: polygon(0.0% 21.0%,8.3% 18.5%,16.7% 16.0%,25.0% 18.5%,33.3% 18.5%,41.7% 21.0%,50.0% 21.0%,58.3% 16.0%,66.7% 18.5%,75.0% 16.0%,83.3% 19.0%,91.7% 19.0%,100.0% 18.5%,100.0% 100.0%,96.4% 97.8%,92.9% 100.0%,89.3% 97.8%,85.7% 100.0%,82.1% 97.8%,78.6% 100.0%,75.0% 97.8%,71.4% 100.0%,67.9% 97.8%,64.3% 100.0%,60.7% 97.8%,57.1% 100.0%,53.6% 97.8%,50.0% 100.0%,46.4% 97.8%,42.9% 100.0%,39.3% 97.8%,35.7% 100.0%,32.1% 97.8%,28.6% 100.0%,25.0% 97.8%,21.4% 100.0%,17.9% 97.8%,14.3% 100.0%,10.7% 97.8%,7.1% 100.0%,3.6% 97.8%,0.0% 100.0%); padding-top: 18%; }
+.bpk-glow, .bpk-rays { top: 18%; }
+.bpk-lid::after, .bpk-main::after { background-size: auto, 250% 100%; }
+.packov { cursor: pointer; } .packov .pcard, .packov .pactions button { cursor: pointer; }
+.pgain { color: #fff; font-weight: 700; margin: 0; text-shadow: 0 2px 0 rgba(0,0,0,.3); }
+.pmsg.pulse { animation: pmsgp 1.4s ease-in-out infinite; } @keyframes pmsgp { 50% { opacity: .35; } }

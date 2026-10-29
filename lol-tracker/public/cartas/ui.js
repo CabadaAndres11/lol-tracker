@@ -127,6 +127,10 @@
       '<button class="btn sec" data-act="nav" data-to="deck">🃏 Ir al mazo</button></div></div>';
     app.innerHTML = h + packOverlay() + '</div>';
   }
+  function packHint() {
+    var m = app.querySelector('.pmsg'); if (!m || !ui.pack || !ui.pack.rev.every(Boolean)) return;
+    m.textContent = 'Haz clic en un espacio vacío para continuar'; m.classList.add('pulse');
+  }
   function RIP_MS(pk) { return pk.cards.some(function (c) { return CARD[c.id].rarity === 'Legendaria'; }) ? 2300 : 1750; }
   function packOverlay() {
     var pk = ui.pack; if (!pk) return '';
@@ -134,11 +138,12 @@
     var best = pk.cards.reduce(function (b, c) { var r = CARD[c.id].rarity; return RANK.indexOf(r) > RANK.indexOf(b) ? r : b; }, 'Común');
     if (pk.stage === 'rip') return '<div class="packov' + (best === 'Legendaria' ? ' rainbow' : '') + '">' + bpkHtml('rip best-' + best) + '</div>';
     var gain = pk.cards.reduce(function (n, c) { return n + c.dupCoins; }, 0);
-    return '<div class="packov' + (best === 'Legendaria' ? ' rainbowpost' : '') + '"><div class="pcards">' + pk.cards.map(function (c, i) {
+    var allRev = pk.rev.every(Boolean);
+    return '<div class="packov' + (best === 'Legendaria' ? ' rainbowpost' : '') + '" data-act="packbg"><div class="pcards">' + pk.cards.map(function (c, i) {
       var cd = CARD[c.id];
       return '<div class="pcard r-' + cd.rarity + (pk.rev[i] ? ' flipped' : '') + '" data-act="flipcard" data-i="' + i + '" style="--d:' + i * 0.12 + 's"><div class="pin"><div class="pback"><span>' + GEM[cd.rarity] + '</span></div><div class="pfront">' + cardHtml(cd, {}) +
         (c.isNew ? '<span class="pnew">¡NUEVA!</span>' : '<span class="pdup">Repetida +' + c.dupCoins + ' 🪙</span>') + '</div></div></div>';
-    }).join('') + '</div><div class="pactions"><button class="btn sec" data-act="flipall">Girar todas</button><button class="btn" data-act="closepack">' + (gain ? 'Listo · +' + gain + ' 🪙 por repetidas' : 'Listo') + '</button></div><p class="pmsg">Pulsa cada carta para girarla · el color del reverso te dice su rareza</p></div>';
+    }).join('') + '</div><div class="pactions"><button class="btn sec" data-act="flipall">Girar todas</button></div>' + (gain ? '<p class="pgain">+' + gain + ' 🪙 por cartas repetidas</p>' : '') + '<p class="pmsg' + (allRev ? ' pulse' : '') + '">' + (allRev ? 'Haz clic en un espacio vacío para continuar' : 'Pulsa cada carta para girarla · el color del reverso te dice su rareza') + '</p></div>';
   }
   function renderModes() {
     var modes = [
@@ -594,9 +599,9 @@
         }, wait);
       });
     }
-    if (act === 'flipcard') { var fi = +el.dataset.i; if (ui.pack && ui.pack.cards) { ui.pack.rev[fi] = true; el.classList.add('flipped'); } return; }
-    if (act === 'flipall') { if (ui.pack && ui.pack.cards) { ui.pack.rev = ui.pack.rev.map(function () { return true; }); app.querySelectorAll('.pcard').forEach(function (n, k) { setTimeout(function () { n.classList.add('flipped'); }, k * 140); }); } return; }
-    if (act === 'closepack') { ui.pack = null; return render(); }
+    if (act === 'flipcard') { var fi = +el.dataset.i; if (ui.pack && ui.pack.cards) { ui.pack.rev[fi] = true; el.classList.add('flipped'); packHint(); } return; }
+    if (act === 'flipall') { if (ui.pack && ui.pack.cards) { ui.pack.rev = ui.pack.rev.map(function () { return true; }); app.querySelectorAll('.pcard').forEach(function (n, k) { setTimeout(function () { n.classList.add('flipped'); }, k * 140); }); packHint(); } return; }
+    if (act === 'packbg') { if (ui.pack && ui.pack.cards && ui.pack.stage === 'reveal' && ui.pack.rev.every(Boolean)) { ui.pack = null; render(); } return; }
     if (act === 'nav') {
       clearTimeout(timer); ui.playing = false;
       if (el.dataset.to === 'play') { if (deckError()) { ui.screen = 'deck'; return render(); } saveDeck(); ui.screen = 'modes'; window.scrollTo(0, 0); return render(); }

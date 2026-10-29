@@ -2,13 +2,36 @@
   'use strict';
   var E = window.CartasEngine, D = E.DATA, CARD = E.CARD, CFG = E.CFG;
   var app = document.getElementById('app');
-  var ui = { screen: 'home', filters: [], fmode: 'any', group: false, deck: [], slots: [null, null, null], slotTo: 0, slotName: '', msg: '', s: null, sel: null, view: null, playing: false, shown: 0, frames: [], hl: null, hint: '' };
+  var ui = { screen: 'boot', acct: null, ownedSet: null, pack: null, onlyOwned: false, filters: [], fmode: 'any', group: false, deck: [], slots: [null, null, null], slotTo: 0, slotName: '', msg: '', s: null, sel: null, view: null, playing: false, shown: 0, frames: [], hl: null, hint: '' };
 
-  try { var sv = JSON.parse(localStorage.getItem('cartas_deck') || 'null'); if (sv && sv.length) ui.deck = sv.filter(function (id) { return CARD[id]; }); } catch (e) {}
-  try { var sl = JSON.parse(localStorage.getItem('cartas_slots') || 'null'); if (sl && sl.length === 3) ui.slots = sl.map(function (x) { return x && x.ids ? { name: String(x.name || 'Mazo'), ids: x.ids.filter(function (id) { return CARD[id]; }) } : null; }); } catch (e) {}
-  if (!ui.deck.length) ui.deck = E.randomDeck(Math.random);
-  function saveDeck() { try { localStorage.setItem('cartas_deck', JSON.stringify(ui.deck)); } catch (e) {} }
-  function saveSlots() { try { localStorage.setItem('cartas_slots', JSON.stringify(ui.slots)); } catch (e) {} }
+  // El mazo y los huecos guardados son por cuenta (en este navegador); la colección vive en el servidor.
+  function lk(n) { return 'cartas_' + n + ':' + (ui.acct ? ui.acct.name.toLowerCase() : ''); }
+  function saveDeck() { try { localStorage.setItem(lk('deck'), JSON.stringify(ui.deck)); } catch (e) {} }
+  function saveSlots() { try { localStorage.setItem(lk('slots'), JSON.stringify(ui.slots)); } catch (e) {} }
+  function owns(id) { return !!(ui.ownedSet && ui.ownedSet[id]); }
+  function setAcct(user) {
+    ui.acct = user; ui.ownedSet = {}; user.owned.forEach(function (id) { ui.ownedSet[id] = 1; });
+  }
+  function loadLocal() {
+    try { var sv = JSON.parse(localStorage.getItem(lk('deck')) || 'null'); ui.deck = sv && sv.length ? sv.filter(function (id) { return CARD[id] && owns(id); }) : []; } catch (e) { ui.deck = []; }
+    ui.slots = [null, null, null];
+    try { var sl = JSON.parse(localStorage.getItem(lk('slots')) || 'null'); if (sl && sl.length === 3) ui.slots = sl.map(function (x) { return x && x.ids ? { name: String(x.name || 'Mazo'), ids: x.ids.filter(function (id) { return CARD[id] && owns(id); }) } : null; }); } catch (e) {}
+    if (!ui.deck.length || deckError()) { ui.deck = E.randomDeck(Math.random, ui.acct.owned); saveDeck(); }
+  }
+  // ---------- Servidor (cuenta, monedas, sobres) ----------
+  function getTok() { try { return localStorage.getItem('cartas_tok') || ''; } catch (e) { return ''; } }
+  function api(action, body) {
+    var h = { 'Content-Type': 'application/json' }, t = getTok(); if (t) h['x-token'] = t;
+    return fetch('/api/cartas', { method: 'POST', headers: h, body: JSON.stringify(Object.assign({ action: action }, body || {})) })
+      .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { return { ok: r.ok, status: r.status, data: d }; }); })
+      .catch(function () { return { ok: false, status: 0, data: { error: 'Sin conexión con el servidor.' } }; })
+      .then(function (r) { if (r.data && r.data.login) logout(); return r; });
+  }
+  function logout() {
+    try { localStorage.removeItem('cartas_tok'); } catch (e) {}
+    ui.acct = null; ui.ownedSet = null; ui.s = null; ui.pack = null; clearTimeout(timer); ui.playing = false; ui.deadline = null;
+    ui.screen = 'login'; render();
+  }
   function esc(t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
 
   // ---------- Cartas ----------
@@ -46,10 +69,10 @@
   }
 
   // ---------- Navegación ----------
-  var NAV = [['home', '🏠 Inicio'], ['play', '⚔ Jugar'], ['deck', '🃏 Mazo'], ['themes', '✨ Sinergias'], ['rules', '📖 Normas']];
+  var NAV = [['home', '🏠 Inicio'], ['play', '⚔ Jugar'], ['deck', '🃏 Mazo'], ['packs', '🎁 Sobres'], ['themes', '✨ Sinergias'], ['rules', '📖 Normas']];
   function navHtml(cur) {
     return '<nav class="nav">' + NAV.map(function (n) { return '<button class="navb' + (n[0] === cur ? ' on' : '') + '" data-act="nav" data-to="' + n[0] + '">' + n[1] + '</button>'; }).join('') +
-      '<span class="navsp"></span><a class="navb" href="/">← Hub</a><button class="navb" data-act="lock">🔒 Bloquear</button></nav>';
+      '<span class="navsp"></span>' + (ui.acct ? '<button class="navb coinpill" data-act="nav" data-to="packs" title="Tus monedas">🪙 ' + ui.acct.coins + '</button><span class="navb who" title="Tu cuenta">👤 ' + esc(ui.acct.name) + '</span>' : '') + '<a class="navb" href="/">← Hub</a><button class="navb" data-act="logout" title="Cambiar de cuenta">Salir</button><button class="navb" data-act="lock" title="Bloquear">🔒</button></nav>';
   }
   function head(cur, title) { return '<div class="wrap">' + navHtml(cur) + (title ? '<h1 class="ptitle">' + title + '</h1>' : ''); }
   function deckSize() { return E.deckSize(ui.deck); }
@@ -77,6 +100,37 @@
     app.innerHTML = h;
   }
 
+  function renderBoot() { app.innerHTML = '<div class="wrap"><p class="mut" style="text-align:center;margin-top:30vh">Cargando…</p></div>'; }
+  function renderLogin() {
+    app.innerHTML = '<div class="wrap"><div class="loginbox panel"><div class="lg-ico">🃏</div><h1>Juego de Cartas</h1><p class="mut">Crea tu cuenta con un nombre y un PIN de 4 dígitos para guardar tus monedas y tu colección. Apunta el PIN: no se puede recuperar.</p>' +
+      '<label>Nombre<input id="lg-name" maxlength="16" autocomplete="username" placeholder="Tu nombre" value="' + esc(ui.lgName || '') + '"></label>' +
+      '<label>PIN<input id="lg-pin" type="password" inputmode="numeric" maxlength="4" autocomplete="current-password" placeholder="0000"></label>' +
+      (ui.msg ? '<div class="hint" style="color:var(--bad)">' + esc(ui.msg) + '</div>' : '') +
+      '<div class="btnrow"><button class="btn" data-act="login">Entrar</button><button class="btn sec" data-act="register">Crear cuenta nueva</button></div>' +
+      '<p class="mut" style="margin:.6rem 0 0">Al crear la cuenta recibes ' + 150 + ' monedas y todas las cartas Comunes.</p></div></div>';
+  }
+  function renderPacks() {
+    var a = ui.acct, total = D.cards.length + D.actions.length, can = a.coins >= a.packCost && !ui.pack;
+    var h = head('packs', '🎁 Sobres') + '<div class="packs-grid">' +
+      '<div class="panel packbox"><div class="bigpack"><span>🃏</span><b>SOBRE</b><i>' + a.packSize + ' cartas</i></div><h2>Sobre estándar</h2><p class="mut">' + a.packSize + ' cartas al azar de todo el juego (tropas y acciones). La última siempre es Rara o mejor. Las cartas que ya tengas se cambian por monedas.</p>' +
+      '<button class="btn cta big" data-act="openpack"' + (can ? '' : ' disabled') + '>Abrir sobre · ' + a.packCost + ' 🪙</button>' + (a.coins < a.packCost ? '<p class="mut">Te faltan ' + (a.packCost - a.coins) + ' monedas.</p>' : '') + (ui.msg ? '<div class="hint" style="color:var(--bad)">' + esc(ui.msg) + '</div>' : '') + '</div>' +
+      '<div class="panel"><h2>Tus monedas</h2><div class="coinbig">🪙 ' + a.coins + '</div>' +
+      '<div class="dailybox">' + (a.dailyAvailable ? '<button class="btn" data-act="daily">🎁 Recompensa diaria · +' + a.dailyCoins + ' 🪙</button>' : '<p class="mut">✔ Ya cobraste la recompensa de hoy. Vuelve mañana.</p>') + '</div>' +
+      '<h2 style="margin-top:1rem">Cómo conseguir monedas</h2><ul class="rules"><li><b>Recompensa diaria:</b> +' + a.dailyCoins + ' 🪙 cada día.</li><li><b>Partidas contra la IA:</b> +10 🪙 por partida y +20 🪙 más si ganas (hoy llevas ' + a.gamesToday + '/' + a.maxGamesToday + ' partidas con premio). Las partidas muy cortas no dan monedas.</li><li><b>Cartas repetidas:</b> Común +5, Rara +15, Épica +40, Legendaria +100 🪙.</li></ul></div>' +
+      '<div class="panel"><h2>Tu colección</h2><div class="coinbig">' + a.owned.length + ' / ' + total + '</div><div class="meter colm"><i class="on" style="width:' + Math.round(a.owned.length / total * 100) + '%"></i></div><p class="mut">Solo puedes usar en tu mazo las cartas que tienes. Mira cuáles te faltan en la pestaña Mazo.</p>' +
+      '<button class="btn sec" data-act="nav" data-to="deck">🃏 Ir al mazo</button></div></div>';
+    app.innerHTML = h + packOverlay() + '</div>';
+  }
+  function packOverlay() {
+    var pk = ui.pack; if (!pk) return '';
+    if (!pk.cards) return '<div class="packov"><div class="bigpack tearing"><span>🃏</span><b>SOBRE</b></div></div>';
+    var gain = pk.cards.reduce(function (n, c) { return n + c.dupCoins; }, 0);
+    return '<div class="packov"><div class="pcards">' + pk.cards.map(function (c, i) {
+      var cd = CARD[c.id];
+      return '<div class="pcard r-' + cd.rarity + (pk.rev[i] ? ' flipped' : '') + '" data-act="flipcard" data-i="' + i + '" style="--d:' + i * 0.12 + 's"><div class="pin"><div class="pback"><span>🃏</span></div><div class="pfront">' + cardHtml(cd, {}) +
+        (c.isNew ? '<span class="pnew">¡NUEVA!</span>' : '<span class="pdup">Repetida +' + c.dupCoins + ' 🪙</span>') + '</div></div></div>';
+    }).join('') + '</div><div class="pactions"><button class="btn sec" data-act="flipall">Girar todas</button><button class="btn" data-act="closepack">' + (gain ? 'Listo · +' + gain + ' 🪙 por repetidas' : 'Listo') + '</button></div><p class="pmsg">Pulsa cada carta para girarla</p></div>';
+  }
   function renderModes() {
     var modes = [
       ['ai', '🤖', 'Contra la IA', 'Duelo 1 contra 1 con tu mazo. Disponible ahora.', true],
@@ -146,11 +200,11 @@
       }).join('') + '</aside>';
   }
   function deckCard(c) {
-    var inn = ui.deck.indexOf(c.id) >= 0;
-    return cardHtml(c, { size: true, cls: inn ? 'in' : '', attrs: 'data-act="toggle" data-id="' + c.id + '"', tag: 'button' });
+    var inn = ui.deck.indexOf(c.id) >= 0, own = owns(c.id);
+    return cardHtml(c, { size: true, cls: (inn ? 'in' : '') + (own ? '' : ' locked'), extra: own ? '' : '<span class="lockb">🔒</span>', attrs: 'data-act="toggle" data-id="' + c.id + '"', tag: 'button' });
   }
   function filtered() {
-    var f = ui.filters, all = D.cards.concat(D.actions);
+    var f = ui.filters, all = D.cards.concat(D.actions).filter(function (c) { return !ui.onlyOwned || owns(c.id); });
     if (!f.length) return all;
     var th = f.filter(function (x) { return x !== '__act'; }), act = f.indexOf('__act') >= 0;
     return all.filter(function (c) {
@@ -173,7 +227,7 @@
     h += '<div class="chips filt"><button class="chip' + (!ui.filters.length ? ' on' : '') + '" data-act="filterset" data-t="">Todas</button>' +
       Object.keys(D.themes).map(function (t) { return '<button class="chip' + (ui.filters.indexOf(t) >= 0 ? ' on' : '') + '" style="--tc:' + D.themes[t].color + '" data-act="filter" data-t="' + esc(t) + '">' + esc(t) + ' ' + cnt(t) + '</button>'; }).join('') +
       '<button class="chip' + (ui.filters.indexOf('__act') >= 0 ? ' on' : '') + '" data-act="filter" data-t="__act">Acciones</button></div>';
-    h += '<div class="bar" style="margin:.2rem 0 .6rem"><label class="grp"><input type="checkbox" data-act="group"' + (ui.group ? ' checked' : '') + '> Agrupar por sinergia</label>';
+    h += '<div class="bar" style="margin:.2rem 0 .6rem"><label class="grp"><input type="checkbox" data-act="group"' + (ui.group ? ' checked' : '') + '> Agrupar por sinergia</label><label class="grp"><input type="checkbox" data-act="onlyowned"' + (ui.onlyOwned ? ' checked' : '') + '> Solo mis cartas (' + ui.acct.owned.length + '/' + (D.cards.length + D.actions.length) + ')</label>';
     if (ui.filters.length > 1) h += '<span class="seg"><button class="' + (ui.fmode === 'any' ? 'on' : '') + '" data-act="fmode" data-m="any">Cualquiera de las elegidas</button><button class="' + (ui.fmode === 'all' ? 'on' : '') + '" data-act="fmode" data-m="all">Todas a la vez</button></span>';
     h += '</div>';
     if (ui.group && !ui.filters.length) {
@@ -192,6 +246,7 @@
   function startGame() {
     var seed = Math.floor(Math.random() * 1e9), r = E.mulberry32(seed + 7);
     ui.s = E.newGame(ui.deck, E.aiDeck(r), seed);
+    ui.reward = null; api('gameStart');
     ui.screen = 'game'; ui.sel = null; ui.view = null; ui.playing = false; ui.hint = ''; ui.landed = null; ui.busy = false;
     announce(); render();
   }
@@ -307,8 +362,17 @@
     h += '<div class="panel logp"><h2>Registro</h2><div class="log" id="log">' + shown.map(function (l, n) { return '<div' + (n === shown.length - 1 ? ' class="cur"' : '') + '>' + esc(l.text) + '</div>'; }).join('') + '</div></div></aside></div>';
     if (s.phase === 'over' && !ui.playing) {
       var win = s.winner === 0;
+      if (!s.rep) {
+        s.rep = 1; ui.reward = null;
+        api('gameFinish', { won: win, rounds: s.round }).then(function (r) {
+          ui.reward = r.ok ? r.data : { gained: 0, err: 1 };
+          if (r.ok) setAcct(r.data.user);
+          if (ui.s === s && ui.screen === 'game' && s.phase === 'over' && !ui.playing) render();
+        });
+      }
+      var rw = ui.reward ? (ui.reward.gained > 0 ? '<p class="reward">+' + ui.reward.gained + ' 🪙 monedas</p>' : '<p class="mut">Sin monedas esta vez (partida muy corta o límite diario alcanzado).</p>') : '<p class="mut">Calculando recompensa…</p>';
       var conf = ''; if (win) for (var q = 0; q < 36; q++) conf += '<i style="left:' + (q * 2.8 + (q % 3)) + '%;--d:' + ((q * 37) % 100) / 100 * 1.2 + 's;--c:' + ['#ffc533', '#ff6b8b', '#4f9dff', '#38d39f', '#a78bfa'][q % 5] + '"></i>';
-      h += '<div class="overlay ' + (win ? 'owin' : 'olose') + '">' + (win ? '<div class="confetti">' + conf + '</div>' : '') + '<div class="panel over"><div class="obig">' + (win ? '🏆' : '💔') + '</div><h2>' + (win ? '¡Victoria!' : 'Derrota') + '</h2><p class="mut">' + esc(s.reason) + ' · ronda ' + s.round + '</p><button class="btn big" data-act="play">Jugar otra vez</button> <button class="btn sec" data-act="menu" data-to="deck">Cambiar mazo</button> <button class="btn sec" data-act="menu" data-to="home">Menú</button></div></div>';
+      h += '<div class="overlay ' + (win ? 'owin' : 'olose') + '">' + (win ? '<div class="confetti">' + conf + '</div>' : '') + '<div class="panel over"><div class="obig">' + (win ? '🏆' : '💔') + '</div><h2>' + (win ? '¡Victoria!' : 'Derrota') + '</h2><p class="mut">' + esc(s.reason) + ' · ronda ' + s.round + '</p>' + rw + '<button class="btn big" data-act="play">Jugar otra vez</button> <button class="btn sec" data-act="menu" data-to="deck">Cambiar mazo</button> <button class="btn sec" data-act="menu" data-to="home">Menú</button></div></div>';
     }
     h += '</div>';
     app.innerHTML = h;
@@ -438,7 +502,7 @@
 
   function render() {
     document.body.classList.remove('shopbg');
-    var f = { home: renderHome, deck: renderDeck, rules: renderRules, themes: renderThemes, modes: renderModes }[ui.screen];
+    var f = { home: renderHome, deck: renderDeck, rules: renderRules, themes: renderThemes, modes: renderModes, login: renderLogin, packs: renderPacks, boot: renderBoot }[ui.screen];
     if (f) f(); else renderGame();
   }
 
@@ -497,6 +561,31 @@
     var el = e.target.closest('[data-act]'); if (!el) return;
     var act = el.dataset.act, s = ui.s, P = s && s.p[0];
     if (act === 'lock') return window.cartasLock();
+    if (act === 'logout') return logout();
+    if (act === 'login' || act === 'register') {
+      var nm = document.getElementById('lg-name').value, pn = document.getElementById('lg-pin').value; ui.lgName = nm;
+      return api(act, { name: nm, pin: pn }).then(function (r) {
+        if (!r.ok) { ui.msg = (r.data && r.data.error) || 'No se pudo entrar.'; return render(); }
+        try { localStorage.setItem('cartas_tok', r.data.token); } catch (e) {}
+        ui.msg = ''; setAcct(r.data.user); loadLocal(); ui.screen = 'home'; render();
+      });
+    }
+    if (act === 'daily') { return api('daily').then(function (r) { if (r.data && r.data.user) setAcct(r.data.user); ui.msg = r.ok ? '' : (r.data.error || ''); render(); }); }
+    if (act === 'openpack') {
+      if (ui.pack) return; ui.msg = ''; ui.pack = { cards: null, rev: [] }; render();
+      var t0 = Date.now(), pk0 = ui.pack;
+      return api('open').then(function (r) {
+        var wait = Math.max(0, 1300 - (Date.now() - t0));
+        setTimeout(function () {
+          if (ui.pack !== pk0) return;
+          if (!r.ok) { ui.pack = null; ui.msg = (r.data && r.data.error) || 'No se pudo abrir.'; if (r.data && r.data.user) setAcct(r.data.user); return render(); }
+          pk0.cards = r.data.cards; pk0.rev = r.data.cards.map(function () { return false; }); setAcct(r.data.user); render();
+        }, wait);
+      });
+    }
+    if (act === 'flipcard') { var fi = +el.dataset.i; if (ui.pack && ui.pack.cards) { ui.pack.rev[fi] = true; el.classList.add('flipped'); } return; }
+    if (act === 'flipall') { if (ui.pack && ui.pack.cards) { ui.pack.rev = ui.pack.rev.map(function () { return true; }); app.querySelectorAll('.pcard').forEach(function (n, k) { setTimeout(function () { n.classList.add('flipped'); }, k * 140); }); } return; }
+    if (act === 'closepack') { ui.pack = null; return render(); }
     if (act === 'nav') {
       clearTimeout(timer); ui.playing = false;
       if (el.dataset.to === 'play') { if (deckError()) { ui.screen = 'deck'; return render(); } saveDeck(); ui.screen = 'modes'; window.scrollTo(0, 0); return render(); }
@@ -506,21 +595,23 @@
     if (act === 'filterset') { ui.filters = el.dataset.t ? [el.dataset.t] : []; ui.screen = 'deck'; window.scrollTo(0, 0); return render(); }
     if (act === 'fmode') { ui.fmode = el.dataset.m; return renderDeck(); }
     if (act === 'group') { ui.group = el.checked; return render(); }
+    if (act === 'onlyowned') { ui.onlyOwned = el.checked; return render(); }
     if (act === 'toggle') {
       var id = el.dataset.id, k = ui.deck.indexOf(id);
-      if (k >= 0) ui.deck.splice(k, 1);
+      if (!owns(id)) ui.msg = 'Aún no tienes esta carta: consíguela en los sobres.';
+      else if (k >= 0) ui.deck.splice(k, 1);
       else if (deckSize() + CARD[id].size <= CFG.deckBudget) ui.deck.push(id);
       else ui.msg = 'No cabe: el mazo ya está lleno de espacio.';
       saveDeck(); var y = window.scrollY; renderDeck(); window.scrollTo(0, y); return;
     }
-    if (act === 'randdeck') { ui.deck = E.randomDeck(Math.random); saveDeck(); ui.msg = ''; return renderDeck(); }
+    if (act === 'randdeck') { ui.deck = E.randomDeck(Math.random, ui.acct.owned); saveDeck(); ui.msg = ''; return renderDeck(); }
     if (act === 'cleardeck') { ui.deck = []; saveDeck(); ui.msg = ''; return renderDeck(); }
     if (act === 'slot-save') {
       if (!ui.deck.length) return;
       var nm = (ui.slotName || '').trim() || 'Mazo ' + (ui.slotTo + 1);
       ui.slots[ui.slotTo] = { name: nm, ids: ui.deck.slice() }; saveSlots(); ui.msg = '«' + nm + '» guardado en el hueco ' + (ui.slotTo + 1) + '.'; ui.slotName = ''; return renderDeck();
     }
-    if (act === 'slot-load') { var sl = ui.slots[+el.dataset.i]; if (sl) { ui.deck = sl.ids.slice(); saveDeck(); ui.slotTo = +el.dataset.i; ui.msg = 'Cargado «' + sl.name + '».'; } return renderDeck(); }
+    if (act === 'slot-load') { var sl = ui.slots[+el.dataset.i]; if (sl) { ui.deck = sl.ids.filter(owns); saveDeck(); ui.slotTo = +el.dataset.i; ui.msg = 'Cargado «' + sl.name + '».'; } return renderDeck(); }
     if (act === 'slot-del') { var di = +el.dataset.i; if (ui.slots[di]) { ui.msg = 'Borrado «' + ui.slots[di].name + '».'; ui.slots[di] = null; saveSlots(); } return renderDeck(); }
     if (act === 'menu') { clearTimeout(timer); ui.playing = false; ui.screen = el.dataset.to || 'home'; return render(); }
     if (act === 'startai') { if (deckError()) { ui.screen = 'deck'; return render(); } saveDeck(); return startGame(); }
@@ -641,5 +732,11 @@
   }
 
   window.CartasUI = ui; window.CartasRender = render; // depuración
+  app.addEventListener('keydown', function (e) { if (e.key === 'Enter' && ui.screen === 'login' && e.target.id && e.target.id.indexOf('lg-') === 0) { var b = app.querySelector('[data-act=login]'); if (b) b.click(); } });
   render();
+  if (!getTok()) { ui.screen = 'login'; render(); }
+  else api('me').then(function (r) {
+    if (r.ok) { setAcct(r.data.user); loadLocal(); ui.screen = 'home'; } else if (ui.screen === 'boot') ui.screen = 'login';
+    render();
+  });
 })();

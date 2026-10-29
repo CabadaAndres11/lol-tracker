@@ -87,8 +87,8 @@
 
   // ---------- Partida ----------
   function deckSize(ids) { return ids.reduce(function (n, id) { return n + CARD[id].size; }, 0); }
-  function randomDeck(rng) {
-    var pool = DATA.cards.concat(DATA.actions).map(function (c) { return c.id; });
+  function randomDeck(rng, only) {
+    var pool = only ? only.filter(function (id) { return CARD[id]; }) : DATA.cards.concat(DATA.actions).map(function (c) { return c.id; });
     for (var i = pool.length - 1; i > 0; i--) { var j = Math.floor(rng() * (i + 1)); var t = pool[i]; pool[i] = pool[j]; pool[j] = t; }
     var deck = [], used = 0, acts = 0, com = 0;
     var isCom = function (id) { return CARD[id].type === 'tropa' && CARD[id].rarity === 'Común'; };

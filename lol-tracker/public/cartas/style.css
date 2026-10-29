@@ -77,3 +77,31 @@ button { font: inherit; cursor: pointer; color: inherit; }
   .hand { grid-template-columns: repeat(5, 1fr); }
   .card .mini button { font-size: .6rem; }
 }
+
+/* Cliente / navegación */
+.nav { display: flex; flex-wrap: wrap; gap: .4rem; align-items: center; padding: .4rem 0 .6rem; border-bottom: 1px solid var(--line); margin-bottom: .8rem; }
+.navb { background: rgba(255,255,255,.06); border: 1px solid var(--line); color: var(--ink); border-radius: 999px; padding: .45rem .9rem; font-size: .85rem; text-decoration: none; min-height: 38px; display: inline-flex; align-items: center; }
+.navb.on { background: var(--acc); color: #120a2a; border-color: var(--acc); font-weight: 700; } .navsp { flex: 1; }
+.ptitle { margin: .2rem 0 .8rem; font-size: 1.4rem; }
+.hero { text-align: center; padding: 1.2rem 0; } .hero h1 { margin: .3rem 0; font-size: 2rem; } .hero-logo { width: 150px; filter: drop-shadow(0 10px 24px rgba(0,0,0,.6)); }
+.menu { display: grid; grid-template-columns: repeat(2, 1fr); gap: .8rem; max-width: 700px; margin: 1rem auto; }
+.menu-i { display: flex; flex-direction: column; gap: .3rem; text-align: left; background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 1.1rem; transition: transform .15s, border-color .15s; }
+.menu-i:hover { transform: translateY(-3px); border-color: var(--acc); } .menu-i .mi { font-size: 2rem; } .menu-i b { font-size: 1.15rem; }
+.rules { margin: 0; padding-left: 1.1rem; display: flex; flex-direction: column; gap: .4rem; } .lv { margin: .3rem 0; font-size: .9rem; }
+.chips { display: flex; flex-wrap: wrap; gap: .35rem; margin: .5rem 0; }
+.chip { font-size: .75rem; padding: .3rem .7rem; border-radius: 999px; border: 1px solid var(--tc, var(--line)); background: rgba(255,255,255,.05); color: var(--ink); }
+.chip.on { background: var(--tc, var(--acc)); color: #0d0a18; font-weight: 700; }
+span.chip.r-Rara { border-color: #60a5fa; } span.chip.r-Épica { border-color: #c084fc; } span.chip.r-Legendaria { border-color: #fbbf24; }
+/* Mazo con barra lateral */
+.deck-layout { display: grid; grid-template-columns: 1fr 300px; gap: 1rem; align-items: start; }
+.side-themes { position: relative; }
+.thm { position: relative; padding: .45rem .5rem; border-radius: 10px; cursor: pointer; border: 1px solid transparent; }
+.thm:hover, .thm:focus, .thm.on { background: rgba(255,255,255,.07); border-color: var(--line); outline: none; }
+.thm .cnt { font-size: .7rem; color: var(--mut); } .thm .sm { font-size: .72rem; color: var(--mut); margin-top: 2px; }
+.tip { display: none; position: absolute; right: calc(100% + 10px); top: 0; width: 320px; z-index: 20; background: #0b0816; border: 1px solid var(--acc); border-radius: 12px; padding: .7rem .8rem; box-shadow: 0 10px 40px rgba(0,0,0,.7); font-size: .78rem; }
+.tip p { margin: .35rem 0 0; } .thm:hover .tip, .thm:focus .tip { display: block; }
+.grp { display: inline-flex; gap: .4rem; align-items: center; margin: .3rem 0 .6rem; font-size: .85rem; color: var(--mut); }
+.gh { margin: 1rem 0 .5rem; }
+.deckgrid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+@media (max-width: 900px) { .deck-layout { grid-template-columns: 1fr; } .side-themes { position: static; max-height: none; } .tip { position: static; width: auto; margin-top: .4rem; } .thm:hover .tip { display: block; } .thm:not(:hover):not(:focus) .tip { display: none; } }
+@media (max-width: 700px) { .menu { grid-template-columns: 1fr 1fr; } .navb { padding: .4rem .65rem; font-size: .78rem; } }

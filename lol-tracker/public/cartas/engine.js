@@ -25,11 +25,6 @@
     nini: { per: 2, cap: 8 },
     pelayos: { cap: 10 },
   };
-  var ACTION_FX = {
-    refuerzo: function (t) { t.tmp.atk += 2; },
-    escudo: function (t) { t.tmp.hp += 3; t.hp += 3; },
-    zancadilla: function (t) { t.tmp.atk -= 2; },
-  };
 
   if (!DATA.hpScaled) {
     DATA.cards.forEach(function (c) { c.hp = Math.max(CFG.hpMin, Math.round(c.hp * CFG.hpMult * Math.pow(CFG.hpGrow, c.cost - 1))); });
@@ -109,11 +104,11 @@
   }
 
   function newPlayer(deck) {
-    return { life: CFG.life, gold: CFG.gold, deck: deck.slice(), hand: [], mesa: [null, null, null, null], grave: [], target: {}, voley: {}, offers: [], refreshes: 0, pickUsed: false, anime: 0, lost: false };
+    return { life: CFG.life, gold: CFG.gold, deck: deck.slice(), hand: [], mesa: [null, null, null, null], grave: [], target: {}, voley: {}, fl: {}, offers: [], refreshes: 0, pickUsed: false, anime: 0, lost: false };
   }
 
   function newGame(deckA, deckB, seed) {
-    var s = { rng: mulberry32(seed == null ? (Date.now() & 0xffffff) : seed), uid: 1, round: 0, shops: 0, phase: 'prep', shopOpen: false, first: 0, over: false, winner: -1, reason: '', log: [], frames: [], p: [newPlayer(deckA), newPlayer(deckB)], lastBall: [null, null] };
+    var s = { rng: mulberry32(seed == null ? (Date.now() & 0xffffff) : seed), uid: 1, round: 0, shops: 0, phase: 'prep', shopOpen: false, first: 0, over: false, winner: -1, reason: '', log: [], frames: [], p: [newPlayer(deckA), newPlayer(deckB)], lastBall: [null, null], refreshN: [0, 0], err: '' };
     startRound(s);
     return s;
   }
@@ -152,7 +147,7 @@
     [0, 1].forEach(function (p) {
       var got = income(s, p);
       if (p === 0) say(s, 'Ronda ' + s.round + ': +' + got + ' de oro.');
-      s.p[p].target = {}; s.p[p].anime = 0;
+      s.p[p].target = {}; s.p[p].anime = 0; s.p[p].fl = {};
     });
     if (s.round % CFG.shopEvery === 1) {
       s.shops++;
@@ -217,7 +212,7 @@
     if (!s.shopOpen || s.phase !== 'prep') return false;
     var c = refreshCost(s, p);
     if (P.gold < c) return false;
-    P.gold -= c; P.refreshes++;
+    P.gold -= c; P.refreshes++; s.refreshN[p]++;
     var keep = P.offers.filter(function (x) { return x && x.extra; });
     P.offers = [];
     for (var n = 0; n < CFG.shopOffers; n++) P.offers.push(drawOffer(s, p));
@@ -255,16 +250,84 @@
     P.hand.splice(handIdx, 1); P.mesa[slot] = i;
     return true;
   }
+  // Muere una tropa fuera del combate (daño de acciones): sale de la mesa al momento.
+  function dropDead(s, p, i) {
+    var P = s.p[p], k = P.mesa.indexOf(i);
+    i.dead = true; i.hp = 0;
+    if (k >= 0) P.mesa[k] = null;
+    P.grave.push(i); delete P.target[i.uid];
+  }
+  function validTarget(c, i) { return !c.only || has(i, c.only); }
+  // Cada acción: ok(s,p,tgt) devuelve '' si se puede jugar o el motivo; run(s,p,tgt) la aplica y devuelve el texto del registro.
+  var ACT = {
+    entrenamiento: { run: function (s, p, t) { grow(t, 'atk', 3); return '+3 ataque permanente'; } },
+    armadura: { run: function (s, p, t) { grow(t, 'hp', 5); return '+5 vida máxima permanente'; } },
+    arenga: { run: function (s, p) { mesaTroops(s.p[p]).forEach(function (i) { grow(i, 'atk', 1); }); return '+1 ataque permanente a todas'; } },
+    banquete: { run: function (s, p) { mesaTroops(s.p[p]).forEach(function (i) { grow(i, 'hp', 2); }); return '+2 vida máxima permanente a todas'; } },
+    intimidacion: { run: function (s, p, t) { t.perm.atk -= 3; return '-3 ataque permanente'; } },
+    'mal-de-ojo': { ok: function (s, p) { return mesaTroops(s.p[1 - p]).length ? '' : 'El rival no tiene tropas.'; }, run: function (s, p) { mesaTroops(s.p[1 - p]).forEach(function (i) { i.perm.atk -= 1; }); return '-1 ataque permanente a todas las rivales'; } },
+    'golpe-certero': { run: function (s, p, t) { t.hp -= 6; if (t.hp <= 0) dropDead(s, 1 - p, t); return '6 de daño'; } },
+    lluvia: { ok: function (s, p) { return mesaTroops(s.p[1 - p]).length ? '' : 'El rival no tiene tropas.'; }, run: function (s, p) { mesaTroops(s.p[1 - p]).forEach(function (i) { i.hp -= 2; if (i.hp <= 0) dropDead(s, 1 - p, i); }); return '2 de daño a todas las rivales'; } },
+    cafe: { run: function (s, p) { s.p[p].gold += 2; return '+2 de oro'; } },
+    'bola-extra': { ok: function (s, p) { return (tiers(s.p[p])['Pokémon'] || 0) >= 1 ? '' : 'Necesitas el nivel 1 de Pokémon (2 cartas distintas).'; }, run: function (s, p) { s.p[p].fl.pk = (s.p[p].fl.pk || 0) + 1; return 'bola extra esta ronda'; } },
+    'segundo-aliento': {
+      ok: function (s, p) { return mesaTroops(s.p[p]).some(function (i) { return has(i, 'Comebacker') && i.hp < maxHp(i); }) ? '' : 'Ninguna Comebacker en mesa está herida.'; },
+      run: function (s, p) { mesaTroops(s.p[p]).filter(function (i) { return has(i, 'Comebacker'); }).forEach(function (i) { i.hp = maxHp(i); }); return 'las Comebacker recuperan su vida'; } },
+    'cambio-de-linea': { run: function (s, p, t) { var P = s.p[p]; P.mesa[P.mesa.indexOf(t)] = null; t.hp = maxHp(t); t.tmp = { atk: 0, hp: 0, red: 0 }; delete P.target[t.uid]; P.hand.push(t); return 'vuelve a la mano con la vida completa'; } },
+    parche: {
+      ok: function (s, p) { return s.refreshN[p] > 0 ? '' : 'Aún no has actualizado la tienda en esta partida.'; },
+      run: function (s, p) { var P = s.p[p], n = s.refreshN[p]; P.mesa.concat(P.hand).filter(function (i) { return i && isTroop(i) && !i.dead && has(i, 'Informático'); }).forEach(function (i) { grow(i, 'atk', n); }); return '+' + n + ' ataque permanente a las Informático'; } },
+    'horas-extra': { run: function (s, p) { s.p[p].fl.work = true; return 'si ganas esta ronda: +5 de oro'; } },
+    'capitulo-especial': { ok: function (s, p) { return (tiers(s.p[p])['Anime'] || 0) >= 1 ? '' : 'Necesitas el nivel 1 de Anime (2 cartas distintas).'; }, run: function (s, p) { s.p[p].fl.anime = true; return 'lo que cedan tus Anime se duplica'; } },
+    'segunda-temporada': {
+      ok: function (s, p) { return graveKoi(s.p[p]) ? '' : 'Todavía no ha caído ninguna tropa KOI.'; },
+      run: function (s, p) { var P = s.p[p], i = graveKoi(P); P.grave.splice(P.grave.indexOf(i), 1); i.dead = false; i.tmp = { atk: 0, hp: 0, red: 0 }; i.hp = maxHp(i); P.hand.push(i); return card(i).name + ' vuelve a tu mano'; } },
+    'remate-doble': { ok: function (s, p) { return (tiers(s.p[p])['Voley'] || 0) >= 1 ? '' : 'Necesitas el nivel 1 de Voley (2 cartas distintas).'; }, run: function (s, p) { s.p[p].fl.vol = true; return 'tus Voley: ataque doble o defensa total'; } },
+    'cita-sorpresa': {
+      ok: function (s, p) { return (tiers(s.p[p])['Novia'] || 0) >= 1 && mesaTroops(s.p[p]).length ? '' : 'Necesitas el nivel 1 de Novia (2 cartas distintas) y tropas en mesa.'; },
+      run: function (s, p) { var P = s.p[p], t = tiers(P), r = noviaRoll(P, t, mesaTroops(P), s); return r.up ? '¡tu novia te apoya! +' + FX.novia.up[t['Novia'] - 1] + '/+' + FX.novia.up[t['Novia'] - 1] + ' permanente' : '¡tu novia te regaña! -1/-1 esta ronda'; } },
+    'rabia-contenida': { run: function (s, p) { s.p[p].fl.tilt = true; return 'si ganas esta ronda: +1 ataque a las Tilt'; } },
+    'fiesta-del-pueblo': { ok: function (s, p) { return (tiers(s.p[p])['Pueblo'] || 0) >= 1 ? '' : 'Necesitas el nivel 1 de Pueblo (2 cartas distintas).'; }, run: function (s, p) { s.p[p].fl.pueblo = true; return 'el crecimiento del pueblo se duplica'; } },
+    'hermano-del-alma': {
+      ok: function (s, p) { return duoPartner(s.p[p]) ? '' : 'Necesitas un Dúo Inseparable en la mesa.'; },
+      run: function (s, p) { var id = duoPartner(s.p[p]); s.p[p].hand.push(mk(s, id, p)); return 'consigues una copia de ' + CARD[id].name; } },
+    'sofa-compartido': {
+      ok: function (s, p) { var P = s.p[p]; return mesaTroops(P).some(function (i) { return has(i, 'NINI'); }) && P.hand.some(function (i) { return isTroop(i) && has(i, 'NINI'); }) ? '' : 'Necesitas una NINI en la mesa y otra en la mano.'; },
+      run: function (s, p) { var P = s.p[p]; mesaTroops(P).concat(P.hand.filter(isTroop)).filter(function (i) { return has(i, 'NINI'); }).forEach(function (i) { grow(i, 'atk', 2); grow(i, 'hp', 2); }); return '+2/+2 permanente a las NINI'; } },
+    madrugon: { ok: function (s, p) { return mesaTroops(s.p[p]).some(function (i) { return has(i, 'Pelayos'); }) ? '' : 'Necesitas una Pelayos en la mesa.'; }, run: function (s, p) { s.p[p].fl.pel = true; return 'tus Pelayos atacan primero'; } },
+  };
+  function graveKoi(P) {
+    return P.grave.filter(function (i) { return isTroop(i) && has(i, 'KOI'); }).sort(function (a, b) { return atk(b) - atk(a); })[0] || null;
+  }
+  function duoPartner(P) {
+    var on = mesaTroops(P).filter(function (i) { return has(i, 'Dúo Inseparable'); });
+    for (var k = 0; k < on.length; k++) {
+      var other = DATA.cards.filter(function (c) { return c.themes.indexOf('Dúo Inseparable') >= 0 && c.id !== on[k].id; })[0];
+      if (other) return other.id;
+    }
+    return null;
+  }
+  // ¿Se puede jugar esta acción ahora? Devuelve '' o el motivo.
+  function actionBlock(s, p, c, tgt) {
+    if (s.phase !== 'prep' || s.over) return 'Ahora no se puede.';
+    if (s.shopOpen) return 'Las acciones se juegan en las rondas de combate.';
+    if (c.target !== 'none' && !tgt) return c.target === 'ally' ? 'Esa acción va sobre una tropa tuya.' : 'Esa acción va sobre una tropa rival.';
+    if (tgt && !validTarget(c, tgt)) return 'Solo vale sobre tropas ' + c.only + '.';
+    var a = ACT[c.id];
+    return a && a.ok ? a.ok(s, p, tgt) : '';
+  }
   function playAction(s, p, handIdx, targetUid) {
     var P = s.p[p], i = P.hand[handIdx];
-    if (s.phase !== 'prep' || !i || isTroop(i)) return false;
+    s.err = '';
+    if (!i || isTroop(i)) return false;
     var c = card(i), tgt = null;
     if (c.target === 'ally') tgt = P.mesa.filter(alive).filter(function (x) { return x.uid === targetUid; })[0];
     else if (c.target === 'enemy') tgt = s.p[1 - p].mesa.filter(alive).filter(function (x) { return x.uid === targetUid; })[0];
-    if (c.target !== 'none' && !tgt) return false;
-    if (c.id === 'cafe') P.gold += 2; else ACTION_FX[c.id](tgt);
+    var why = actionBlock(s, p, c, tgt);
+    if (why) { s.err = why; return false; }
     P.hand.splice(handIdx, 1); P.grave.push(i);
-    say(s, (p === 0 ? 'Juegas ' : 'El rival juega ') + c.name + (tgt ? ' sobre ' + card(tgt).name : '') + '.');
+    var res = ACT[c.id].run(s, p, tgt);
+    say(s, (p === 0 ? 'Juegas ' : 'El rival juega ') + c.name + (tgt ? ' sobre ' + card(tgt).name : '') + ': ' + res + '.');
     return true;
   }
   function setTarget(s, p, uid, targetUid) {
@@ -313,14 +376,15 @@
       var i = P.hand[k];
       if (isTroop(i)) continue;
       var c = card(i), allies = mesaTroops(P), foes = mesaTroops(s.p[1 - p]);
-      if (c.id === 'cafe') playAction(s, p, k, null);
-      else if (c.target === 'ally' && allies.length) {
-        allies.sort(function (a, b) { return atk(b) - atk(a); });
-        playAction(s, p, k, allies[0].uid);
-      } else if (c.target === 'enemy' && foes.length) {
-        foes.sort(function (a, b) { return atk(b) - atk(a); });
-        playAction(s, p, k, foes[0].uid);
+      if (c.id === 'cambio-de-linea' || c.id === 'capitulo-especial') continue; // la IA no las usa
+      var tgt = null;
+      if (c.target === 'ally') { allies.sort(function (a, b) { return atk(b) - atk(a); }); tgt = allies[0]; if (c.id === 'armadura') tgt = allies.slice().sort(function (a, b) { return maxHp(b) - maxHp(a); })[0]; }
+      else if (c.target === 'enemy') {
+        foes.sort(function (a, b) { return atk(b) - atk(a); }); tgt = foes[0];
+        if (c.id === 'golpe-certero') tgt = foes.filter(function (f) { return f.hp <= 6; })[0] || foes[0];
       }
+      if (c.target !== 'none' && !tgt) continue;
+      playAction(s, p, k, tgt ? tgt.uid : null);
     }
     // Voley: ataca salvo que esté en desventaja numérica
     mesaTroops(P).forEach(function (i) { if (has(i, 'Voley')) P.voley[i.uid] = s.rng() < 0.7 ? 'atk' : 'def'; });
@@ -380,6 +444,19 @@
     else { i.perm.hp += n; i.hp += n; }
   }
 
+  function noviaRoll(P, t, troops, s) {
+    var nt = t['Novia'] - 1, up = s.rng() < FX.novia.p[nt];
+    troops.forEach(function (i) {
+      if (up) gainCap(i, 'nov', 'both', FX.novia.up[nt], FX.novia.cap);
+      else {
+        var da = Math.min(FX.novia.down, atk(i) - 1), dh = Math.min(FX.novia.down, maxHp(i) - 1);
+        if (da > 0) i.tmp.atk -= da;
+        if (dh > 0) { i.tmp.hp -= dh; i.hp = Math.min(i.hp, maxHp(i)); }
+      }
+    });
+    return { up: up };
+  }
+
   function startEffects(s) {
     var T = [tiers(s.p[0]), tiers(s.p[1])];
     s.tiers = T;
@@ -394,28 +471,22 @@
         }
 
       }
-      // Pokémon: bola
+      // Pokémon: bola (las acciones pueden añadir bolas extra esta ronda)
       if (t['Pokémon']) {
-        var pk = troops.filter(function (i) { return has(i, 'Pokémon'); });
-        var probs = FX.pokemon.probs[t['Pokémon'] - 1], r = s.rng() * 100, ball = 0;
-        if (r < probs[0]) ball = 0; else if (r < probs[0] + probs[1]) ball = 1; else ball = 2;
-        s.lastBall[p] = ball;
-        var b = FX.pokemon.bonus[ball];
-        pk = pk.filter(function (i) { return gainCap(i, 'pk', 'both', b, FX.pokemon.cap) > 0; });
-        if (pk.length) { fxFrame(s, p, 'pokemon', FX.pokemon.names[ball], '+' + b + '/+' + b + ' permanente a las Pokémon', pk.map(function (i) { return i.uid; })); s.frames[s.frames.length - 1].hl.fx.ball = ball; }
+        for (var bn = 0; bn < 1 + (P.fl.pk || 0); bn++) {
+          var pk = troops.filter(function (i) { return has(i, 'Pokémon'); });
+          var probs = FX.pokemon.probs[t['Pokémon'] - 1], r = s.rng() * 100, ball = 0;
+          if (r < probs[0]) ball = 0; else if (r < probs[0] + probs[1]) ball = 1; else ball = 2;
+          s.lastBall[p] = ball;
+          var b = FX.pokemon.bonus[ball];
+          pk = pk.filter(function (i) { return gainCap(i, 'pk', 'both', b, FX.pokemon.cap) > 0; });
+          if (pk.length) { fxFrame(s, p, 'pokemon', FX.pokemon.names[ball] + (bn ? ' (extra)' : ''), '+' + b + '/+' + b + ' permanente a las Pokémon', pk.map(function (i) { return i.uid; })); s.frames[s.frames.length - 1].hl.fx.ball = ball; }
+        }
       }
       // Novia
       if (t['Novia'] && troops.length) {
-        var nt = t['Novia'] - 1, up = s.rng() < FX.novia.p[nt];
-        troops.forEach(function (i) {
-          if (up) gainCap(i, 'nov', 'both', FX.novia.up[nt], FX.novia.cap);
-          else {
-            var da = Math.min(FX.novia.down, atk(i) - 1), dh = Math.min(FX.novia.down, maxHp(i) - 1);
-            if (da > 0) i.tmp.atk -= da;
-            if (dh > 0) { i.tmp.hp -= dh; i.hp = Math.min(i.hp, maxHp(i)); }
-          }
-        });
-        fxFrame(s, p, 'novia', up ? '¡Tu novia te apoya!' : '¡Tu novia te regaña!', up ? '+' + FX.novia.up[nt] + '/+' + FX.novia.up[nt] + ' permanente a todas' : '-1/-1 esta ronda a todas', troops.map(function (i) { return i.uid; }), !up);
+        var nr = noviaRoll(P, t, troops, s);
+        fxFrame(s, p, 'novia', nr.up ? '¡Tu novia te apoya!' : '¡Tu novia te regaña!', nr.up ? '+' + FX.novia.up[t['Novia'] - 1] + '/+' + FX.novia.up[t['Novia'] - 1] + ' permanente a todas' : '-1/-1 esta ronda a todas', troops.map(function (i) { return i.uid; }), !nr.up);
       }
       // Pueblo
       if (t['Pueblo']) {
@@ -423,9 +494,9 @@
         var pu = [];
         troops.filter(function (i) { return has(i, 'Pueblo'); }).forEach(function (i) {
           var g = Math.min(FX.pueblo.per[pt], FX.pueblo.cap[pt] - i.caps.pueblo);
-          if (g > 0) { i.caps.pueblo += g; grow(i, 'atk', g); grow(i, 'hp', g); pu.push(i.uid); }
+          if (g > 0) { i.caps.pueblo += g; var gg = P.fl.pueblo ? g * 2 : g; grow(i, 'atk', gg); grow(i, 'hp', gg); pu.push(i.uid); }
         });
-        if (pu.length) fxFrame(s, p, 'pueblo', 'El pueblo crece', '+' + FX.pueblo.per[pt] + '/+' + FX.pueblo.per[pt] + ' permanente', pu);
+        if (pu.length) fxFrame(s, p, 'pueblo', 'El pueblo crece', '+' + FX.pueblo.per[pt] * (P.fl.pueblo ? 2 : 1) + '/+' + FX.pueblo.per[pt] * (P.fl.pueblo ? 2 : 1) + ' permanente' + (P.fl.pueblo ? ' (¡fiesta!)' : ''), pu);
       }
       // NINI
       if (t['NINI'] && !hasWork(P)) {
@@ -449,7 +520,7 @@
       }
     });
     // Comebacker (con los números ya modificados)
-    var sums = [0, 1].map(function (p) { return mesaTroops(s.p[p]).reduce(function (a, i) { return a + maxHp(i); }, 0); });
+    var sums = [0, 1].map(function (p) { return mesaTroops(s.p[p]).reduce(function (a, i) { return a + Math.max(0, i.hp); }, 0); });
     [0, 1].forEach(function (p) {
       var t = T[p];
       if (!t['Comebacker']) return;
@@ -498,9 +569,22 @@
     frame(s, 'Empieza el combate. ' + (s.first === 0 ? 'Atacas primero.' : 'Ataca primero el rival.'), null);
     startEffects(s);
     var seq = order(s);
+    // Madrugón: las Pelayos de quien lo jugó atacan las primeras
+    var firstPel = [];
+    [s.first, 1 - s.first].forEach(function (p) { if (s.p[p].fl.pel) firstPel = firstPel.concat(seq.filter(function (i) { return i.owner === p && has(i, 'Pelayos'); })); });
+    if (firstPel.length) seq = firstPel.concat(seq.filter(function (i) { return firstPel.indexOf(i) < 0; }));
+    // Remate doble: los Voley en ataque golpean dos veces; en defensa no atacan y reciben como mucho 1
+    var dbl = {};
+    [0, 1].forEach(function (p) {
+      var P = s.p[p]; if (!P.fl.vol) return;
+      mesaTroops(P).filter(function (i) { return has(i, 'Voley'); }).forEach(function (i) {
+        if ((P.voley[i.uid] || 'atk') === 'def') { i.tmp.noAtk = true; i.tmp.cap1 = true; } else dbl[i.uid] = true;
+      });
+    });
+    if (Object.keys(dbl).length) { var sq2 = []; seq.forEach(function (i) { sq2.push(i); if (dbl[i.uid]) sq2.push(i); }); seq = sq2; }
     for (var n = 0; n < seq.length && !s.over; n++) {
       var a = seq[n];
-      if (a.dead) continue;
+      if (a.dead || a.tmp.noAtk) continue;
       var P = s.p[a.owner], E = s.p[1 - a.owner], foes = mesaTroops(E);
       var tgt = null, retarget = false;
       if (P.target[a.uid]) tgt = foes.filter(function (f) { return f.uid === P.target[a.uid]; })[0] || null;
@@ -513,6 +597,7 @@
         continue;
       }
       var fxk = null, real = Math.max(0, dmg - tgt.tmp.red);
+      if (tgt.tmp.cap1) real = Math.min(real, 1);
       tgt.hp -= real;
       var line = card(a).name + (retarget ? ' (su objetivo ya cayó) ataca a ' : ' ataca a ') + card(tgt).name + ': ' + real + ' de daño' + (tgt.tmp.red && real < dmg ? ' (reducido)' : '') + '.';
       if (real > 0) {
@@ -558,6 +643,15 @@
           fxFrame(s, p, 'tilt', 'Tilt', 'conservan ataque tras perder la ronda', mesaTroops(s.p[p]).filter(function (i) { return has(i, 'Tilt'); }).map(function (i) { return i.uid; }));
         }
       });
+      [0, 1].forEach(function (p) {
+        var P = s.p[p], won = al[p] > al[1 - p];
+        if (P.fl.work && won) { P.gold += 5; fxFrame(s, p, 'trabajo', 'Horas extra', '+5 de oro por ganar la ronda', []); }
+        if (P.fl.tilt && won) {
+          var tl = mesaTroops(P).filter(function (i) { return has(i, 'Tilt'); });
+          tl.forEach(function (i) { grow(i, 'atk', 1); });
+          if (tl.length) fxFrame(s, p, 'tilt', 'Rabia contenida', '+1 ataque permanente a las Tilt', tl.map(function (i) { return i.uid; }));
+        }
+      });
       cleanup(s);
       frame(s, 'Fin de la ronda ' + s.round + '.', null);
       s.phase = 'post';
@@ -591,10 +685,11 @@
     if (stat === 'atk') {
       var v = atk(a);
       if (v <= 0) return false;
-      a.perm.atk -= v; b.perm.atk += v;
-      say(s, card(a).name + ' cede ' + v + ' de ataque a ' + card(b).name + '.');
+      var mul = P.fl.anime ? 2 : 1;
+      a.perm.atk -= v; b.perm.atk += v * mul;
+      say(s, card(a).name + ' cede ' + v * mul + ' de ataque a ' + card(b).name + '.');
     } else {
-      var m = maxHp(a), g = Math.floor(m / 2);
+      var mul2 = P.fl.anime ? 2 : 1, m = maxHp(a), g = Math.floor(m / 2) * mul2;
       b.perm.hp += g; b.hp += g;
       P.mesa[P.mesa.indexOf(a)] = null; P.grave.push(a);
       say(s, card(a).name + ' cede su vida y cae; ' + card(b).name + ' gana +' + g + ' de vida máxima.');
@@ -627,7 +722,7 @@
     _mk: mk, _startEffects: startEffects, _tiers: tiers,
     CFG: CFG, FX: FX, CARD: CARD, DATA: DATA,
     newGame: newGame, randomDeck: randomDeck, deckSize: deckSize, mulberry32: mulberry32,
-    place: place, playAction: playAction, setTarget: setTarget, clearTargets: clearTargets, forfeit: forfeit, setVoley: setVoley,
+    place: place, playAction: playAction, setTarget: setTarget, clearTargets: clearTargets, forfeit: forfeit, setVoley: setVoley, actionBlock: actionBlock, validTarget: validTarget,
     buy: buy, refresh: refresh, refreshCost: refreshCost, pickFromDeck: pickFromDeck, retire: retire,
     aiDeck: aiDeck, aiShop: aiShop, aiPrep: aiPrep, aiTargets: aiTargets, fight: fight, endShop: endShop, pendingTargets: pendingTargets, cede: cede, nextRound: nextRound,
     themeCounts: themeCounts, tiers: tiers, tierOf: tierOf, atk: atk, maxHp: maxHp, card: card, isTroop: isTroop, has: has, mesaTroops: mesaTroops, viewOf: viewOf,

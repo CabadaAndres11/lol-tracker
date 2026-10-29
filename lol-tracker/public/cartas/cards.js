@@ -527,34 +527,88 @@ var D={
  ],
  "actions": [
   {
-   "id": "refuerzo",
-   "name": "Refuerzo",
-   "cost": 1,
-   "rarity": "Común",
-   "type": "accion",
-   "size": 1,
-   "target": "ally",
-   "text": "Una tropa aliada gana +2 de ataque esta ronda."
-  },
-  {
-   "id": "escudo",
-   "name": "Escudo",
-   "cost": 1,
-   "rarity": "Común",
-   "type": "accion",
-   "size": 1,
-   "target": "ally",
-   "text": "Una tropa aliada gana +3 de vida esta ronda."
-  },
-  {
-   "id": "zancadilla",
-   "name": "Zancadilla",
+   "id": "entrenamiento",
+   "name": "Entrenamiento",
    "cost": 2,
    "rarity": "Común",
    "type": "accion",
    "size": 1,
+   "target": "ally",
+   "text": "Una tropa aliada gana +3 de ataque permanente."
+  },
+  {
+   "id": "arenga",
+   "name": "Arenga",
+   "cost": 3,
+   "rarity": "Común",
+   "type": "accion",
+   "size": 1,
+   "target": "none",
+   "text": "Todas tus tropas en mesa ganan +1 de ataque permanente."
+  },
+  {
+   "id": "armadura",
+   "name": "Armadura",
+   "cost": 2,
+   "rarity": "Común",
+   "type": "accion",
+   "size": 1,
+   "target": "ally",
+   "text": "Una tropa aliada gana +5 de vida máxima permanente."
+  },
+  {
+   "id": "banquete",
+   "name": "Banquete",
+   "cost": 3,
+   "rarity": "Común",
+   "type": "accion",
+   "size": 1,
+   "target": "none",
+   "text": "Todas tus tropas en mesa ganan +2 de vida máxima permanente."
+  },
+  {
+   "id": "intimidacion",
+   "name": "Intimidación",
+   "cost": 2,
+   "rarity": "Rara",
+   "type": "accion",
+   "size": 1,
    "target": "enemy",
-   "text": "Una tropa rival pierde 2 de ataque esta ronda."
+   "text": "Una tropa rival pierde 3 de ataque permanente.",
+   "foe": true
+  },
+  {
+   "id": "mal-de-ojo",
+   "name": "Mal de ojo",
+   "cost": 3,
+   "rarity": "Rara",
+   "type": "accion",
+   "size": 1,
+   "target": "none",
+   "text": "Todas las tropas rivales pierden 1 de ataque permanente.",
+   "foe": true
+  },
+  {
+   "id": "golpe-certero",
+   "name": "Golpe certero",
+   "cost": 2,
+   "rarity": "Rara",
+   "type": "accion",
+   "size": 1,
+   "target": "enemy",
+   "text": "Hace 6 de daño a una tropa rival.",
+   "foe": true
+  },
+  {
+   "id": "lluvia",
+   "name": "Lluvia de flechas",
+   "cost": 3,
+   "rarity": "Rara",
+   "type": "accion",
+   "size": 1,
+   "target": "none",
+   "text": "Hace 2 de daño a todas las tropas rivales.",
+   "foe": true
   },
   {
    "id": "cafe",
@@ -565,6 +619,161 @@ var D={
    "size": 1,
    "target": "none",
    "text": "Ganas 2 de oro ahora."
+  },
+  {
+   "id": "bola-extra",
+   "name": "Bola extra",
+   "cost": 2,
+   "rarity": "Rara",
+   "type": "accion",
+   "size": 1,
+   "target": "none",
+   "text": "Esta ronda se abre una bola Pokémon extra (necesitas el nivel 1 de Pokémon).",
+   "theme": "Pokémon"
+  },
+  {
+   "id": "segundo-aliento",
+   "name": "Segundo aliento",
+   "cost": 2,
+   "rarity": "Rara",
+   "type": "accion",
+   "size": 1,
+   "target": "none",
+   "text": "Tus tropas Comebacker en mesa recuperan toda su vida.",
+   "theme": "Comebacker"
+  },
+  {
+   "id": "cambio-de-linea",
+   "name": "Cambio de línea",
+   "cost": 1,
+   "rarity": "Rara",
+   "type": "accion",
+   "size": 1,
+   "target": "ally",
+   "text": "Retira del campo una tropa Lol: vuelve a tu mano con la vida completa.",
+   "theme": "Lol",
+   "only": "Lol"
+  },
+  {
+   "id": "parche",
+   "name": "Parche de actualización",
+   "cost": 3,
+   "rarity": "Épica",
+   "type": "accion",
+   "size": 1,
+   "target": "none",
+   "text": "Tus tropas Informático ganan +1 de ataque permanente por cada actualización de la tienda hecha en la partida.",
+   "theme": "Informático"
+  },
+  {
+   "id": "horas-extra",
+   "name": "Horas extra",
+   "cost": 2,
+   "rarity": "Rara",
+   "type": "accion",
+   "size": 1,
+   "target": "none",
+   "text": "Si ganas esta ronda, ganas +5 de oro.",
+   "theme": "Trabajo"
+  },
+  {
+   "id": "capitulo-especial",
+   "name": "Capítulo especial",
+   "cost": 2,
+   "rarity": "Rara",
+   "type": "accion",
+   "size": 1,
+   "target": "none",
+   "text": "Esta ronda, las estadísticas que cedan tus Anime se duplican (necesitas el nivel 1 de Anime).",
+   "theme": "Anime"
+  },
+  {
+   "id": "segunda-temporada",
+   "name": "Segunda temporada",
+   "cost": 3,
+   "rarity": "Épica",
+   "type": "accion",
+   "size": 1,
+   "target": "none",
+   "text": "Recuperas en tu mano una tropa KOI que haya caído en la partida (la de más ataque).",
+   "theme": "KOI"
+  },
+  {
+   "id": "remate-doble",
+   "name": "Remate doble",
+   "cost": 2,
+   "rarity": "Rara",
+   "type": "accion",
+   "size": 1,
+   "target": "none",
+   "text": "Esta ronda tus Voley en ataque golpean dos veces al mismo objetivo; en defensa no atacan y solo sufren 1 de daño por golpe (necesitas el nivel 1 de Voley).",
+   "theme": "Voley"
+  },
+  {
+   "id": "cita-sorpresa",
+   "name": "Cita sorpresa",
+   "cost": 2,
+   "rarity": "Rara",
+   "type": "accion",
+   "size": 1,
+   "target": "none",
+   "text": "Tu novia aparece ahora: su apoyo (o su regaño) cae sobre todas tus tropas en mesa (necesitas el nivel 1 de Novia).",
+   "theme": "Novia"
+  },
+  {
+   "id": "rabia-contenida",
+   "name": "Rabia contenida",
+   "cost": 2,
+   "rarity": "Rara",
+   "type": "accion",
+   "size": 1,
+   "target": "none",
+   "text": "Si ganas esta ronda, tus tropas Tilt ganan +1 de ataque permanente.",
+   "theme": "Tilt"
+  },
+  {
+   "id": "fiesta-del-pueblo",
+   "name": "Fiesta del pueblo",
+   "cost": 2,
+   "rarity": "Rara",
+   "type": "accion",
+   "size": 1,
+   "target": "none",
+   "text": "Esta ronda, las estadísticas que ganen tus Pueblo se duplican (necesitas el nivel 1 de Pueblo).",
+   "theme": "Pueblo"
+  },
+  {
+   "id": "hermano-del-alma",
+   "name": "Hermano del alma",
+   "cost": 2,
+   "rarity": "Épica",
+   "type": "accion",
+   "size": 1,
+   "target": "none",
+   "text": "Si tienes un Dúo Inseparable en la mesa, consigues en tu mano una copia de su pareja.",
+   "theme": "Dúo Inseparable"
+  },
+  {
+   "id": "sofa-compartido",
+   "name": "Sofá compartido",
+   "cost": 2,
+   "rarity": "Rara",
+   "type": "accion",
+   "size": 1,
+   "target": "none",
+   "text": "Si tienes una NINI en la mesa y la otra en la mano, ambas ganan +2/+2 permanente.",
+   "theme": "NINI"
+  },
+  {
+   "id": "madrugon",
+   "name": "Madrugón",
+   "cost": 2,
+   "rarity": "Rara",
+   "type": "accion",
+   "size": 1,
+   "target": "none",
+   "text": "Esta ronda tus Pelayos en mesa atacan los primeros.",
+   "theme": "Pelayos"
   }
  ],
  "themes": {
@@ -589,7 +798,7 @@ var D={
    ],
    "color": "#f59e0b",
    "tx": [
-    "Si la suma de vida máxima de tus tropas es menor que la del rival: +1 ataque a las Comebacker.",
+    "Si la suma de vida actual de tus tropas es menor que la del rival: +1 ataque a las Comebacker.",
     "+2 ataque a las Comebacker.",
     "+2 ataque a las Comebacker y +1 al resto."
    ]

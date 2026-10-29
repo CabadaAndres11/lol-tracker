@@ -19,12 +19,13 @@
   }
   function tagHtml(t) { return '<span class="tag" style="--tc:' + D.themes[t].color + '">' + esc(t) + '</span>'; }
   function pips(n) { var h = ''; for (var k = 0; k < 3; k++) h += '<i' + (k < n ? ' class="on"' : '') + '></i>'; return h; }
-  var AICON = { refuerzo: '⚔️', escudo: '🛡️', zancadilla: '🦵', cafe: '☕' };
+  var AICON = { entrenamiento: '⚔️', arenga: '📣', armadura: '🛡️', banquete: '🍖', intimidacion: '😠', 'mal-de-ojo': '🧿', 'golpe-certero': '🎯', lluvia: '🏹', cafe: '☕',
+    'bola-extra': '⚾', 'segundo-aliento': '💨', 'cambio-de-linea': '🔄', parche: '💾', 'horas-extra': '💼', 'capitulo-especial': '📺', 'segunda-temporada': '🏆', 'remate-doble': '🏐', 'cita-sorpresa': '💕', 'rabia-contenida': '😡', 'fiesta-del-pueblo': '🎉', 'hermano-del-alma': '👯', 'sofa-compartido': '🛋️', madrugon: '⏰' };
   function cardHtml(c, o) {
     o = o || {};
     var troop = c.type === 'tropa', c1, c2;
     if (troop) { c1 = D.themes[c.themes[0]].color; c2 = c.themes[1] ? D.themes[c.themes[1]].color : hexMix(c1, '#0b0716', .62); }
-    else { c1 = '#2dd4bf'; c2 = '#0f3f3a'; }
+    else if (c.theme) { c1 = D.themes[c.theme].color; c2 = hexMix(c1, '#0b0716', .62); } else { c1 = '#2dd4bf'; c2 = '#0f3f3a'; }
     var tag = o.tag || 'div';
     var h = '<' + tag + ' class="card r-' + c.rarity + (troop ? '' : ' accion') + (o.cls ? ' ' + o.cls : '') + '" style="--c1:' + c1 + ';--c2:' + c2 + '"' + (o.attrs ? ' ' + o.attrs : '') + '>';
     h += '<span class="coin" title="Coste en oro para comprarla">' + c.cost + '</span>';
@@ -38,7 +39,7 @@
       if (dH) h += '<i class="dl h ' + (dH > 0 ? 'pos' : 'neg') + '">' + (dH > 0 ? '+' : '') + dH + '</i>';
       h += '<span class="sc a' + (a > c.atk ? ' up' : '') + '" title="Ataque"><b>' + a + '</b></span><span class="sc h' + (mx > c.hp ? ' up' : '') + (hp < mx ? ' low' : '') + '" title="Vida' + (hp < mx ? ' (' + hp + '/' + mx + ')' : '') + '"><b>' + hp + '</b></span>';
     } else {
-      h += '<div class="mono ico">' + (AICON[c.id] || '✨') + '</div><div class="adesc">' + esc(c.text) + '</div>';
+      h += '<div class="mono ico">' + (AICON[c.id] || '✨') + '</div><div class="adesc">' + esc(c.text) + '</div>' + (c.theme ? '<div class="tags">' + tagHtml(c.theme) + '</div>' : '');
     }
     if (o.extra) h += o.extra;
     return h + '</' + tag + '>';
@@ -84,13 +85,14 @@
       sec('Cartas', ['El <b>círculo dorado</b> es lo que cuesta comprarla en oro.', 'El <b>círculo naranja</b> es el ataque y el <b>verde</b> la vida.', 'El color de la carta mezcla los de sus sinergias y el borde indica la rareza (gris Común, azul Rara, morado Épica, dorado Legendaria).']) +
       sec('Primera ronda', ['La partida empieza con una <b>tienda</b>: ambos jugadores tienen <b>' + (CFG.gold + CFG.income) + ' de oro</b> y solo salen tropas Comunes de tu mazo. Pulsa una carta para comprarla, colócala (pulsando o arrastrándola) y termina la tienda.']) +
       sec('Una ronda de combate', ['Cada ronda ganas <b>2 de oro</b> (se reinicia cada partida y es distinto de las monedas de los sobres).', 'Tienes <b>4 huecos en mesa</b> y una <b>mano de 5</b>.', 'En la preparación colocas tropas (pulsando o arrastrando desde la mano), juegas acciones y <b>debes elegir objetivo para cada una de tus tropas</b>: no se puede combatir hasta que todas tengan uno. Puedes deshacerlos todos con el botón «Deshacer objetivos». El rival no ve tus objetivos.', '<b>Tienes 45 segundos</b> por ronda de combate (el reloj se ve arriba). Si se acaban y faltan objetivos por elegir, <b>pierdes la partida</b>; si ya estaban todos elegidos, el combate empieza solo.']) +
-      sec('Tienda', ['Hay tienda <b>cada 3 rondas</b> (rondas 1, 4, 7…). En una ronda de tienda <b>no hay combate</b>.', 'La tienda ofrece 4 cartas al azar de tu propio mazo; pulsa una para comprarla. El botón redondo ↻ la actualiza por 1 de oro.', '<b>Solo en las rondas de tienda</b> puedes retirar tropas de la mesa; el resto del tiempo puedes colocar si hay hueco, pero no quitar.', 'Las tropas de coste 5 aparecen a partir de la segunda tienda.']) +
+      sec('Tienda', ['Hay tienda <b>cada 3 rondas</b> (rondas 1, 4, 7…). En una ronda de tienda <b>no hay combate</b>.', 'La tienda ofrece 5 cartas al azar de tu propio mazo; pulsa una para comprarla. El botón redondo ↻ la actualiza por 1 de oro.', '<b>Solo en las rondas de tienda</b> puedes retirar tropas de la mesa; el resto del tiempo puedes colocar si hay hueco, pero no quitar.', 'Las tropas de coste 5 aparecen a partir de la segunda tienda.']) +
       sec('Combate', ['Los ataques se resuelven de uno en uno, alternando bandos de izquierda a derecha. Cada tropa ataca <b>una vez por ronda</b>. El bando que empieza se alterna cada ronda.', 'Si el objetivo ya murió, el ataque va a una tropa rival viva al azar.', 'No se puede atacar al jugador directamente: <b>recibes daño solo si todas tus tropas han muerto</b> y a tu rival le quedan tropas por atacar; el daño es igual a su ataque.', '<b>Las tropas no se curan entre rondas</b>: el daño se acumula. Solo se curan del todo al volver a tu mano (retirándolas en la tienda). Las muertas liberan su hueco y los bonus de «esta ronda» desaparecen.', 'Si en una ronda sin tienda no tienes tropas ni en mesa ni en mano, <b>pierdes automáticamente</b>.']) +
-      sec('Sinergias', ['Cada tropa tiene 1 o 2 sinergias. Cuentan las <b>cartas distintas</b> de cada sinergia entre mesa y mano (las copias no suman; las acciones no tienen sinergia).', 'Al llegar a ciertos números (niveles) la sinergia da su bonificación. <b>Las mejoras de estadísticas son permanentes</b> (con un tope por tropa), salvo las de Voley, que solo duran la ronda, así que tus tropas se hacen más fuertes con la partida. En la partida ves a un lado cuántas llevas y cuántas necesitas.', 'Voley solo funciona con 2 o más cartas distintas de Voley entre mesa y mano; hasta entonces no puedes elegir ataque o defensa.']) +
-      sec('Todavía por llegar', ['Pasivas en las tropas de coste 5, más acciones, sobres y monedas, y partidas contra otros jugadores.']) + '</div>';
+      sec('Sinergias', ['Cada tropa tiene 1 o 2 sinergias. Cuentan las <b>cartas distintas</b> de cada sinergia entre mesa y mano (las copias no suman; las acciones no cuentan para la sinergia, aunque las de color pertenecen a una).', 'Al llegar a ciertos números (niveles) la sinergia da su bonificación. <b>Las mejoras de estadísticas son permanentes</b> (con un tope por tropa), salvo las de Voley, que solo duran la ronda, así que tus tropas se hacen más fuertes con la partida. En la partida ves a un lado cuántas llevas y cuántas necesitas.', 'Voley solo funciona con 2 o más cartas distintas de Voley entre mesa y mano; hasta entonces no puedes elegir ataque o defensa.']) +
+      sec('Acciones', ['Se juegan en las <b>rondas de combate</b> (no en la tienda) y ocupan 1 de espacio. Las mejoras de estadísticas de las acciones son <b>permanentes</b>.', 'Generales: dar ataque o vida a una tropa o a todas las tuyas, y quitar ataque o hacer daño a una tropa rival o a todas.', 'Las de color son de una sinergia concreta y algunas piden condiciones (p. ej. tener el nivel 1 de esa sinergia); si no se cumplen, la carta te dice qué falta y no se gasta.', 'Comebacker compara la <b>vida actual</b> de las tropas en mesa, no la máxima.']) +
+      sec('Todavía por llegar', ['Pasivas en las tropas de coste 5, sobres y monedas, y partidas contra otros jugadores.']) + '</div>';
   }
 
-  function themeCards(t) { return D.cards.filter(function (c) { return c.themes.indexOf(t) >= 0; }); }
+  function themeCards(t) { return D.cards.filter(function (c) { return c.themes.indexOf(t) >= 0; }).concat(D.actions.filter(function (a) { return a.theme === t; })); }
   function renderThemes() {
     var h = head('themes', '✨ Sinergias') + '<p class="mut">Pulsa «Ver en el mazo» para filtrar las cartas de esa sinergia.</p>';
     Object.keys(D.themes).forEach(function (t) {
@@ -140,7 +142,7 @@
     if (!f.length) return all;
     var th = f.filter(function (x) { return x !== '__act'; }), act = f.indexOf('__act') >= 0;
     return all.filter(function (c) {
-      if (c.type === 'accion') return act && (ui.fmode === 'any' || !th.length);
+      if (c.type === 'accion') return (act && (ui.fmode === 'any' || !th.length)) || (c.theme && ui.fmode === 'any' && th.indexOf(c.theme) >= 0) || (c.theme && ui.fmode === 'all' && th.length === 1 && th[0] === c.theme);
       if (ui.fmode === 'all') return th.every(function (t) { return c.themes.indexOf(t) >= 0; });
       return th.some(function (t) { return c.themes.indexOf(t) >= 0; });
     });
@@ -164,7 +166,7 @@
     h += '</div>';
     if (ui.group && !ui.filters.length) {
       Object.keys(D.themes).forEach(function (t) { h += '<h3 class="gh">' + tagHtml(t) + '</h3><div class="deckgrid">' + themeCards(t).map(deckCard).join('') + '</div>'; });
-      h += '<h3 class="gh">Acciones</h3><div class="deckgrid">' + D.actions.map(deckCard).join('') + '</div>';
+      h += '<h3 class="gh">Acciones</h3><div class="deckgrid">' + D.actions.filter(function (a) { return !a.theme; }).map(deckCard).join('') + '</div>';
     } else {
       var list = filtered();
       h += list.length ? '<div class="deckgrid">' + list.map(deckCard).join('') + '</div>' : '<p class="mut">Ninguna carta cumple todas las sinergias elegidas.</p>';
@@ -219,7 +221,7 @@
         if (sel && sel.k === 'mine' && sel.uid === v.uid) o.cls += ' sel';
         if (pending) o.cls += ' notgt';
         o.attrs += ' data-act="mine"';
-        if (sel && sel.k === 'act' && CARD[P0.hand[sel.i].id].target === 'ally') o.cls += ' tgtable';
+        if (sel && sel.k === 'act' && CARD[P0.hand[sel.i].id].target === 'ally' && E.validTarget(CARD[P0.hand[sel.i].id], I || v)) o.cls += ' tgtable';
         if (s.phase === 'prep' && !ui.playing && I && E.has(I, 'Voley') && !s.shopOpen && (E.tiers(P0).Voley || 0) >= 1) {
           var m = P0.voley[v.uid] || 'atk';
           under += '<div class="mini"><button data-act="voley" data-uid="' + v.uid + '" data-m="atk" class="' + (m === 'atk' ? 'on' : '') + '">⚔ Ataque</button><button data-act="voley" data-uid="' + v.uid + '" data-m="def" class="' + (m === 'def' ? 'on' : '') + '">🛡 Defensa</button></div>';
@@ -338,7 +340,7 @@
   }
 
     // ---------- Efectos de sinergia: cartel, bola, números flotantes ----------
-  var FXICON = { duo: '👯', novia: '💕', pueblo: '🏘️', nini: '🛋️', voley: '🏐', comeback: '🔥', tilt: '😡', koi: '🏆' };
+  var FXICON = { duo: '👯', novia: '💕', pueblo: '🏘️', nini: '🛋️', voley: '🏐', comeback: '🔥', tilt: '😡', koi: '🏆', trabajo: '💼' };
   function fxBanner() {
     var fx = ui.playing && ui.hl && ui.hl.fx; if (!fx) return;
     var b = document.getElementById('board'), row = b && b.querySelector('.row4.side' + fx.side); if (!row) return;
@@ -514,7 +516,7 @@
         if (!P.mesa.some(function (x) { return !x; })) { ui.hint = 'La mesa está llena: solo puedes retirar tropas en la tienda.'; ui.sel = null; }
         else { ui.sel = { k: 'hand', i: i }; ui.hint = 'Pulsa un hueco libre para colocarla.'; }
       } else if (s.shopOpen) { ui.hint = 'Las acciones se juegan en las rondas de combate.'; ui.sel = null; }
-      else if (c.target === 'none') { E.playAction(s, 0, i, null); ui.sel = null; ui.hint = ''; }
+      else if (c.target === 'none') { ui.hint = E.playAction(s, 0, i, null) ? '' : s.err; ui.sel = null; }
       else { ui.sel = { k: 'act', i: i }; ui.hint = c.target === 'ally' ? 'Elige una tropa tuya en la mesa.' : 'Elige una tropa rival.'; }
       return render();
     }
@@ -526,14 +528,14 @@
     }
     if (act === 'mine') {
       var uid = +el.dataset.cuid;
-      if (ui.sel && ui.sel.k === 'act') { if (E.playAction(s, 0, ui.sel.i, uid)) { ui.sel = null; ui.hint = ''; } else ui.hint = 'Esa acción no va sobre una tropa tuya.'; return render(); }
+      if (ui.sel && ui.sel.k === 'act') { if (E.playAction(s, 0, ui.sel.i, uid)) { ui.sel = null; ui.hint = ''; } else ui.hint = s.err || 'Esa acción no va sobre una tropa tuya.'; return render(); }
       if (s.shopOpen) return;
       if (ui.sel && ui.sel.k === 'mine' && ui.sel.uid === uid) { ui.sel = null; ui.hint = ''; return render(); }
       ui.sel = { k: 'mine', uid: uid }; ui.hint = 'Ahora pulsa la tropa rival a la que atacará.'; return render();
     }
     if (act === 'foe') {
       var fu = +el.dataset.cuid;
-      if (ui.sel && ui.sel.k === 'act') { if (E.playAction(s, 0, ui.sel.i, fu)) { ui.sel = null; ui.hint = ''; } else ui.hint = 'Esa acción no va sobre una tropa rival.'; return render(); }
+      if (ui.sel && ui.sel.k === 'act') { if (E.playAction(s, 0, ui.sel.i, fu)) { ui.sel = null; ui.hint = ''; } else ui.hint = s.err || 'Esa acción no va sobre una tropa rival.'; return render(); }
       if (ui.sel && ui.sel.k === 'mine') { E.setTarget(s, 0, ui.sel.uid, fu); ui.hint = ''; nextPending(s); return render(); }
     }
   });
@@ -600,7 +602,7 @@
       } else if (c.target === 'none') { if (t.closest('#board')) ok = E.playAction(s, 0, drag.i, null); }
       else { var cd = t.closest('[data-cuid]'); if (cd && cd.dataset.side === (c.target === 'ally' ? '0' : '1')) ok = E.playAction(s, 0, drag.i, +cd.dataset.cuid); }
     }
-    ui.sel = null; ui.hint = ok ? '' : 'No se pudo soltar ahí.';
+    ui.sel = null; ui.hint = ok ? '' : (s.err && c.type !== 'tropa' ? s.err : 'No se pudo soltar ahí.');
     if (ok && !s.shopOpen) nextPending(s);
     render();
   }

@@ -1,0 +1,742 @@
+/* Datos generados: tropas, acciones y temáticas del juego de cartas (prototipo). */
+(function(root){
+var D={
+ "cards": [
+  {
+   "id": "computer-lihone",
+   "name": "Computer Lihone",
+   "person": "Lihone",
+   "themes": [
+    "Informático",
+    "Trabajo"
+   ],
+   "cost": 1,
+   "atk": 3,
+   "hp": 3,
+   "rarity": "Común",
+   "type": "tropa",
+   "size": 1
+  },
+  {
+   "id": "lihone-viego",
+   "name": "Lihone Viego",
+   "person": "Lihone",
+   "themes": [
+    "Lol",
+    "Comebacker"
+   ],
+   "cost": 5,
+   "atk": 4,
+   "hp": 6,
+   "rarity": "Épica",
+   "type": "tropa",
+   "size": 3
+  },
+  {
+   "id": "haikyuu-lihone",
+   "name": "Haikyuu Lihone",
+   "person": "Lihone",
+   "themes": [
+    "Voley",
+    "Anime"
+   ],
+   "cost": 3,
+   "atk": 4,
+   "hp": 6,
+   "rarity": "Épica",
+   "type": "tropa",
+   "size": 2
+  },
+  {
+   "id": "lihone",
+   "name": "Lihone",
+   "person": "Lihone",
+   "themes": [
+    "Pokémon",
+    "Pueblo"
+   ],
+   "cost": 4,
+   "atk": 4,
+   "hp": 8,
+   "rarity": "Épica",
+   "type": "tropa",
+   "size": 2
+  },
+  {
+   "id": "lihone-correa",
+   "name": "Lihone Correa",
+   "person": "Lihone",
+   "themes": [
+    "Novia",
+    "Trabajo"
+   ],
+   "cost": 2,
+   "atk": 2,
+   "hp": 6,
+   "rarity": "Rara",
+   "type": "tropa",
+   "size": 1
+  },
+  {
+   "id": "aitorlg-renata",
+   "name": "AitoRLG Renata",
+   "person": "AitoRLG",
+   "themes": [
+    "Lol",
+    "Comebacker"
+   ],
+   "cost": 5,
+   "atk": 4,
+   "hp": 6,
+   "rarity": "Épica",
+   "type": "tropa",
+   "size": 3
+  },
+  {
+   "id": "aitorlg-koisito",
+   "name": "AitoRLG Koisito",
+   "person": "AitoRLG",
+   "themes": [
+    "KOI"
+   ],
+   "cost": 3,
+   "atk": 5,
+   "hp": 7,
+   "rarity": "Rara",
+   "type": "tropa",
+   "size": 2
+  },
+  {
+   "id": "aitorlg-friki",
+   "name": "AitoRLG Friki",
+   "person": "AitoRLG",
+   "themes": [
+    "Anime",
+    "Pokémon"
+   ],
+   "cost": 4,
+   "atk": 5,
+   "hp": 7,
+   "rarity": "Rara",
+   "type": "tropa",
+   "size": 2
+  },
+  {
+   "id": "aitorlg-regla",
+   "name": "AitoRLG Regla",
+   "person": "AitoRLG",
+   "themes": [
+    "Trabajo",
+    "Tilt"
+   ],
+   "cost": 2,
+   "atk": 4,
+   "hp": 4,
+   "rarity": "Rara",
+   "type": "tropa",
+   "size": 1
+  },
+  {
+   "id": "computer-dashlight",
+   "name": "Computer Dashlight",
+   "person": "Dashlight",
+   "themes": [
+    "Informático",
+    "Pokémon"
+   ],
+   "cost": 2,
+   "atk": 3,
+   "hp": 5,
+   "rarity": "Común",
+   "type": "tropa",
+   "size": 1
+  },
+  {
+   "id": "dashlight-correa",
+   "name": "Dashlight Correa",
+   "person": "Dashlight",
+   "themes": [
+    "Novia"
+   ],
+   "cost": 3,
+   "atk": 4,
+   "hp": 8,
+   "rarity": "Rara",
+   "type": "tropa",
+   "size": 2
+  },
+  {
+   "id": "dashlight-akali",
+   "name": "Dashlight Akali",
+   "person": "Dashlight",
+   "themes": [
+    "Comebacker",
+    "Lol"
+   ],
+   "cost": 4,
+   "atk": 5,
+   "hp": 7,
+   "rarity": "Común",
+   "type": "tropa",
+   "size": 2
+  },
+  {
+   "id": "javihi",
+   "name": "Javihi",
+   "person": "Javihi",
+   "themes": [
+    "Informático",
+    "Trabajo"
+   ],
+   "cost": 1,
+   "atk": 3,
+   "hp": 3,
+   "rarity": "Común",
+   "type": "tropa",
+   "size": 1
+  },
+  {
+   "id": "javihi-friki",
+   "name": "Javihi Friki",
+   "person": "Javihi",
+   "themes": [
+    "Lol",
+    "Anime"
+   ],
+   "cost": 2,
+   "atk": 3,
+   "hp": 5,
+   "rarity": "Rara",
+   "type": "tropa",
+   "size": 1
+  },
+  {
+   "id": "javihi-duo",
+   "name": "Javihi Dúo",
+   "person": "Javihi",
+   "themes": [
+    "Dúo Inseparable",
+    "Tilt"
+   ],
+   "cost": 5,
+   "atk": 5,
+   "hp": 5,
+   "rarity": "Legendaria",
+   "type": "tropa",
+   "size": 3
+  },
+  {
+   "id": "javihi-koisito",
+   "name": "Javihi Koisito",
+   "person": "Javihi",
+   "themes": [
+    "Comebacker",
+    "KOI"
+   ],
+   "cost": 4,
+   "atk": 5,
+   "hp": 7,
+   "rarity": "Rara",
+   "type": "tropa",
+   "size": 2
+  },
+  {
+   "id": "javihi-prime",
+   "name": "Javihi Prime",
+   "person": "Javihi",
+   "themes": [
+    "Voley",
+    "NINI"
+   ],
+   "cost": 4,
+   "atk": 5,
+   "hp": 7,
+   "rarity": "Legendaria",
+   "type": "tropa",
+   "size": 2
+  },
+  {
+   "id": "sech-thresh",
+   "name": "Sech Thresh",
+   "person": "Sech",
+   "themes": [
+    "Lol",
+    "Comebacker"
+   ],
+   "cost": 1,
+   "atk": 3,
+   "hp": 3,
+   "rarity": "Común",
+   "type": "tropa",
+   "size": 1
+  },
+  {
+   "id": "sech-duo",
+   "name": "Sech Dúo",
+   "person": "Sech",
+   "themes": [
+    "Dúo Inseparable",
+    "Tilt"
+   ],
+   "cost": 5,
+   "atk": 5,
+   "hp": 5,
+   "rarity": "Legendaria",
+   "type": "tropa",
+   "size": 3
+  },
+  {
+   "id": "sech",
+   "name": "Sech",
+   "person": "Sech",
+   "themes": [
+    "Trabajo",
+    "Pelayos"
+   ],
+   "cost": 4,
+   "atk": 5,
+   "hp": 7,
+   "rarity": "Legendaria",
+   "type": "tropa",
+   "size": 2
+  },
+  {
+   "id": "sech-koisito",
+   "name": "Sech Koisito",
+   "person": "Sech",
+   "themes": [
+    "Pokémon",
+    "KOI"
+   ],
+   "cost": 4,
+   "atk": 5,
+   "hp": 7,
+   "rarity": "Rara",
+   "type": "tropa",
+   "size": 2
+  },
+  {
+   "id": "petea-koisito",
+   "name": "Petea Koisito",
+   "person": "Petea",
+   "themes": [
+    "Lol",
+    "KOI"
+   ],
+   "cost": 2,
+   "atk": 3,
+   "hp": 5,
+   "rarity": "Rara",
+   "type": "tropa",
+   "size": 1
+  },
+  {
+   "id": "petea-pokemaniaco",
+   "name": "Petea Pokemaniaco",
+   "person": "Petea",
+   "themes": [
+    "Pokémon"
+   ],
+   "cost": 3,
+   "atk": 5,
+   "hp": 7,
+   "rarity": "Común",
+   "type": "tropa",
+   "size": 2
+  },
+  {
+   "id": "computer-petea",
+   "name": "Computer Petea",
+   "person": "Petea",
+   "themes": [
+    "Comebacker",
+    "Informático"
+   ],
+   "cost": 4,
+   "atk": 5,
+   "hp": 7,
+   "rarity": "Común",
+   "type": "tropa",
+   "size": 2
+  },
+  {
+   "id": "computer-hellbramn",
+   "name": "Computer Hellbramn",
+   "person": "Hellbramn",
+   "themes": [
+    "Informático",
+    "Trabajo"
+   ],
+   "cost": 1,
+   "atk": 3,
+   "hp": 3,
+   "rarity": "Común",
+   "type": "tropa",
+   "size": 1
+  },
+  {
+   "id": "hellbramn",
+   "name": "Hellbramn",
+   "person": "Hellbramn",
+   "themes": [
+    "Pokémon",
+    "Voley"
+   ],
+   "cost": 3,
+   "atk": 4,
+   "hp": 6,
+   "rarity": "Rara",
+   "type": "tropa",
+   "size": 2
+  },
+  {
+   "id": "potango",
+   "name": "PotAnGo",
+   "person": "Hellbramn",
+   "themes": [
+    "Novia",
+    "Pueblo"
+   ],
+   "cost": 3,
+   "atk": 3,
+   "hp": 7,
+   "rarity": "Legendaria",
+   "type": "tropa",
+   "size": 2
+  },
+  {
+   "id": "mertens",
+   "name": "Mertens",
+   "person": "Mertens",
+   "themes": [
+    "Pokémon",
+    "Voley"
+   ],
+   "cost": 2,
+   "atk": 3,
+   "hp": 5,
+   "rarity": "Rara",
+   "type": "tropa",
+   "size": 1
+  },
+  {
+   "id": "mertens-prime",
+   "name": "Mertens PRIME",
+   "person": "Mertens",
+   "themes": [
+    "Pueblo",
+    "NINI"
+   ],
+   "cost": 5,
+   "atk": 3,
+   "hp": 7,
+   "rarity": "Legendaria",
+   "type": "tropa",
+   "size": 3
+  },
+  {
+   "id": "computer-chipy",
+   "name": "Computer Chipy",
+   "person": "Chipy",
+   "themes": [
+    "Informático",
+    "Trabajo"
+   ],
+   "cost": 1,
+   "atk": 3,
+   "hp": 3,
+   "rarity": "Común",
+   "type": "tropa",
+   "size": 1
+  },
+  {
+   "id": "chipy-correa",
+   "name": "Chipy Correa",
+   "person": "Chipy",
+   "themes": [
+    "Anime",
+    "Novia"
+   ],
+   "cost": 3,
+   "atk": 3,
+   "hp": 7,
+   "rarity": "Épica",
+   "type": "tropa",
+   "size": 2
+  },
+  {
+   "id": "chipy-lloron",
+   "name": "Chipy Llorón",
+   "person": "Chipy",
+   "themes": [
+    "Pelayos",
+    "Tilt"
+   ],
+   "cost": 5,
+   "atk": 5,
+   "hp": 5,
+   "rarity": "Legendaria",
+   "type": "tropa",
+   "size": 3
+  },
+  {
+   "id": "pampert-friki",
+   "name": "Pampert Friki",
+   "person": "Pampert",
+   "themes": [
+    "Lol",
+    "Anime"
+   ],
+   "cost": 2,
+   "atk": 3,
+   "hp": 5,
+   "rarity": "Rara",
+   "type": "tropa",
+   "size": 1
+  },
+  {
+   "id": "pampert",
+   "name": "Pampert",
+   "person": "Pampert",
+   "themes": [
+    "Voley",
+    "Pokémon"
+   ],
+   "cost": 3,
+   "atk": 4,
+   "hp": 6,
+   "rarity": "Rara",
+   "type": "tropa",
+   "size": 2
+  },
+  {
+   "id": "pampert-koisito",
+   "name": "Pampert Koisito",
+   "person": "Pampert",
+   "themes": [
+    "KOI",
+    "Comebacker"
+   ],
+   "cost": 3,
+   "atk": 4,
+   "hp": 6,
+   "rarity": "Rara",
+   "type": "tropa",
+   "size": 2
+  }
+ ],
+ "actions": [
+  {
+   "id": "refuerzo",
+   "name": "Refuerzo",
+   "cost": 1,
+   "rarity": "Común",
+   "type": "accion",
+   "size": 1,
+   "target": "ally",
+   "text": "Una tropa aliada gana +2 de ataque esta ronda."
+  },
+  {
+   "id": "escudo",
+   "name": "Escudo",
+   "cost": 1,
+   "rarity": "Común",
+   "type": "accion",
+   "size": 1,
+   "target": "ally",
+   "text": "Una tropa aliada gana +3 de vida esta ronda."
+  },
+  {
+   "id": "zancadilla",
+   "name": "Zancadilla",
+   "cost": 2,
+   "rarity": "Común",
+   "type": "accion",
+   "size": 1,
+   "target": "enemy",
+   "text": "Una tropa rival pierde 2 de ataque esta ronda."
+  },
+  {
+   "id": "cafe",
+   "name": "Café",
+   "cost": 1,
+   "rarity": "Común",
+   "type": "accion",
+   "size": 1,
+   "target": "none",
+   "text": "Ganas 2 de oro ahora."
+  }
+ ],
+ "themes": {
+  "Pokémon": {
+   "th": [
+    2,
+    4,
+    6
+   ],
+   "color": "#ff5a5f",
+   "tx": [
+    "Cada ronda se abre una bola (70% Pokéball, 25% Superball, 5% Ultraball): +1/+1, +2/+2 o +3/+3 a las Pokémon.",
+    "Probabilidades 45% / 40% / 15%.",
+    "Probabilidades 25% / 45% / 30%."
+   ]
+  },
+  "Comebacker": {
+   "th": [
+    2,
+    4,
+    6
+   ],
+   "color": "#f59e0b",
+   "tx": [
+    "Si la suma de vida máxima de tus tropas es menor que la del rival: +1 ataque a las Comebacker.",
+    "+2 ataque a las Comebacker.",
+    "+2 ataque a las Comebacker y +1 al resto."
+   ]
+  },
+  "Lol": {
+   "th": [
+    2,
+    4,
+    6
+   ],
+   "color": "#38bdf8",
+   "tx": [
+    "No se pueden retirar. Cada golpe: +1 ataque (tope +4).",
+    "Cada golpe: +1 ataque y +1 vida (tope +6).",
+    "Cada golpe: +2 ataque y +2 vida (tope +8)."
+   ]
+  },
+  "Informático": {
+   "th": [
+    2,
+    4,
+    6
+   ],
+   "color": "#22d3ee",
+   "tx": [
+    "Las cartas Rara o superior salen el doble de probable en la tienda.",
+    "Además: una actualización gratis por tienda.",
+    "Además: eliges a dedo una carta de tu mazo como oferta extra."
+   ]
+  },
+  "Trabajo": {
+   "th": [
+    2,
+    4,
+    6
+   ],
+   "color": "#a3a3a3",
+   "tx": [
+    "Con una Trabajo en mesa: +1 oro cada 2 rondas.",
+    "+1 oro por ronda.",
+    "+1 oro por ronda y +2 al abrir cada tienda."
+   ]
+  },
+  "Anime": {
+   "th": [
+    2,
+    3,
+    4
+   ],
+   "color": "#f472b6",
+   "tx": [
+    "Al final de ronda, 1 Anime puede ceder su ataque o su vida máxima a otra.",
+    "2 Anime pueden ceder.",
+    "3 Anime pueden ceder."
+   ]
+  },
+  "KOI": {
+   "th": [
+    2,
+    3,
+    4
+   ],
+   "color": "#fb923c",
+   "tx": [
+    "Cuando muere una KOI, tus tropas vivas ganan +1 ataque en ese combate.",
+    "+2 ataque.",
+    "+3 ataque."
+   ]
+  },
+  "Voley": {
+   "th": [
+    2,
+    3,
+    4
+   ],
+   "color": "#facc15",
+   "tx": [
+    "Cada ronda eliges por tropa: atacar (+1 ataque) o defender (-1 daño recibido).",
+    "Atacar +2, defender -1.",
+    "Atacar +3, defender -2."
+   ]
+  },
+  "Novia": {
+   "th": [
+    2,
+    3,
+    4
+   ],
+   "color": "#fb7185",
+   "tx": [
+    "Al empezar el combate: 60% te apoya (+1/+1 a todas) y 40% te regaña (-1/-1).",
+    "75% apoya +2/+2, regaña -1/-1.",
+    "90% apoya +3/+3, regaña -1/-1."
+   ]
+  },
+  "Tilt": {
+   "th": [
+    2,
+    3,
+    4
+   ],
+   "color": "#ef4444",
+   "tx": [
+    "Cada vez que recibe daño gana +1 ataque; si pierdes la ronda, +1 permanente.",
+    "+1 por golpe, +2 permanente.",
+    "+2 por golpe, +2 permanente."
+   ]
+  },
+  "Pueblo": {
+   "th": [
+    2,
+    3
+   ],
+   "color": "#84cc16",
+   "tx": [
+    "Cada ronda: +1/+1 permanente a las Pueblo (tope +4/+4).",
+    "Cada ronda: +2/+2 permanente (tope +8/+8)."
+   ]
+  },
+  "Dúo Inseparable": {
+   "th": [
+    2
+   ],
+   "color": "#c084fc",
+   "tx": [
+    "Las dos tropas Dúo en mesa ganan +3/+3 y, si una muere, la otra gana +2 ataque."
+   ]
+  },
+  "NINI": {
+   "th": [
+    2
+   ],
+   "color": "#94a3b8",
+   "tx": [
+    "Sin ninguna Trabajo en mesa ni mano, las NINI ganan +2/+2 por ronda (tope +8/+8)."
+   ]
+  },
+  "Pelayos": {
+   "th": [
+    2
+   ],
+   "color": "#2dd4bf",
+   "tx": [
+    "Atacan siempre las últimas y ganan como vida máxima y ataque la mitad del daño que hacen (tope +10/+10)."
+   ]
+  }
+ }
+};
+if(typeof module!=="undefined"&&module.exports)module.exports=D;else root.CARTAS=D;
+})(typeof window!=="undefined"?window:globalThis);

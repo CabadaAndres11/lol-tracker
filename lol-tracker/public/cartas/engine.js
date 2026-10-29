@@ -343,6 +343,9 @@
   }
   function frame(s, text, hl) { s.frames.push({ text: text, view: viewOf(s), hl: hl || null }); say(s, text); }
 
+  function fxFrame(s, p, type, title, sub, uids, neg) {
+    frame(s, (p === 0 ? '' : 'Rival · ') + title + (sub ? ' ' + sub : ''), { fx: { type: type, side: p, title: title, sub: sub || '', uids: uids || [], neg: !!neg } });
+  }
   function grow(i, stat, n) {
     if (stat === 'atk') i.perm.atk += n;
     else { i.perm.hp += n; i.hp += n; }
@@ -356,8 +359,11 @@
       // Dúo
       if ((t['Dúo Inseparable'] || 0) >= 1) {
         var duos = troops.filter(function (i) { return has(i, 'Dúo Inseparable'); });
-        duos.forEach(function (i) { i.tmp.atk += FX.duo.stat; i.tmp.hp += FX.duo.stat; i.hp += FX.duo.stat; });
-        if (duos.length) say(s, 'Dúo Inseparable: +3/+3 a ' + duos.length + ' tropa(s).');
+        if (duos.length >= 2) {
+          duos.forEach(function (i) { i.tmp.atk += FX.duo.stat; i.tmp.hp += FX.duo.stat; i.hp += FX.duo.stat; });
+          fxFrame(s, p, 'duo', 'Dúo Inseparable', '+' + FX.duo.stat + '/+' + FX.duo.stat, duos.map(function (i) { return i.uid; }));
+        }
+
       }
       // Pokémon: bola
       if (t['Pokémon']) {
@@ -367,7 +373,8 @@
         s.lastBall[p] = ball;
         var b = FX.pokemon.bonus[ball];
         pk.forEach(function (i) { i.tmp.atk += b; i.tmp.hp += b; i.hp += b; });
-        if (pk.length) say(s, (p === 0 ? 'Tu ' : 'La ') + FX.pokemon.names[ball] + (p === 0 ? '' : ' rival') + ': +' + b + '/+' + b + ' a las Pokémon.');
+        if (pk.length) fxFrame(s, p, 'pokemon', FX.pokemon.names[ball], '+' + b + '/+' + b + ' a las Pokémon', pk.map(function (i) { return i.uid; }));
+        if (pk.length) s.frames[s.frames.length - 1].hl.fx.ball = ball;
       }
       // Novia
       if (t['Novia'] && troops.length) {
@@ -380,30 +387,37 @@
             if (dh > 0) { i.tmp.hp -= dh; i.hp = Math.min(i.hp, maxHp(i)); }
           }
         });
-        say(s, up ? (p === 0 ? 'Tu novia te apoya' : 'La novia rival le apoya') + ': +' + FX.novia.up[nt] + '/+' + FX.novia.up[nt] + ' a todas.' : (p === 0 ? 'Tu novia te regaña' : 'La novia rival le regaña') + ': -1/-1 a todas.');
+        fxFrame(s, p, 'novia', up ? '¡Tu novia te apoya!' : '¡Tu novia te regaña!', up ? '+' + FX.novia.up[nt] + '/+' + FX.novia.up[nt] + ' a todas' : '-1/-1 a todas', troops.map(function (i) { return i.uid; }), !up);
       }
       // Pueblo
       if (t['Pueblo']) {
         var pt = t['Pueblo'] - 1;
+        var pu = [];
         troops.filter(function (i) { return has(i, 'Pueblo'); }).forEach(function (i) {
           var g = Math.min(FX.pueblo.per[pt], FX.pueblo.cap[pt] - i.caps.pueblo);
-          if (g > 0) { i.caps.pueblo += g; grow(i, 'atk', g); grow(i, 'hp', g); }
+          if (g > 0) { i.caps.pueblo += g; grow(i, 'atk', g); grow(i, 'hp', g); pu.push(i.uid); }
         });
+        if (pu.length) fxFrame(s, p, 'pueblo', 'El pueblo crece', '+' + FX.pueblo.per[pt] + '/+' + FX.pueblo.per[pt] + ' permanente', pu);
       }
       // NINI
       if (t['NINI'] && !hasWork(P)) {
+        var ni = [];
         troops.filter(function (i) { return has(i, 'NINI'); }).forEach(function (i) {
           var g = Math.min(FX.nini.per, FX.nini.cap - i.caps.nini);
-          if (g > 0) { i.caps.nini += g; grow(i, 'atk', g); grow(i, 'hp', g); }
+          if (g > 0) { i.caps.nini += g; grow(i, 'atk', g); grow(i, 'hp', g); ni.push(i.uid); }
         });
+        if (ni.length) fxFrame(s, p, 'nini', 'Sin trabajo, sin problemas', '+' + FX.nini.per + '/+' + FX.nini.per + ' permanente', ni);
       }
       // Voley
       if (t['Voley']) {
         var vt = t['Voley'] - 1;
+        var vo = [], vd = 0, va = 0;
         troops.filter(function (i) { return has(i, 'Voley'); }).forEach(function (i) {
           var mode = P.voley[i.uid] || 'atk';
-          if (mode === 'atk') i.tmp.atk += FX.voley.atk[vt]; else i.tmp.red += FX.voley.red[vt];
+          if (mode === 'atk') { i.tmp.atk += FX.voley.atk[vt]; va++; } else { i.tmp.red += FX.voley.red[vt]; vd++; }
+          vo.push(i.uid);
         });
+        if (vo.length) fxFrame(s, p, 'voley', 'Voley', (va ? '+' + FX.voley.atk[vt] + ' ataque en ' + va : '') + (va && vd ? ' · ' : '') + (vd ? '-' + FX.voley.red[vt] + ' daño recibido en ' + vd : ''), vo);
       }
     });
     // Comebacker (con los números ya modificados)
@@ -417,7 +431,7 @@
           if (has(i, 'Comebacker')) i.tmp.atk += FX.comebacker.atk[ct];
           else if (FX.comebacker.others[ct]) i.tmp.atk += FX.comebacker.others[ct];
         });
-        say(s, (p === 0 ? 'Remontada' : 'Remontada del rival') + ': +' + FX.comebacker.atk[ct] + ' de ataque a las Comebacker.');
+        fxFrame(s, p, 'comeback', '¡Remontada!', '+' + FX.comebacker.atk[ct] + ' ataque a las Comebacker', mesaTroops(s.p[p]).filter(function (i) { return has(i, 'Comebacker'); }).map(function (i) { return i.uid; }));
       }
     });
   }
@@ -453,16 +467,16 @@
     s.shopOpen = false;
     s.frames = [];
     aiTargets(s, 1);
-    startEffects(s);
     frame(s, 'Empieza el combate. ' + (s.first === 0 ? 'Atacas primero.' : 'Ataca primero el rival.'), null);
+    startEffects(s);
     var seq = order(s);
     for (var n = 0; n < seq.length && !s.over; n++) {
       var a = seq[n];
       if (a.dead) continue;
       var P = s.p[a.owner], E = s.p[1 - a.owner], foes = mesaTroops(E);
-      var tgt = null;
+      var tgt = null, retarget = false;
       if (P.target[a.uid]) tgt = foes.filter(function (f) { return f.uid === P.target[a.uid]; })[0] || null;
-      if (!tgt && foes.length) tgt = foes[Math.floor(s.rng() * foes.length)];
+      if (!tgt && foes.length) { tgt = foes[Math.floor(s.rng() * foes.length)]; retarget = !!P.target[a.uid]; }
       var dmg = atk(a);
       if (!tgt) {
         E.life -= dmg;
@@ -470,9 +484,9 @@
         if (E.life <= 0) { s.over = true; s.phase = 'over'; s.winner = a.owner; s.reason = 'Vida a cero.'; break; }
         continue;
       }
-      var real = Math.max(0, dmg - tgt.tmp.red);
+      var fxk = null, real = Math.max(0, dmg - tgt.tmp.red);
       tgt.hp -= real;
-      var line = card(a).name + ' ataca a ' + card(tgt).name + ': ' + real + ' de daño' + (tgt.tmp.red && real < dmg ? ' (reducido)' : '') + '.';
+      var line = card(a).name + (retarget ? ' (su objetivo ya cayó) ataca a ' : ' ataca a ') + card(tgt).name + ': ' + real + ' de daño' + (tgt.tmp.red && real < dmg ? ' (reducido)' : '') + '.';
       if (real > 0) {
         var ta = s.tiers[a.owner], tt = s.tiers[tgt.owner];
         if (has(a, 'Lol') && ta['Lol']) {
@@ -495,12 +509,15 @@
           var kb = FX.koi.atk[tt2['KOI'] - 1];
           mesaTroops(E).forEach(function (i) { i.tmp.atk += kb; });
           line += ' KOI anima al equipo: +' + kb + ' de ataque.';
+          fxk = { type: 'koi', side: tgt.owner, title: '¡KOI anima al equipo!', sub: '+' + kb + ' ataque', uids: mesaTroops(E).map(function (i) { return i.uid; }), neg: false };
         }
         if (has(tgt, 'Dúo Inseparable') && tt2['Dúo Inseparable']) {
-          mesaTroops(E).filter(function (i) { return has(i, 'Dúo Inseparable'); }).forEach(function (i) { i.tmp.atk += FX.duo.death; });
+          var dd = mesaTroops(E).filter(function (i) { return has(i, 'Dúo Inseparable'); });
+          dd.forEach(function (i) { i.tmp.atk += FX.duo.death; });
+          if (dd.length && !fxk) fxk = { type: 'duo', side: tgt.owner, title: 'Su dúo se ha roto', sub: '+' + FX.duo.death + ' ataque', uids: dd.map(function (i) { return i.uid; }), neg: false };
         }
       }
-      frame(s, line, { att: a.uid, tgt: tgt.uid, dmg: real });
+      frame(s, line, { att: a.uid, tgt: tgt.uid, dmg: real, retarget: retarget, fx: fxk });
     }
     if (!s.over) {
       // Tilt: si pierdes la ronda (menos tropas vivas), parte del ataque se queda
@@ -512,7 +529,7 @@
             var g = Math.min(FX.tilt.perm[t['Tilt'] - 1], FX.tilt.cap - i.caps.tilt);
             if (g > 0) { i.caps.tilt += g; grow(i, 'atk', g); }
           });
-          say(s, 'Tilt: las tropas enfadadas conservan ataque tras perder la ronda.');
+          fxFrame(s, p, 'tilt', 'Tilt', 'conservan ataque tras perder la ronda', mesaTroops(s.p[p]).filter(function (i) { return has(i, 'Tilt'); }).map(function (i) { return i.uid; }));
         }
       });
       cleanup(s);
@@ -581,6 +598,7 @@
 
   // ---------- Utilidades para la interfaz ----------
   var API = {
+    _mk: mk, _startEffects: startEffects, _tiers: tiers,
     CFG: CFG, FX: FX, CARD: CARD, DATA: DATA,
     newGame: newGame, randomDeck: randomDeck, deckSize: deckSize, mulberry32: mulberry32,
     place: place, playAction: playAction, setTarget: setTarget, clearTargets: clearTargets, setVoley: setVoley,

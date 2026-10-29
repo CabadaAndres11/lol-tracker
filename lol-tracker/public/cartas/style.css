@@ -97,7 +97,7 @@ svg.arrows .ln.hit { stroke-dasharray: none; stroke-width: 5; stroke: #fbbf24; }
 .synside { position: sticky; top: .6rem; }
 .synlist { display: flex; flex-direction: column; gap: .35rem; }
 .syn-row { position: relative; display: flex; align-items: center; gap: .6rem; padding: .35rem .5rem; border-radius: 12px; background: rgba(255,255,255,.04); border: 1px solid var(--line); opacity: .65; }
-.syn-row.t1, .syn-row.t2, .syn-row.t3 { opacity: 1; border-color: var(--tc); background: linear-gradient(90deg, rgba(255,255,255,.08), rgba(255,255,255,.03)); }
+.syn-row.t1, .syn-row.t2, .syn-row.t3 { border-color: var(--tc); background: linear-gradient(90deg, rgba(255,255,255,.08), rgba(255,255,255,.03)); }
 .hexa { width: 38px; height: 42px; flex: none; display: grid; place-items: center; background: var(--tc); clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%); color: #0d0a18; font-weight: 900; font-size: 1.1rem; }
 .syn-row:not(.t1):not(.t2):not(.t3) .hexa { background: #3d3560; color: #cfc6ee; }
 .si { flex: 1; min-width: 0; } .si b { font-size: .85rem; display: block; }
@@ -266,3 +266,51 @@ body.shopbg { background: radial-gradient(ellipse 90% 60% at 50% 0, #7a4a12 0, #
 .splash.k-combat .band { background: linear-gradient(90deg, rgba(127,29,29,.9), rgba(220,38,38,.9), rgba(127,29,29,.9)); border-color: #fecaca; color: #fff; }
 .splash.k-end .band { background: linear-gradient(90deg, rgba(46,16,101,.92), rgba(109,40,217,.92), rgba(46,16,101,.92)); border-color: #c4b5fd; color: #fff; }
 @keyframes splash { 0% { opacity: 0; transform: scale(.7) translateX(-6%); } 18% { opacity: 1; transform: scale(1) translateX(0); } 78% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(1.06) translateX(4%); } }
+
+/* ======== v5: efectos de temáticas, números flotantes, arrastrar a la mano ======== */
+.handwrap.dropzone { outline: 3px dashed var(--acc); outline-offset: 4px; background: rgba(167,139,250,.1); border-radius: 16px; }
+.shopmode .row4.side0 .card { touch-action: none; cursor: grab; }
+/* Deltas permanentes sobre los círculos */
+.dl { position: absolute; bottom: 17cqw; font-style: normal; font-weight: 900; font-size: 9cqw; padding: 0 2.6cqw; border-radius: 999px; z-index: 3; border: .8cqw solid #1a1030; line-height: 1.35; }
+.dl.a { left: 0; } .dl.h { right: 0; }
+.dl.pos { background: #fde047; color: #3a2600; } .dl.neg { background: #f87171; color: #3b0a0a; }
+/* Cartas afectadas por un efecto */
+.card.buffed { animation: buffp 1.1s ease-in-out; box-shadow: 0 0 0 3px #4ade80, 0 0 26px #4ade80 !important; }
+.card.debuffed { animation: buffp 1.1s ease-in-out; box-shadow: 0 0 0 3px #f87171, 0 0 26px #f87171 !important; filter: saturate(.7); }
+@keyframes buffp { 0% { transform: scale(1); } 25% { transform: translateY(-10px) scale(1.1); } 60% { transform: translateY(-4px) scale(1.05); } 100% { transform: none; } }
+/* Números flotantes */
+.flt { position: absolute; left: 50%; top: 30%; transform: translateX(-50%); z-index: 30; white-space: nowrap; font-weight: 900; font-size: 15cqw; pointer-events: none; text-shadow: 0 2px 0 #000, 0 0 8px #000; animation: flt 1.2s ease-out both; }
+.orb .flt { font-size: 1.4rem; top: -10%; }
+.flt.pos { color: #4ade80; } .flt.neg { color: #f87171; } .flt.dmg { color: #ff4d4d; font-size: 20cqw; } .flt.info { color: #fde68a; font-size: 8cqw; top: -8%; white-space: normal; text-align: center; width: 120%; }
+.orb .flt.dmg { font-size: 1.7rem; }
+@keyframes flt { 0% { opacity: 0; transform: translate(-50%, 10px) scale(.6); } 15% { opacity: 1; transform: translate(-50%, -6px) scale(1.25); } 75% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -46px) scale(1); } }
+/* Cartel de efecto sobre una fila */
+.fxb { position: absolute; z-index: 40; transform: translate(-50%, -50%); text-align: center; pointer-events: none; animation: fxpop 1.2s ease both; padding: .5rem 1.2rem; border-radius: 18px; background: rgba(10,6,24,.82); border: 2px solid #4ade80; box-shadow: 0 0 40px rgba(74,222,128,.45); min-width: 190px; }
+.fxb.neg { border-color: #f87171; box-shadow: 0 0 40px rgba(248,113,113,.45); }
+.fxb.t-pokemon { animation-duration: 1.7s; border-color: #fff; box-shadow: 0 0 50px rgba(255,255,255,.35); }
+.fxi { font-size: 2.6rem; line-height: 1.1; animation: fxbounce .8s ease; } .fxt { font-weight: 800; font-size: 1.05rem; } .fxs { font-size: .82rem; color: #d8cfff; }
+@keyframes fxpop { 0% { opacity: 0; transform: translate(-50%, -50%) scale(.5); } 14% { opacity: 1; transform: translate(-50%, -50%) scale(1.08); } 22% { transform: translate(-50%, -50%) scale(1); } 85% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -62%) scale(1); } }
+@keyframes fxbounce { 0% { transform: scale(.2) rotate(-30deg); } 60% { transform: scale(1.25) rotate(8deg); } 100% { transform: scale(1); } }
+/* Pokébolas */
+.pball { position: relative; width: 70px; height: 70px; margin: 0 auto .3rem; border-radius: 50%; border: 4px solid #17171f; overflow: hidden; box-shadow: 0 6px 14px rgba(0,0,0,.6); background: linear-gradient(#e11d2f 0 45%, #17171f 45% 55%, #f4f4f6 55%); animation: ball 1.6s ease-in-out both; }
+.pball::after { content: ''; position: absolute; left: 50%; top: 50%; width: 20px; height: 20px; transform: translate(-50%, -50%); border-radius: 50%; background: #fff; border: 4px solid #17171f; }
+.pball.k1 { background: linear-gradient(#2563eb 0 45%, #17171f 45% 55%, #f4f4f6 55%); }
+.pball.k1::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 18% 22%, #e11d2f 0 9px, transparent 10px), radial-gradient(circle at 82% 22%, #e11d2f 0 9px, transparent 10px); }
+.pball.k2 { background: linear-gradient(#26262e 0 45%, #17171f 45% 55%, #f4f4f6 55%); }
+.pball.k2::before { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent 20%, #fbbf24 20% 30%, transparent 30% 70%, #fbbf24 70% 80%, transparent 80%); clip-path: inset(0 0 55% 0); }
+@keyframes ball {
+  0% { transform: translateY(-120px) rotate(-540deg) scale(.4); opacity: 0; } 22% { transform: translateY(0) rotate(0) scale(1); opacity: 1; }
+  30% { transform: translateY(-22px); } 38% { transform: translateY(0); }
+  48% { transform: rotate(-24deg); } 56% { transform: rotate(22deg); } 64% { transform: rotate(-18deg); } 72% { transform: rotate(0); }
+  84% { transform: scale(1.5); filter: brightness(2.2); } 100% { transform: scale(1.1); filter: none; }
+}
+.pring { position: absolute; left: 50%; top: 32px; width: 40px; height: 40px; border-radius: 50%; border: 4px solid #fff; transform: translate(-50%, -50%) scale(.2); opacity: 0; animation: ring 1.7s ease-out both; }
+@keyframes ring { 0%, 76% { opacity: 0; transform: translate(-50%, -50%) scale(.2); } 80% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -50%) scale(6); } }
+/* Tooltips siempre por encima y opacos */
+.syn-row { opacity: 1; }
+.syn-row.t0 .hexa, .syn-row.t0 .si, .syn-row.t0 .need { opacity: .55; }
+.syn-row:hover, .syn-row:focus, .thm:hover, .thm:focus { z-index: 80; }
+.tip { z-index: 90; background: #0b0816; opacity: 1; }
+.gl { position: relative; z-index: 60; }
+.side-themes { position: relative; z-index: 60; }
+.synside { position: relative; top: auto; }

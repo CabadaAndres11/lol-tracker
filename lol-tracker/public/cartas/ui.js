@@ -33,6 +33,9 @@
     if (troop) {
       var a = o.atk != null ? o.atk : c.atk, hp = o.hp != null ? o.hp : c.hp, mx = o.max != null ? o.max : hp;
       h += '<div class="mono">' + esc(c.person.charAt(0)) + '</div><div class="tags">' + c.themes.map(tagHtml).join('') + '</div>';
+      var dA = a - c.atk, dH = mx - c.hp;
+      if (dA) h += '<i class="dl a ' + (dA > 0 ? 'pos' : 'neg') + '">' + (dA > 0 ? '+' : '') + dA + '</i>';
+      if (dH) h += '<i class="dl h ' + (dH > 0 ? 'pos' : 'neg') + '">' + (dH > 0 ? '+' : '') + dH + '</i>';
       h += '<span class="sc a' + (a > c.atk ? ' up' : '') + '" title="Ataque"><b>' + a + '</b></span><span class="sc h' + (mx > c.hp ? ' up' : '') + (hp < mx ? ' low' : '') + '" title="Vida' + (hp < mx ? ' (' + hp + '/' + mx + ')' : '') + '"><b>' + hp + '</b></span>';
     } else {
       h += '<div class="mono ico">' + (AICON[c.id] || '✨') + '</div><div class="adesc">' + esc(c.text) + '</div>';
@@ -174,9 +177,9 @@
     ui.screen = 'game'; ui.sel = null; ui.view = null; ui.playing = false; ui.hint = ''; ui.landed = null; ui.busy = false;
     announce(); render();
   }
-  function orb(kind, val, max, label) {
+  function orb(kind, val, max, label, idx) {
     var p = max ? Math.max(0, Math.min(100, val / max * 100)) : 100;
-    return '<div class="orb ' + kind + '" style="--p:' + p + '%" title="' + label + '"><b>' + Math.max(0, val) + '</b><span>' + label + '</span></div>';
+    return '<div class="orb ' + kind + '" data-orb="' + (idx == null ? '' : idx) + '" style="--p:' + p + '%" title="' + label + '"><b>' + Math.max(0, val) + '</b><span>' + label + '</span></div>';
   }
   function synergyHtml(P) {
     var c = E.themeCounts(P), keys = Object.keys(c).sort(function (a, b) { return E.tierOf(b, c[b]) - E.tierOf(a, c[a]) || c[b] - c[a]; });
@@ -205,6 +208,7 @@
       if (ui.hl && ui.hl.att === v.uid) o.cls += ' atk';
       if (ui.hl && ui.hl.tgt === v.uid) o.cls += ' hit';
       if (ui.landed === v.uid) o.cls += ' landed';
+      if (ui.hl && ui.hl.fx && ui.hl.fx.uids.indexOf(v.uid) >= 0) o.cls += ui.hl.fx.neg ? ' debuffed' : ' buffed';
       o.attrs = 'data-cuid="' + v.uid + '" data-side="' + side + '"';
       if (mine) {
         var P0 = s.p[0], pending = prep && E.pendingTargets(s).some(function (x) { return x.uid === v.uid; });
@@ -233,7 +237,7 @@
     var pend = prep ? E.pendingTargets(s).length : 0, hasT = Object.keys(P.target).length > 0;
     var h = '<div class="gwrap' + (shopMode ? ' shopmode' : '') + '"><div class="top"><div><h1>Ronda ' + s.round + ' · ' + (s.shopOpen ? '🛒 Tienda' + (s.round === 1 ? ' inicial' : '') : '⚔ Combate') + (!s.shopOpen ? ' <span class="mut">· ' + (s.first === 0 ? 'atacas primero' : 'ataca primero el rival') + '</span>' : '') + '</h1></div><div><button class="lnk" data-act="menu" data-to="deck">🃏 Mazo</button> · <button class="lnk" data-act="menu" data-to="home">🏠 Menú</button></div></div>';
     h += '<div class="gmain"><aside class="gl">' + synergyHtml(P) + '</aside><section class="gc"><div class="board" id="board">';
-    if (!shopMode) h += '<div class="hud top">' + orb('life', view.life[1], CFG.life, 'Rival') + '</div>' + mesaRow(1, view, s, false) + '<div class="gap"></div>';
+    if (!shopMode) h += '<div class="hud top">' + orb('life', view.life[1], CFG.life, 'Rival', 1) + '</div>' + mesaRow(1, view, s, false) + '<div class="gap"></div>';
     h += mesaRow(0, view, s, true);
     // HUD inferior: vida, oro y acciones
     var acts = '';
@@ -241,16 +245,16 @@
     else if (ui.playing) acts = '<button class="btn sec" data-act="skip">⏩ Saltar animación</button>';
     else if (shop) {
       var any = P.mesa.some(Boolean) || P.hand.length;
-      acts = '<div class="hint">' + esc(ui.hint || (any ? 'Pulsa una carta de la tienda para comprarla.' : 'Compra al menos una tropa.')) + '</div><button class="btn big" data-act="endshop"' + (any ? '' : ' disabled') + '>Terminar tienda ▶</button>';
+      acts = '<div class="hint">' + esc(ui.hint || (any ? 'Pulsa una carta para comprarla. Arrastra una tropa de la mesa a tu mano para retirarla.' : 'Compra al menos una tropa.')) + '</div><button class="btn big" data-act="endshop"' + (any ? '' : ' disabled') + '>Terminar tienda ▶</button>';
     } else if (prep) {
       var msg = ui.hint || (!P.mesa.some(Boolean) ? 'Coloca tropas de tu mano en la mesa.' : pend ? 'Pulsa una tropa tuya y después la rival a la que atacará.' : 'Todos los objetivos elegidos.');
       if (pend && P.mesa.some(Boolean)) msg = (ui.hint ? ui.hint + ' · ' : '') + 'Faltan ' + pend + ' por elegir objetivo.';
       acts = '<div class="hint">' + esc(msg) + '</div><div class="btnrow"><button class="btn big" data-act="fight"' + (pend || (!P.mesa.some(Boolean) && E.mesaTroops(R).length) ? ' disabled' : '') + '>⚔ ¡Combatir!</button><button class="btn sec" data-act="undo"' + (hasT ? '' : ' disabled') + ' title="Quitar todos los objetivos elegidos">↩ Deshacer objetivos</button></div>';
     } else if (s.phase === 'post') acts = ui.busy ? '' : '<div class="hint">Puedes ceder estadísticas Anime antes de seguir.</div><button class="btn big" data-act="next">Continuar ▶</button>';
-    h += '<div class="hud bottom">' + orb('life', view.life[0], CFG.life, 'Tu vida') + orb('gold', P.gold, 0, 'Tu oro') + '<div class="acts">' + acts + '</div></div></div>';
+    h += '<div class="hud bottom">' + orb('life', view.life[0], CFG.life, 'Tu vida', 0) + orb('gold', P.gold, 0, 'Tu oro') + '<div class="acts">' + acts + '</div></div></div>';
 
     // Mano
-    h += '<div class="handwrap"><div class="hl">Tu mano ' + P.hand.length + '/' + CFG.handMax + '</div><div class="hand">';
+    h += '<div class="handwrap' + (ui.dragMesa ? ' dropzone' : '') + '"><div class="hl">Tu mano ' + P.hand.length + '/' + CFG.handMax + '</div><div class="hand">';
     P.hand.forEach(function (i, k) {
       var c = CARD[i.id], sel = ui.sel && (ui.sel.k === 'hand' || ui.sel.k === 'act') && ui.sel.i === k;
       h += '<div class="cw">' + cardHtml(c, { atk: E.atk(i), hp: i.hp, max: E.maxHp(i), cls: 'hcard' + (sel ? ' sel' : ''), attrs: 'data-act="hand" data-i="' + k + '" title="Pulsa o arrastra a la mesa"', tag: 'button' }) + '</div>';
@@ -291,7 +295,7 @@
     document.body.classList.toggle('shopbg', !!shopMode);
     ui.landed = null;
     var lg = document.getElementById('log'); if (lg) lg.scrollTop = lg.scrollHeight;
-    strikeVars(); drawArrows();
+    strikeVars(); drawArrows(); fxBanner(); applyFloats();
   }
 
   // Dirección del golpe durante el combate (la carta se levanta y se lanza contra su objetivo)
@@ -303,6 +307,45 @@
     var dx = rt ? (rt.left + rt.width / 2) - (ra.left + ra.width / 2) : 0;
     var dy = rt ? (rt.top + rt.height / 2) - (ra.top + ra.height / 2) : (a.dataset.side === '0' ? -ra.height : ra.height);
     a.style.setProperty('--dx', (dx * .72) + 'px'); a.style.setProperty('--dy', (dy * .72) + 'px');
+  }
+
+    // ---------- Efectos de temática: cartel, bola, números flotantes ----------
+  var FXICON = { duo: '👯', novia: '💕', pueblo: '🏘️', nini: '🛋️', voley: '🏐', comeback: '🔥', tilt: '😡', koi: '🏆' };
+  function fxBanner() {
+    var fx = ui.playing && ui.hl && ui.hl.fx; if (!fx) return;
+    var b = document.getElementById('board'), row = b && b.querySelector('.row4.side' + fx.side); if (!row) return;
+    var br = b.getBoundingClientRect(), rr = row.getBoundingClientRect(), el = document.createElement('div');
+    el.className = 'fxb t-' + fx.type + (fx.neg ? ' neg' : '');
+    el.style.top = (rr.top - br.top + rr.height / 2) + 'px'; el.style.left = (rr.left - br.left + rr.width / 2) + 'px';
+    var icon = fx.type === 'pokemon' ? '<div class="pball k' + fx.ball + '"></div><div class="pring"></div>' : '<div class="fxi">' + (fx.type === 'novia' && fx.neg ? '😤' : (FXICON[fx.type] || '✨')) + '</div>';
+    el.innerHTML = icon + '<div class="fxt">' + esc(fx.title) + '</div><div class="fxs">' + esc(fx.sub) + '</div>';
+    b.appendChild(el);
+  }
+  function diffFloats(prev, f) {
+    var out = [];
+    function map(v) { var m = {}; v.mesa.forEach(function (row) { row.forEach(function (c) { if (c) m[c.uid] = c; }); }); return m; }
+    if (prev) {
+      var a = map(prev), b = map(f.view);
+      Object.keys(b).forEach(function (u) {
+        var x = a[u], y = b[u]; if (!x) return;
+        var da = y.atk - x.atk, dm = y.max - x.max, parts = [];
+        if (da) parts.push((da > 0 ? '+' : '') + da + '⚔'); if (dm) parts.push((dm > 0 ? '+' : '') + dm + '❤');
+        if (parts.length) out.push({ uid: +u, text: parts.join(' '), cls: (da < 0 || dm < 0) && !(da > 0 || dm > 0) ? 'neg' : 'pos' });
+      });
+    }
+    var hl = f.hl;
+    if (hl && hl.tgt && hl.dmg > 0) out.push({ uid: hl.tgt, text: '-' + hl.dmg, cls: 'dmg', delay: .34 });
+    if (hl && hl.life != null && hl.dmg > 0) out.push({ orb: hl.life, text: '-' + hl.dmg, cls: 'dmg', delay: .3 });
+    if (hl && hl.retarget) out.push({ uid: hl.att, text: '¡Su objetivo había caído!', cls: 'info' });
+    return out;
+  }
+  function applyFloats() {
+    (ui.floats || []).forEach(function (fl) {
+      var el = fl.orb != null ? document.querySelector('[data-orb="' + fl.orb + '"]') : document.querySelector('[data-cuid="' + fl.uid + '"]');
+      if (!el) return;
+      var sp = document.createElement('span'); sp.className = 'flt ' + fl.cls; sp.textContent = fl.text; if (fl.delay) sp.style.animationDelay = fl.delay + 's';
+      el.appendChild(sp);
+    });
   }
 
   // Flechas en parábola (plan en la preparación, golpe actual durante el combate)
@@ -351,17 +394,19 @@
   }
   function play() {
     ui.frames = ui.s.frames.slice(); ui.shown = 0; ui.playing = true; ui.sel = null;
-    clearInterval(timer); step(); timer = setInterval(step, 750);
+    clearTimeout(timer); ui.floats = []; step();
   }
   function step() {
     if (ui.shown >= ui.frames.length) { stopPlay(); return; }
-    var f = ui.frames[ui.shown++];
+    var f = ui.frames[ui.shown++], prev = ui.view || (ui.frames[0] && ui.frames[0].view);
+    ui.floats = diffFloats(prev, f);
     ui.view = f.view; ui.hl = f.hl; render();
+    var fxk = f.hl && f.hl.fx; timer = setTimeout(step, fxk ? (fxk.type === 'pokemon' ? 1700 : 1250) : 780);
     var lg = document.getElementById('log');
     if (lg) lg.innerHTML = '<div class="cur">' + esc(f.text) + '</div>' + ui.frames.slice(0, ui.shown - 1).reverse().slice(0, 7).map(function (x) { return '<div>' + esc(x.text) + '</div>'; }).join('');
   }
   function stopPlay() {
-    clearInterval(timer); timer = null; ui.playing = false; ui.view = null; ui.hl = null;
+    clearTimeout(timer); timer = null; ui.playing = false; ui.view = null; ui.hl = null; ui.floats = [];
     var s = ui.s;
     if (s.phase === 'post' && !s.over && s.p[0].anime <= 0) {
       ui.busy = true;
@@ -389,7 +434,7 @@
     var act = el.dataset.act, s = ui.s, P = s && s.p[0];
     if (act === 'lock') return window.cartasLock();
     if (act === 'nav') {
-      clearInterval(timer); ui.playing = false;
+      clearTimeout(timer); ui.playing = false;
       if (el.dataset.to === 'play') { if (deckError()) { ui.screen = 'deck'; return render(); } saveDeck(); return startGame(); }
       ui.screen = el.dataset.to; ui.msg = ''; window.scrollTo(0, 0); return render();
     }
@@ -413,9 +458,9 @@
     }
     if (act === 'slot-load') { var sl = ui.slots[+el.dataset.i]; if (sl) { ui.deck = sl.ids.slice(); saveDeck(); ui.slotTo = +el.dataset.i; ui.msg = 'Cargado «' + sl.name + '».'; } return renderDeck(); }
     if (act === 'slot-del') { var di = +el.dataset.i; if (ui.slots[di]) { ui.msg = 'Borrado «' + ui.slots[di].name + '».'; ui.slots[di] = null; saveSlots(); } return renderDeck(); }
-    if (act === 'menu') { clearInterval(timer); ui.playing = false; ui.screen = el.dataset.to || 'home'; return render(); }
+    if (act === 'menu') { clearTimeout(timer); ui.playing = false; ui.screen = el.dataset.to || 'home'; return render(); }
     if (act === 'play') { if (deckError()) { ui.screen = 'deck'; return render(); } saveDeck(); return startGame(); }
-    if (act === 'skip') { clearInterval(timer); ui.shown = ui.frames.length; return stopPlay(); }
+    if (act === 'skip') { clearTimeout(timer); ui.shown = ui.frames.length; return stopPlay(); }
     if (!s || ui.playing) return;
 
     if (act === 'fight') { if (E.fight(s) === false) return; ui.sel = null; ui.hint = ''; return play(); }
@@ -468,9 +513,10 @@
   // ---------- Arrastrar cartas de la mano ----------
   var drag = null;
   app.addEventListener('pointerdown', function (e) {
-    var el = e.target.closest('.hand [data-act="hand"]');
-    if (!el || !ui.s || ui.playing || ui.busy || ui.s.phase !== 'prep' || (e.button && e.button > 0)) return;
-    drag = { i: +el.dataset.i, x: e.clientX, y: e.clientY, active: false, ghost: null, w: 0, h: 0 };
+    var el = e.target.closest('.hand [data-act="hand"]'), mel = null;
+    if (!el && ui.s && ui.s.shopOpen) mel = e.target.closest('.row4.side0 [data-act="mine"]');
+    if ((!el && !mel) || !ui.s || ui.playing || ui.busy || ui.s.phase !== 'prep' || (e.button && e.button > 0)) return;
+    drag = { kind: mel ? 'mesa' : 'hand', uid: mel ? +mel.dataset.cuid : 0, i: el ? +el.dataset.i : 0, x: e.clientX, y: e.clientY, active: false, ghost: null, w: 0, h: 0 };
   });
   document.addEventListener('pointermove', function (e) {
     if (!drag) return;
@@ -483,7 +529,19 @@
   document.addEventListener('pointerup', function (e) { if (drag && drag.active) finishDrag(e.clientX, e.clientY); drag = null; });
   document.addEventListener('pointercancel', function () { if (drag && drag.active) cancelDrag(); drag = null; });
   function startDrag() {
-    var s = ui.s, P = s.p[0], inst0 = P.hand[drag.i]; if (!inst0) return false;
+    var s = ui.s, P = s.p[0];
+    if (drag.kind === 'mesa') {
+      var mi = inst(P, drag.uid);
+      if (!mi || E.has(mi, 'Lol')) { ui.hint = mi ? 'Las tropas Lol no se pueden retirar.' : ''; render(); return false; }
+      if (P.hand.length >= CFG.handMax) { ui.hint = 'Tu mano está llena.'; render(); return false; }
+      ui.dragMesa = true; ui.sel = null; ui.hint = 'Suéltala sobre tu mano para retirarla.'; render();
+      var src0 = app.querySelector('.row4.side0 [data-cuid="' + drag.uid + '"]'); if (!src0) return false;
+      var r0 = src0.getBoundingClientRect(); drag.w = r0.width; drag.h = r0.height;
+      var g0 = src0.cloneNode(true); g0.classList.add('ghostcard'); g0.style.width = r0.width + 'px'; g0.style.height = r0.height + 'px';
+      document.body.appendChild(g0); drag.ghost = g0; drag.active = true; src0.classList.add('lifted-src');
+      return true;
+    }
+    var inst0 = P.hand[drag.i]; if (!inst0) return false;
     var c = CARD[inst0.id];
     if (c.type === 'tropa') { if (!P.mesa.some(function (x) { return !x; })) return false; ui.sel = { k: 'hand', i: drag.i }; ui.hint = 'Suéltala sobre un hueco libre.'; }
     else { if (s.shopOpen) return false; ui.sel = { k: c.target === 'none' ? 'hand0' : 'act', i: drag.i }; ui.hint = c.target === 'none' ? 'Suéltala sobre el tablero.' : (c.target === 'ally' ? 'Suéltala sobre una tropa tuya.' : 'Suéltala sobre una tropa rival.'); }
@@ -495,11 +553,16 @@
     return true;
   }
   function moveGhost(x, y) { drag.ghost.style.transform = 'translate(' + (x - drag.w / 2) + 'px,' + (y - drag.h * .6) + 'px) scale(1.14) rotate(-3deg)'; }
-  function cancelDrag() { if (drag.ghost) drag.ghost.remove(); ui.sel = null; ui.hint = ''; render(); }
+  function cancelDrag() { if (drag.ghost) drag.ghost.remove(); ui.sel = null; ui.dragMesa = false; ui.hint = ''; render(); }
   function finishDrag(x, y) {
     var s = ui.s, P = s.p[0]; drag.ghost.style.display = 'none';
     var t = document.elementFromPoint(x, y); drag.ghost.remove(); noClick = Date.now();
     var inst0 = P.hand[drag.i], ok = false;
+    if (drag.kind === 'mesa') {
+      ui.dragMesa = false;
+      if (t && t.closest('.handwrap')) { var sl = P.mesa.findIndex(function (x) { return x && x.uid === drag.uid; }); ok = sl >= 0 && E.retire(s, 0, sl); }
+      ui.sel = null; ui.hint = ok ? '' : 'No se pudo retirar.'; render(); return;
+    }
     if (t && inst0) {
       var c = CARD[inst0.id];
       if (c.type === 'tropa') {
@@ -513,5 +576,6 @@
     render();
   }
 
+  window.CartasUI = ui; window.CartasRender = render; // depuración
   render();
 })();

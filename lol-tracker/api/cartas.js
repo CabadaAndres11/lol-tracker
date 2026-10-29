@@ -56,6 +56,7 @@ function publicUser(u) {
     gamesToday: u.rewardDay === today() ? u.rewardCount : 0,
     maxGamesToday: MAX_GAME_REWARDS_PER_DAY,
     packCost: isAdmin(u) ? 0 : PACK_COST, packSize: PACK_SIZE, dailyCoins: DAILY_COINS,
+    ...(isAdmin(u) ? { admin: true, starters: Object.fromEntries(STARTER_THEMES.map((t) => [t, starterFor(t)])) } : {}),
   };
 }
 const isAdmin = (u) => String(u.name).toLowerCase() === 'admin';

@@ -114,12 +114,17 @@
       '<p class="mut" style="margin:.6rem 0 0">Al crear la cuenta recibes ' + 150 + ' monedas y un mazo inicial a tu elección.</p></div></div>';
   }
   var STARTERS = [['Pokémon', 'beisbol'], ['Informático', 'robot'], ['Trabajo', 'maletin'], ['Lol', 'espadas'], ['Comebacker', 'fuego'], ['KOI', 'trofeo']];
+  function starterCards(act) {
+    return STARTERS.map(function (t) {
+      var th = D.themes[t[0]], n = D.cards.filter(function (c) { return c.themes.indexOf(t[0]) >= 0; }).length;
+      return '<button class="starter" style="--tc:' + th.color + '" data-act="' + act + '" data-t="' + t[0] + '"><span class="si">' + ic(t[1]) + '</span><b>' + t[0] + '</b><span class="mut">' + n + ' tropas · ' + esc(th.tx[0]) + '</span></button>';
+    }).join('');
+  }
+  function adminStarters() {
+    return '<div class="panel adminst"><h2>Mazo inicial (vista de jugador nuevo)</h2><p class="mut">Así lo eligen las cuentas nuevas al registrarse. Al pulsar uno, se carga como tu mazo actual (no cambia tu colección).</p><div class="starters">' + starterCards('adminstarter') + '</div>' + (ui.msg ? '<div class="hint">' + esc(ui.msg) + '</div>' : '') + '</div>';
+  }
   function renderStarter() {
-    app.innerHTML = '<div class="wrap"><div class="loginbox starterbox panel"><h1>Elige tu mazo inicial</h1><p class="mut">Cada mazo gira en torno a una sinergia. Es tu regalo de bienvenida: podrás ampliar tu colección abriendo sobres.</p><div class="starters">' +
-      STARTERS.map(function (t) {
-        var th = D.themes[t[0]], n = D.cards.filter(function (c) { return c.themes.indexOf(t[0]) >= 0; }).length;
-        return '<button class="starter" style="--tc:' + th.color + '" data-act="pickstarter" data-t="' + t[0] + '"><span class="si">' + ic(t[1]) + '</span><b>' + t[0] + '</b><span class="mut">' + n + ' tropas · ' + esc(th.tx[0]) + '</span></button>';
-      }).join('') + '</div>' + (ui.msg ? '<div class="hint" style="color:var(--bad)">' + esc(ui.msg) + '</div>' : '') +
+    app.innerHTML = '<div class="wrap"><div class="loginbox starterbox panel"><h1>Elige tu mazo inicial</h1><p class="mut">Cada mazo gira en torno a una sinergia. Es tu regalo de bienvenida: podrás ampliar tu colección abriendo sobres.</p><div class="starters">' + starterCards('pickstarter') + '</div>' + (ui.msg ? '<div class="hint" style="color:var(--bad)">' + esc(ui.msg) + '</div>' : '') +
       '<button class="btn sec" data-act="backlogin">← Volver</button></div></div>';
   }
   function bpkHtml(cls) {
@@ -132,7 +137,7 @@
     var h = head('packs', '' + ic('regalo') + ' Sobres') + '<div class="packs-grid">' +
       '<div class="panel packbox">' + bpkHtml('') + '<h2>Sobre estándar</h2><p class="mut">' + a.packSize + ' cartas al azar de todo el juego (tropas y acciones). La última siempre es Rara o mejor. Las cartas que ya tengas se cambian por monedas.</p>' +
       '<button class="btn cta big" data-act="openpack"' + (can ? '' : ' disabled') + '>' + (a.packCost ? 'Abrir sobre · ' + a.packCost + ' ' + ic('moneda') + '' : 'Abrir sobre · gratis') + '</button>' + (a.coins < a.packCost ? '<p class="mut">Te faltan ' + (a.packCost - a.coins) + ' monedas.</p>' : '') + (ui.msg ? '<div class="hint" style="color:var(--bad)">' + esc(ui.msg) + '</div>' : '') + '</div>' +
-      '<div class="panel"><h2>Tus monedas</h2><div class="coinbig">' + ic('moneda') + ' ' + a.coins + '</div>' +
+      (a.admin ? adminStarters() : '') + '<div class="panel"><h2>Tus monedas</h2><div class="coinbig">' + ic('moneda') + ' ' + a.coins + '</div>' +
       '<div class="dailybox">' + (a.dailyAvailable ? '<button class="btn" data-act="daily">' + ic('regalo') + ' Recompensa diaria · +' + a.dailyCoins + ' ' + ic('moneda') + '</button>' : '<p class="mut">' + ic('check') + ' Ya cobraste la recompensa de hoy. Vuelve mañana.</p>') + '</div>' +
       '<h2 style="margin-top:1rem">Cómo conseguir monedas</h2><ul class="rules"><li><b>Recompensa diaria:</b> +' + a.dailyCoins + ' ' + ic('moneda') + ' cada día.</li><li><b>Partidas contra la IA:</b> +10 ' + ic('moneda') + ' por partida y +20 ' + ic('moneda') + ' más si ganas (hoy llevas ' + a.gamesToday + '/' + a.maxGamesToday + ' partidas con premio). Las partidas muy cortas no dan monedas.</li><li><b>Cartas repetidas:</b> Común +5, Rara +15, Épica +40, Legendaria +100 ' + ic('moneda') + '.</li></ul></div>' +
       '<div class="panel"><h2>Tu colección</h2><div class="coinbig">' + a.owned.length + ' / ' + total + '</div><div class="meter colm"><i class="on" style="width:' + Math.round(a.owned.length / total * 100) + '%"></i></div><p class="mut">Solo puedes usar en tu mazo las cartas que tienes. Mira cuáles te faltan en la pestaña Mazo.</p>' +
@@ -595,6 +600,11 @@
       if (rn.length < 3 || rn.length > 16) { ui.msg = 'El nombre debe tener entre 3 y 16 caracteres.'; return render(); }
       if (!/^\d{4}$/.test(rp)) { ui.msg = 'El PIN son 4 dígitos.'; return render(); }
       ui.lgPin = rp; ui.msg = ''; ui.screen = 'starter'; return render();
+    }
+    if (act === 'adminstarter') {
+      var ids = (ui.acct.starters && ui.acct.starters[el.dataset.t]) || [], st2 = [], u2 = 0;
+      ids.forEach(function (id) { if (CARD[id] && u2 + CARD[id].size <= CFG.deckBudget) { st2.push(id); u2 += CARD[id].size; } });
+      ui.deck = st2; saveDeck(); ui.msg = 'Mazo inicial «' + el.dataset.t + '» cargado (' + u2 + '/' + CFG.deckBudget + '). Míralo en la pestaña Mazo.'; return render();
     }
     if (act === 'backlogin') { ui.screen = 'login'; ui.lgPin = ''; ui.msg = ''; return render(); }
     if (act === 'login' || act === 'pickstarter') {

@@ -75,10 +75,10 @@
       sec('Objetivo', ['Es un 1 contra 1. Empiezas con <b>12 de vida</b>; gana quien deje la vida del rival a 0.']) +
       sec('Tu mazo', ['El mazo tiene un <b>presupuesto de espacio de ' + CFG.deckBudget + '</b>: las tropas baratas ocupan 1, las medias 2 y las de coste 5 ocupan 3; las acciones ocupan 1. Lo ves en los cuadraditos de la esquina de cada carta.', 'No hay cartas duplicadas en el mazo, pero una misma carta puede salir varias veces en la tienda.', 'Necesitas al menos una tropa <b>Común</b>.']) +
       sec('Cartas', ['El <b>círculo dorado</b> es lo que cuesta comprarla en oro.', 'El <b>círculo naranja</b> es el ataque y el <b>verde</b> la vida.', 'El color de la carta mezcla los de sus temáticas y el borde indica la rareza (gris Común, azul Rara, morado Épica, dorado Legendaria).']) +
-      sec('Primera ronda', ['La partida empieza con una <b>tienda</b>: ambos jugadores tienen <b>6 de oro</b> y solo salen tropas Comunes de tu mazo. Compra, coloca y pulsa «Terminar tienda».']) +
-      sec('Una ronda de combate', ['Cada ronda ganas <b>2 de oro</b> (se reinicia cada partida y es distinto de las monedas de los sobres).', 'Tienes <b>4 huecos en mesa</b> y una <b>mano de 5</b>.', 'En la preparación colocas tropas, juegas acciones y <b>debes elegir objetivo para cada una de tus tropas</b>: no se puede combatir hasta que todas tengan uno. El rival no ve tus objetivos.']) +
-      sec('Tienda', ['Hay tienda <b>cada 3 rondas</b> (rondas 1, 4, 7…). En una ronda de tienda <b>no hay combate</b>.', 'La tienda ofrece 4 cartas al azar de tu propio mazo. Renovar cuesta 1 de oro.', '<b>Solo en las rondas de tienda</b> puedes retirar tropas de la mesa; el resto del tiempo puedes colocar si hay hueco, pero no quitar.', 'Las tropas de coste 5 aparecen a partir de la segunda tienda.']) +
-      sec('Combate', ['Los ataques se resuelven de uno en uno, alternando bandos de izquierda a derecha. Cada tropa ataca <b>una vez por ronda</b>. El bando que empieza se alterna cada ronda.', 'Si el objetivo ya murió, el ataque va a una tropa rival viva al azar.', 'No se puede atacar al jugador directamente: <b>recibes daño solo si todas tus tropas han muerto</b> y a tu rival le quedan tropas por atacar; el daño es igual a su ataque.', 'Al final de la ronda las tropas recuperan toda su vida máxima; las muertas liberan su hueco.', 'Si en una ronda sin tienda no tienes tropas ni en mesa ni en mano, <b>pierdes automáticamente</b>.']) +
+      sec('Primera ronda', ['La partida empieza con una <b>tienda</b>: ambos jugadores tienen <b>6 de oro</b> y solo salen tropas Comunes de tu mazo. Pulsa una carta para comprarla, colócala (pulsando o arrastrándola) y termina la tienda.']) +
+      sec('Una ronda de combate', ['Cada ronda ganas <b>2 de oro</b> (se reinicia cada partida y es distinto de las monedas de los sobres).', 'Tienes <b>4 huecos en mesa</b> y una <b>mano de 5</b>.', 'En la preparación colocas tropas (pulsando o arrastrando desde la mano), juegas acciones y <b>debes elegir objetivo para cada una de tus tropas</b>: no se puede combatir hasta que todas tengan uno. Puedes deshacerlos todos con el botón «Deshacer objetivos». El rival no ve tus objetivos.']) +
+      sec('Tienda', ['Hay tienda <b>cada 3 rondas</b> (rondas 1, 4, 7…). En una ronda de tienda <b>no hay combate</b>.', 'La tienda ofrece 4 cartas al azar de tu propio mazo; pulsa una para comprarla. El botón redondo ↻ la actualiza por 1 de oro.', '<b>Solo en las rondas de tienda</b> puedes retirar tropas de la mesa; el resto del tiempo puedes colocar si hay hueco, pero no quitar.', 'Las tropas de coste 5 aparecen a partir de la segunda tienda.']) +
+      sec('Combate', ['Los ataques se resuelven de uno en uno, alternando bandos de izquierda a derecha. Cada tropa ataca <b>una vez por ronda</b>. El bando que empieza se alterna cada ronda.', 'Si el objetivo ya murió, el ataque va a una tropa rival viva al azar.', 'No se puede atacar al jugador directamente: <b>recibes daño solo si todas tus tropas han muerto</b> y a tu rival le quedan tropas por atacar; el daño es igual a su ataque.', '<b>Las tropas no se curan entre rondas</b>: el daño se acumula. Solo se curan del todo al volver a tu mano (retirándolas en la tienda). Las muertas liberan su hueco y los bonus de «esta ronda» desaparecen.', 'Si en una ronda sin tienda no tienes tropas ni en mesa ni en mano, <b>pierdes automáticamente</b>.']) +
       sec('Temáticas', ['Cada tropa tiene 1 o 2 temáticas. Cuentan las <b>cartas distintas</b> de cada temática entre mesa y mano (las copias no suman; las acciones no tienen temática).', 'Al llegar a ciertos números (niveles) la temática da su bonificación. En la partida ves a un lado cuántas llevas y cuántas necesitas.']) +
       sec('Todavía por llegar', ['Pasivas en las tropas de coste 5, más acciones, sobres y monedas, y partidas contra otros jugadores.']) + '</div>';
   }
@@ -171,7 +171,7 @@
   function startGame() {
     var seed = Math.floor(Math.random() * 1e9), r = E.mulberry32(seed + 7);
     ui.s = E.newGame(ui.deck, E.randomDeck(r), seed);
-    ui.screen = 'game'; ui.sel = null; ui.view = null; ui.playing = false; ui.hint = '';
+    ui.screen = 'game'; ui.sel = null; ui.view = null; ui.playing = false; ui.hint = ''; ui.landed = null;
     render();
   }
   function orb(kind, val, max, label) {
@@ -180,14 +180,14 @@
   }
   function synergyHtml(P) {
     var c = E.themeCounts(P), keys = Object.keys(c).sort(function (a, b) { return E.tierOf(b, c[b]) - E.tierOf(a, c[a]) || c[b] - c[a]; });
-    var h = '<aside class="synside panel"><h2>Sinergias</h2>';
-    if (!keys.length) return h + '<p class="mut">Coloca tropas en mesa o mano.</p></aside>';
+    var h = '<div class="synside panel"><h2>Sinergias</h2>';
+    if (!keys.length) return h + '<p class="mut">Coloca tropas en mesa o mano.</p></div>';
     h += '<div class="synlist">' + keys.map(function (t) {
       var T = D.themes[t], tier = E.tierOf(t, c[t]), nxt = T.th[tier];
       var tip = '<div class="tip"><b>' + esc(t) + '</b>' + T.tx.map(function (x, k) { return '<p' + (k + 1 === tier ? ' class="cur"' : '') + '><b>' + T.th[k] + ' cartas:</b> ' + esc(x) + '</p>'; }).join('') + '</div>';
       return '<div class="syn-row t' + tier + '" style="--tc:' + T.color + '" tabindex="0"><div class="hexa"><b>' + c[t] + '</b></div><div class="si"><b>' + esc(t) + '</b><div class="th">' +
         T.th.map(function (n, k) { return '<i class="' + (k < tier ? 'on' : '') + '">' + n + '</i>'; }).join('') + '</div></div><span class="need">' + (nxt ? c[t] + '/' + nxt : '✓ máx') + '</span>' + tip + '</div>';
-    }).join('') + '</div></aside>';
+    }).join('') + '</div></div>';
     return h;
   }
   function mesaRow(side, view, s, mine) {
@@ -204,6 +204,7 @@
       if (v.dead) o.cls += ' dead';
       if (ui.hl && ui.hl.att === v.uid) o.cls += ' atk';
       if (ui.hl && ui.hl.tgt === v.uid) o.cls += ' hit';
+      if (ui.landed === v.uid) o.cls += ' landed';
       o.attrs = 'data-cuid="' + v.uid + '" data-side="' + side + '"';
       if (mine) {
         var P0 = s.p[0], pending = prep && E.pendingTargets(s).some(function (x) { return x.uid === v.uid; });
@@ -225,71 +226,85 @@
     });
     return h + '</div>';
   }
+  var REFRESH_SVG = '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>';
   function renderGame() {
     var s = ui.s, view = ui.view || E.viewOf(s), P = s.p[0], R = s.p[1];
-    var shop = s.shopOpen && !ui.playing && s.phase === 'prep', prep = s.phase === 'prep' && !ui.playing && !s.shopOpen;
-    var pend = prep ? E.pendingTargets(s).length : 0;
-    var h = '<div class="wrap"><div class="top"><div><h1>Ronda ' + s.round + ' · ' + (s.shopOpen ? '🛒 Tienda' + (s.round === 1 ? ' inicial' : '') : '⚔ Combate') + (!s.shopOpen ? ' <span class="mut">· ' + (s.first === 0 ? 'atacas primero' : 'ataca primero el rival') + '</span>' : '') + '</h1></div><div><button class="lnk" data-act="menu" data-to="deck">🃏 Mazo</button> · <button class="lnk" data-act="menu" data-to="home">🏠 Menú</button></div></div>';
-    h += '<div class="game-grid"><div class="board" id="board">';
-    if (!s.shopOpen) h += '<div class="hud top">' + orb('life', view.life[1], CFG.life, 'Rival') + '</div>' + mesaRow(1, view, s, false);
-    else if (s.phase === 'prep') h += '<div class="shopbanner">🛒 Ronda de tienda: no hay combate. Compra cartas, colócalas en la mesa y pulsa «Terminar tienda».</div>';
-    h += '<div class="gap"></div>' + mesaRow(0, view, s, true);
-    h += '<div class="hud bottom">' + orb('life', view.life[0], CFG.life, 'Tu vida') + orb('gold', P.gold, 0, 'Tu oro') + '</div></div>' + synergyHtml(P) + '</div>';
-
-    if (s.phase === 'over') {
-      var win = s.winner === 0;
-      h += '<div class="panel over"><h2>' + (win ? '🏆 ¡Has ganado!' : '💀 Has perdido') + '</h2><p class="mut">' + esc(s.reason) + ' · ronda ' + s.round + '</p><button class="btn big" data-act="play">Jugar otra vez</button> <button class="btn sec" data-act="menu" data-to="deck">Cambiar mazo</button> <button class="btn sec" data-act="menu" data-to="home">Menú</button></div>';
-    } else if (ui.playing) {
-      h += '<div class="bar"><button class="btn sec" data-act="skip">⏩ Saltar animación</button></div>';
-    } else if (shop) {
+    var shopMode = s.shopOpen && !ui.playing, shop = shopMode && s.phase === 'prep', prep = s.phase === 'prep' && !ui.playing && !s.shopOpen;
+    var pend = prep ? E.pendingTargets(s).length : 0, hasT = Object.keys(P.target).length > 0;
+    var h = '<div class="gwrap' + (shopMode ? ' shopmode' : '') + '"><div class="top"><div><h1>Ronda ' + s.round + ' · ' + (s.shopOpen ? '🛒 Tienda' + (s.round === 1 ? ' inicial' : '') : '⚔ Combate') + (!s.shopOpen ? ' <span class="mut">· ' + (s.first === 0 ? 'atacas primero' : 'ataca primero el rival') + '</span>' : '') + '</h1></div><div><button class="lnk" data-act="menu" data-to="deck">🃏 Mazo</button> · <button class="lnk" data-act="menu" data-to="home">🏠 Menú</button></div></div>';
+    h += '<div class="gmain"><aside class="gl">' + synergyHtml(P) + '</aside><section class="gc"><div class="board" id="board">';
+    if (!shopMode) h += '<div class="hud top">' + orb('life', view.life[1], CFG.life, 'Rival') + '</div>' + mesaRow(1, view, s, false) + '<div class="gap"></div>';
+    h += mesaRow(0, view, s, true);
+    // HUD inferior: vida, oro y acciones
+    var acts = '';
+    if (s.phase === 'over') acts = '';
+    else if (ui.playing) acts = '<button class="btn sec" data-act="skip">⏩ Saltar animación</button>';
+    else if (shop) {
       var any = P.mesa.some(Boolean) || P.hand.length;
-      h += '<div class="hint">' + esc(ui.hint || (any ? '' : 'Compra al menos una tropa.')) + '</div><div class="bar"><button class="btn big" data-act="endshop"' + (any ? '' : ' disabled') + '>Terminar tienda ▶</button></div>';
+      acts = '<div class="hint">' + esc(ui.hint || (any ? 'Pulsa una carta de la tienda para comprarla.' : 'Compra al menos una tropa.')) + '</div><button class="btn big" data-act="endshop"' + (any ? '' : ' disabled') + '>Terminar tienda ▶</button>';
     } else if (prep) {
       var msg = ui.hint || (!P.mesa.some(Boolean) ? 'Coloca tropas de tu mano en la mesa.' : pend ? 'Elige una tropa tuya y luego la rival a la que atacará.' : 'Todos los objetivos elegidos.');
-      if (pend && P.mesa.some(Boolean)) msg = (ui.hint ? ui.hint + ' · ' : '') + 'Faltan ' + pend + ' tropa(s) por elegir objetivo (contorno rojo).';
-      h += '<div class="hint">' + esc(msg) + '</div><div class="bar"><button class="btn big" data-act="fight"' + (pend || (!P.mesa.some(Boolean) && E.mesaTroops(R).length) ? ' disabled' : '') + '>⚔ ¡Combatir!</button></div>';
-    } else if (s.phase === 'post') {
-      if (P.anime > 0) {
-        var an = P.mesa.filter(function (i) { return i && !i.dead && E.has(i, 'Anime'); });
-        var opts = an.map(function (i) { return '<option value="' + i.uid + '">' + esc(CARD[i.id].name) + ' (' + E.atk(i) + '/' + E.maxHp(i) + ')</option>'; }).join('');
-        h += '<div class="panel"><h2>Anime · puedes ceder estadísticas (' + P.anime + ' uso/s)</h2><div class="bar"><select id="an-from">' + opts + '</select> → <select id="an-to">' + opts + '</select>' +
-          '<button class="btn sec" data-act="cede" data-stat="atk">Ceder todo el ataque</button><button class="btn sec" data-act="cede" data-stat="hp">Ceder vida (cae)</button></div></div>';
-      }
-      h += '<div class="bar"><button class="btn big" data-act="next">Siguiente ronda →</button></div>';
-    }
-
-    // Tienda (antes de la mano)
-    if (shop) {
-      var t = E.tiers(P), rc = E.refreshCost(s, 0);
-      h += '<div class="panel"><h2>🛒 Tienda · cartas de tu mazo' + (s.round === 1 ? ' (solo Comunes)' : '') + '</h2><div class="shop">';
-      P.offers.forEach(function (id, k) {
-        var c = CARD[id];
-        h += '<div class="offer">' + cardHtml(c, {}) + '<button class="btn sec" data-act="buy" data-i="' + k + '"' + (P.gold < c.cost || P.hand.length >= CFG.handMax ? ' disabled' : '') + '>Comprar · ' + c.cost + ' oro</button></div>';
-      });
-      h += '</div><div class="bar"><button class="btn sec" data-act="refresh"' + (P.gold < rc ? ' disabled' : '') + '>🔄 Renovar · ' + rc + ' oro</button>';
-      if ((t['Informático'] || 0) >= 3 && !P.pickUsed) {
-        h += '<select id="pick-sel">' + P.deck.map(function (id) { return '<option value="' + id + '">' + esc(CARD[id].name) + '</option>'; }).join('') + '</select><button class="btn sec" data-act="pick">Añadir a la tienda</button>';
-      }
-      h += '</div><p class="mut">Solo en las rondas de tienda puedes retirar tropas de la mesa (↩). Las de coste 5 aparecen desde la segunda tienda.</p></div>';
-    }
+      if (pend && P.mesa.some(Boolean)) msg = (ui.hint ? ui.hint + ' · ' : '') + 'Faltan ' + pend + ' por elegir objetivo.';
+      acts = '<div class="hint">' + esc(msg) + '</div><div class="btnrow"><button class="btn big" data-act="fight"' + (pend || (!P.mesa.some(Boolean) && E.mesaTroops(R).length) ? ' disabled' : '') + '>⚔ ¡Combatir!</button><button class="btn sec" data-act="undo"' + (hasT ? '' : ' disabled') + ' title="Quitar todos los objetivos elegidos">↩ Deshacer objetivos</button></div>';
+    } else if (s.phase === 'post') acts = '<button class="btn big" data-act="next">Siguiente ronda →</button>';
+    h += '<div class="hud bottom">' + orb('life', view.life[0], CFG.life, 'Tu vida') + orb('gold', P.gold, 0, 'Tu oro') + '<div class="acts">' + acts + '</div></div></div>';
 
     // Mano
-    h += '<div class="panel"><h2>Tu mano (' + P.hand.length + '/' + CFG.handMax + ')</h2><div class="hand">';
+    h += '<div class="handwrap"><div class="hl">Tu mano ' + P.hand.length + '/' + CFG.handMax + '</div><div class="hand">';
     P.hand.forEach(function (i, k) {
       var c = CARD[i.id], sel = ui.sel && (ui.sel.k === 'hand' || ui.sel.k === 'act') && ui.sel.i === k;
-      h += '<div class="cw">' + cardHtml(c, { cls: sel ? 'sel' : '', attrs: 'data-act="hand" data-i="' + k + '"', tag: 'button' }) + '</div>';
+      h += '<div class="cw">' + cardHtml(c, { atk: E.atk(i), hp: i.hp, max: E.maxHp(i), cls: 'hcard' + (sel ? ' sel' : ''), attrs: 'data-act="hand" data-i="' + k + '" title="Pulsa o arrastra a la mesa"', tag: 'button' }) + '</div>';
     });
     for (var f = P.hand.length; f < CFG.handMax; f++) h += '<div class="cw"><div class="slot">—</div></div>';
     h += '</div></div>';
 
+    // Tienda (bajo la mano): pulsar una carta para comprarla
+    if (shop) {
+      var t = E.tiers(P), rc = E.refreshCost(s, 0);
+      h += '<div class="shopwrap"><div class="hl">🛒 Tienda' + (s.round === 1 ? ' (solo Comunes)' : '') + ' · pulsa una carta para comprarla</div><div class="shoprow">';
+      for (var k = 0; k < CFG.shopOffers; k++) {
+        var id = P.offers[k];
+        if (!id) { h += '<div class="cw"><div class="slot">Vendida</div></div>'; continue; }
+        var c2 = CARD[id], cant = P.gold < c2.cost || P.hand.length >= CFG.handMax;
+        h += '<div class="cw">' + cardHtml(c2, { tag: 'button', cls: 'offer' + (cant ? ' cant' : ''), attrs: 'data-act="buy" data-i="' + k + '" title="Comprar por ' + c2.cost + ' de oro"' }) + '</div>';
+      }
+      h += '<div class="refwrap"><button class="refresh" data-act="refresh" title="Actualizar tienda (' + rc + ' oro)"' + (P.gold < rc ? ' disabled' : '') + '>' + REFRESH_SVG + '</button><span class="rlabel">Actualizar · ' + rc + ' oro</span></div></div>';
+      if ((t['Informático'] || 0) >= 3 && !P.pickUsed) {
+        h += '<div class="bar"><select id="pick-sel">' + P.deck.map(function (id) { return '<option value="' + id + '">' + esc(CARD[id].name) + '</option>'; }).join('') + '</select><button class="btn sec sm" data-act="pick">Añadir a la tienda</button></div>';
+      }
+      h += '</div>';
+    }
+    h += '</section><aside class="gr">';
+    if (s.phase === 'post' && !ui.playing && P.anime > 0) {
+      var an = P.mesa.filter(function (i) { return i && !i.dead && E.has(i, 'Anime'); });
+      var opts = an.map(function (i) { return '<option value="' + i.uid + '">' + esc(CARD[i.id].name) + ' (' + E.atk(i) + '/' + E.maxHp(i) + ')</option>'; }).join('');
+      h += '<div class="panel"><h2>Anime · ceder (' + P.anime + ')</h2><div class="bar"><select id="an-from">' + opts + '</select><span>→</span><select id="an-to">' + opts + '</select></div><div class="bar"><button class="btn sec sm" data-act="cede" data-stat="atk">Ceder ataque</button><button class="btn sec sm" data-act="cede" data-stat="hp">Ceder vida</button></div></div>';
+    } else h += '<div></div>';
     var shown = s.log.slice(-14);
-    h += '<div class="panel"><h2>Registro</h2><div class="log" id="log">' + shown.map(function (l, n) { return '<div' + (n === shown.length - 1 ? ' class="cur"' : '') + '>' + esc(l.text) + '</div>'; }).join('') + '</div></div></div>';
+    h += '<div class="panel logp"><h2>Registro</h2><div class="log" id="log">' + shown.map(function (l, n) { return '<div' + (n === shown.length - 1 ? ' class="cur"' : '') + '>' + esc(l.text) + '</div>'; }).join('') + '</div></div></aside></div>';
+    if (s.phase === 'over') {
+      var win = s.winner === 0;
+      h += '<div class="overlay"><div class="panel over"><h2>' + (win ? '🏆 ¡Has ganado!' : '💀 Has perdido') + '</h2><p class="mut">' + esc(s.reason) + ' · ronda ' + s.round + '</p><button class="btn big" data-act="play">Jugar otra vez</button> <button class="btn sec" data-act="menu" data-to="deck">Cambiar mazo</button> <button class="btn sec" data-act="menu" data-to="home">Menú</button></div></div>';
+    }
+    h += '</div>';
     app.innerHTML = h;
+    ui.landed = null;
     var lg = document.getElementById('log'); if (lg) lg.scrollTop = lg.scrollHeight;
-    drawArrows();
+    strikeVars(); drawArrows();
   }
 
-  // Flechas de objetivo (plan en la preparación, golpe actual durante el combate)
+  // Dirección del golpe durante el combate (la carta se levanta y se lanza contra su objetivo)
+  function strikeVars() {
+    if (!ui.playing || !ui.hl || !ui.hl.att) return;
+    var a = document.querySelector('.card.atk'), t = ui.hl.tgt && document.querySelector('[data-cuid="' + ui.hl.tgt + '"]');
+    if (!a) return;
+    var ra = a.getBoundingClientRect(), rt = t ? t.getBoundingClientRect() : null;
+    var dx = rt ? (rt.left + rt.width / 2) - (ra.left + ra.width / 2) : 0;
+    var dy = rt ? (rt.top + rt.height / 2) - (ra.top + ra.height / 2) : (a.dataset.side === '0' ? -ra.height : ra.height);
+    a.style.setProperty('--dx', (dx * .72) + 'px'); a.style.setProperty('--dy', (dy * .72) + 'px');
+  }
+
+  // Flechas en parábola (plan en la preparación, golpe actual durante el combate)
   function drawArrows() {
     var b = document.getElementById('board'); if (!b || !ui.s) return;
     var s = ui.s, pairs = [];
@@ -298,14 +313,17 @@
     if (!pairs.length) return;
     var br = b.getBoundingClientRect(), ns = 'http://www.w3.org/2000/svg', svg = document.createElementNS(ns, 'svg');
     svg.setAttribute('class', 'arrows'); svg.setAttribute('width', br.width); svg.setAttribute('height', br.height);
-    svg.innerHTML = '<defs><marker id="ah" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#ff5a5f"/></marker></defs>';
+    svg.innerHTML = '<defs><marker id="ah" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L7,3.5 L0,7 z" fill="#ff5a5f"/></marker></defs>';
     pairs.forEach(function (p, n) {
       var a = b.querySelector('[data-cuid="' + p[0] + '"]'), t = b.querySelector('[data-cuid="' + p[1] + '"]'); if (!a || !t) return;
-      var ra = a.getBoundingClientRect(), rt = t.getBoundingClientRect(), mine = a.dataset.side === '0', off = (n % 3 - 1) * 5;
-      var x1 = ra.left + ra.width / 2 - br.left + off, y1 = (mine ? ra.top : ra.bottom) - br.top, x2 = rt.left + rt.width / 2 - br.left + off, y2 = (mine ? rt.bottom : rt.top) - br.top + (mine ? 5 : -5);
-      var l = document.createElementNS(ns, 'line');
-      l.setAttribute('x1', x1); l.setAttribute('y1', y1); l.setAttribute('x2', x2); l.setAttribute('y2', y2);
-      l.setAttribute('class', 'ln ' + p[2]); l.setAttribute('marker-end', 'url(#ah)'); svg.appendChild(l);
+      var ra = a.getBoundingClientRect(), rt = t.getBoundingClientRect(), mine = a.dataset.side === '0', off = (n % 3 - 1) * 8;
+      var x1 = ra.left + ra.width / 2 - br.left + off, y1 = (mine ? ra.top : ra.bottom) - br.top;
+      var x2 = rt.left + rt.width / 2 - br.left + off, y2 = rt.top + rt.height * .42 - br.top;
+      var d = Math.hypot(x2 - x1, y2 - y1), bulge = 55 + d * .28 + (n % 3) * 10;
+      var cx = (x1 + x2) / 2, cy = (mine ? Math.min(y1, y2) : Math.max(y1, y2)) + (mine ? -bulge : bulge);
+      var l = document.createElementNS(ns, 'path');
+      l.setAttribute('d', 'M' + x1 + ',' + y1 + ' Q' + cx + ',' + cy + ' ' + x2 + ',' + y2);
+      l.setAttribute('class', 'ln ' + p[2]); l.setAttribute('fill', 'none'); l.setAttribute('marker-end', 'url(#ah)'); svg.appendChild(l);
     });
     b.appendChild(svg);
   }
@@ -334,11 +352,13 @@
   // ---------- Eventos ----------
   app.addEventListener('input', function (e) { if (e.target.id === 'slot-name') ui.slotName = e.target.value; });
   app.addEventListener('change', function (e) { if (e.target.id === 'slot-to') ui.slotTo = +e.target.value; });
+  var noClick = 0;
   function nextPending(s) {
     var p = E.pendingTargets(s)[0];
     ui.sel = p ? { k: 'mine', uid: p.uid } : null;
   }
   app.addEventListener('click', function (e) {
+    if (Date.now() - noClick < 350) return;
     var el = e.target.closest('[data-act]'); if (!el) return;
     var act = el.dataset.act, s = ui.s, P = s && s.p[0];
     if (act === 'lock') return window.cartasLock();
@@ -379,7 +399,8 @@
       var ok = E.cede(s, +document.getElementById('an-from').value, +document.getElementById('an-to').value, el.dataset.stat);
       ui.hint = ok ? '' : 'Elige dos tropas Anime distintas.'; return render();
     }
-    if (act === 'buy') { if (!E.buy(s, 0, +el.dataset.i)) ui.hint = 'No puedes comprarla (oro o mano llena).'; else ui.hint = ''; return render(); }
+    if (act === 'buy') { var bi = +el.dataset.i, bc = CARD[P.offers[bi]]; if (!E.buy(s, 0, bi)) ui.hint = bc && P.gold < bc.cost ? 'No tienes oro suficiente.' : 'Tu mano está llena.'; else ui.hint = ''; return render(); }
+    if (act === 'undo') { E.clearTargets(s, 0); ui.hint = ''; nextPending(s); return render(); }
     if (act === 'refresh') { E.refresh(s, 0); return render(); }
     if (act === 'pick') { E.pickFromDeck(s, 0, document.getElementById('pick-sel').value); return render(); }
     if (act === 'voley') { E.setVoley(s, 0, +el.dataset.uid, el.dataset.m); return render(); }
@@ -398,7 +419,7 @@
       return render();
     }
     if (act === 'slot') {
-      if (ui.sel && ui.sel.k === 'hand') E.place(s, 0, ui.sel.i, +el.dataset.i);
+      if (ui.sel && ui.sel.k === 'hand') { var sl2 = +el.dataset.i; if (E.place(s, 0, ui.sel.i, sl2)) ui.landed = s.p[0].mesa[sl2].uid; }
       ui.sel = null; ui.hint = '';
       if (!s.shopOpen) nextPending(s);
       return render();
@@ -416,6 +437,55 @@
       if (ui.sel && ui.sel.k === 'mine') { E.setTarget(s, 0, ui.sel.uid, fu); ui.hint = ''; nextPending(s); return render(); }
     }
   });
+
+
+  // ---------- Arrastrar cartas de la mano ----------
+  var drag = null;
+  app.addEventListener('pointerdown', function (e) {
+    var el = e.target.closest('.hand [data-act="hand"]');
+    if (!el || !ui.s || ui.playing || ui.s.phase !== 'prep' || (e.button && e.button > 0)) return;
+    drag = { i: +el.dataset.i, x: e.clientX, y: e.clientY, active: false, ghost: null, w: 0, h: 0 };
+  });
+  document.addEventListener('pointermove', function (e) {
+    if (!drag) return;
+    if (!drag.active) {
+      if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) < 8) return;
+      if (!startDrag()) { drag = null; return; }
+    }
+    e.preventDefault(); moveGhost(e.clientX, e.clientY);
+  }, { passive: false });
+  document.addEventListener('pointerup', function (e) { if (drag && drag.active) finishDrag(e.clientX, e.clientY); drag = null; });
+  document.addEventListener('pointercancel', function () { if (drag && drag.active) cancelDrag(); drag = null; });
+  function startDrag() {
+    var s = ui.s, P = s.p[0], inst0 = P.hand[drag.i]; if (!inst0) return false;
+    var c = CARD[inst0.id];
+    if (c.type === 'tropa') { if (!P.mesa.some(function (x) { return !x; })) return false; ui.sel = { k: 'hand', i: drag.i }; ui.hint = 'Suéltala sobre un hueco libre.'; }
+    else { if (s.shopOpen) return false; ui.sel = { k: c.target === 'none' ? 'hand0' : 'act', i: drag.i }; ui.hint = c.target === 'none' ? 'Suéltala sobre el tablero.' : (c.target === 'ally' ? 'Suéltala sobre una tropa tuya.' : 'Suéltala sobre una tropa rival.'); }
+    render();
+    var src = app.querySelector('.hand [data-i="' + drag.i + '"]'); if (!src) return false;
+    var r = src.getBoundingClientRect(); drag.w = r.width; drag.h = r.height;
+    var g = src.cloneNode(true); g.classList.add('ghostcard'); g.classList.remove('sel'); g.style.width = r.width + 'px'; g.style.height = r.height + 'px';
+    document.body.appendChild(g); drag.ghost = g; drag.active = true; src.classList.add('lifted-src');
+    return true;
+  }
+  function moveGhost(x, y) { drag.ghost.style.transform = 'translate(' + (x - drag.w / 2) + 'px,' + (y - drag.h * .6) + 'px) scale(1.14) rotate(-3deg)'; }
+  function cancelDrag() { if (drag.ghost) drag.ghost.remove(); ui.sel = null; ui.hint = ''; render(); }
+  function finishDrag(x, y) {
+    var s = ui.s, P = s.p[0]; drag.ghost.style.display = 'none';
+    var t = document.elementFromPoint(x, y); drag.ghost.remove(); noClick = Date.now();
+    var inst0 = P.hand[drag.i], ok = false;
+    if (t && inst0) {
+      var c = CARD[inst0.id];
+      if (c.type === 'tropa') {
+        var slotEl = t.closest('.slot.free'), onBoard = t.closest('#board'), idx = slotEl ? +slotEl.dataset.i : (onBoard ? P.mesa.indexOf(null) : -1);
+        if (idx >= 0 && E.place(s, 0, drag.i, idx)) { ok = true; ui.landed = P.mesa[idx].uid; }
+      } else if (c.target === 'none') { if (t.closest('#board')) ok = E.playAction(s, 0, drag.i, null); }
+      else { var cd = t.closest('[data-cuid]'); if (cd && cd.dataset.side === (c.target === 'ally' ? '0' : '1')) ok = E.playAction(s, 0, drag.i, +cd.dataset.cuid); }
+    }
+    ui.sel = null; ui.hint = ok ? '' : 'No se pudo soltar ahí.';
+    if (ok && !s.shopOpen) nextPending(s);
+    render();
+  }
 
   render();
 })();

@@ -6,7 +6,8 @@
   // ---------- Ajustes de balance (todo en un sitio para tocarlo fácil) ----------
   var CFG = {
     slots: 4, handMax: 5, life: 12, gold: 4, income: 2, shopEvery: 3, shopOffers: 4,
-    refreshCost: 1, deckBudget: 20, maxRounds: 30,
+    refreshCost: 1, deckBudget: 20, maxRounds: 40,
+    hpMult: 1.1, hpGrow: 1.25, // vida base de las tropas: x hpMult x hpGrow^(coste-1)
     rarityWeight: { 'Común': 50, 'Rara': 30, 'Épica': 15, 'Legendaria': 5 },
   };
   var FX = {
@@ -30,6 +31,10 @@
     zancadilla: function (t) { t.tmp.atk -= 2; },
   };
 
+  if (!DATA.hpScaled) {
+    DATA.cards.forEach(function (c) { c.hp = Math.max(1, Math.round(c.hp * CFG.hpMult * Math.pow(CFG.hpGrow, c.cost - 1))); });
+    DATA.hpScaled = true;
+  }
   var CARD = {};
   DATA.cards.concat(DATA.actions).forEach(function (c) { CARD[c.id] = c; });
 
@@ -238,7 +243,7 @@
     if (!s.shopOpen || s.phase !== 'prep' || !i || i.dead) return false;
     if (has(i, 'Lol')) return false;
     if (P.hand.length >= CFG.handMax) return false;
-    P.mesa[slot] = null; P.hand.push(i);
+    P.mesa[slot] = null; i.hp = maxHp(i); P.hand.push(i);
     delete P.target[i.uid];
     return true;
   }
@@ -266,6 +271,7 @@
     var P = s.p[p];
     if (targetUid == null) delete P.target[uid]; else P.target[uid] = targetUid;
   }
+  function clearTargets(s, p) { s.p[p].target = {}; }
   function setVoley(s, p, uid, mode) { s.p[p].voley[uid] = mode; }
 
   // ---------- IA ----------
@@ -525,7 +531,7 @@
       P.mesa.forEach(function (i, k) {
         if (!i) return;
         if (i.dead) { P.grave.push(i); P.mesa[k] = null; delete P.target[i.uid]; return; }
-        i.tmp = { atk: 0, hp: 0, red: 0 }; i.hp = maxHp(i);
+        i.tmp = { atk: 0, hp: 0, red: 0 }; i.hp = Math.min(i.hp, maxHp(i)); // sin curación entre rondas
       });
       P.hand.forEach(function (i) { if (isTroop(i)) { i.tmp = { atk: 0, hp: 0, red: 0 }; i.hp = maxHp(i); } });
       P.target = {}; P.voley = {};
@@ -577,7 +583,7 @@
   var API = {
     CFG: CFG, FX: FX, CARD: CARD, DATA: DATA,
     newGame: newGame, randomDeck: randomDeck, deckSize: deckSize, mulberry32: mulberry32,
-    place: place, playAction: playAction, setTarget: setTarget, setVoley: setVoley,
+    place: place, playAction: playAction, setTarget: setTarget, clearTargets: clearTargets, setVoley: setVoley,
     buy: buy, refresh: refresh, refreshCost: refreshCost, pickFromDeck: pickFromDeck, retire: retire,
     aiShop: aiShop, aiPrep: aiPrep, aiTargets: aiTargets, fight: fight, endShop: endShop, pendingTargets: pendingTargets, cede: cede, nextRound: nextRound,
     themeCounts: themeCounts, tiers: tiers, tierOf: tierOf, atk: atk, maxHp: maxHp, card: card, isTroop: isTroop, has: has, mesaTroops: mesaTroops, viewOf: viewOf,

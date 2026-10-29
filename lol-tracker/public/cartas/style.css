@@ -457,3 +457,20 @@ input, select { background: #fff; color: var(--ink); border: 2px solid var(--lin
 @keyframes bob2 { 0%, 100% { transform: translateY(-8px); } 50% { transform: translateY(-18px); } }
 .fan .fc, .confetti i, .btn.cta, .over, .obig { will-change: transform; }
 .fan .fc .card { transition: none; }
+
+/* v8c · desplazamiento fluido: el fondo va en una capa fija propia (no se repinta al hacer scroll) */
+body, body.shopbg { background: transparent; }
+body::before { content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none; transform: translateZ(0);
+  background:
+    radial-gradient(circle at 12% 18%, rgba(255,255,255,.9) 0 7%, transparent 7.2%),
+    radial-gradient(circle at 17% 20%, rgba(255,255,255,.9) 0 5%, transparent 5.2%),
+    radial-gradient(circle at 86% 12%, rgba(255,255,255,.85) 0 6%, transparent 6.2%),
+    radial-gradient(circle at 91% 14%, rgba(255,255,255,.85) 0 4%, transparent 4.2%),
+    radial-gradient(circle, rgba(255,255,255,.55) 1.5px, transparent 2px) 0 0 / 28px 28px,
+    linear-gradient(180deg, #a9d7ff 0%, #d5ecff 45%, #fff3d3 100%); }
+body.shopbg::before { background: radial-gradient(circle, rgba(255,255,255,.55) 1.5px, transparent 2px) 0 0 / 28px 28px, linear-gradient(180deg, #ffd98a 0%, #ffeabc 40%, #fff7e2 100%); }
+/* rejillas de cartas: sin filtros ni sombras pesadas por carta */
+.deckgrid .card { filter: none; opacity: .6; box-shadow: 0 3px 0 rgba(40,50,100,.25); transition: none; }
+.deckgrid .card.in { opacity: 1; box-shadow: 0 0 0 3px var(--ok), 0 3px 0 rgba(40,50,100,.25); }
+.deckgrid .card:hover { transform: translateY(-3px); }
+.panel, .nav, .menu-i { box-shadow: 0 4px 0 var(--edge); }

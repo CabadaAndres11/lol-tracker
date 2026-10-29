@@ -20,10 +20,17 @@ const MAX_FAILS = 10, BLOCK_SECONDS = 900;
 
 const ALL = DATA.cards.concat(DATA.actions);
 const BY_ID = {}; ALL.forEach((c) => { BY_ID[c.id] = c; });
-// Regalo de bienvenida: mazo inicial de una sola sinergia (Pokémon) + acciones generales Comunes
-const STARTER_THEME = 'Pokémon';
-const STARTER = DATA.cards.filter((c) => c.themes.includes(STARTER_THEME)).map((c) => c.id)
-  .concat(DATA.actions.filter((a) => a.theme === STARTER_THEME || (!a.theme && a.rarity === 'Común')).map((a) => a.id));
+// Regalo de bienvenida: el jugador elige un mazo inicial de una sinergia (+ acciones generales Comunes).
+// Si la sinergia no tiene tropas Comunes se añaden dos tropas Comunes baratas para poder jugar la tienda inicial.
+const STARTER_THEMES = ['Pokémon', 'Informático', 'Trabajo', 'Lol', 'Comebacker', 'KOI'];
+function starterFor(theme) {
+  const troops = DATA.cards.filter((c) => c.themes.includes(theme));
+  const ids = troops.map((c) => c.id);
+  if (!troops.some((c) => c.rarity === 'Común')) {
+    DATA.cards.filter((c) => c.rarity === 'Común' && !ids.includes(c.id)).sort((x, y) => x.cost - y.cost).slice(0, 2).forEach((c) => ids.push(c.id));
+  }
+  return ids.concat(DATA.actions.filter((a) => a.theme === theme || (!a.theme && a.rarity === 'Común')).map((a) => a.id));
+}
 
 const uKey = (n) => `cartas:user:${n.toLowerCase()}`;
 const today = () => new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Madrid' }); // AAAA-MM-DD
@@ -83,9 +90,11 @@ module.exports = async function handler(req, res) {
       if (!/^\d{4}$/.test(pin)) { res.status(400).json({ error: 'El PIN son 4 dígitos.' }); return; }
       const failKey = `cartas:fail:${name.toLowerCase()}`;
       if (act === 'register') {
+        const starter = String(body.starter || '');
+        if (!STARTER_THEMES.includes(starter) && name.toLowerCase() !== 'admin') { res.status(400).json({ error: 'Elige un mazo inicial.' }); return; }
         if (await loadUser(cfg, name)) { res.status(409).json({ error: 'Ese nombre ya está cogido.' }); return; }
         const salt = crypto.randomBytes(16).toString('hex');
-        const u = { name, salt, hash: hashPin(pin, salt), coins: START_COINS, owned: STARTER.slice(), lastDaily: '', rewardDay: '', rewardCount: 0, startedAt: 0, createdAt: Date.now() };
+        const u = { name, salt, hash: hashPin(pin, salt), coins: START_COINS, owned: starterFor(STARTER_THEMES.includes(starter) ? starter : STARTER_THEMES[0]), lastDaily: '', rewardDay: '', rewardCount: 0, startedAt: 0, createdAt: Date.now() };
         if (isAdmin(u)) u.owned = ALL.map((c) => c.id);
         await saveUser(cfg, u);
         res.status(200).json({ token: await newSession(cfg, name), user: publicUser(u) });

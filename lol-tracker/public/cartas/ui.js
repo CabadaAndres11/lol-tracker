@@ -111,7 +111,16 @@
       '<label>PIN<input id="lg-pin" type="password" inputmode="numeric" maxlength="4" autocomplete="current-password" placeholder="0000"></label>' +
       (ui.msg ? '<div class="hint" style="color:var(--bad)">' + esc(ui.msg) + '</div>' : '') +
       '<div class="btnrow"><button class="btn" data-act="login">Entrar</button><button class="btn sec" data-act="register">Crear cuenta nueva</button></div>' +
-      '<p class="mut" style="margin:.6rem 0 0">Al crear la cuenta recibes ' + 150 + ' monedas y un mazo inicial de Pokémon listo para jugar.</p></div></div>';
+      '<p class="mut" style="margin:.6rem 0 0">Al crear la cuenta recibes ' + 150 + ' monedas y un mazo inicial a tu elección.</p></div></div>';
+  }
+  var STARTERS = [['Pokémon', 'beisbol'], ['Informático', 'robot'], ['Trabajo', 'maletin'], ['Lol', 'espadas'], ['Comebacker', 'fuego'], ['KOI', 'trofeo']];
+  function renderStarter() {
+    app.innerHTML = '<div class="wrap"><div class="loginbox starterbox panel"><h1>Elige tu mazo inicial</h1><p class="mut">Cada mazo gira en torno a una sinergia. Es tu regalo de bienvenida: podrás ampliar tu colección abriendo sobres.</p><div class="starters">' +
+      STARTERS.map(function (t) {
+        var th = D.themes[t[0]], n = D.cards.filter(function (c) { return c.themes.indexOf(t[0]) >= 0; }).length;
+        return '<button class="starter" style="--tc:' + th.color + '" data-act="pickstarter" data-t="' + t[0] + '"><span class="si">' + ic(t[1]) + '</span><b>' + t[0] + '</b><span class="mut">' + n + ' tropas · ' + esc(th.tx[0]) + '</span></button>';
+      }).join('') + '</div>' + (ui.msg ? '<div class="hint" style="color:var(--bad)">' + esc(ui.msg) + '</div>' : '') +
+      '<button class="btn sec" data-act="backlogin">← Volver</button></div></div>';
   }
   function bpkHtml(cls) {
     return '<div class="bpk ' + (cls || '') + '"><div class="bpk-glow"></div><div class="bpk-rays"></div><div class="bpk-main"><span>' + ic('cartas') + '</span><b>SOBRE</b><i>' + (ui.acct ? ui.acct.packSize : 5) + ' cartas</i></div><div class="bpk-lid"></div></div>';
@@ -520,7 +529,7 @@
 
   function render() {
     document.body.classList.remove('shopbg');
-    var f = { home: renderHome, deck: renderDeck, rules: renderRules, themes: renderThemes, modes: renderModes, login: renderLogin, packs: renderPacks, boot: renderBoot }[ui.screen];
+    var f = { home: renderHome, deck: renderDeck, rules: renderRules, themes: renderThemes, modes: renderModes, login: renderLogin, starter: renderStarter, packs: renderPacks, boot: renderBoot }[ui.screen];
     if (f) f(); else renderGame();
   }
 
@@ -581,12 +590,19 @@
     if (act === 'lock') return window.cartasLock();
     if (act === 'acctmenu') { var w = el.closest('.acctw'); if (w) w.classList.toggle('open'); return; }
     if (act === 'logout') return logout();
-    if (act === 'login' || act === 'register') {
-      var nm = document.getElementById('lg-name').value, pn = document.getElementById('lg-pin').value; ui.lgName = nm;
-      return api(act, { name: nm, pin: pn }).then(function (r) {
-        if (!r.ok) { ui.msg = (r.data && r.data.error) || 'No se pudo entrar.'; return render(); }
+    if (act === 'register') {
+      var rn = document.getElementById('lg-name').value.trim(), rp = document.getElementById('lg-pin').value; ui.lgName = rn;
+      if (rn.length < 3 || rn.length > 16) { ui.msg = 'El nombre debe tener entre 3 y 16 caracteres.'; return render(); }
+      if (!/^\d{4}$/.test(rp)) { ui.msg = 'El PIN son 4 dígitos.'; return render(); }
+      ui.lgPin = rp; ui.msg = ''; ui.screen = 'starter'; return render();
+    }
+    if (act === 'backlogin') { ui.screen = 'login'; ui.lgPin = ''; ui.msg = ''; return render(); }
+    if (act === 'login' || act === 'pickstarter') {
+      var nm = act === 'login' ? document.getElementById('lg-name').value : ui.lgName, pn = act === 'login' ? document.getElementById('lg-pin').value : ui.lgPin; ui.lgName = nm;
+      return api(act === 'login' ? 'login' : 'register', { name: nm, pin: pn, starter: el.dataset.t }).then(function (r) {
+        if (!r.ok) { ui.msg = (r.data && r.data.error) || 'No se pudo entrar.'; ui.screen = 'login'; return render(); }
         try { localStorage.setItem('cartas_tok', r.data.token); } catch (e) {}
-        ui.msg = ''; setAcct(r.data.user); loadLocal(); ui.screen = 'home'; render();
+        ui.msg = ''; ui.lgPin = ''; setAcct(r.data.user); loadLocal(); ui.screen = 'home'; render();
       });
     }
     if (act === 'daily') { return api('daily').then(function (r) { if (r.data && r.data.user) setAcct(r.data.user); ui.msg = r.ok ? '' : (r.data.error || ''); render(); }); }

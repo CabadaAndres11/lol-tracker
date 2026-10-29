@@ -796,3 +796,13 @@ input:focus, select:focus { outline: none; border-color: var(--acc); box-shadow:
 .bpk-main i { background: rgba(0,0,0,.4); border: 1px solid rgba(200,170,110,.5); border-radius: 2px; color: var(--ink); text-transform: uppercase; letter-spacing: .1em; font-size: .7rem; }
 .bpk { filter: drop-shadow(0 14px 22px rgba(0,0,0,.7)); }
 .loginbox h1, .gate-box h1 { text-transform: uppercase; letter-spacing: .14em; color: var(--gold); font-size: 1.5rem; }
+
+/* elección de mazo inicial */
+.starterbox { max-width: 860px !important; margin-top: 5vh; }
+.starters { display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; text-align: left; }
+.starter { display: flex; flex-direction: column; gap: .3rem; padding: .9rem; background: linear-gradient(180deg, var(--panel2), var(--panel)); border: 1px solid var(--line); border-top: 3px solid var(--tc); border-radius: 6px; color: var(--ink); transition: transform .12s, box-shadow .12s, border-color .12s; }
+.starter:hover { transform: translateY(-3px); border-color: var(--tc); box-shadow: 0 0 18px -2px var(--tc), 0 12px 22px rgba(0,0,0,.5); }
+.starter .si { font-size: 2rem; } .starter b { font-family: var(--serif); color: var(--gold); letter-spacing: .1em; text-transform: uppercase; }
+.starter .mut { font-size: .8rem; line-height: 1.3; }
+@media (max-width: 760px) { .starters { grid-template-columns: 1fr 1fr; } }
+.starter { align-items: flex-start; justify-content: flex-start; text-align: left; } .starter .mut { text-align: left; } .starterbox h1 { margin-bottom: 0; }

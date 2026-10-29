@@ -630,3 +630,14 @@ body.shopbg::before { background: radial-gradient(circle, rgba(255,255,255,.55) 
   .menu { grid-template-columns: repeat(5, 1fr); max-width: 1000px; }
   .menu-i .mut { font-size: .74rem; }
 }
+
+/* v14b inicio: más holgado mientras quepa en pantalla */
+.hero { padding-top: clamp(.2rem, 1.5vh, 1rem); }
+.fan { height: clamp(150px, 20vh, 190px); } .fan .fc { width: clamp(92px, 12.5vh, 112px); }
+.menu { gap: clamp(.7rem, 1.6vh, 1rem); margin-top: clamp(.6rem, 2vh, 1.2rem); }
+.menu-i { padding: clamp(.7rem, 1.8vh, 1rem) .9rem; }
+.menu-i .mi { font-size: clamp(1.6rem, 4vh, 2.2rem); }
+@media (max-height: 760px) and (min-width: 700px) {
+  .fan { height: clamp(118px, 19vh, 150px); } .fan .fc { width: clamp(74px, 12vh, 92px); }
+  .menu-i { padding: clamp(.7rem, 3vh, 1.2rem) .9rem; }
+}

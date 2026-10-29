@@ -130,6 +130,7 @@
   function packHint() {
     var m = app.querySelector('.pmsg'); if (!m || !ui.pack || !ui.pack.rev.every(Boolean)) return;
     m.textContent = 'Haz clic en un espacio vacío para continuar'; m.classList.add('pulse');
+    var fb = app.querySelector('[data-act=flipall]'); if (fb) fb.style.visibility = 'hidden';
   }
   function RIP_MS(pk) { return pk.cards.some(function (c) { return CARD[c.id].rarity === 'Legendaria'; }) ? 2300 : 1750; }
   function packOverlay() {
@@ -143,7 +144,7 @@
       var cd = CARD[c.id];
       return '<div class="pcard r-' + cd.rarity + (pk.rev[i] ? ' flipped' : '') + '" data-act="flipcard" data-i="' + i + '" style="--d:' + i * 0.12 + 's"><div class="pin"><div class="pback"><span>' + GEM[cd.rarity] + '</span></div><div class="pfront">' + cardHtml(cd, {}) +
         (c.isNew ? '<span class="pnew">¡NUEVA!</span>' : '<span class="pdup">Repetida +' + c.dupCoins + ' 🪙</span>') + '</div></div></div>';
-    }).join('') + '</div><div class="pactions"><button class="btn sec" data-act="flipall">Girar todas</button></div>' + (gain ? '<p class="pgain">+' + gain + ' 🪙 por cartas repetidas</p>' : '') + '<p class="pmsg' + (allRev ? ' pulse' : '') + '">' + (allRev ? 'Haz clic en un espacio vacío para continuar' : 'Pulsa cada carta para girarla · el color del reverso te dice su rareza') + '</p></div>';
+    }).join('') + '</div><div class="pactions"><button class="btn sec" data-act="flipall"' + (allRev ? ' style="visibility:hidden"' : '') + '>Girar todas</button></div>' + (gain ? '<p class="pgain">+' + gain + ' 🪙 por cartas repetidas</p>' : '') + '<p class="pmsg' + (allRev ? ' pulse' : '') + '">' + (allRev ? 'Haz clic en un espacio vacío para continuar' : 'Pulsa cada carta para girarla · el color del reverso te dice su rareza') + '</p></div>';
   }
   function renderModes() {
     var modes = [

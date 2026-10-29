@@ -42,8 +42,8 @@
   }
   function tagHtml(t) { return '<span class="tag" style="--tc:' + D.themes[t].color + '">' + esc(t) + '</span>'; }
   function pips(n) { var h = ''; for (var k = 0; k < 3; k++) h += '<i' + (k < n ? ' class="on"' : '') + '></i>'; return h; }
-  var AICON = { entrenamiento: '⚔️', arenga: '📣', armadura: '🛡️', banquete: '🍖', intimidacion: '😠', 'mal-de-ojo': '🧿', 'golpe-certero': '🎯', lluvia: '🏹',
-    'bola-extra': '⚾', 'segundo-aliento': '💨', 'cambio-de-linea': '🔄', parche: '💾', 'horas-extra': '💼', 'capitulo-especial': '📺', 'segunda-temporada': '🏆', 'remate-doble': '🏐', 'cita-sorpresa': '💕', 'rabia-contenida': '😡', 'fiesta-del-pueblo': '🎉', 'hermano-del-alma': '👯', 'sofa-compartido': '🛋️', madrugon: '⏰' };
+  var AICON = { entrenamiento: 'espadas', arenga: 'megafono', armadura: 'escudo', banquete: 'carne', intimidacion: 'enfado', 'mal-de-ojo': 'ojo', 'golpe-certero': 'diana', lluvia: 'arco',
+    'bola-extra': 'beisbol', 'segundo-aliento': 'viento', 'cambio-de-linea': 'cambio', parche: 'disquete', 'horas-extra': 'maletin', 'capitulo-especial': 'tele', 'segunda-temporada': 'trofeo', 'remate-doble': 'voley', 'cita-sorpresa': 'corazon', 'rabia-contenida': 'enfado', 'fiesta-del-pueblo': 'fiesta', 'hermano-del-alma': 'duo', 'sofa-compartido': 'sofa', madrugon: 'reloj' };
   function cardHtml(c, o) {
     o = o || {};
     var troop = c.type === 'tropa', c1, c2;
@@ -62,17 +62,17 @@
       if (dH) h += '<i class="dl h ' + (dH > 0 ? 'pos' : 'neg') + '">' + (dH > 0 ? '+' : '') + dH + '</i>';
       h += '<span class="sc a' + (a > c.atk ? ' up' : '') + '" title="Ataque"><b>' + a + '</b></span><span class="sc h' + (mx > c.hp ? ' up' : '') + (hp < mx ? ' low' : '') + '" title="Vida' + (hp < mx ? ' (' + hp + '/' + mx + ')' : '') + '"><b>' + hp + '</b></span>';
     } else {
-      h += '<div class="mono ico">' + (AICON[c.id] || '✨') + '</div><div class="adesc">' + esc(c.text) + '</div>' + (c.theme ? '<div class="tags">' + tagHtml(c.theme) + '</div>' : '');
+      h += '<div class="mono ico">' + ic(AICON[c.id] || 'brillo') + '</div><div class="adesc">' + esc(c.text) + '</div>' + (c.theme ? '<div class="tags">' + tagHtml(c.theme) + '</div>' : '');
     }
     if (o.extra) h += o.extra;
     return h + '</' + tag + '>';
   }
 
   // ---------- Navegación ----------
-  var NAV = [['home', '🏠 Inicio'], ['play', '⚔ Jugar'], ['deck', '🃏 Mazo'], ['packs', '🎁 Sobres'], ['themes', '✨ Sinergias'], ['rules', '📖 Normas']];
+  var NAV = [['home', 'casa', 'Inicio'], ['play', 'espadas', 'Jugar'], ['deck', 'cartas', 'Mazo'], ['packs', 'regalo', 'Sobres'], ['themes', 'brillo', 'Sinergias'], ['rules', 'libro', 'Normas']];
   function navHtml(cur) {
-    return '<nav class="nav">' + NAV.map(function (n) { return '<button class="navb' + (n[0] === cur ? ' on' : '') + '" data-act="nav" data-to="' + n[0] + '">' + n[1] + '</button>'; }).join('') +
-      '<span class="navsp"></span>' + (ui.acct ? '<button class="navb coinpill" data-act="nav" data-to="packs" title="Tus monedas">🪙 ' + ui.acct.coins + '</button><span class="acctw"><button class="navb who" data-act="acctmenu" title="Tu cuenta">👤 ' + esc(ui.acct.name) + ' ▾</button><div class="acctmenu"><div class="am-name">Sesión de <b>' + esc(ui.acct.name) + '</b></div><button data-act="logout">🚪 Cerrar sesión</button></div></span>' : '') + '<a class="navb" href="/">← Hub</a><button class="navb" data-act="lock" title="Bloquear">🔒</button></nav>';
+    return '<nav class="nav">' + NAV.map(function (n) { return '<button class="navb' + (n[0] === cur ? ' on' : '') + '" data-act="nav" data-to="' + n[0] + '">' + ic(n[1]) + ' ' + n[2] + '</button>'; }).join('') +
+      '<span class="navsp"></span>' + (ui.acct ? '<button class="navb coinpill" data-act="nav" data-to="packs" title="Tus monedas">' + ic('moneda') + ' ' + ui.acct.coins + '</button><span class="acctw"><button class="navb who" data-act="acctmenu" title="Tu cuenta">' + ic('usuario') + ' ' + esc(ui.acct.name) + ' ▾</button><div class="acctmenu"><div class="am-name">Sesión de <b>' + esc(ui.acct.name) + '</b></div><button data-act="logout">' + ic('puerta') + ' Cerrar sesión</button></div></span>' : '') + '<a class="navb" href="/">← Hub</a><button class="navb" data-act="lock" title="Bloquear">' + ic('candado') + '</button></nav>';
   }
   function head(cur, title) { return '<div class="wrap">' + navHtml(cur) + (title ? '<h1 class="ptitle">' + title + '</h1>' : ''); }
   function deckSize() { return E.deckSize(ui.deck); }
@@ -89,13 +89,13 @@
   }
   function renderHome() {
     var n = Object.keys(D.themes).length;
-    var h = head('home') + '<div class="hero">' + heroCards() + '<img src="/cartas/logo.svg" alt="" class="hero-logo"><h1>Juego de Cartas</h1><p class="mut">Mazos con sinergias combinables, combates por rondas y memes de la pandilla.</p><button class="btn big cta" data-act="nav" data-to="play">⚔ ¡Jugar ahora!</button></div>';
+    var h = head('home') + '<div class="hero">' + heroCards() + '<img src="/cartas/logo.svg" alt="" class="hero-logo"><h1>Juego de Cartas</h1><p class="mut">Mazos con sinergias combinables, combates por rondas y memes de la pandilla.</p><button class="btn big cta" data-act="nav" data-to="play">' + ic('espadas') + ' ¡Jugar ahora!</button></div>';
     h += '<div class="menu">' + [
-      ['play', '⚔', 'Jugar', 'Elige modo: contra la IA, jugador contra jugador o versus de 4.'],
-      ['deck', '🃏', 'Mazo', 'Elige tus cartas (' + deckSize() + '/' + CFG.deckBudget + ') y guarda hasta 3 mazos.'],
-      ['packs', '🎁', 'Sobres', 'Abre sobres con tus monedas (' + (ui.acct ? ui.acct.coins : 0) + ' 🪙) y amplía tu colección.'],
-      ['themes', '✨', 'Sinergias', n + ' sinergias con sus niveles y cartas.'],
-      ['rules', '📖', 'Normas', 'Cómo funcionan las rondas, la tienda y el combate.'],
+      ['play', ic('espadas'), 'Jugar', 'Elige modo: contra la IA, jugador contra jugador o versus de 4.'],
+      ['deck', ic('cartas'), 'Mazo', 'Elige tus cartas (' + deckSize() + '/' + CFG.deckBudget + ') y guarda hasta 3 mazos.'],
+      ['packs', ic('regalo'), 'Sobres', 'Abre sobres con tus monedas (' + (ui.acct ? ui.acct.coins : 0) + ' ' + ic('moneda') + ') y amplía tu colección.'],
+      ['themes', ic('brillo'), 'Sinergias', n + ' sinergias con sus niveles y cartas.'],
+      ['rules', ic('libro'), 'Normas', 'Cómo funcionan las rondas, la tienda y el combate.'],
     ].map(function (m) { return '<button class="menu-i m-' + m[0] + '" data-act="nav" data-to="' + m[0] + '"><span class="mi">' + m[1] + '</span><b>' + m[2] + '</b><span class="mut">' + m[3] + '</span></button>'; }).join('') + '</div>';
     h += '<p class="mut" style="text-align:center">' + D.cards.length + ' tropas · ' + D.actions.length + ' acciones · prototipo</p></div>';
     app.innerHTML = h;
@@ -103,7 +103,7 @@
 
   function renderBoot() { app.innerHTML = '<div class="wrap"><p class="mut" style="text-align:center;margin-top:30vh">Cargando…</p></div>'; }
   function renderLogin() {
-    app.innerHTML = '<div class="wrap"><div class="loginbox panel"><div class="lg-ico">🃏</div><h1>Juego de Cartas</h1><p class="mut">Crea tu cuenta con un nombre y un PIN de 4 dígitos para guardar tus monedas y tu colección. Apunta el PIN: no se puede recuperar.</p>' +
+    app.innerHTML = '<div class="wrap"><div class="loginbox panel"><div class="lg-ico">' + ic('cartas') + '</div><h1>Juego de Cartas</h1><p class="mut">Crea tu cuenta con un nombre y un PIN de 4 dígitos para guardar tus monedas y tu colección. Apunta el PIN: no se puede recuperar.</p>' +
       '<label>Nombre<input id="lg-name" maxlength="16" autocomplete="username" placeholder="Tu nombre" value="' + esc(ui.lgName || '') + '"></label>' +
       '<label>PIN<input id="lg-pin" type="password" inputmode="numeric" maxlength="4" autocomplete="current-password" placeholder="0000"></label>' +
       (ui.msg ? '<div class="hint" style="color:var(--bad)">' + esc(ui.msg) + '</div>' : '') +
@@ -111,20 +111,20 @@
       '<p class="mut" style="margin:.6rem 0 0">Al crear la cuenta recibes ' + 150 + ' monedas y todas las cartas Comunes.</p></div></div>';
   }
   function bpkHtml(cls) {
-    return '<div class="bpk ' + (cls || '') + '"><div class="bpk-glow"></div><div class="bpk-rays"></div><div class="bpk-main"><span>🃏</span><b>SOBRE</b><i>' + (ui.acct ? ui.acct.packSize : 5) + ' cartas</i></div><div class="bpk-lid"></div></div>';
+    return '<div class="bpk ' + (cls || '') + '"><div class="bpk-glow"></div><div class="bpk-rays"></div><div class="bpk-main"><span>' + ic('cartas') + '</span><b>SOBRE</b><i>' + (ui.acct ? ui.acct.packSize : 5) + ' cartas</i></div><div class="bpk-lid"></div></div>';
   }
   var GEM = { 'Común': '●', 'Rara': '◆', 'Épica': '✦', 'Legendaria': '★' };
   var RANK = ['Común', 'Rara', 'Épica', 'Legendaria'];
   function renderPacks() {
     var a = ui.acct, total = D.cards.length + D.actions.length, can = a.coins >= a.packCost && !ui.pack;
-    var h = head('packs', '🎁 Sobres') + '<div class="packs-grid">' +
+    var h = head('packs', '' + ic('regalo') + ' Sobres') + '<div class="packs-grid">' +
       '<div class="panel packbox">' + bpkHtml('') + '<h2>Sobre estándar</h2><p class="mut">' + a.packSize + ' cartas al azar de todo el juego (tropas y acciones). La última siempre es Rara o mejor. Las cartas que ya tengas se cambian por monedas.</p>' +
-      '<button class="btn cta big" data-act="openpack"' + (can ? '' : ' disabled') + '>' + (a.packCost ? 'Abrir sobre · ' + a.packCost + ' 🪙' : 'Abrir sobre · gratis') + '</button>' + (a.coins < a.packCost ? '<p class="mut">Te faltan ' + (a.packCost - a.coins) + ' monedas.</p>' : '') + (ui.msg ? '<div class="hint" style="color:var(--bad)">' + esc(ui.msg) + '</div>' : '') + '</div>' +
-      '<div class="panel"><h2>Tus monedas</h2><div class="coinbig">🪙 ' + a.coins + '</div>' +
-      '<div class="dailybox">' + (a.dailyAvailable ? '<button class="btn" data-act="daily">🎁 Recompensa diaria · +' + a.dailyCoins + ' 🪙</button>' : '<p class="mut">✔ Ya cobraste la recompensa de hoy. Vuelve mañana.</p>') + '</div>' +
-      '<h2 style="margin-top:1rem">Cómo conseguir monedas</h2><ul class="rules"><li><b>Recompensa diaria:</b> +' + a.dailyCoins + ' 🪙 cada día.</li><li><b>Partidas contra la IA:</b> +10 🪙 por partida y +20 🪙 más si ganas (hoy llevas ' + a.gamesToday + '/' + a.maxGamesToday + ' partidas con premio). Las partidas muy cortas no dan monedas.</li><li><b>Cartas repetidas:</b> Común +5, Rara +15, Épica +40, Legendaria +100 🪙.</li></ul></div>' +
+      '<button class="btn cta big" data-act="openpack"' + (can ? '' : ' disabled') + '>' + (a.packCost ? 'Abrir sobre · ' + a.packCost + ' ' + ic('moneda') + '' : 'Abrir sobre · gratis') + '</button>' + (a.coins < a.packCost ? '<p class="mut">Te faltan ' + (a.packCost - a.coins) + ' monedas.</p>' : '') + (ui.msg ? '<div class="hint" style="color:var(--bad)">' + esc(ui.msg) + '</div>' : '') + '</div>' +
+      '<div class="panel"><h2>Tus monedas</h2><div class="coinbig">' + ic('moneda') + ' ' + a.coins + '</div>' +
+      '<div class="dailybox">' + (a.dailyAvailable ? '<button class="btn" data-act="daily">' + ic('regalo') + ' Recompensa diaria · +' + a.dailyCoins + ' ' + ic('moneda') + '</button>' : '<p class="mut">' + ic('check') + ' Ya cobraste la recompensa de hoy. Vuelve mañana.</p>') + '</div>' +
+      '<h2 style="margin-top:1rem">Cómo conseguir monedas</h2><ul class="rules"><li><b>Recompensa diaria:</b> +' + a.dailyCoins + ' ' + ic('moneda') + ' cada día.</li><li><b>Partidas contra la IA:</b> +10 ' + ic('moneda') + ' por partida y +20 ' + ic('moneda') + ' más si ganas (hoy llevas ' + a.gamesToday + '/' + a.maxGamesToday + ' partidas con premio). Las partidas muy cortas no dan monedas.</li><li><b>Cartas repetidas:</b> Común +5, Rara +15, Épica +40, Legendaria +100 ' + ic('moneda') + '.</li></ul></div>' +
       '<div class="panel"><h2>Tu colección</h2><div class="coinbig">' + a.owned.length + ' / ' + total + '</div><div class="meter colm"><i class="on" style="width:' + Math.round(a.owned.length / total * 100) + '%"></i></div><p class="mut">Solo puedes usar en tu mazo las cartas que tienes. Mira cuáles te faltan en la pestaña Mazo.</p>' +
-      '<button class="btn sec" data-act="nav" data-to="deck">🃏 Ir al mazo</button></div></div>';
+      '<button class="btn sec" data-act="nav" data-to="deck">' + ic('cartas') + ' Ir al mazo</button></div></div>';
     app.innerHTML = h + packOverlay() + '</div>';
   }
   function packHint() {
@@ -143,30 +143,30 @@
     return '<div class="packov' + (best === 'Legendaria' ? ' rainbowpost' : '') + '" data-act="packbg"><div class="pcards">' + pk.cards.map(function (c, i) {
       var cd = CARD[c.id];
       return '<div class="pcard r-' + cd.rarity + (pk.rev[i] ? ' flipped' : '') + '" data-act="flipcard" data-i="' + i + '" style="--d:' + i * 0.12 + 's"><div class="pin"><div class="pback"><span>' + GEM[cd.rarity] + '</span></div><div class="pfront">' + cardHtml(cd, {}) +
-        (c.isNew ? '<span class="pnew">¡NUEVA!</span>' : '<span class="pdup">Repetida +' + c.dupCoins + ' 🪙</span>') + '</div></div></div>';
-    }).join('') + '</div><div class="pactions"><button class="btn sec" data-act="flipall"' + (allRev ? ' style="visibility:hidden"' : '') + '>Girar todas</button></div>' + (gain ? '<p class="pgain">+' + gain + ' 🪙 por cartas repetidas</p>' : '') + '<p class="pmsg' + (allRev ? ' pulse' : '') + '">' + (allRev ? 'Haz clic en un espacio vacío para continuar' : 'Pulsa cada carta para girarla · el color del reverso te dice su rareza') + '</p></div>';
+        (c.isNew ? '<span class="pnew">¡NUEVA!</span>' : '<span class="pdup">Repetida +' + c.dupCoins + ' ' + ic('moneda') + '</span>') + '</div></div></div>';
+    }).join('') + '</div><div class="pactions"><button class="btn sec" data-act="flipall"' + (allRev ? ' style="visibility:hidden"' : '') + '>Girar todas</button></div>' + (gain ? '<p class="pgain">+' + gain + ' ' + ic('moneda') + ' por cartas repetidas</p>' : '') + '<p class="pmsg' + (allRev ? ' pulse' : '') + '">' + (allRev ? 'Haz clic en un espacio vacío para continuar' : 'Pulsa cada carta para girarla · el color del reverso te dice su rareza') + '</p></div>';
   }
   function renderModes() {
     var modes = [
-      ['ai', '🤖', 'Contra la IA', 'Duelo 1 contra 1 con tu mazo. Disponible ahora.', true],
-      ['pvp', '⚔️', 'Jugador contra jugador', 'Reta a otro jugador en un duelo 1 contra 1.', false],
-      ['vs4', '👥', 'Versus de 4', 'Cuatro jugadores en la misma partida.', false],
+      ['ai', ic('robot'), 'Contra la IA', 'Duelo 1 contra 1 con tu mazo. Disponible ahora.', true],
+      ['pvp', ic('espadas'), 'Jugador contra jugador', 'Reta a otro jugador en un duelo 1 contra 1.', false],
+      ['vs4', ic('grupo'), 'Versus de 4', 'Cuatro jugadores en la misma partida.', false],
     ];
-    app.innerHTML = head('play', '⚔ Elige modo de juego') + '<p class="mut">Tu mazo actual (' + deckSize() + '/' + CFG.deckBudget + ') se usará en cualquier modo.</p><div class="modes">' +
+    app.innerHTML = head('play', '' + ic('espadas') + ' Elige modo de juego') + '<p class="mut">Tu mazo actual (' + deckSize() + '/' + CFG.deckBudget + ') se usará en cualquier modo.</p><div class="modes">' +
       modes.map(function (m) {
         return '<button class="mode m-' + m[0] + (m[4] ? '' : ' off') + '"' + (m[4] ? ' data-act="startai"' : ' disabled aria-disabled="true"') + '><span class="mi">' + m[1] + '</span><b>' + m[2] + '</b><span class="mut">' + m[3] + '</span>' +
-          (m[4] ? '<span class="go">¡Jugar!</span>' : '<span class="soon">🔒 Próximamente</span>') + '</button>';
+          (m[4] ? '<span class="go">¡Jugar!</span>' : '<span class="soon">' + ic('candado') + ' Próximamente</span>') + '</button>';
       }).join('') + '</div></div>';
   }
   function renderRules() {
     var sec = function (t, items) { return '<div class="panel"><h2>' + t + '</h2><ul class="rules">' + items.map(function (i) { return '<li>' + i + '</li>'; }).join('') + '</ul></div>'; };
-    app.innerHTML = head('rules', '📖 Normas') +
+    app.innerHTML = head('rules', '' + ic('libro') + ' Normas') +
       sec('Objetivo', ['Es un 1 contra 1. Empiezas con <b>12 de vida</b>; gana quien deje la vida del rival a 0.']) +
       sec('Tu mazo', ['El mazo tiene un <b>presupuesto de espacio de ' + CFG.deckBudget + '</b>: las tropas baratas ocupan 1, las medias 2 y las de coste 5 ocupan 3; las acciones ocupan 1. Lo ves en los cuadraditos de la esquina de cada carta.', 'No hay cartas duplicadas en el mazo, pero una misma carta puede salir varias veces en la tienda.', 'Necesitas al menos una tropa <b>Común</b>.']) +
       sec('Cartas', ['El <b>círculo dorado</b> es lo que cuesta comprarla en oro.', 'El <b>círculo naranja</b> es el ataque y el <b>verde</b> la vida.', 'El color de la carta mezcla los de sus sinergias y el borde indica la rareza (gris Común, azul Rara, morado Épica, dorado Legendaria).']) +
       sec('Primera ronda', ['La partida empieza con una <b>tienda</b>: ambos jugadores tienen <b>' + (CFG.gold + CFG.income) + ' de oro</b> y solo salen tropas Comunes y cualquier acción de tu mazo (siempre con al menos 3 tropas; las acciones se guardan para jugarlas en combate). Si te quedas <b>sin tropas y sin oro</b> para comprar ninguna (ni para actualizar), pierdes automáticamente. Pulsa una carta para comprarla, colócala (pulsando o arrastrándola) y termina la tienda.']) +
       sec('Una ronda de combate', ['Cada ronda ganas <b>2 de oro</b> (se reinicia cada partida y es distinto de las monedas de los sobres).', 'Tienes <b>4 huecos en mesa</b> y una <b>mano de 5</b>.', 'En la preparación colocas tropas (pulsando o arrastrando desde la mano), juegas acciones y <b>debes elegir objetivo para cada una de tus tropas</b>: no se puede combatir hasta que todas tengan uno. Puedes deshacerlos todos con el botón «Deshacer objetivos». El rival no ve tus objetivos.', '<b>La tienda dura 1 minuto</b>: al acabarse se cierra sola y pasas al combate. <b>Tienes 45 segundos</b> por ronda de combate (el reloj se ve arriba). Si se acaban y faltan objetivos por elegir, <b>pierdes la partida</b>; si ya estaban todos elegidos, el combate empieza solo.']) +
-      sec('Tienda', ['Hay tienda <b>cada 3 rondas</b> (rondas 1, 4, 7…). En una ronda de tienda <b>no hay combate</b>.', 'La tienda ofrece 5 cartas al azar de tu propio mazo; pulsa una para comprarla. El botón redondo ↻ la actualiza por 1 de oro.', '<b>Solo en las rondas de tienda</b> puedes retirar tropas de la mesa; el resto del tiempo puedes colocar si hay hueco, pero no quitar.', 'Las tropas de coste 5 aparecen a partir de la segunda tienda.']) +
+      sec('Tienda', ['Hay tienda <b>cada 3 rondas</b> (rondas 1, 4, 7…). En una ronda de tienda <b>no hay combate</b>.', 'La tienda ofrece 5 cartas al azar de tu propio mazo; pulsa una para comprarla. El botón redondo ' + ic('cambio') + ' la actualiza por 1 de oro.', '<b>Solo en las rondas de tienda</b> puedes retirar tropas de la mesa; el resto del tiempo puedes colocar si hay hueco, pero no quitar.', 'Las tropas de coste 5 aparecen a partir de la segunda tienda.']) +
       sec('Combate', ['Los ataques se resuelven de uno en uno, alternando bandos de izquierda a derecha. Cada tropa ataca <b>una vez por ronda</b>. El bando que empieza se alterna cada ronda.', 'Si el objetivo ya murió, el ataque va a una tropa rival viva al azar.', 'No se puede atacar al jugador directamente: <b>recibes daño solo si todas tus tropas han muerto</b> y a tu rival le quedan tropas por atacar; el daño es igual a su ataque.', '<b>Las tropas no se curan entre rondas</b>: el daño se acumula. Solo se curan del todo al volver a tu mano (retirándolas en la tienda). Las muertas liberan su hueco y los bonus de «esta ronda» desaparecen.', 'Si en una ronda sin tienda no tienes tropas ni en mesa ni en mano, <b>pierdes automáticamente</b>.']) +
       sec('Sinergias', ['Cada tropa tiene 1 o 2 sinergias. Cuentan las <b>cartas distintas</b> de cada sinergia entre mesa y mano (las copias no suman; las acciones no cuentan para la sinergia, aunque las de color pertenecen a una).', 'Al llegar a ciertos números (niveles) la sinergia da su bonificación. <b>Las mejoras de estadísticas son permanentes</b> (con un tope por tropa), salvo las de Voley, que solo duran la ronda, así que tus tropas se hacen más fuertes con la partida. En la partida ves a un lado cuántas llevas y cuántas necesitas.', 'Voley solo funciona con 2 o más cartas distintas de Voley entre mesa y mano; hasta entonces no puedes elegir ataque o defensa.']) +
       sec('Acciones', ['Se juegan en las <b>rondas de combate</b> (no en la tienda) y ocupan 1 de espacio. Las mejoras de estadísticas de las acciones son <b>permanentes</b>.', 'Generales: dar ataque o vida a una tropa o a todas las tuyas, y quitar ataque o hacer daño a una tropa rival o a todas.', 'Las de color son de una sinergia concreta y algunas piden condiciones (p. ej. tener el nivel 1 de esa sinergia); si no se cumplen, la carta te dice qué falta y no se gasta.', 'Comebacker compara la <b>vida actual</b> de las tropas en mesa, no la máxima.']) +
@@ -175,7 +175,7 @@
 
   function themeCards(t) { return D.cards.filter(function (c) { return c.themes.indexOf(t) >= 0; }).concat(D.actions.filter(function (a) { return a.theme === t; })); }
   function renderThemes() {
-    var h = head('themes', '✨ Sinergias') + '<p class="mut">Pulsa «Ver en el mazo» para filtrar las cartas de esa sinergia.</p>';
+    var h = head('themes', '' + ic('brillo') + ' Sinergias') + '<p class="mut">Pulsa «Ver en el mazo» para filtrar las cartas de esa sinergia.</p>';
     Object.keys(D.themes).forEach(function (t) {
       var T = D.themes[t], cs = themeCards(t);
       h += '<div class="panel"><h2>' + tagHtml(t) + ' <span class="mut" style="letter-spacing:0;text-transform:none">· ' + cs.length + ' cartas</span></h2>' +
@@ -193,13 +193,13 @@
     for (var i = 0; i < 3; i++) {
       var sl = ui.slots[i], cur = sl && sameDeck(sl.ids, ui.deck);
       h += '<div class="sl' + (sl ? '' : ' empty') + (cur ? ' cur' : '') + '">';
-      if (sl) h += '<b>' + esc(sl.name) + (cur ? ' ✓' : '') + '</b><span class="mut">' + E.deckSize(sl.ids) + '/' + CFG.deckBudget + ' espacio · ' + sl.ids.length + ' cartas</span><div class="bar" style="margin:.3rem 0 0"><button class="btn sec sm" data-act="slot-load" data-i="' + i + '">Cargar</button><button class="btn sec sm" data-act="slot-del" data-i="' + i + '" title="Borrar">🗑</button></div>';
+      if (sl) h += '<b>' + esc(sl.name) + (cur ? ' ' + ic('check') : '') + '</b><span class="mut">' + E.deckSize(sl.ids) + '/' + CFG.deckBudget + ' espacio · ' + sl.ids.length + ' cartas</span><div class="bar" style="margin:.3rem 0 0"><button class="btn sec sm" data-act="slot-load" data-i="' + i + '">Cargar</button><button class="btn sec sm" data-act="slot-del" data-i="' + i + '" title="Borrar">' + ic('papelera') + '</button></div>';
       else h += '<b>Hueco ' + (i + 1) + '</b><span class="mut">Vacío</span>';
       h += '</div>';
     }
     h += '</div><div class="bar"><input id="slot-name" maxlength="20" placeholder="Nombre del mazo" value="' + esc(ui.slotName) + '"><select id="slot-to">' +
       [0, 1, 2].map(function (i) { return '<option value="' + i + '"' + (ui.slotTo === i ? ' selected' : '') + '>Hueco ' + (i + 1) + (ui.slots[i] ? ' (' + esc(ui.slots[i].name) + ')' : ' (vacío)') + '</option>'; }).join('') +
-      '</select><button class="btn sec" data-act="slot-save"' + (ui.deck.length ? '' : ' disabled') + '>💾 Guardar mazo actual</button></div>';
+      '</select><button class="btn sec" data-act="slot-save"' + (ui.deck.length ? '' : ' disabled') + '>' + ic('disquete') + ' Guardar mazo actual</button></div>';
     if (ui.msg) h += '<div class="hint">' + esc(ui.msg) + '</div>';
     return h;
   }
@@ -216,7 +216,7 @@
   }
   function deckCard(c) {
     var inn = ui.deck.indexOf(c.id) >= 0, own = owns(c.id);
-    return cardHtml(c, { size: true, cls: (inn ? 'in' : '') + (own ? '' : ' locked'), extra: own ? '' : '<span class="lockb">🔒</span>', attrs: 'data-act="toggle" data-id="' + c.id + '"', tag: 'button' });
+    return cardHtml(c, { size: true, cls: (inn ? 'in' : '') + (own ? '' : ' locked'), extra: own ? '' : '<span class="lockb">' + ic('candado') + '</span>', attrs: 'data-act="toggle" data-id="' + c.id + '"', tag: 'button' });
   }
   function filtered() {
     var f = ui.filters, all = D.cards.concat(D.actions).filter(function (c) { return !ui.onlyOwned || owns(c.id); });
@@ -231,10 +231,10 @@
   function renderDeck() {
     var used = deckSize(), troops = ui.deck.filter(function (id) { return CARD[id].type === 'tropa'; }).length, err = deckError();
     var segs = ''; for (var k = 0; k < CFG.deckBudget; k++) segs += '<i' + (k < used ? ' class="on"' : '') + '></i>';
-    var h = head('deck', '🃏 Tu mazo') + '<div class="panel"><h2>Mazos guardados (máx. 3)</h2>' + slotsHtml() + '</div>';
+    var h = head('deck', '' + ic('cartas') + ' Tu mazo') + '<div class="panel"><h2>Mazos guardados (máx. 3)</h2>' + slotsHtml() + '</div>';
     h += '<div class="panel"><div class="bar" style="margin:0"><span class="pill">Espacio <b>' + used + '/' + CFG.deckBudget + '</b></span><span class="pill">' + troops + ' tropas</span>' +
-      '<button class="btn sec" data-act="randdeck">🎲 Aleatorio</button><button class="btn sec" data-act="cleardeck">Vaciar</button>' +
-      '<button class="btn" data-act="nav" data-to="play"' + (err ? ' disabled' : '') + '>⚔ Jugar</button></div><div class="meter">' + segs + '</div>' +
+      '<button class="btn sec" data-act="randdeck">' + ic('dado') + ' Aleatorio</button><button class="btn sec" data-act="cleardeck">Vaciar</button>' +
+      '<button class="btn" data-act="nav" data-to="play"' + (err ? ' disabled' : '') + '>' + ic('espadas') + ' Jugar</button></div><div class="meter">' + segs + '</div>' +
       (err ? '<div class="hint" style="color:var(--bad)">' + esc(err) + '</div>' : '') +
       '<p class="legend"><span class="coin inl">3</span> coste en oro para comprarla · <span class="pips inl"><i class="on"></i><i class="on"></i><i></i></span> espacio que ocupa en el mazo · <span class="sc a inl"><b>4</b></span> ataque · <span class="sc h inl"><b>6</b></span> vida</p></div>';
     h += '<div class="deck-layout"><div class="deck-main">';
@@ -271,13 +271,13 @@
   }
   function synergyHtml(P, foe) {
     var c = E.themeCounts(P), keys = Object.keys(c).filter(function (t) { return !foe || E.tierOf(t, c[t]) > 0; }).sort(function (a, b) { return E.tierOf(b, c[b]) - E.tierOf(a, c[a]) || c[b] - c[a]; });
-    var h = '<div class="synside panel' + (foe ? ' foe' : '') + '"><h2>' + (foe ? '⚠ Sinergias del RIVAL' : 'Sinergias') + '</h2>';
+    var h = '<div class="synside panel' + (foe ? ' foe' : '') + '"><h2>' + (foe ? '' + ic('aviso') + ' Sinergias del RIVAL' : 'Sinergias') + '</h2>';
     if (!keys.length) return h + '<p class="mut">' + (foe ? 'El rival no tiene sinergias activas.' : 'Coloca tropas en mesa o mano.') + '</p></div>';
     h += '<div class="synlist">' + keys.map(function (t) {
       var T = D.themes[t], tier = E.tierOf(t, c[t]), nxt = T.th[tier];
       var tip = '<div class="tip"><b>' + esc(t) + '</b>' + T.tx.map(function (x, k) { return '<p' + (k + 1 === tier ? ' class="cur"' : '') + '><b>' + T.th[k] + ' cartas:</b> ' + esc(x) + '</p>'; }).join('') + '</div>';
       return '<div class="syn-row t' + tier + '" style="--tc:' + T.color + '" tabindex="0"><div class="hexa"><b>' + c[t] + '</b></div><div class="si"><b>' + esc(t) + '</b><div class="th">' +
-        T.th.map(function (n, k) { return '<i class="' + (k < tier ? 'on' : '') + '">' + n + '</i>'; }).join('') + '</div></div><span class="need">' + (nxt ? c[t] + '/' + nxt : '✓ máx') + '</span>' + tip + '</div>';
+        T.th.map(function (n, k) { return '<i class="' + (k < tier ? 'on' : '') + '">' + n + '</i>'; }).join('') + '</div></div><span class="need">' + (nxt ? c[t] + '/' + nxt : ic('check') + ' máx') + '</span>' + tip + '</div>';
     }).join('') + '</div></div>';
     return h;
   }
@@ -306,13 +306,13 @@
         if (sel && sel.k === 'act' && CARD[P0.hand[sel.i].id].target === 'ally' && E.validTarget(CARD[P0.hand[sel.i].id], I || v)) o.cls += ' tgtable';
         if (s.phase === 'prep' && !ui.playing && I && E.has(I, 'Voley') && !s.shopOpen && (E.tiers(P0).Voley || 0) >= 1) {
           var m = P0.voley[v.uid] || 'atk';
-          under += '<div class="mini"><button data-act="voley" data-uid="' + v.uid + '" data-m="atk" class="' + (m === 'atk' ? 'on' : '') + '">⚔ Ataque</button><button data-act="voley" data-uid="' + v.uid + '" data-m="def" class="' + (m === 'def' ? 'on' : '') + '">🛡 Defensa</button></div>';
+          under += '<div class="mini"><button data-act="voley" data-uid="' + v.uid + '" data-m="atk" class="' + (m === 'atk' ? 'on' : '') + '">' + ic('espadas') + ' Ataque</button><button data-act="voley" data-uid="' + v.uid + '" data-m="def" class="' + (m === 'def' ? 'on' : '') + '">' + ic('escudo') + ' Defensa</button></div>';
         }
-        if (shop && I && !E.has(I, 'Lol')) under += '<div class="mini"><button data-act="retire" data-slot="' + k + '">↩ Retirar</button></div>';
+        if (shop && I && !E.has(I, 'Lol')) under += '<div class="mini"><button data-act="retire" data-slot="' + k + '">' + ic('deshacer') + ' Retirar</button></div>';
       } else {
         o.attrs += ' data-act="foe"';
         if (prep && sel && (sel.k === 'mine' || (sel.k === 'act' && CARD[s.p[0].hand[sel.i].id].target === 'enemy'))) o.cls += ' tgtable';
-        if (prep && aim[v.uid]) o.extra = '<span class="aim">🎯×' + aim[v.uid] + '</span>';
+        if (prep && aim[v.uid]) o.extra = '<span class="aim">' + ic('diana') + '×' + aim[v.uid] + '</span>';
       }
       h += '<div class="cw">' + cardHtml(c, o) + under + '</div>';
     });
@@ -323,13 +323,13 @@
     var s = ui.s, view = ui.view || E.viewOf(s), P = s.p[0], R = s.p[1];
     var shopMode = s.shopOpen && !ui.playing, shop = shopMode && s.phase === 'prep', prep = s.phase === 'prep' && !ui.playing && !s.shopOpen;
     var pend = prep ? E.pendingTargets(s).length : 0, hasT = Object.keys(P.target).length > 0;
-    var h = '<div class="gwrap' + (shopMode ? ' shopmode' : '') + '"><div class="top"><div><h1>Ronda ' + s.round + ' · ' + (s.shopOpen ? '🛒 Tienda' + (s.round === 1 ? ' inicial' : '') : '⚔ Combate') + (!s.shopOpen ? ' <span class="mut">· ' + (s.first === 0 ? 'atacas primero' : 'ataca primero el rival') + '</span>' : '') + '</h1></div><div><button class="lnk" data-act="menu" data-to="deck">🃏 Mazo</button> · <button class="lnk" data-act="menu" data-to="home">🏠 Menú</button></div></div>' + timerHtml(prep || shop) + '';
+    var h = '<div class="gwrap' + (shopMode ? ' shopmode' : '') + '"><div class="top"><div><h1>Ronda ' + s.round + ' · ' + (s.shopOpen ? '' + ic('carrito') + ' Tienda' + (s.round === 1 ? ' inicial' : '') : '' + ic('espadas') + ' Combate') + (!s.shopOpen ? ' <span class="mut">· ' + (s.first === 0 ? 'atacas primero' : 'ataca primero el rival') + '</span>' : '') + '</h1></div><div><button class="lnk" data-act="menu" data-to="deck">' + ic('cartas') + ' Mazo</button> · <button class="lnk" data-act="menu" data-to="home">' + ic('casa') + ' Menú</button></div></div>' + timerHtml(prep || shop) + '';
     h += '<div class="gmain"><aside class="gl">' + synergyHtml(P) + '</aside><section class="gc"><div class="board" id="board">';
     if (!shopMode) h += '<div class="hud top">' + orb('life', view.life[1], CFG.life, 'Rival', 1) + '</div>' + mesaRow(1, view, s, false) + '<div class="gap"></div>';
     h += mesaRow(0, view, s, true);
     // HUD inferior: vida, oro y acciones
     var acts = '';
-    if (ui.playing) acts = '<button class="btn sec" data-act="skip">⏩ Saltar animación</button>';
+    if (ui.playing) acts = '<button class="btn sec" data-act="skip">' + ic('avance') + ' Saltar animación</button>';
     else if (s.phase === 'over') acts = '';
     else if (shop) {
       var any = P.mesa.some(Boolean) || P.hand.length;
@@ -337,7 +337,7 @@
     } else if (prep) {
       var msg = ui.hint || (!P.mesa.some(Boolean) ? 'Coloca tropas de tu mano en la mesa.' : pend ? 'Pulsa una tropa tuya y después la rival a la que atacará.' : 'Todos los objetivos elegidos.');
       if (pend && P.mesa.some(Boolean)) msg = (ui.hint ? ui.hint + ' · ' : '') + 'Faltan ' + pend + ' por elegir objetivo.';
-      acts = '<div class="hint">' + esc(msg) + '</div><div class="btnrow"><button class="btn big" data-act="fight"' + (pend || (!P.mesa.some(Boolean) && E.mesaTroops(R).length) ? ' disabled' : '') + '>⚔ ¡Combatir!</button><button class="btn sec sm" data-act="undo"' + (hasT ? '' : ' disabled') + ' title="Quitar todos los objetivos elegidos">↩ Deshacer</button></div>';
+      acts = '<div class="hint">' + esc(msg) + '</div><div class="btnrow"><button class="btn big" data-act="fight"' + (pend || (!P.mesa.some(Boolean) && E.mesaTroops(R).length) ? ' disabled' : '') + '>' + ic('espadas') + ' ¡Combatir!</button><button class="btn sec sm" data-act="undo"' + (hasT ? '' : ' disabled') + ' title="Quitar todos los objetivos elegidos">' + ic('deshacer') + ' Deshacer</button></div>';
     } else if (s.phase === 'post') acts = ui.busy ? '' : '<div class="hint">Puedes ceder estadísticas Anime antes de seguir.</div><button class="btn big" data-act="next">Continuar ▶</button>';
     h += '<div class="hud bottom">' + orb('life', view.life[0], CFG.life, 'Tu vida', 0) + orb('gold', P.gold, 0, 'Tu oro') + '<div class="acts">' + acts + '</div></div></div>';
 
@@ -353,7 +353,7 @@
     // Tienda (bajo la mano): pulsar una carta para comprarla
     if (shop) {
       var t = E.tiers(P), rc = E.refreshCost(s, 0);
-      h += '<div class="shopwrap"><div class="hl">🛒 Tienda' + (s.round === 1 ? ' (solo Comunes)' : '') + ' · pulsa una carta para comprarla</div><div class="shoprow">';
+      h += '<div class="shopwrap"><div class="hl">' + ic('carrito') + ' Tienda' + (s.round === 1 ? ' (solo Comunes)' : '') + ' · pulsa una carta para comprarla</div><div class="shoprow">';
       for (var k = 0; k < CFG.shopOffers; k++) {
         var id = P.offers[k];
         if (!id) { h += '<div class="cw"><div class="slot">Vendida</div></div>'; continue; }
@@ -372,7 +372,7 @@
       var opts = an.map(function (i) { return '<option value="' + i.uid + '">' + esc(CARD[i.id].name) + ' (' + E.atk(i) + '/' + E.maxHp(i) + ')</option>'; }).join('');
       h += '<div class="panel"><h2>Anime · ceder (' + P.anime + ')</h2><div class="bar"><select id="an-from">' + opts + '</select><span>→</span><select id="an-to">' + opts + '</select></div><div class="bar"><button class="btn sec sm" data-act="cede" data-stat="atk">Ceder ataque</button><button class="btn sec sm" data-act="cede" data-stat="hp">Ceder vida</button></div></div>';
     } else h += '<div></div>';
-    h += '<div class="foesyn">' + (s.shopOpen ? '<div class="synside panel foe locked"><h2>⚠ Sinergias del RIVAL</h2><p class="mut">🔒 Ocultas durante la tienda. Se revelan cuando empieza el combate.</p></div>' : synergyHtml(R, true)) + '</div>';
+    h += '<div class="foesyn">' + (s.shopOpen ? '<div class="synside panel foe locked"><h2>' + ic('aviso') + ' Sinergias del RIVAL</h2><p class="mut">' + ic('candado') + ' Ocultas durante la tienda. Se revelan cuando empieza el combate.</p></div>' : synergyHtml(R, true)) + '</div>';
     var shown = s.log.slice(-14);
     h += '<div class="panel logp"><h2>Registro</h2><div class="log" id="log">' + shown.map(function (l, n) { return '<div' + (n === shown.length - 1 ? ' class="cur"' : '') + '>' + esc(l.text) + '</div>'; }).join('') + '</div></div></aside></div>';
     if (s.phase === 'over' && !ui.playing) {
@@ -385,9 +385,9 @@
           if (ui.s === s && ui.screen === 'game' && s.phase === 'over' && !ui.playing) render();
         });
       }
-      var rw = ui.reward ? (ui.reward.gained > 0 ? '<p class="reward">+' + ui.reward.gained + ' 🪙 monedas</p>' : '<p class="mut">Sin monedas esta vez (partida muy corta o límite diario alcanzado).</p>') : '<p class="mut">Calculando recompensa…</p>';
+      var rw = ui.reward ? (ui.reward.gained > 0 ? '<p class="reward">+' + ui.reward.gained + ' ' + ic('moneda') + ' monedas</p>' : '<p class="mut">Sin monedas esta vez (partida muy corta o límite diario alcanzado).</p>') : '<p class="mut">Calculando recompensa…</p>';
       var conf = ''; if (win) for (var q = 0; q < 36; q++) conf += '<i style="left:' + (q * 2.8 + (q % 3)) + '%;--d:' + ((q * 37) % 100) / 100 * 1.2 + 's;--c:' + ['#ffc533', '#ff6b8b', '#4f9dff', '#38d39f', '#a78bfa'][q % 5] + '"></i>';
-      h += '<div class="overlay ' + (win ? 'owin' : 'olose') + '">' + (win ? '<div class="confetti">' + conf + '</div>' : '') + '<div class="panel over"><div class="obig">' + (win ? '🏆' : '💔') + '</div><h2>' + (win ? '¡Victoria!' : 'Derrota') + '</h2><p class="mut">' + esc(s.reason) + ' · ronda ' + s.round + '</p>' + rw + '<button class="btn big" data-act="play">Jugar otra vez</button> <button class="btn sec" data-act="menu" data-to="deck">Cambiar mazo</button> <button class="btn sec" data-act="menu" data-to="home">Menú</button></div></div>';
+      h += '<div class="overlay ' + (win ? 'owin' : 'olose') + '">' + (win ? '<div class="confetti">' + conf + '</div>' : '') + '<div class="panel over"><div class="obig">' + (win ? '' + ic('trofeo') + '' : '' + ic('corazonroto') + '') + '</div><h2>' + (win ? '¡Victoria!' : 'Derrota') + '</h2><p class="mut">' + esc(s.reason) + ' · ronda ' + s.round + '</p>' + rw + '<button class="btn big" data-act="play">Jugar otra vez</button> <button class="btn sec" data-act="menu" data-to="deck">Cambiar mazo</button> <button class="btn sec" data-act="menu" data-to="home">Menú</button></div></div>';
     }
     h += '</div>';
     app.innerHTML = h;
@@ -423,13 +423,13 @@
   function timerHtml(prep) {
     if (!prep || !ui.deadline) return '';
     var L = limit(), sec = Math.min(L, Math.ceil(remaining() / 1000));
-    return '<div class="timer' + (sec <= 10 ? ' low' : '') + '" id="timer"><span class="tl">⏱ ' + (ui.s.shopOpen ? 'Tienda' : 'Elige objetivos') + '</span><b id="tsec">' + sec + '</b><span>s</span><div class="tbar"><i id="tfill" style="width:' + Math.min(100, remaining() / (L * 10)) + '%"></i></div></div>';
+    return '<div class="timer' + (sec <= 10 ? ' low' : '') + '" id="timer"><span class="tl">' + ic('reloj') + ' ' + (ui.s.shopOpen ? 'Tienda' : 'Elige objetivos') + '</span><b id="tsec">' + sec + '</b><span>s</span><div class="tbar"><i id="tfill" style="width:' + Math.min(100, remaining() / (L * 10)) + '%"></i></div></div>';
   }
   function timeUp() {
     var s = ui.s; ui.deadline = null;
     if (!s || s.over || s.phase !== 'prep') return;
-    if (s.shopOpen) { E.endShop(s); ui.sel = null; ui.hint = ''; showSplash({ kind: 'end', title: '⏱ ¡TIEMPO!', sub: 'Se cierra la tienda' }); announce(); return render(); }
-    if (E.pendingTargets(s).length) { E.forfeit(s, 0, 'Se acabó el tiempo para elegir objetivos.'); ui.sel = null; showSplash({ kind: 'combat', title: '⏱ ¡TIEMPO AGOTADO!', sub: 'No elegiste objetivos a tiempo' }); render(); return; }
+    if (s.shopOpen) { E.endShop(s); ui.sel = null; ui.hint = ''; showSplash({ kind: 'end', title: ic('reloj') + ' ¡TIEMPO!', sub: 'Se cierra la tienda' }); announce(); return render(); }
+    if (E.pendingTargets(s).length) { E.forfeit(s, 0, 'Se acabó el tiempo para elegir objetivos.'); ui.sel = null; showSplash({ kind: 'combat', title: ic('reloj') + ' ¡TIEMPO AGOTADO!', sub: 'No elegiste objetivos a tiempo' }); render(); return; }
     E.fight(s); ui.sel = null; ui.hint = ''; play();
   }
   setInterval(function () {
@@ -452,14 +452,14 @@
   }
 
     // ---------- Efectos de sinergia: cartel, bola, números flotantes ----------
-  var FXICON = { duo: '👯', novia: '💕', pueblo: '🏘️', nini: '🛋️', voley: '🏐', comeback: '🔥', tilt: '😡', koi: '🏆', trabajo: '💼' };
+  var FXICON = { duo: 'duo', novia: 'corazon', pueblo: 'pueblo', nini: 'sofa', voley: 'voley', comeback: 'fuego', tilt: 'enfado', koi: 'trofeo', trabajo: 'maletin' };
   function fxBanner() {
     var fx = ui.playing && ui.hl && ui.hl.fx; if (!fx) return;
     var b = document.getElementById('board'), row = b && b.querySelector('.row4.side' + fx.side); if (!row) return;
     var br = b.getBoundingClientRect(), rr = row.getBoundingClientRect(), el = document.createElement('div');
     el.className = 'fxb t-' + fx.type + (fx.neg ? ' neg' : '');
     el.style.top = (rr.top - br.top + rr.height / 2) + 'px'; el.style.left = (rr.left - br.left + rr.width / 2) + 'px';
-    var icon = fx.type === 'pokemon' ? '<div class="pball k' + fx.ball + '"></div><div class="pring"></div>' : '<div class="fxi">' + (fx.type === 'novia' && fx.neg ? '😤' : (FXICON[fx.type] || '✨')) + '</div>';
+    var icon = fx.type === 'pokemon' ? '<div class="pball k' + fx.ball + '"></div><div class="pring"></div>' : '<div class="fxi">' + ic(fx.type === 'novia' && fx.neg ? 'humo' : (FXICON[fx.type] || 'brillo')) + '</div>';
     el.innerHTML = icon + '<div class="fxt">' + esc(fx.title) + '</div><div class="fxs">' + esc(fx.sub) + '</div>';
     b.appendChild(el);
   }
@@ -471,7 +471,7 @@
       Object.keys(b).forEach(function (u) {
         var x = a[u], y = b[u]; if (!x) return;
         var da = y.atk - x.atk, dm = y.max - x.max, parts = [];
-        if (da) parts.push((da > 0 ? '+' : '') + da + '⚔'); if (dm) parts.push((dm > 0 ? '+' : '') + dm + '❤');
+        if (da) parts.push((da > 0 ? '+' : '') + da + '' + ic('espadas') + ''); if (dm) parts.push((dm > 0 ? '+' : '') + dm + '' + ic('corazon') + '');
         if (parts.length) out.push({ uid: +u, text: parts.join(' '), cls: (da < 0 || dm < 0) && !(da > 0 || dm > 0) ? 'neg' : 'pos' });
       });
     }
@@ -485,7 +485,7 @@
     (ui.floats || []).forEach(function (fl) {
       var el = fl.orb != null ? document.querySelector('[data-orb="' + fl.orb + '"]') : document.querySelector('[data-cuid="' + fl.uid + '"]');
       if (!el) return;
-      var sp = document.createElement('span'); sp.className = 'flt ' + fl.cls; sp.textContent = fl.text; if (fl.delay) sp.style.animationDelay = fl.delay + 's';
+      var sp = document.createElement('span'); sp.className = 'flt ' + fl.cls; sp.innerHTML = fl.text; if (fl.delay) sp.style.animationDelay = fl.delay + 's';
       el.appendChild(sp);
     });
   }
@@ -532,8 +532,8 @@
   function announce() {
     var s = ui.s; if (!s || s.over) { ui.deadline = null; return; }
     ui.deadline = Date.now() + (s.shopOpen ? SHOP_LIMIT : TIME_LIMIT) * 1000 + 1400; // 1,4 s de cartel de ronda
-    if (s.shopOpen) showSplash({ kind: 'shop', title: '🛒 ¡RONDA DE TIENDA!', sub: s.round === 1 ? 'Compra tus primeras tropas · no hay combate' : 'Compra, coloca y retira tropas · no hay combate' });
-    else showSplash({ kind: 'combat', title: '⚔ RONDA ' + s.round, sub: s.first === 0 ? 'Atacas primero' : 'Ataca primero el rival' });
+    if (s.shopOpen) showSplash({ kind: 'shop', title: '' + ic('carrito') + ' ¡RONDA DE TIENDA!', sub: s.round === 1 ? 'Compra tus primeras tropas · no hay combate' : 'Compra, coloca y retira tropas · no hay combate' });
+    else showSplash({ kind: 'combat', title: '' + ic('espadas') + ' RONDA ' + s.round, sub: s.first === 0 ? 'Atacas primero' : 'Ataca primero el rival' });
   }
   function play() {
     ui.frames = ui.s.frames.slice(); ui.shown = 0; ui.playing = true; ui.sel = null;

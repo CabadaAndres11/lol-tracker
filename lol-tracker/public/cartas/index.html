@@ -12,7 +12,7 @@
 <body>
 <div id="gate" class="gate">
   <form id="gate-form" class="gate-box" autocomplete="off">
-    <div class="gate-icon">🃏</div>
+    <div class="gate-icon" id="gate-ic"></div>
     <h1>Juego de Cartas</h1>
     <p>Prototipo privado. Introduce la contraseña para entrar.</p>
     <input id="gate-pw" type="password" placeholder="Contraseña" autocomplete="off" autofocus />
@@ -22,8 +22,10 @@
   </form>
 </div>
 <div id="app" hidden></div>
+<script src="icons.js"></script>
 <script>
 (function () {
+  try { document.getElementById("gate-ic").innerHTML = ic("cartas"); } catch (e) {}
   var HASH = '7d88d6b06256e7b2e42c694d0065e5e2d78fc513e03ec84bfed62891319cd67b';
   var loaded = false;
   function unlock() {
@@ -31,7 +33,7 @@
     try { localStorage.setItem('cartas_ok', '1'); } catch (e) {}
     document.getElementById('gate').hidden = true;
     document.getElementById('app').hidden = false;
-    ['cards.js', 'engine.js', 'ui.js'].reduce(function (p, src) {
+    ['icons.js', 'cards.js', 'engine.js', 'ui.js'].reduce(function (p, src) {
       return p.then(function () { return new Promise(function (ok, ko) { var s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = ko; document.body.appendChild(s); }); });
     }, Promise.resolve());
   }

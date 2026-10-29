@@ -641,3 +641,24 @@ body.shopbg::before { background: radial-gradient(circle, rgba(255,255,255,.55) 
   .fan { height: clamp(118px, 19vh, 150px); } .fan .fc { width: clamp(74px, 12vh, 92px); }
   .menu-i { padding: clamp(.7rem, 3vh, 1.2rem) .9rem; }
 }
+
+/* v15 iconos propios (SVG) */
+.ic { width: 1.1em; height: 1.1em; display: inline-block; vertical-align: -.2em; flex: none; overflow: visible; }
+.gate-icon .ic, .lg-ico .ic { width: 1em; height: 1em; filter: drop-shadow(0 4px 0 rgba(43,58,115,.25)); }
+.menu-i .mi .ic, .mode .mi .ic { width: 1em; height: 1em; filter: drop-shadow(0 3px 0 rgba(43,58,115,.18)); }
+.obig .ic { width: 1em; height: 1em; }
+.fxi .ic { width: 1em; height: 1em; }
+.card .mono.ico .ic { width: 1em; height: 1em; display: block; margin: 0 auto; }
+.btn .ic, .navb .ic, .nav .ic { width: 1.15em; height: 1.15em; vertical-align: -.22em; }
+.coinbig .ic { width: 1em; height: 1em; vertical-align: -.12em; }
+.flt .ic { width: 1em; height: 1em; vertical-align: -.18em; }
+.bpk-main span .ic { width: 1em; height: 1em; }
+.lockb .ic { width: 1em; height: 1em; }
+.splash .st .ic { width: 1em; height: 1em; vertical-align: -.12em; }
+.mini button .ic { width: 1.1em; height: 1.1em; }
+.gap::after { content: ''; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M12 12l40 40M52 12L12 52' stroke='%232b3a73' stroke-width='9' stroke-linecap='round'/%3E%3Cpath d='M12 12l40 40M52 12L12 52' stroke='%23dfe6fa' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E") center / contain no-repeat; width: 1.2em; height: 1.2em; display: inline-block; }
+.ic { margin-right: .15em; } .menu-i .mi .ic, .mode .mi .ic { width: 1.35em; height: 1.35em; margin: 0; }
+.btn .ic, .navb .ic { width: 1.3em; height: 1.3em; margin-right: .3em; } .coinpill .ic { margin-right: .25em; }
+.obig .ic, .fxi .ic, .lg-ico .ic, .gate-icon .ic, .bpk-main span .ic, .card .mono.ico .ic { margin: 0; }
+.ptitle .ic { width: 1.25em; height: 1.25em; vertical-align: -.3em; }
+.bpk-main span .ic { width: 1.5em; height: 1.5em; }

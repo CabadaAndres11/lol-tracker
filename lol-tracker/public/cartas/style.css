@@ -317,3 +317,13 @@ body.shopbg { background: radial-gradient(ellipse 90% 60% at 50% 0, #7a4a12 0, #
 
 .shoprow { grid-template-columns: repeat(5, minmax(0, calc(var(--hh) * 5 / 7))) auto; }
 @media (max-width: 1000px) { .shoprow { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+
+/* v6 · temporizador de objetivos */
+.timer{display:flex;align-items:center;gap:6px;justify-content:center;margin:4px auto 6px;padding:4px 12px;max-width:320px;border-radius:999px;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.18);font-size:13px;position:relative;overflow:hidden;flex-wrap:wrap}
+.timer b{font-size:20px;min-width:1.6em;text-align:center;font-variant-numeric:tabular-nums}
+.timer .tbar{flex-basis:100%;height:4px;border-radius:2px;background:rgba(255,255,255,.12);overflow:hidden}
+.timer .tbar i{display:block;height:100%;background:#4fc38a;transition:width .25s linear}
+.timer.low{border-color:#ff5a5a;color:#ff8a8a}
+.timer.low .tbar i{background:#ff4d4d}
+.timer.low b{animation:tpulse .6s infinite alternate}
+@keyframes tpulse{to{transform:scale(1.25)}}

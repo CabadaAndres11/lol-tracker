@@ -5,7 +5,7 @@
 
   // ---------- Ajustes de balance (todo en un sitio para tocarlo fácil) ----------
   var CFG = {
-    aiBonus: 1, aiBonusRounds: 6, slots: 4, handMax: 5, life: 12, gold: 8, income: 2, shopEvery: 3, shopOffers: 5,
+    slots: 4, handMax: 5, life: 12, gold: 8, income: 2, shopEvery: 3, shopOffers: 5,
     refreshCost: 1, deckBudget: 20, maxRounds: 40,
     hpMult: 1.1, hpGrow: 1.25, hpMin: 5, // vida base de las tropas: x hpMult x hpGrow^(coste-1)
     rarityWeight: { 'Común': 50, 'Rara': 30, 'Épica': 15, 'Legendaria': 5 },
@@ -140,7 +140,6 @@
       if (tw === 1 && s.round % 2 === 0) extra = 1;
       else if (tw >= 2) extra = 1;
     }
-    if (p === 1 && s.round <= CFG.aiBonusRounds) g += CFG.aiBonus; // ayuda de dificultad para la IA al principio
     P.gold += g + extra;
     return g + extra;
   }
@@ -271,6 +270,11 @@
   function setTarget(s, p, uid, targetUid) {
     var P = s.p[p];
     if (targetUid == null) delete P.target[uid]; else P.target[uid] = targetUid;
+  }
+  function forfeit(s, p, reason) {
+    if (s.over) return;
+    s.over = true; s.phase = 'over'; s.shopOpen = false; s.winner = 1 - p; s.reason = reason;
+    say(s, reason);
   }
   function clearTargets(s, p) { s.p[p].target = {}; }
   function setVoley(s, p, uid, mode) { s.p[p].voley[uid] = mode; }
@@ -623,7 +627,7 @@
     _mk: mk, _startEffects: startEffects, _tiers: tiers,
     CFG: CFG, FX: FX, CARD: CARD, DATA: DATA,
     newGame: newGame, randomDeck: randomDeck, deckSize: deckSize, mulberry32: mulberry32,
-    place: place, playAction: playAction, setTarget: setTarget, clearTargets: clearTargets, setVoley: setVoley,
+    place: place, playAction: playAction, setTarget: setTarget, clearTargets: clearTargets, forfeit: forfeit, setVoley: setVoley,
     buy: buy, refresh: refresh, refreshCost: refreshCost, pickFromDeck: pickFromDeck, retire: retire,
     aiDeck: aiDeck, aiShop: aiShop, aiPrep: aiPrep, aiTargets: aiTargets, fight: fight, endShop: endShop, pendingTargets: pendingTargets, cede: cede, nextRound: nextRound,
     themeCounts: themeCounts, tiers: tiers, tierOf: tierOf, atk: atk, maxHp: maxHp, card: card, isTroop: isTroop, has: has, mesaTroops: mesaTroops, viewOf: viewOf,

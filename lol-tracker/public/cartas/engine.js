@@ -178,8 +178,8 @@
     var elig = pool.filter(function (id) { return !(CARD[id].cost === 5 && CARD[id].type === 'tropa' && s.shops < 2); });
     if (!elig.length) elig = pool;
     if (s.round === 1) { // tienda inicial: solo tropas comunes
-      var cm = pool.filter(function (id) { return CARD[id].type === 'tropa' && CARD[id].rarity === 'Común'; });
-      if (cm.length) elig = cm;
+      var cm = pool.filter(function (id) { return CARD[id].rarity === 'Común'; });
+      if (cm.some(function (id) { return CARD[id].type === 'tropa'; })) elig = cm;
     }
     var boost = (t['Informático'] || 0) >= 1;
     return elig.map(function (id) {
@@ -193,10 +193,20 @@
     for (var k = 0; k < pool.length; k++) { r -= pool[k].w; if (r <= 0) return pool[k].id; }
     return pool[pool.length - 1].id;
   }
+  // En la tienda inicial siempre hay al menos 3 tropas comprables (las acciones no se pueden jugar en tienda).
+  function fixFirstShop(s, p) {
+    if (s.round !== 1) return;
+    var P = s.p[p], tr = function (id) { return CARD[id].type === 'tropa'; }, g = 0;
+    while (P.offers.filter(tr).length < 3 && g++ < 30) {
+      var k = P.offers.findIndex(function (id) { return !tr(id); }), id2 = drawOffer(s, p);
+      if (k >= 0 && tr(id2)) P.offers[k] = id2;
+    }
+  }
   function openShop(s, p) {
     var P = s.p[p], t = tiers(P);
     P.refreshes = 0; P.pickUsed = false; P.offers = [];
     for (var n = 0; n < CFG.shopOffers; n++) P.offers.push(drawOffer(s, p));
+    fixFirstShop(s, p);
     if (mesaTroops(P).some(function (i) { return has(i, 'Trabajo'); }) && FX.trabajo.shop[(t['Trabajo'] || 0) - 1]) {
       var b = FX.trabajo.shop[(t['Trabajo'] || 0) - 1];
       P.gold += b;
@@ -216,6 +226,7 @@
     var keep = P.offers.filter(function (x) { return x && x.extra; });
     P.offers = [];
     for (var n = 0; n < CFG.shopOffers; n++) P.offers.push(drawOffer(s, p));
+    fixFirstShop(s, p);
     return true;
   }
   function pickFromDeck(s, p, id) {

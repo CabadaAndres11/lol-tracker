@@ -1054,10 +1054,10 @@ footer { padding-bottom: calc(3rem + env(safe-area-inset-bottom)); }
    ============================================================ */
 .champ-bg { position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: 0; transition: opacity 1.2s ease; overflow: hidden; }
 body[data-theme] .champ-bg { opacity: 1; }
-.champ-art { position: absolute; inset: -2%; background-size: cover; background-position: 55% 18%; background-repeat: no-repeat; opacity: .62; filter: blur(2.5px) saturate(1.05); transform: scale(1.04); animation: champ-drift 40s ease-in-out infinite alternate; }
+.champ-art { position: absolute; inset: -6%; background-size: cover; background-position: 55% 18%; background-repeat: no-repeat; opacity: .62; will-change: transform; backface-visibility: hidden; animation: champ-drift 40s ease-in-out infinite alternate; }
 .champ-art::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 35%, var(--bg) 92%), radial-gradient(ellipse at 55% 25%, transparent 30%, var(--bg) 100%); }
-.champ-fx { position: absolute; inset: 0; mix-blend-mode: screen; }
-@keyframes champ-drift { from { transform: scale(1.04) translate3d(0, 0, 0); } to { transform: scale(1.1) translate3d(-1.5%, 1%, 0); } }
+.champ-fx { position: absolute; inset: -10%; mix-blend-mode: screen; will-change: opacity, transform; }
+@keyframes champ-drift { from { transform: translate3d(1.5%, -1%, 0); } to { transform: translate3d(-1.5%, 1%, 0); } }
 .theme-line { margin: .5rem 0 0; font: 600 .78rem var(--font-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--gold); text-shadow: 0 0 14px color-mix(in srgb, var(--gold) 55%, transparent); }
 .hero, .hero-inner { position: relative; z-index: 1; }
 .hex-bg { transition: opacity 1s ease; }
@@ -1078,7 +1078,7 @@ body[data-theme="renata"] .champ-fx {
     radial-gradient(30vw 22vw at 60% 70%, rgba(255, 93, 184, .16), transparent 70%);
   animation: renata-pulse 9s ease-in-out infinite alternate;
 }
-@keyframes renata-pulse { from { opacity: .55; transform: scale(1); } to { opacity: 1; transform: scale(1.06); } }
+@keyframes renata-pulse { from { opacity: .55; transform: scale(1); } to { opacity: 1; transform: scale(1.04); } }
 body[data-theme="renata"] .hero { background: radial-gradient(ellipse at top, rgba(224, 64, 154, .2), transparent 62%), linear-gradient(180deg, rgba(8, 6, 12, .35), transparent); }
 body[data-theme="renata"] h1 { background-image: linear-gradient(90deg, #ffd3ee, #ff5db8 50%, #b6f55a); }
 
@@ -1089,7 +1089,7 @@ body[data-theme="viego"] {
   --gold: #5ff2c3; --gold-bright: #c9ffee; --gold-soft: #1f7a62;
   --rise: #3ef0b0; --neon-cyan: #2fe0b4; --neon-purple: #4a86a8;
 }
-body[data-theme="viego"] .champ-art { background-image: url('/lol/themes/viego.jpg'); filter: saturate(1.1) contrast(1.05); }
+body[data-theme="viego"] .champ-art { background-image: url('/lol/themes/viego.jpg'); }
 body[data-theme="viego"] .champ-fx {
   background:
     radial-gradient(50vw 24vw at 10% 95%, rgba(63, 240, 176, .25), transparent 70%),
@@ -1097,7 +1097,7 @@ body[data-theme="viego"] .champ-fx {
     radial-gradient(60vw 16vw at 50% 100%, rgba(120, 255, 210, .14), transparent 70%);
   animation: viego-mist 14s ease-in-out infinite alternate;
 }
-@keyframes viego-mist { from { opacity: .5; transform: translate3d(-2%, 0, 0); } to { opacity: 1; transform: translate3d(2%, -2%, 0); } }
+@keyframes viego-mist { from { opacity: .5; transform: translate3d(-1.5%, 0, 0); } to { opacity: 1; transform: translate3d(1.5%, -1.5%, 0); } }
 body[data-theme="viego"] .hero { background: radial-gradient(ellipse at top, rgba(63, 240, 176, .14), transparent 62%), linear-gradient(180deg, rgba(4, 11, 16, .3), transparent); }
 body[data-theme="viego"] h1 { background-image: linear-gradient(90deg, #c9ffee, #3ef0b0 55%, #2a8f86); }
 

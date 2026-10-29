@@ -16,7 +16,10 @@
     try { var sv = JSON.parse(localStorage.getItem(lk('deck')) || 'null'); ui.deck = sv && sv.length ? sv.filter(function (id) { return CARD[id] && owns(id); }) : []; } catch (e) { ui.deck = []; }
     ui.slots = [null, null, null];
     try { var sl = JSON.parse(localStorage.getItem(lk('slots')) || 'null'); if (sl && sl.length === 3) ui.slots = sl.map(function (x) { return x && x.ids ? { name: String(x.name || 'Mazo'), ids: x.ids.filter(function (id) { return CARD[id] && owns(id); }) } : null; }); } catch (e) {}
-    if (!ui.deck.length || deckError()) { ui.deck = E.randomDeck(Math.random, ui.acct.owned); saveDeck(); }
+    if (!ui.deck.length || deckError()) {
+      var st = [], used = 0; ui.acct.owned.forEach(function (id) { if (CARD[id] && used + CARD[id].size <= CFG.deckBudget) { st.push(id); used += CARD[id].size; } });
+      ui.deck = st; if (deckError()) ui.deck = E.randomDeck(Math.random, ui.acct.owned); saveDeck();
+    }
   }
   // ---------- Servidor (cuenta, monedas, sobres) ----------
   function getTok() { try { return localStorage.getItem('cartas_tok') || ''; } catch (e) { return ''; } }
@@ -108,7 +111,7 @@
       '<label>PIN<input id="lg-pin" type="password" inputmode="numeric" maxlength="4" autocomplete="current-password" placeholder="0000"></label>' +
       (ui.msg ? '<div class="hint" style="color:var(--bad)">' + esc(ui.msg) + '</div>' : '') +
       '<div class="btnrow"><button class="btn" data-act="login">Entrar</button><button class="btn sec" data-act="register">Crear cuenta nueva</button></div>' +
-      '<p class="mut" style="margin:.6rem 0 0">Al crear la cuenta recibes ' + 150 + ' monedas y todas las cartas Comunes.</p></div></div>';
+      '<p class="mut" style="margin:.6rem 0 0">Al crear la cuenta recibes ' + 150 + ' monedas y un mazo inicial de Pokémon listo para jugar.</p></div></div>';
   }
   function bpkHtml(cls) {
     return '<div class="bpk ' + (cls || '') + '"><div class="bpk-glow"></div><div class="bpk-rays"></div><div class="bpk-main"><span>' + ic('cartas') + '</span><b>SOBRE</b><i>' + (ui.acct ? ui.acct.packSize : 5) + ' cartas</i></div><div class="bpk-lid"></div></div>';
@@ -333,7 +336,7 @@
     else if (s.phase === 'over') acts = '';
     else if (shop) {
       var any = P.mesa.some(Boolean) || P.hand.length;
-      acts = '<div class="hint">' + esc(ui.hint || (any ? 'Pulsa una carta para comprarla. Arrastra una tropa de la mesa a tu mano para retirarla.' : 'Compra al menos una tropa.')) + '</div><button class="btn big" data-act="endshop"' + (any ? '' : ' disabled') + '>Terminar tienda ▶</button>';
+      acts = '<div class="hint">' + esc(ui.hint || (any ? 'Pulsa una carta para comprarla. Arrastra una tropa de la mesa a tu mano para retirarla.' : 'Compra al menos una tropa.')) + '</div><button class="btn big" data-act="endshop"' + (any ? '' : ' disabled') + '>Finalizar fase de compra ▶</button>';
     } else if (prep) {
       var msg = ui.hint || (!P.mesa.some(Boolean) ? 'Coloca tropas de tu mano en la mesa.' : pend ? 'Pulsa una tropa tuya y después la rival a la que atacará.' : 'Todos los objetivos elegidos.');
       if (pend && P.mesa.some(Boolean)) msg = (ui.hint ? ui.hint + ' · ' : '') + 'Faltan ' + pend + ' por elegir objetivo.';

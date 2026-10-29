@@ -20,7 +20,10 @@ const MAX_FAILS = 10, BLOCK_SECONDS = 900;
 
 const ALL = DATA.cards.concat(DATA.actions);
 const BY_ID = {}; ALL.forEach((c) => { BY_ID[c.id] = c; });
-const STARTER = ALL.filter((c) => c.rarity === 'Común').map((c) => c.id);
+// Regalo de bienvenida: mazo inicial de una sola sinergia (Pokémon) + acciones generales Comunes
+const STARTER_THEME = 'Pokémon';
+const STARTER = DATA.cards.filter((c) => c.themes.includes(STARTER_THEME)).map((c) => c.id)
+  .concat(DATA.actions.filter((a) => a.theme === STARTER_THEME || (!a.theme && a.rarity === 'Común')).map((a) => a.id));
 
 const uKey = (n) => `cartas:user:${n.toLowerCase()}`;
 const today = () => new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Madrid' }); // AAAA-MM-DD

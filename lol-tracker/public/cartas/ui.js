@@ -309,9 +309,12 @@
   // ---------- Anuncio de acciones jugadas (tuyas y del rival) ----------
   function flushActs() {
     var s = ui.s; if (!s || !s.acts || !s.acts.length) return;
-    var q = s.acts.splice(0), t = Math.max(0, (ui.splashUntil || 0) - Date.now());
-    q.forEach(function (a, k) {
-      setTimeout(function () { if (ui.s === s && ui.screen === 'game') showActFx(a); }, t + k * 1500);
+    var q = s.acts.splice(0), now = Date.now();
+    q.forEach(function (a) {
+      // cola única: cada anuncio espera a que termine el anterior (y el cartel de ronda), sea tuyo o del rival
+      var at = Math.max(now, ui.splashUntil || 0, ui.actNext || 0);
+      ui.actNext = at + 1500;
+      setTimeout(function () { if (ui.s === s && ui.screen === 'game') showActFx(a); }, at - now);
     });
   }
   function showActFx(a) {
@@ -604,21 +607,20 @@
   function finishDrag(x, y) {
     var s = ui.s, P = s.p[0]; drag.ghost.style.display = 'none';
     var t = document.elementFromPoint(x, y); drag.ghost.remove(); noClick = Date.now();
-    var inst0 = P.hand[drag.i], ok = false;
+    var inst0 = P.hand[drag.i], ok = false, c = inst0 ? CARD[inst0.id] : null;
     if (drag.kind === 'mesa') {
       ui.dragMesa = false;
       if (t && t.closest('.handwrap')) { var sl = P.mesa.findIndex(function (x) { return x && x.uid === drag.uid; }); ok = sl >= 0 && E.retire(s, 0, sl); }
       ui.sel = null; ui.hint = ok ? '' : 'No se pudo retirar.'; render(); return;
     }
     if (t && inst0) {
-      var c = CARD[inst0.id];
       if (c.type === 'tropa') {
         var slotEl = t.closest('.slot.free'), onBoard = t.closest('#board'), idx = slotEl ? +slotEl.dataset.i : (onBoard ? P.mesa.indexOf(null) : -1);
         if (idx >= 0 && E.place(s, 0, drag.i, idx)) { ok = true; ui.landed = P.mesa[idx].uid; }
       } else if (c.target === 'none') { if (t.closest('#board')) ok = E.playAction(s, 0, drag.i, null); }
       else { var cd = t.closest('[data-cuid]'); if (cd && cd.dataset.side === (c.target === 'ally' ? '0' : '1')) ok = E.playAction(s, 0, drag.i, +cd.dataset.cuid); }
     }
-    ui.sel = null; ui.hint = ok ? '' : (s.err && c.type !== 'tropa' ? s.err : 'No se pudo soltar ahí.');
+    ui.sel = null; ui.hint = ok ? '' : (s.err && c && c.type !== 'tropa' ? s.err : 'No se pudo soltar ahí.');
     if (ok && !s.shopOpen) nextPending(s);
     render();
   }

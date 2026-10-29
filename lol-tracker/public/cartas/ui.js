@@ -59,15 +59,19 @@
     return '';
   }
 
+  function heroCards() {
+    var pick = ['Rara', 'Legendaria', 'Épica'].map(function (r) { return D.cards.filter(function (c) { return c.rarity === r; })[0]; }).filter(Boolean);
+    return '<div class="fan">' + pick.map(function (c, k) { return '<div class="fc f' + k + '">' + cardHtml(c, { atk: c.atk, hp: c.hp, max: c.hp, cls: '' }) + '</div>'; }).join('') + '</div>';
+  }
   function renderHome() {
     var n = Object.keys(D.themes).length;
-    var h = head('home') + '<div class="hero"><img src="/cartas/logo.svg" alt="" class="hero-logo"><h1>Juego de Cartas</h1><p class="mut">Mazos con sinergias combinables, combates por rondas y memes de la pandilla.</p></div>';
+    var h = head('home') + '<div class="hero">' + heroCards() + '<img src="/cartas/logo.svg" alt="" class="hero-logo"><h1>Juego de Cartas</h1><p class="mut">Mazos con sinergias combinables, combates por rondas y memes de la pandilla.</p><button class="btn big cta" data-act="nav" data-to="play">⚔ ¡Jugar ahora!</button></div>';
     h += '<div class="menu">' + [
       ['play', '⚔', 'Jugar', 'Duelo 1 contra 1 contra la IA con tu mazo.'],
       ['deck', '🃏', 'Mazo', 'Elige tus cartas (' + deckSize() + '/' + CFG.deckBudget + ') y guarda hasta 3 mazos.'],
       ['themes', '✨', 'Sinergias', n + ' sinergias con sus niveles y cartas.'],
       ['rules', '📖', 'Normas', 'Cómo funcionan las rondas, la tienda y el combate.'],
-    ].map(function (m) { return '<button class="menu-i" data-act="nav" data-to="' + m[0] + '"><span class="mi">' + m[1] + '</span><b>' + m[2] + '</b><span class="mut">' + m[3] + '</span></button>'; }).join('') + '</div>';
+    ].map(function (m) { return '<button class="menu-i m-' + m[0] + '" data-act="nav" data-to="' + m[0] + '"><span class="mi">' + m[1] + '</span><b>' + m[2] + '</b><span class="mut">' + m[3] + '</span></button>'; }).join('') + '</div>';
     h += '<p class="mut" style="text-align:center">' + D.cards.length + ' tropas · ' + D.actions.length + ' acciones · versión prototipo (sobres y monedas, próximamente)</p></div>';
     app.innerHTML = h;
   }
@@ -284,12 +288,13 @@
       var opts = an.map(function (i) { return '<option value="' + i.uid + '">' + esc(CARD[i.id].name) + ' (' + E.atk(i) + '/' + E.maxHp(i) + ')</option>'; }).join('');
       h += '<div class="panel"><h2>Anime · ceder (' + P.anime + ')</h2><div class="bar"><select id="an-from">' + opts + '</select><span>→</span><select id="an-to">' + opts + '</select></div><div class="bar"><button class="btn sec sm" data-act="cede" data-stat="atk">Ceder ataque</button><button class="btn sec sm" data-act="cede" data-stat="hp">Ceder vida</button></div></div>';
     } else h += '<div></div>';
-    h += '<div class="foesyn">' + synergyHtml(R, true) + '</div>';
+    h += '<div class="foesyn">' + (s.shopOpen ? '<div class="synside panel foe locked"><h2>⚠ Sinergias del RIVAL</h2><p class="mut">🔒 Ocultas durante la tienda. Se revelan cuando empieza el combate.</p></div>' : synergyHtml(R, true)) + '</div>';
     var shown = s.log.slice(-14);
     h += '<div class="panel logp"><h2>Registro</h2><div class="log" id="log">' + shown.map(function (l, n) { return '<div' + (n === shown.length - 1 ? ' class="cur"' : '') + '>' + esc(l.text) + '</div>'; }).join('') + '</div></div></aside></div>';
     if (s.phase === 'over' && !ui.playing) {
       var win = s.winner === 0;
-      h += '<div class="overlay"><div class="panel over"><h2>' + (win ? '🏆 ¡Has ganado!' : '💀 Has perdido') + '</h2><p class="mut">' + esc(s.reason) + ' · ronda ' + s.round + '</p><button class="btn big" data-act="play">Jugar otra vez</button> <button class="btn sec" data-act="menu" data-to="deck">Cambiar mazo</button> <button class="btn sec" data-act="menu" data-to="home">Menú</button></div></div>';
+      var conf = ''; if (win) for (var q = 0; q < 36; q++) conf += '<i style="left:' + (q * 2.8 + (q % 3)) + '%;--d:' + ((q * 37) % 100) / 100 * 1.2 + 's;--c:' + ['#ffc533', '#ff6b8b', '#4f9dff', '#38d39f', '#a78bfa'][q % 5] + '"></i>';
+      h += '<div class="overlay ' + (win ? 'owin' : 'olose') + '">' + (win ? '<div class="confetti">' + conf + '</div>' : '') + '<div class="panel over"><div class="obig">' + (win ? '🏆' : '💔') + '</div><h2>' + (win ? '¡Victoria!' : 'Derrota') + '</h2><p class="mut">' + esc(s.reason) + ' · ronda ' + s.round + '</p><button class="btn big" data-act="play">Jugar otra vez</button> <button class="btn sec" data-act="menu" data-to="deck">Cambiar mazo</button> <button class="btn sec" data-act="menu" data-to="home">Menú</button></div></div>';
     }
     h += '</div>';
     app.innerHTML = h;

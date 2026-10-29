@@ -169,6 +169,7 @@
     s.phase = 'prep';
     aiShop(s, 1);
     aiPrep(s, 1);
+    if (s.shopOpen) checkShop(s);
   }
 
   // ---------- Tienda ----------
@@ -178,7 +179,7 @@
     var elig = pool.filter(function (id) { return !(CARD[id].cost === 5 && CARD[id].type === 'tropa' && s.shops < 2); });
     if (!elig.length) elig = pool;
     if (s.round === 1) { // tienda inicial: solo tropas comunes
-      var cm = pool.filter(function (id) { return CARD[id].rarity === 'Común'; });
+      var cm = pool.filter(function (id) { return CARD[id].type === 'accion' || (CARD[id].type === 'tropa' && CARD[id].rarity === 'Común'); });
       if (cm.some(function (id) { return CARD[id].type === 'tropa'; })) elig = cm;
     }
     var boost = (t['Informático'] || 0) >= 1;
@@ -201,6 +202,19 @@
       var k = P.offers.findIndex(function (id) { return !tr(id); }), id2 = drawOffer(s, p);
       if (k >= 0 && tr(id2)) P.offers[k] = id2;
     }
+  }
+  // Sin tropas, sin oro para comprar ninguna de la tienda y sin poder actualizarla: derrota automática.
+  function shopStuck(s, p) {
+    var P = s.p[p];
+    if (!s.shopOpen || s.over) return false;
+    if (P.mesa.some(alive) || P.hand.some(isTroop)) return false;
+    if (P.gold >= refreshCost(s, p)) return false;
+    return !P.offers.some(function (id) { return CARD[id].type === 'tropa' && CARD[id].cost <= P.gold; });
+  }
+  function checkShop(s) {
+    [0, 1].forEach(function (p) {
+      if (shopStuck(s, p)) forfeit(s, p, (p === 0 ? 'Te quedaste' : 'El rival se quedó') + ' sin oro y sin tropas en la tienda.');
+    });
   }
   function openShop(s, p) {
     var P = s.p[p], t = tiers(P);
@@ -227,6 +241,7 @@
     P.offers = [];
     for (var n = 0; n < CFG.shopOffers; n++) P.offers.push(drawOffer(s, p));
     fixFirstShop(s, p);
+    checkShop(s);
     return true;
   }
   function pickFromDeck(s, p, id) {
@@ -242,6 +257,7 @@
     if (P.gold < c.cost || P.hand.length >= CFG.handMax) return false;
     P.gold -= c.cost; P.offers.splice(idx, 1);
     P.hand.push(mk(s, id, p));
+    checkShop(s);
     return true;
   }
   function retire(s, p, slot) {

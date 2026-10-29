@@ -63,7 +63,7 @@ const isAdmin = (u) => String(u.name).toLowerCase() === 'admin';
 async function loadUser(cfg, name) {
   const raw = await redis(cfg, ['GET', uKey(name)]);
   const u = raw ? JSON.parse(raw) : null;
-  if (u && isAdmin(u)) u.owned = ALL.map((c) => c.id); // la cuenta ADMIN lo tiene todo (para pruebas)
+  if (u && isAdmin(u) && !u.adminView) u.owned = ALL.map((c) => c.id); // la cuenta ADMIN lo tiene todo (para pruebas), salvo en modo "vista de jugador nuevo"
   return u;
 }
 const saveUser = (cfg, u) => redis(cfg, ['SET', uKey(u.name), JSON.stringify(u)]);
@@ -119,6 +119,16 @@ module.exports = async function handler(req, res) {
     const u = lname ? await loadUser(cfg, lname) : null;
     if (!u) { res.status(401).json({ error: 'Sesión caducada. Entra de nuevo.', login: true }); return; }
 
+    if (act === 'adminstarter' || act === 'adminall') {
+      if (!isAdmin(u)) { res.status(403).json({ error: 'Solo para la cuenta ADMIN.' }); return; }
+      const th = String(body.starter || '');
+      if (act === 'adminstarter') {
+        if (!STARTER_THEMES.includes(th)) { res.status(400).json({ error: 'Mazo inicial no válido.' }); return; }
+        u.adminView = true; u.owned = starterFor(th); u.coins = START_COINS;
+      } else { u.adminView = false; u.owned = ALL.map((c) => c.id); }
+      await saveUser(cfg, u);
+      res.status(200).json({ user: publicUser(u) }); return;
+    }
     if (act === 'me') { res.status(200).json({ user: publicUser(u) }); return; }
 
     if (act === 'daily') {

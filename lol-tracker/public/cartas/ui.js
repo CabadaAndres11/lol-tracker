@@ -16,10 +16,7 @@
     try { var sv = JSON.parse(localStorage.getItem(lk('deck')) || 'null'); ui.deck = sv && sv.length ? sv.filter(function (id) { return CARD[id] && owns(id); }) : []; } catch (e) { ui.deck = []; }
     ui.slots = [null, null, null];
     try { var sl = JSON.parse(localStorage.getItem(lk('slots')) || 'null'); if (sl && sl.length === 3) ui.slots = sl.map(function (x) { return x && x.ids ? { name: String(x.name || 'Mazo'), ids: x.ids.filter(function (id) { return CARD[id] && owns(id); }) } : null; }); } catch (e) {}
-    if (!ui.deck.length || deckError()) {
-      var st = [], used = 0; ui.acct.owned.forEach(function (id) { if (CARD[id] && used + CARD[id].size <= CFG.deckBudget) { st.push(id); used += CARD[id].size; } });
-      ui.deck = st; if (deckError()) ui.deck = E.randomDeck(Math.random, ui.acct.owned); saveDeck();
-    }
+    // sin mazo guardado: empieza vacío (el jugador monta el suyo con las cartas que tiene)
   }
   // ---------- Servidor (cuenta, monedas, sobres) ----------
   function getTok() { try { return localStorage.getItem('cartas_tok') || ''; } catch (e) { return ''; } }
@@ -121,7 +118,7 @@
     }).join('');
   }
   function adminStarters() {
-    return '<div class="panel adminst"><h2>Mazo inicial (vista de jugador nuevo)</h2><p class="mut">Así lo eligen las cuentas nuevas al registrarse. Al pulsar uno, se carga como tu mazo actual (no cambia tu colección).</p><div class="starters">' + starterCards('adminstarter') + '</div>' + (ui.msg ? '<div class="hint">' + esc(ui.msg) + '</div>' : '') + '</div>';
+    return '<div class="panel adminst"><h2>Mazo inicial (vista de jugador nuevo)</h2><p class="mut">Así lo eligen las cuentas nuevas al registrarse. Al pulsar uno, tu colección pasa a ser solo las cartas de ese mazo (como un jugador nuevo, con 150 monedas y sin mazo montado).</p><div class="starters">' + starterCards('adminstarter') + '</div><button class="btn sec" data-act="adminall">Restaurar todas las cartas</button>' + (ui.msg ? '<div class="hint">' + esc(ui.msg) + '</div>' : '') + '</div>';
   }
   function renderStarter() {
     app.innerHTML = '<div class="wrap"><div class="loginbox starterbox panel"><h1>Elige tu mazo inicial</h1><p class="mut">Cada mazo gira en torno a una sinergia. Es tu regalo de bienvenida: podrás ampliar tu colección abriendo sobres.</p><div class="starters">' + starterCards('pickstarter') + '</div>' + (ui.msg ? '<div class="hint" style="color:var(--bad)">' + esc(ui.msg) + '</div>' : '') +
@@ -601,10 +598,12 @@
       if (!/^\d{4}$/.test(rp)) { ui.msg = 'El PIN son 4 dígitos.'; return render(); }
       ui.lgPin = rp; ui.msg = ''; ui.screen = 'starter'; return render();
     }
-    if (act === 'adminstarter') {
-      var ids = (ui.acct.starters && ui.acct.starters[el.dataset.t]) || [], st2 = [], u2 = 0;
-      ids.forEach(function (id) { if (CARD[id] && u2 + CARD[id].size <= CFG.deckBudget) { st2.push(id); u2 += CARD[id].size; } });
-      ui.deck = st2; saveDeck(); ui.msg = 'Mazo inicial «' + el.dataset.t + '» cargado (' + u2 + '/' + CFG.deckBudget + '). Míralo en la pestaña Mazo.'; return render();
+    if (act === 'adminstarter' || act === 'adminall') {
+      return api(act, { starter: el.dataset.t }).then(function (r) {
+        if (!r.ok) { ui.msg = (r.data && r.data.error) || 'Error.'; return render(); }
+        setAcct(r.data.user); ui.deck = []; ui.slots = [null, null, null]; saveDeck(); try { localStorage.removeItem(lk('slots')); } catch (e) {}
+        ui.msg = act === 'adminall' ? 'Colección completa restaurada.' : 'Colección reiniciada como jugador nuevo con el mazo «' + el.dataset.t + '» (' + r.data.user.owned.length + ' cartas).'; render();
+      });
     }
     if (act === 'backlogin') { ui.screen = 'login'; ui.lgPin = ''; ui.msg = ''; return render(); }
     if (act === 'login' || act === 'pickstarter') {

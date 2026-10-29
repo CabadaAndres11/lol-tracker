@@ -5,7 +5,7 @@
 
   // ---------- Ajustes de balance (todo en un sitio para tocarlo fácil) ----------
   var CFG = {
-    slots: 4, handMax: 5, life: 12, gold: 3, income: 2, shopEvery: 3, shopOffers: 4,
+    slots: 4, handMax: 5, life: 12, gold: 4, income: 2, shopEvery: 3, shopOffers: 4,
     refreshCost: 1, deckBudget: 20, maxRounds: 30,
     rarityWeight: { 'Común': 50, 'Rara': 30, 'Épica': 15, 'Legendaria': 5 },
   };
@@ -90,7 +90,10 @@
   function randomDeck(rng) {
     var pool = DATA.cards.concat(DATA.actions).map(function (c) { return c.id; });
     for (var i = pool.length - 1; i > 0; i--) { var j = Math.floor(rng() * (i + 1)); var t = pool[i]; pool[i] = pool[j]; pool[j] = t; }
-    var deck = [], used = 0, acts = 0;
+    var deck = [], used = 0, acts = 0, com = 0;
+    var isCom = function (id) { return CARD[id].type === 'tropa' && CARD[id].rarity === 'Común'; };
+    var front = pool.filter(isCom).slice(0, 2);
+    pool = front.concat(pool.filter(function (id) { return front.indexOf(id) < 0; }));
     for (var k = 0; k < pool.length; k++) {
       var c = CARD[pool[k]];
       if (c.type === 'accion' && acts >= 2) continue;
@@ -106,7 +109,6 @@
 
   function newGame(deckA, deckB, seed) {
     var s = { rng: mulberry32(seed == null ? (Date.now() & 0xffffff) : seed), uid: 1, round: 0, shops: 0, phase: 'prep', shopOpen: false, first: 0, over: false, winner: -1, reason: '', log: [], frames: [], p: [newPlayer(deckA), newPlayer(deckB)], lastBall: [null, null] };
-    [0, 1].forEach(function (p) { drawStart(s, p); });
     startRound(s);
     return s;
   }
@@ -147,7 +149,7 @@
       if (p === 0) say(s, 'Ronda ' + s.round + ': +' + got + ' de oro.');
       s.p[p].target = {}; s.p[p].anime = 0;
     });
-    if (s.round % 3 === 0) {
+    if (s.round % CFG.shopEvery === 1) {
       s.shops++;
       s.shopOpen = true;
       [0, 1].forEach(function (p) { openShop(s, p); });
@@ -175,6 +177,10 @@
     var pool = P.deck.filter(function (id) { return CARD[id].type === 'tropa' || true; });
     var elig = pool.filter(function (id) { return !(CARD[id].cost === 5 && CARD[id].type === 'tropa' && s.shops < 2); });
     if (!elig.length) elig = pool;
+    if (s.round === 1) { // tienda inicial: solo tropas comunes
+      var cm = pool.filter(function (id) { return CARD[id].type === 'tropa' && CARD[id].rarity === 'Común'; });
+      if (cm.length) elig = cm;
+    }
     var boost = (t['Informático'] || 0) >= 1;
     return elig.map(function (id) {
       var w = CFG.rarityWeight[CARD[id].rarity] || 10;
@@ -428,8 +434,16 @@
     return seq;
   }
 
+  function pendingTargets(s) {
+    var foes = mesaTroops(s.p[1]);
+    if (!foes.length) return [];
+    var T = s.p[0].target;
+    return mesaTroops(s.p[0]).filter(function (i) { return !(T[i.uid] && foes.some(function (f) { return f.uid === T[i.uid]; })); });
+  }
+
   function fight(s) {
-    if (s.phase !== 'prep' || s.over) return;
+    if (s.phase !== 'prep' || s.over || s.shopOpen) return false;
+    if (pendingTargets(s).length) return false;
     s.shopOpen = false;
     s.frames = [];
     aiTargets(s, 1);
@@ -540,8 +554,17 @@
     return true;
   }
 
+  function endShop(s) {
+    if (!s.shopOpen || s.phase !== 'prep' || s.over) return false;
+    s.shopOpen = false;
+    advance(s);
+    return true;
+  }
   function nextRound(s) {
     if (s.phase !== 'post' || s.over) return;
+    advance(s);
+  }
+  function advance(s) {
     if (s.round >= CFG.maxRounds) {
       s.over = true; s.phase = 'over'; s.reason = 'Límite de rondas.';
       s.winner = s.p[0].life === s.p[1].life ? 1 : (s.p[0].life > s.p[1].life ? 0 : 1);
@@ -556,7 +579,7 @@
     newGame: newGame, randomDeck: randomDeck, deckSize: deckSize, mulberry32: mulberry32,
     place: place, playAction: playAction, setTarget: setTarget, setVoley: setVoley,
     buy: buy, refresh: refresh, refreshCost: refreshCost, pickFromDeck: pickFromDeck, retire: retire,
-    aiShop: aiShop, aiPrep: aiPrep, aiTargets: aiTargets, fight: fight, cede: cede, nextRound: nextRound,
+    aiShop: aiShop, aiPrep: aiPrep, aiTargets: aiTargets, fight: fight, endShop: endShop, pendingTargets: pendingTargets, cede: cede, nextRound: nextRound,
     themeCounts: themeCounts, tiers: tiers, tierOf: tierOf, atk: atk, maxHp: maxHp, card: card, isTroop: isTroop, has: has, mesaTroops: mesaTroops, viewOf: viewOf,
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.CartasEngine = API;

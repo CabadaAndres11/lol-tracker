@@ -46,13 +46,13 @@
       <span class="game-cta">Entrar <b aria-hidden="true">→</b></span>
     </span>
   </a>
-  <a class="game game-cartas" id="game-cartas" href="/cartas/" aria-label="Juego de cartas (en desarrollo)" hidden>
+  <a class="game game-cartas" id="game-cartas" href="/cartas/" aria-label="Juego de cartas (acceso con contraseña)">
     <span class="game-bg" aria-hidden="true"></span>
     <span class="game-body">
-      <span class="cartas-emblem" aria-hidden="true">🃏</span>
+      <img class="game-logo cartas-logo" src="/cartas/logo.svg" alt="Juego de Cartas">
       <span class="game-name">Juego de Cartas</span>
-      <span class="game-desc">Prototipo privado: mazos, temáticas y combates por rondas.</span>
-      <span class="game-status"><i class="dot" aria-hidden="true"></i><span>En desarrollo</span></span>
+      <span class="game-desc">Crea tu mazo con temáticas combinables y combate por rondas contra el rival.</span>
+      <span class="game-status"><i class="dot" aria-hidden="true"></i><span>🔒 Acceso con contraseña</span></span>
       <span class="game-cta">Entrar <b aria-hidden="true">→</b></span>
     </span>
   </a>
@@ -91,10 +91,6 @@
   tick();
   setInterval(tick, 60000);
 })();
-</script>
-<script>
-// El tercer juego solo aparece si este navegador ya ha desbloqueado el prototipo con la contraseña.
-(function () { try { if (localStorage.getItem('cartas_ok') === '1') document.getElementById('game-cartas').hidden = false; } catch (e) {} })();
 </script>
 <script>
 if ('serviceWorker' in navigator) window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });

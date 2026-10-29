@@ -45,12 +45,15 @@ function publicUser(u) {
     dailyAvailable: u.lastDaily !== today(),
     gamesToday: u.rewardDay === today() ? u.rewardCount : 0,
     maxGamesToday: MAX_GAME_REWARDS_PER_DAY,
-    packCost: PACK_COST, packSize: PACK_SIZE, dailyCoins: DAILY_COINS,
+    packCost: isAdmin(u) ? 0 : PACK_COST, packSize: PACK_SIZE, dailyCoins: DAILY_COINS,
   };
 }
+const isAdmin = (u) => String(u.name).toLowerCase() === 'admin';
 async function loadUser(cfg, name) {
   const raw = await redis(cfg, ['GET', uKey(name)]);
-  return raw ? JSON.parse(raw) : null;
+  const u = raw ? JSON.parse(raw) : null;
+  if (u && isAdmin(u)) u.owned = ALL.map((c) => c.id); // la cuenta ADMIN lo tiene todo (para pruebas)
+  return u;
 }
 const saveUser = (cfg, u) => redis(cfg, ['SET', uKey(u.name), JSON.stringify(u)]);
 
@@ -80,6 +83,7 @@ module.exports = async function handler(req, res) {
         if (await loadUser(cfg, name)) { res.status(409).json({ error: 'Ese nombre ya está cogido.' }); return; }
         const salt = crypto.randomBytes(16).toString('hex');
         const u = { name, salt, hash: hashPin(pin, salt), coins: START_COINS, owned: STARTER.slice(), lastDaily: '', rewardDay: '', rewardCount: 0, startedAt: 0, createdAt: Date.now() };
+        if (isAdmin(u)) u.owned = ALL.map((c) => c.id);
         await saveUser(cfg, u);
         res.status(200).json({ token: await newSession(cfg, name), user: publicUser(u) });
         return;
@@ -112,8 +116,9 @@ module.exports = async function handler(req, res) {
     }
 
     if (act === 'open') {
-      if (u.coins < PACK_COST) { res.status(402).json({ error: `Necesitas ${PACK_COST} monedas.`, user: publicUser(u) }); return; }
-      u.coins -= PACK_COST;
+      const cost = isAdmin(u) ? 0 : PACK_COST;
+      if (u.coins < cost) { res.status(402).json({ error: `Necesitas ${PACK_COST} monedas.`, user: publicUser(u) }); return; }
+      u.coins -= cost;
       const ids = [];
       for (let k = 0; k < PACK_SIZE; k++) ids.push(drawCard(k === PACK_SIZE - 1 ? 'Rara' : null)); // la última es Rara o mejor
       const cards = ids.map((id) => {

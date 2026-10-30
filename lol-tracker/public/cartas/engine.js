@@ -63,7 +63,7 @@
   function card(i) { return CARD[i.id]; }
   function isTroop(i) { return card(i).type === 'tropa'; }
   function maxHp(i) { return Math.max(1, card(i).hp + i.perm.hp + i.tmp.hp); }
-  function atk(i) { return Math.max(0, card(i).atk + i.perm.atk + i.tmp.atk); }
+  function atk(i) { if (i.tmp.loan != null) return Math.max(0, i.tmp.loan); return Math.max(0, card(i).atk + i.perm.atk + i.tmp.atk); }
   function has(i, theme) { return card(i).themes.indexOf(theme) >= 0; }
   function alive(i) { return i && !i.dead; }
 
@@ -588,6 +588,7 @@
           s.lastBall[p] = ball;
           var b = FX.pokemon.bonus[ball];
           if (b > 0) pk = pk.filter(function (i) { return gainCap(i, 'pk', 'both', b, FX.pokemon.cap) > 0; });
+          troops.filter(function (i) { return pas(i) === 'captura'; }).forEach(function (i) { if (gainCap(i, 'cap', 'both', 1, 6) > 0) fxFrame(s, p, 'captura', 'Captura', '+1/+1 permanente a ' + card(i).name, [i.uid]); });
           if (pk.length) { fxFrame(s, p, 'pokemon', FX.pokemon.names[ball] + (bn ? ' (extra)' : ''), '+' + b + '/+' + b + ' permanente a las Pokémon', pk.map(function (i) { return i.uid; })); s.frames[s.frames.length - 1].hl.fx.ball = ball; }
         }
       }
@@ -671,9 +672,17 @@
 
   // Efectos al caer una tropa (KOI, Dúo Inseparable). Devuelve texto de registro y animación.
   // ---------- Pasivas de legendarias ----------
-  var PAS = { 'javihi-duo': 'duo', 'sech-duo': 'duo', 'javihi-prime': 'remate', 'sech': 'embargo', 'potango': 'aliento', 'mertens-prime': 'pereza', 'chipy-lloron': 'llanto' };
+  var PAS = { 'javihi-duo': 'duo', 'sech-duo': 'duo', 'javihi-prime': 'remate', 'sech': 'embargo', 'potango': 'aliento', 'mertens-prime': 'pereza', 'chipy-lloron': 'llanto', 'lihone-viego': 'racha', 'aitorlg-renata': 'prorroga', 'haikyuu-lihone': 'saque', 'lihone': 'captura', 'chipy-correa': 'consuelo' };
   function pas(i) { return PAS[i.id] || ''; }
   function duoLinked(s, i) { var o = i.id === 'javihi-duo' ? 'sech-duo' : 'javihi-duo'; return mesaTroops(s.p[i.owner]).some(function (x) { return x.id === o; }); }
+  // Prórroga (AitoRLG Renata): la tropa a su derecha no cae a 0 de vida hasta que haya atacado
+  function wardSave(s, v) {
+    if (v.dead || v.tmp.acted || v.tmp.noAtk) return false;
+    if (v.tmp.ward) { v.hp = 0; return true; }
+    var P = s.p[v.owner], k = P.mesa.indexOf(v), r = k > 0 ? P.mesa[k - 1] : null;
+    if (!r || r.dead || pas(r) !== 'prorroga') return false;
+    v.tmp.ward = true; v.hp = 0; return true;
+  }
   // Daño de pasiva a una tropa (sin contraataque). Devuelve texto de registro.
   function passiveHit(s, v, n, depth) {
     if (!v || v.dead || n <= 0) return '';
@@ -681,7 +690,8 @@
     var tv = s.tiers[v.owner];
     if (has(v, 'Tilt') && tv && tv['Tilt']) gainCap(v, 'tilt', 'atk', FX.tilt.hit[tv['Tilt'] - 1], FX.tilt.cap);
     var out = ' ' + card(v).name + ' -' + n + '.';
-    if (v.hp <= 0) { v.dead = true; v.hp = 0; out += ' ¡Cae!'; out += deathFx(s, v, depth + 1).line; }
+    if (v.hp <= 0 && wardSave(s, v)) out += ' ¡Aguanta a 0 de vida hasta atacar!';
+    else if (v.hp <= 0) { v.dead = true; v.hp = 0; out += ' ¡Cae!'; out += deathFx(s, v, depth + 1).line; }
     return out;
   }
   // Efectos al caer una tropa (KOI, Dúo Inseparable). Devuelve texto de registro y animación.
@@ -745,11 +755,13 @@
       var tgt = null, retarget = false;
       if (P.target[a.uid]) tgt = foes.filter(function (f) { return f.uid === P.target[a.uid]; })[0] || null;
       if (!tgt && foes.length) { tgt = foes[Math.floor(s.rng() * foes.length)]; retarget = !!P.target[a.uid]; }
+      if (!tgt && a.tmp.loan != null) delete a.tmp.loan;
       var dmg = atk(a);
       if (!tgt) {
         E.life -= dmg;
         frame(s, card(a).name + ' golpea directamente: ' + dmg + ' de daño a ' + pv(s, a.owner, 'la vida del rival', 'tu vida') + '.', { att: a.uid, life: 1 - a.owner, dmg: dmg });
         if (E.life <= 0) { s.over = true; s.phase = 'over'; s.winner = a.owner; s.reason = 'Vida a cero.'; break; }
+        if (a.tmp.ward) { a.tmp.ward = false; a.dead = true; a.hp = 0; frame(s, card(a).name + ' no derriba a nadie y cae.' + deathFx(s, a, 0).line, null); }
         finishDying(a);
         continue;
       }
@@ -771,7 +783,9 @@
           gainCap(tgt, 'tilt', 'atk', FX.tilt.hit[tt['Tilt'] - 1], FX.tilt.cap);
         }
       }
-      if (tgt.hp <= 0 && pas(tgt) === 'aliento' && !tgt.tmp.acted && !tgt.tmp.noAtk && !tgt.tmp.dying && !tgt.dead) {
+      if (tgt.hp <= 0 && wardSave(s, tgt)) {
+        line += ' ¡Prórroga! ' + card(tgt).name + ' aguanta a 0 de vida hasta que ataque.';
+      } else if (tgt.hp <= 0 && pas(tgt) === 'aliento' && !tgt.tmp.acted && !tgt.tmp.noAtk && !tgt.tmp.dying && !tgt.dead) {
         tgt.tmp.dying = true; line += ' ¡Aliento final! ' + card(tgt).name + ' ataca antes de caer.'; seq.splice(n + 1, 0, tgt);
       } else if (tgt.hp <= 0) {
         tgt.dead = true; tgt.hp = 0; line += ' ¡Cae!';
@@ -788,6 +802,17 @@
         E.life -= 2; P.gold += 1; plife = tgt.owner; pdmg = 2;
         line += ' Embargo: ' + pv(s, a.owner, 'el rival pierde 2 de vida y ganas 1 de oro.', 'pierdes 2 de vida y el rival gana 1 de oro.');
       }
+      // Prórroga: la tropa protegida debe derribar a una rival con su ataque o cae
+      if (a.tmp.ward) {
+        a.tmp.ward = false;
+        if (tgt.dead && !a.dead) { var wh = Math.max(1, Math.floor(maxHp(a) / 2)); a.hp = wh; line += ' Prórroga: ' + card(a).name + ' recupera ' + wh + ' de vida.'; }
+        else if (!a.dead) { a.dead = true; a.hp = 0; line += ' ' + card(a).name + ' no derriba a nadie y cae.'; var dw = deathFx(s, a); line += dw.line; if (!fxk) fxk = dw.fx; }
+      }
+      // Racha de bajas (Lihone Viego): al derrotar a una tropa toma su ataque y vuelve a atacar
+      if (pas(a) === 'racha') {
+        if (tgt.dead && !a.dead && mesaTroops(E).length) { a.tmp.loan = atk(tgt); line += ' Racha de bajas: toma ' + a.tmp.loan + ' de ataque y vuelve a atacar.'; seq.splice(n + 1, 0, a); }
+        else if (a.tmp.loan != null) { delete a.tmp.loan; line += ' Recupera su ataque.'; }
+      }
       // Resurrección: la carta que ataca también recibe el ataque de la carta atacada (contraataque)
       var rec = 0;
       if (s.mode === 'revive') {
@@ -797,8 +822,13 @@
           if (!a.dead) a.hp -= rec; line += ' Contraataque: ' + card(a).name + ' recibe ' + rec + '.';
           var ta2 = s.tiers[a.owner];
           if (has(a, 'Tilt') && ta2['Tilt']) gainCap(a, 'tilt', 'atk', FX.tilt.hit[ta2['Tilt'] - 1], FX.tilt.cap);
-          if (a.hp <= 0 && !a.dead) { a.dead = true; a.hp = 0; line += ' ¡Cae!'; var df2 = deathFx(s, a); line += df2.line; if (!fxk) fxk = df2.fx; }
+          if (a.hp <= 0 && !a.dead && wardSave(s, a)) { line += ' (aguanta a 0 de vida)'; }
+          else if (a.hp <= 0 && !a.dead) { a.dead = true; a.hp = 0; line += ' ¡Cae!'; var df2 = deathFx(s, a); line += df2.line; if (!fxk) fxk = df2.fx; }
         }
+      }
+      if (pas(a) === 'saque' && (P.voley[a.uid] || 'atk') !== 'def') { // Haikyuu Lihone: el saque golpea a las tropas contiguas al objetivo
+        var sk = E.mesa.indexOf(tgt);
+        [sk - 1, sk + 1].forEach(function (q) { var v = q >= 0 ? E.mesa[q] : null; if (v && !v.dead) { line += ' Saque:'; line += passiveHit(s, v, 1, 0); } });
       }
       if (pas(a) === 'remate') { // Javihi Prime: el balón rebota a otra tropa rival
         var rb = mesaTroops(E).filter(function (x) { return x !== tgt; });
@@ -857,7 +887,7 @@
       P.mesa.forEach(function (i, k) {
         if (!i) return;
         if (s.mode === 'revive') { i.dead = false; i.tmp = { atk: 0, hp: 0, red: 0 }; i.hp = maxHp(i); return; } // Resurrección: todas vuelven con la vida completa
-        if (i.dead) { P.grave.push(i); P.mesa[k] = null; delete P.target[i.uid]; return; }
+        if (i.dead || i.hp <= 0) { P.grave.push(i); P.mesa[k] = null; delete P.target[i.uid]; return; }
         i.tmp = { atk: 0, hp: 0, red: 0 }; i.hp = Math.min(i.hp, maxHp(i)); // sin curación entre rondas
       });
       P.hand.forEach(function (i) { if (isTroop(i)) { i.tmp = { atk: 0, hp: 0, red: 0 }; i.hp = maxHp(i); } });
@@ -872,17 +902,22 @@
     var a = P.mesa.filter(function (i) { return i && i.uid === from && has(i, 'Anime'); })[0];
     var b = P.mesa.filter(function (i) { return i && i.uid === to && has(i, 'Anime'); })[0];
     if (!a || !b) return false;
+    var keep = P.hand.some(function (i) { return i && i.id === 'chipy-correa'; }) ? 1 : 0; // Chipy Correa en la mano: nadie se queda a 0
     if (stat === 'atk') {
-      var v = atk(a);
+      var v = atk(a) - keep;
       if (v <= 0) return false;
       var mul = P.fl.anime ? 2 : 1;
       a.perm.atk -= v; b.perm.atk += v * mul;
       say(s, card(a).name + ' cede ' + v * mul + ' de ataque a ' + card(b).name + '.');
     } else {
       var mul2 = P.fl.anime ? 2 : 1, m = maxHp(a), g = Math.floor(m / 2) * mul2;
+      if (keep && m <= 1) return false;
       b.perm.hp += g; b.hp += g;
-      P.mesa[P.mesa.indexOf(a)] = null; P.grave.push(a);
-      say(s, card(a).name + ' cede su vida y cae; ' + card(b).name + ' gana +' + g + ' de vida máxima.');
+      if (keep) { a.perm.hp -= m - 1; a.hp = 1; say(s, card(a).name + ' cede su vida y se queda con 1; ' + card(b).name + ' gana +' + g + ' de vida máxima.'); }
+      else {
+        P.mesa[P.mesa.indexOf(a)] = null; P.grave.push(a);
+        say(s, card(a).name + ' cede su vida y cae; ' + card(b).name + ' gana +' + g + ' de vida máxima.');
+      }
     }
     P.anime--;
     return true;

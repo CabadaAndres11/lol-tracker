@@ -30,7 +30,11 @@ var D={
    "hp": 16,
    "rarity": "Épica",
    "type": "tropa",
-   "size": 3
+   "size": 3,
+   "pas": {
+    "n": "Racha de bajas",
+    "t": "Si al atacar derrota a una tropa rival, toma su ataque y vuelve a atacar, y así mientras siga derrotando. Al terminar recupera su propio ataque."
+   }
   },
   {
    "id": "haikyuu-lihone",
@@ -45,7 +49,11 @@ var D={
    "hp": 14,
    "rarity": "Épica",
    "type": "tropa",
-   "size": 2
+   "size": 2,
+   "pas": {
+    "n": "Saque",
+    "t": "Si está en modo atacar, cada golpe hace 1 de daño a las tropas rivales contiguas a su objetivo."
+   }
   },
   {
    "id": "lihone",
@@ -60,7 +68,11 @@ var D={
    "hp": 16,
    "rarity": "Épica",
    "type": "tropa",
-   "size": 2
+   "size": 2,
+   "pas": {
+    "n": "Captura",
+    "t": "Cada bola Pokémon que se abre le da +1/+1 permanente extra a ella sola (tope +6/+6)."
+   }
   },
   {
    "id": "lihone-correa",
@@ -90,7 +102,11 @@ var D={
    "hp": 16,
    "rarity": "Épica",
    "type": "tropa",
-   "size": 3
+   "size": 3,
+   "pas": {
+    "n": "Prórroga",
+    "t": "La tropa que tiene justo a su derecha no cae al llegar a 0 de vida hasta que ataque. Si al atacar derrota a una tropa rival, recupera la mitad de su vida máxima; si no, cae."
+   }
   },
   {
    "id": "aitorlg-koisito",
@@ -486,7 +502,11 @@ var D={
    "hp": 16,
    "rarity": "Épica",
    "type": "tropa",
-   "size": 2
+   "size": 2,
+   "pas": {
+    "n": "Consuelo",
+    "t": "Mientras esté en tu mano, las Anime que ceden estadísticas siempre se quedan con 1 de ataque o 1 de vida."
+   }
   },
   {
    "id": "chipy-lloron",

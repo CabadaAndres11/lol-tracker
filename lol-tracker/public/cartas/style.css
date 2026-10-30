@@ -940,6 +940,7 @@ img.timg[src$="comebacker.png"] { filter: drop-shadow(0 0 1.5px #fff) drop-shado
 
 .card .pasn{position:absolute;left:5cqw;right:5cqw;bottom:34cqw;z-index:6;display:flex;justify-content:center;cursor:help}
 .card .pasl{max-width:100%;padding:.5cqw 3cqw;border-radius:999px;font:800 7.6cqw/1.3 Inter,sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#2a1a00;background:linear-gradient(180deg,#ffe28a,#d4a52c);border:.7cqw solid #fff3c4;box-shadow:0 1px 4px rgba(0,0,0,.6)}
+.card.r-Épica .pasl{background:linear-gradient(180deg,#e6ccff,#9a4df0);border-color:#f1e1ff;color:#240a40}
 .card .pastip{display:none;position:absolute;left:50%;bottom:calc(100% + 6px);transform:translateX(-50%);width:max(150cqw,200px);padding:8px 10px;border-radius:10px;background:#120d24;border:1px solid #d4a52c;color:#f1ecff;font:500 13px/1.35 Inter,sans-serif;text-align:left;box-shadow:0 8px 20px rgba(0,0,0,.7);z-index:300;pointer-events:none}
 .card .pastip b{display:block;color:#ffd75e;margin-bottom:3px}
 .card .pasn:hover .pastip{display:block}

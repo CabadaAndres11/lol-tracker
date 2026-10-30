@@ -1,6 +1,13 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-10-30', tag: 'Novedad', title: 'Pasivas de las cartas épicas',
+      items: ['Las 5 épicas estrenan pasiva (píldora morada; pasa el cursor para leerla).',
+        'Lihone Viego — Racha de bajas: si al atacar derrota a una tropa rival, toma su ataque y vuelve a atacar, mientras siga derrotando. Al terminar recupera su ataque.',
+        'AitoRLG Renata — Prórroga: la tropa que tiene justo a su derecha no cae a 0 de vida hasta que ataque; si derrota a una rival recupera la mitad de su vida máxima, y si no, cae.',
+        'Haikyuu Lihone — Saque: en modo atacar, cada golpe hace 1 de daño a las tropas rivales contiguas a su objetivo.',
+        'Lihone — Captura: cada bola Pokémon le da +1/+1 permanente extra a ella sola (tope +6/+6).',
+        'Chipy Correa — Consuelo: mientras esté en tu mano, las Anime que ceden estadísticas siempre se quedan con 1 de ataque o 1 de vida.'] },
     { date: '2026-10-30', tag: 'Novedad', title: 'Ver solo las cartas del mazo',
       items: ['En la pantalla de mazo hay una nueva casilla «Solo cartas del mazo» para ver únicamente las cartas que ya has añadido.'] },
     { date: '2026-10-30', tag: 'Balance', title: 'Pokémon sin tope de estadísticas',

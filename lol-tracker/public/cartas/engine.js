@@ -9,7 +9,6 @@
     refreshCost: 1, deckBudget: 20, maxRounds: 40,
     reviveLife: 20, // modo Resurrección: vida inicial (la vida solo se pierde con golpes directos; la carta que ataca recibe el ataque de la atacada)
     merge: [1, 2, 4], // fusión de 3 copias iguales (estilo TFT): multiplicador de las estadísticas base por estrella
-    hpMult: 1.1, hpGrow: 1.25, hpMin: 5, // vida base de las tropas: x hpMult x hpGrow^(coste-1)
     rarityWeight: { 'Común': 50, 'Rara': 30, 'Épica': 15, 'Legendaria': 5 },
   };
   var FX = {
@@ -28,10 +27,6 @@
     pelayos: { cap: 10 },
   };
 
-  if (!DATA.hpScaled) {
-    DATA.cards.forEach(function (c) { c.hp = Math.max(CFG.hpMin, Math.round(c.hp * CFG.hpMult * Math.pow(CFG.hpGrow, c.cost - 1))); });
-    DATA.hpScaled = true;
-  }
   var CARD = {};
   DATA.cards.concat(DATA.actions).forEach(function (c) { CARD[c.id] = c; });
 

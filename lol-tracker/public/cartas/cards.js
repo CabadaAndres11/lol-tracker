@@ -10,9 +10,9 @@ var D={
     "Informático",
     "Trabajo"
    ],
-   "cost": 1,
-   "atk": 3,
-   "hp": 3,
+   "cost": 2,
+   "atk": 4,
+   "hp": 6,
    "rarity": "Común",
    "type": "tropa",
    "size": 1
@@ -25,9 +25,9 @@ var D={
     "Lol",
     "Comebacker"
    ],
-   "cost": 5,
+   "cost": 4,
    "atk": 4,
-   "hp": 6,
+   "hp": 16,
    "rarity": "Épica",
    "type": "tropa",
    "size": 3
@@ -40,9 +40,9 @@ var D={
     "Voley",
     "Anime"
    ],
-   "cost": 3,
-   "atk": 4,
-   "hp": 6,
+   "cost": 4,
+   "atk": 6,
+   "hp": 14,
    "rarity": "Épica",
    "type": "tropa",
    "size": 2
@@ -57,7 +57,7 @@ var D={
    ],
    "cost": 4,
    "atk": 4,
-   "hp": 8,
+   "hp": 16,
    "rarity": "Épica",
    "type": "tropa",
    "size": 2
@@ -70,9 +70,9 @@ var D={
     "Novia",
     "Trabajo"
    ],
-   "cost": 2,
-   "atk": 2,
-   "hp": 6,
+   "cost": 3,
+   "atk": 3,
+   "hp": 12,
    "rarity": "Rara",
    "type": "tropa",
    "size": 1
@@ -85,9 +85,9 @@ var D={
     "Lol",
     "Comebacker"
    ],
-   "cost": 5,
+   "cost": 4,
    "atk": 4,
-   "hp": 6,
+   "hp": 16,
    "rarity": "Épica",
    "type": "tropa",
    "size": 3
@@ -100,8 +100,8 @@ var D={
     "KOI"
    ],
    "cost": 3,
-   "atk": 5,
-   "hp": 7,
+   "atk": 4,
+   "hp": 11,
    "rarity": "Rara",
    "type": "tropa",
    "size": 2
@@ -114,9 +114,9 @@ var D={
     "Anime",
     "Pokémon"
    ],
-   "cost": 4,
-   "atk": 5,
-   "hp": 7,
+   "cost": 3,
+   "atk": 4,
+   "hp": 11,
    "rarity": "Rara",
    "type": "tropa",
    "size": 2
@@ -129,9 +129,9 @@ var D={
     "Trabajo",
     "Tilt"
    ],
-   "cost": 2,
-   "atk": 4,
-   "hp": 4,
+   "cost": 3,
+   "atk": 6,
+   "hp": 9,
    "rarity": "Rara",
    "type": "tropa",
    "size": 1
@@ -146,7 +146,7 @@ var D={
    ],
    "cost": 2,
    "atk": 3,
-   "hp": 5,
+   "hp": 7,
    "rarity": "Común",
    "type": "tropa",
    "size": 1
@@ -159,8 +159,8 @@ var D={
     "Novia"
    ],
    "cost": 3,
-   "atk": 4,
-   "hp": 8,
+   "atk": 3,
+   "hp": 12,
    "rarity": "Rara",
    "type": "tropa",
    "size": 2
@@ -173,8 +173,8 @@ var D={
     "Comebacker",
     "Lol"
    ],
-   "cost": 4,
-   "atk": 5,
+   "cost": 2,
+   "atk": 3,
    "hp": 7,
    "rarity": "Común",
    "type": "tropa",
@@ -188,9 +188,9 @@ var D={
     "Informático",
     "Trabajo"
    ],
-   "cost": 1,
-   "atk": 4,
-   "hp": 4,
+   "cost": 3,
+   "atk": 7,
+   "hp": 8,
    "rarity": "Rara",
    "type": "tropa",
    "size": 1
@@ -203,9 +203,9 @@ var D={
     "Lol",
     "Anime"
    ],
-   "cost": 2,
-   "atk": 3,
-   "hp": 5,
+   "cost": 3,
+   "atk": 5,
+   "hp": 10,
    "rarity": "Rara",
    "type": "tropa",
    "size": 1
@@ -219,12 +219,15 @@ var D={
     "Tilt"
    ],
    "cost": 5,
-   "atk": 5,
-   "hp": 5,
+   "atk": 7,
+   "hp": 18,
    "rarity": "Legendaria",
    "type": "tropa",
    "size": 3,
-   "pas": {"n": "Dúo en sintonía", "t": "Solo con su pareja Dúo (Javihi Dúo + Sech Dúo) viva en la mesa: cuando una recibe un ataque, hace la mitad de ese daño (redondeado hacia arriba) a todas las tropas rivales. Si acaban el combate las dos vivas, tu jugador recupera 1 de vida."}
+   "pas": {
+    "n": "Dúo en sintonía",
+    "t": "Solo con su pareja Dúo (Javihi Dúo + Sech Dúo) viva en la mesa: cuando una recibe un ataque, hace la mitad de ese daño (redondeado hacia arriba) a todas las tropas rivales. Si acaban el combate las dos vivas, tu jugador recupera 1 de vida."
+   }
   },
   {
    "id": "javihi-koisito",
@@ -234,9 +237,9 @@ var D={
     "Comebacker",
     "KOI"
    ],
-   "cost": 4,
-   "atk": 5,
-   "hp": 7,
+   "cost": 3,
+   "atk": 4,
+   "hp": 11,
    "rarity": "Rara",
    "type": "tropa",
    "size": 2
@@ -249,13 +252,16 @@ var D={
     "Voley",
     "NINI"
    ],
-   "cost": 4,
-   "atk": 5,
-   "hp": 7,
+   "cost": 5,
+   "atk": 6,
+   "hp": 19,
    "rarity": "Legendaria",
    "type": "tropa",
    "size": 2,
-   "pas": {"n": "Remate", "t": "Cada vez que ataca, el balón rebota: la mitad de su ataque (redondeado hacia arriba) golpea a otra tropa rival al azar."}
+   "pas": {
+    "n": "Remate",
+    "t": "Cada vez que ataca, el balón rebota: la mitad de su ataque (redondeado hacia arriba) golpea a otra tropa rival al azar."
+   }
   },
   {
    "id": "sech-thresh",
@@ -265,9 +271,9 @@ var D={
     "Lol",
     "Comebacker"
    ],
-   "cost": 1,
-   "atk": 3,
-   "hp": 3,
+   "cost": 2,
+   "atk": 4,
+   "hp": 6,
    "rarity": "Común",
    "type": "tropa",
    "size": 1
@@ -281,12 +287,15 @@ var D={
     "Tilt"
    ],
    "cost": 5,
-   "atk": 5,
-   "hp": 5,
+   "atk": 7,
+   "hp": 18,
    "rarity": "Legendaria",
    "type": "tropa",
    "size": 3,
-   "pas": {"n": "Dúo en sintonía", "t": "Solo con su pareja Dúo (Javihi Dúo + Sech Dúo) viva en la mesa: cuando una recibe un ataque, hace la mitad de ese daño (redondeado hacia arriba) a todas las tropas rivales. Si acaban el combate las dos vivas, tu jugador recupera 1 de vida."}
+   "pas": {
+    "n": "Dúo en sintonía",
+    "t": "Solo con su pareja Dúo (Javihi Dúo + Sech Dúo) viva en la mesa: cuando una recibe un ataque, hace la mitad de ese daño (redondeado hacia arriba) a todas las tropas rivales. Si acaban el combate las dos vivas, tu jugador recupera 1 de vida."
+   }
   },
   {
    "id": "sech",
@@ -296,13 +305,16 @@ var D={
     "Trabajo",
     "Pelayos"
    ],
-   "cost": 4,
-   "atk": 5,
-   "hp": 7,
+   "cost": 5,
+   "atk": 6,
+   "hp": 19,
    "rarity": "Legendaria",
    "type": "tropa",
    "size": 2,
-   "pas": {"n": "Embargo", "t": "Cuando mata a una tropa con su ataque, el jugador rival pierde 2 de vida directamente y tú ganas 1 de oro."}
+   "pas": {
+    "n": "Embargo",
+    "t": "Cuando mata a una tropa con su ataque, el jugador rival pierde 2 de vida directamente y tú ganas 1 de oro."
+   }
   },
   {
    "id": "sech-koisito",
@@ -312,9 +324,9 @@ var D={
     "Pokémon",
     "KOI"
    ],
-   "cost": 4,
-   "atk": 5,
-   "hp": 7,
+   "cost": 3,
+   "atk": 4,
+   "hp": 11,
    "rarity": "Rara",
    "type": "tropa",
    "size": 2
@@ -327,9 +339,9 @@ var D={
     "Lol",
     "KOI"
    ],
-   "cost": 2,
-   "atk": 3,
-   "hp": 5,
+   "cost": 3,
+   "atk": 5,
+   "hp": 10,
    "rarity": "Rara",
    "type": "tropa",
    "size": 1
@@ -341,8 +353,8 @@ var D={
    "themes": [
     "Pokémon"
    ],
-   "cost": 3,
-   "atk": 5,
+   "cost": 2,
+   "atk": 3,
    "hp": 7,
    "rarity": "Común",
    "type": "tropa",
@@ -356,8 +368,8 @@ var D={
     "Comebacker",
     "Informático"
    ],
-   "cost": 4,
-   "atk": 5,
+   "cost": 2,
+   "atk": 3,
    "hp": 7,
    "rarity": "Común",
    "type": "tropa",
@@ -371,9 +383,9 @@ var D={
     "Informático",
     "Trabajo"
    ],
-   "cost": 1,
-   "atk": 3,
-   "hp": 3,
+   "cost": 2,
+   "atk": 4,
+   "hp": 6,
    "rarity": "Común",
    "type": "tropa",
    "size": 1
@@ -388,7 +400,7 @@ var D={
    ],
    "cost": 3,
    "atk": 4,
-   "hp": 6,
+   "hp": 11,
    "rarity": "Rara",
    "type": "tropa",
    "size": 2
@@ -401,13 +413,16 @@ var D={
     "Novia",
     "Pueblo"
    ],
-   "cost": 3,
-   "atk": 3,
-   "hp": 7,
+   "cost": 5,
+   "atk": 5,
+   "hp": 20,
    "rarity": "Legendaria",
    "type": "tropa",
    "size": 2,
-   "pas": {"n": "Aliento final", "t": "Si un ataque rival la mataría antes de haber atacado en este combate, ataca primero y después cae."}
+   "pas": {
+    "n": "Aliento final",
+    "t": "Si un ataque rival la mataría antes de haber atacado en este combate, ataca primero y después cae."
+   }
   },
   {
    "id": "mertens",
@@ -417,9 +432,9 @@ var D={
     "Pokémon",
     "Voley"
    ],
-   "cost": 2,
-   "atk": 3,
-   "hp": 5,
+   "cost": 3,
+   "atk": 5,
+   "hp": 10,
    "rarity": "Rara",
    "type": "tropa",
    "size": 1
@@ -434,11 +449,14 @@ var D={
    ],
    "cost": 5,
    "atk": 3,
-   "hp": 7,
+   "hp": 22,
    "rarity": "Legendaria",
    "type": "tropa",
    "size": 3,
-   "pas": {"n": "Pereza contagiosa", "t": "Al empezar cada combate, todas las tropas rivales pierden 1/1 de forma permanente (máximo -4/-4 por tropa)."}
+   "pas": {
+    "n": "Pereza contagiosa",
+    "t": "Al empezar cada combate, todas las tropas rivales pierden 1/1 de forma permanente (máximo -4/-4 por tropa)."
+   }
   },
   {
    "id": "computer-chipy",
@@ -448,9 +466,9 @@ var D={
     "Informático",
     "Trabajo"
    ],
-   "cost": 1,
-   "atk": 4,
-   "hp": 4,
+   "cost": 3,
+   "atk": 7,
+   "hp": 8,
    "rarity": "Rara",
    "type": "tropa",
    "size": 1
@@ -463,9 +481,9 @@ var D={
     "Anime",
     "Novia"
    ],
-   "cost": 3,
-   "atk": 3,
-   "hp": 7,
+   "cost": 4,
+   "atk": 4,
+   "hp": 16,
    "rarity": "Épica",
    "type": "tropa",
    "size": 2
@@ -479,12 +497,15 @@ var D={
     "Tilt"
    ],
    "cost": 5,
-   "atk": 5,
-   "hp": 5,
+   "atk": 7,
+   "hp": 18,
    "rarity": "Legendaria",
    "type": "tropa",
    "size": 3,
-   "pas": {"n": "Llanto final", "t": "Al caer, hace la mitad de su ataque (redondeado hacia arriba) a todas las tropas rivales."}
+   "pas": {
+    "n": "Llanto final",
+    "t": "Al caer, hace la mitad de su ataque (redondeado hacia arriba) a todas las tropas rivales."
+   }
   },
   {
    "id": "pampert-friki",
@@ -494,9 +515,9 @@ var D={
     "Lol",
     "Anime"
    ],
-   "cost": 2,
-   "atk": 3,
-   "hp": 5,
+   "cost": 3,
+   "atk": 5,
+   "hp": 10,
    "rarity": "Rara",
    "type": "tropa",
    "size": 1
@@ -511,7 +532,7 @@ var D={
    ],
    "cost": 3,
    "atk": 4,
-   "hp": 6,
+   "hp": 11,
    "rarity": "Rara",
    "type": "tropa",
    "size": 2
@@ -526,7 +547,7 @@ var D={
    ],
    "cost": 3,
    "atk": 4,
-   "hp": 6,
+   "hp": 11,
    "rarity": "Rara",
    "type": "tropa",
    "size": 2
@@ -617,7 +638,6 @@ var D={
    "text": "Hace 2 de daño a todas las tropas rivales.",
    "foe": true
   },
-
   {
    "id": "bola-extra",
    "name": "Bola extra",

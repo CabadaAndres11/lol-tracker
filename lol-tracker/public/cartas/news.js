@@ -1,6 +1,10 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-10-30', tag: 'Balance', title: 'Estadísticas y precios por rareza',
+      items: ['Ataque + vida es ahora siempre el mismo dentro de una rareza: Común 10, Rara 15, Épica 20 y Legendaria 25 (cambia el reparto entre ataque y vida según la carta).',
+        'El precio también depende de la rareza: Común 2, Rara 3, Épica 4 y Legendaria 5 de oro.',
+        'Las estadísticas que ves en la carta son las reales: ya no se escala la vida según el coste.'] },
     { date: '2026-10-30', tag: 'Novedad', title: 'Pasivas de las cartas legendarias',
       items: ['Las 7 legendarias estrenan pasiva (las cartas con ✦; pasa el cursor para leerla).',
         'Javihi Dúo y Sech Dúo — Dúo en sintonía: solo con su pareja en mesa, al recibir un ataque hacen la mitad del daño a todas las tropas rivales, y si acaban las dos vivas curas 1 de vida.',

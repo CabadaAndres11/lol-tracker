@@ -994,7 +994,13 @@ var D={
     "Atacan siempre las últimas y ganan como vida máxima y ataque la mitad del daño que hacen (tope +10/+10)."
    ]
   }
- }
+ },
+ "shop": [
+  {
+   "id": "pedir-refuerzos",
+   "price": 50
+  }
+ ]
 };
 if(typeof module!=="undefined"&&module.exports)module.exports=D;else root.CARTAS=D;
 })(typeof window!=="undefined"?window:globalThis);

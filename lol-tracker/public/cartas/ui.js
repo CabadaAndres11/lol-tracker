@@ -175,12 +175,22 @@
       return '<div class="skitem"><div class="skcard">' + cardHtml(c, { skin: s.id, lv: 1 }) + '</div><b>' + esc(c.name) + '</b><span class="mut">' + esc(s.name) + '</span>' + btn + '</div>';
     }).join('') + '</div></div>';
   }
+  function newCards(a) {
+    var L = D.shop || [];
+    if (!L.length) return '';
+    return '<div class="panel skinshop"><h2>' + ic('estrella') + ' Cartas nuevas</h2><p class="mut">Cartas recién añadidas que puedes comprar directamente con monedas.</p><div class="skgrid">' + L.map(function (it) {
+      var c = CARD[it.id], own = a.owned.indexOf(it.id) >= 0;
+      var btn = own ? '<button class="btn sec sm" disabled>' + ic('check') + ' Ya la tienes</button>'
+        : '<button class="btn sm" data-act="cardbuy" data-card="' + it.id + '"' + (a.coins < (a.admin ? 0 : it.price) ? ' disabled' : '') + '>Comprar · ' + (a.admin ? 'gratis' : it.price + ' ' + ic('moneda')) + '</button>';
+      return '<div class="skitem"><div class="skcard">' + cardHtml(c, { lv: 1 }) + '</div><b>' + esc(c.name) + '</b>' + btn + '</div>';
+    }).join('') + '</div></div>';
+  }
   function renderPacks() {
     var a = ui.acct, total = D.cards.length + D.actions.length, can = a.coins >= a.packCost && !ui.pack;
     var h = head('packs', '' + ic('tienda') + ' Tienda') + '<div class="packs-grid">' +
       '<div class="panel packbox">' + bpkHtml('') + '<h2>Sobre estándar</h2><p class="mut">' + a.packSize + ' cartas al azar de todo el juego (tropas y acciones). La última siempre es Rara o mejor. Las cartas que ya tengas se cambian por monedas.</p>' +
       '<button class="btn cta big" data-act="openpack"' + (can ? '' : ' disabled') + '>' + (a.packCost ? 'Abrir sobre · ' + a.packCost + ' ' + ic('moneda') + '' : 'Abrir sobre · gratis') + '</button>' + (a.coins < a.packCost ? '<p class="mut">Te faltan ' + (a.packCost - a.coins) + ' monedas.</p>' : '') + (ui.msg ? '<div class="hint" style="color:var(--bad)">' + esc(ui.msg) + '</div>' : '') + '</div>' +
-      (a.admin ? adminStarters() : '') + skinShop(a) + '<div class="panel"><h2>Tus monedas</h2><div class="coinbig">' + ic('moneda') + ' ' + a.coins + '</div>' +
+      (a.admin ? adminStarters() : '') + newCards(a) + skinShop(a) + '<div class="panel"><h2>Tus monedas</h2><div class="coinbig">' + ic('moneda') + ' ' + a.coins + '</div>' +
       '<div class="dailybox">' + (a.dailyAvailable ? '<button class="btn" data-act="daily">' + ic('regalo') + ' Recompensa diaria · +' + a.dailyCoins + ' ' + ic('moneda') + '</button>' : '<p class="mut">' + ic('check') + ' Ya cobraste la recompensa de hoy. Vuelve mañana.</p>') + '</div>' +
       '<h2 style="margin-top:1rem">Cómo conseguir monedas</h2><ul class="rules"><li><b>Recompensa diaria:</b> +' + a.dailyCoins + ' ' + ic('moneda') + ' cada día.</li><li><b>Partidas contra la IA:</b> +10 ' + ic('moneda') + ' por partida y +20 ' + ic('moneda') + ' más si ganas (hoy llevas ' + a.gamesToday + '/' + a.maxGamesToday + ' partidas con premio). Las partidas muy cortas no dan monedas.</li><li><b>Cartas repetidas:</b> no dan monedas, pero suben la carta de nivel (ver Normas).</li></ul></div>' +
       '<div class="panel"><h2>Tu colección</h2><div class="coinbig">' + a.owned.length + ' / ' + total + '</div><div class="meter colm"><i class="on" style="width:' + Math.round(a.owned.length / total * 100) + '%"></i></div><p class="mut">Solo puedes usar en tu mazo las cartas que tienes. Mira cuáles te faltan en la pestaña Mazo.</p>' +
@@ -864,6 +874,7 @@
       });
     }
     if (act === 'newstog') { ui.newsOpen = !ui.newsOpen; return render(); }
+    if (act === 'cardbuy') return api('cardBuy', { id: el.dataset.card }).then(function (r) { if (r.data && r.data.user) setAcct(r.data.user); ui.msg = r.ok ? '' : (r.data.error || ''); render(); });
     if (act === 'skinbuy') return api('skinBuy', { id: el.dataset.skin }).then(function (r) { if (r.data && r.data.user) setAcct(r.data.user); ui.msg = r.ok ? '' : (r.data.error || ''); render(); });
     if (act === 'skinequip') return api('skinEquip', { id: el.dataset.skin, card: el.dataset.card }).then(function (r) { if (r.data && r.data.user) setAcct(r.data.user); render(); });
     if (act === 'daily') { return api('daily').then(function (r) { if (r.data && r.data.user) setAcct(r.data.user); ui.msg = r.ok ? '' : (r.data.error || ''); render(); }); }

@@ -579,6 +579,16 @@ module.exports = async function handler(req, res) {
     }
     if (act === 'me') { res.status(200).json({ user: publicUser(u) }); return; }
 
+    if (act === 'cardBuy') { // tienda de cartas nuevas
+      const it = (DATA.shop || []).find((x) => x.id === String(body.id || ''));
+      if (!it) { res.status(400).json({ error: 'Esa carta no está a la venta.' }); return; }
+      if (u.owned.indexOf(it.id) >= 0) { res.status(409).json({ error: 'Ya tienes esa carta.', user: publicUser(u) }); return; }
+      const cost = isAdmin(u) ? 0 : it.price;
+      if (u.coins < cost) { res.status(402).json({ error: `Necesitas ${it.price} monedas.`, user: publicUser(u) }); return; }
+      u.coins -= cost; u.owned.push(it.id);
+      await saveUser(cfg, u);
+      res.status(200).json({ user: publicUser(u) }); return;
+    }
     if (act === 'skinBuy' || act === 'skinEquip') {
       const sk = SKIN_BY_ID[String(body.id || body.skin || '')];
       u.skins = u.skins || []; u.skinSel = u.skinSel || {};

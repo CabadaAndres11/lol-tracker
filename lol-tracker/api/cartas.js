@@ -283,6 +283,8 @@ async function pvpHandle(cfg, act, body, u) {
         if (g.rdy[seat]) { /* ya estaba */ }
         else if (s.phase === 'prep' && !s.shopOpen && E.pendingTargets(s, seat).length) hint = 'Elige objetivo para todas tus tropas.';
         else { g.rdy[seat] = true; g.v++; resolveIfReady(g, false); }
+      } else if (op === 'unready') {
+        if (g.rdy[seat]) { g.rdy[seat] = false; g.v++; }
       } else if (SEAT_OPS[op] && !g.rdy[seat]) {
         s.err = '';
         const ok = SEAT_OPS[op](s, seat, a, x);
@@ -473,6 +475,8 @@ async function vs4Handle(cfg, act, body, u) {
         if (T.rdy[seat]) { /* ya estaba */ }
         else if (pend) hint = 'Elige objetivo para todas tus tropas.';
         else { T.rdy[seat] = true; g.v++; if (V4.resolve(T, false, E.CFG.maxRounds)) v4Deadline(g); }
+      } else if (op === 'unready') {
+        if (T.rdy[seat]) { T.rdy[seat] = false; g.v++; }
       } else if (!T.rdy[seat]) {
         T.err = '';
         if (op === 'action') {

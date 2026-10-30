@@ -1,6 +1,8 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-10-30', tag: 'Novedad', title: 'Botón Cancelar tras pulsar listo',
+      items: ['En las partidas contra otros jugadores (1 contra 1 y de 4), después de pulsar listo aparece un botón Cancelar para volver a preparar tu turno si te has precipitado.'] },
     { date: '2026-10-30', tag: 'Balance', title: 'Estadísticas y precios por rareza',
       items: ['Ataque + vida es ahora siempre el mismo dentro de una rareza: Común 10, Rara 15, Épica 20 y Legendaria 25 (cambia el reparto entre ataque y vida según la carta).',
         'El precio también depende de la rareza: Común 2, Rara 3, Épica 4 y Legendaria 5 de oro.',

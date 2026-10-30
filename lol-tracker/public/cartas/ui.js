@@ -556,7 +556,7 @@
     var acts = '';
     if (ui.playing) acts = '<button class="btn sec" data-act="skip">' + ic('avance') + ' Saltar animación</button>';
     else if (s.phase === 'over') acts = '';
-    else if (PV.on && PV.rdy[0]) acts = '<div class="hint">' + ic('reloj') + ' ' + (s.vs4 ? 'Esperando a los demás…' : 'Esperando al rival…') + '</div><div class="waitdots"><i></i><i></i><i></i></div>';
+    else if (PV.on && PV.rdy[0]) acts = '<div class="hint">' + ic('reloj') + ' ' + (s.vs4 ? 'Esperando a los demás…' : 'Esperando al rival…') + '</div><div class="waitdots"><i></i><i></i><i></i></div>' + (s.phase === 'post' ? '' : '<button class="btn sec sm" data-act="unready" title="Volver a preparar tu turno">Cancelar</button>');
     else if (shop) {
       var any = P.mesa.some(Boolean) || P.hand.length;
       acts = '<div class="hint">' + esc(ui.hint || (any ? 'Pulsa una carta para comprarla. Arrastra una tropa de la mesa a tu mano para retirarla.' : 'Compra al menos una tropa.')) + '</div><button class="btn big" data-act="endshop"' + (any ? '' : ' disabled') + '>Finalizar fase de compra ▶</button>';
@@ -925,6 +925,7 @@
     if (act === 'play') { if (deckError()) { ui.screen = 'deck'; return render(); } saveDeck(); return startGame(); }
     if (act === 'skip') { clearTimeout(timer); ui.shown = ui.frames.length; return stopPlay(); }
     if (!s || ui.playing) return;
+    if (act === 'unready') { if (PV.on && PV.rdy[0]) { PV.rdy[0] = false; ui.hint = ''; pvpSend('unready'); render(); } return; }
     if (PV.on && PV.rdy[0]) return;
     if (PV.on && (PV.busy || PV.q.length) && (act === 'buy' || act === 'refresh' || act === 'pick')) return;
     if (PV.on && (act === 'fight' || act === 'endshop' || act === 'next')) {

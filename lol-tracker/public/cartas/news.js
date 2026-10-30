@@ -1,6 +1,10 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-10-30', tag: 'Novedad', title: 'Vender cartas',
+      items: ['En la tienda puedes vender cartas de tu mano o de tu mesa y recuperas su valor en oro (su coste).',
+        'Las cartas fusionadas valen más: ★2 = ×3 y ★3 = ×9 su coste.',
+        'Disponible en todos los modos.'] },
     { date: '2026-10-30', tag: 'Novedad', title: 'Nuevo modo: Resurrección',
       items: ['Disponible contra la IA y en 1 vs 1 (sala con código o búsqueda automática).',
         'Las tropas no mueren: reviven con la vida completa al final de cada ronda.',

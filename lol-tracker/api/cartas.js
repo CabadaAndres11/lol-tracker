@@ -212,6 +212,7 @@ const SEAT_OPS = {
   refresh: (s, p) => E.refresh(s, p),
   pick: (s, p, a) => E.pickFromDeck(s, p, String(a[0])),
   retire: (s, p, a) => E.retire(s, p, +a[0]),
+  sell: (s, p, a) => E.sell(s, p, a[0] === 'mesa' ? 'mesa' : 'hand', +a[1]),
   cede: (s, p, a, x) => E.cede(s, x(a[0]), x(a[1]), a[2] === 'hp' ? 'hp' : 'atk', p),
 };
 async function pvpHandle(cfg, act, body, u) {
@@ -373,6 +374,7 @@ const V4_OPS = {
   refresh: (T, p) => E.refresh(T, p),
   pick: (T, p, a) => E.pickFromDeck(T, p, String(a[0])),
   retire: (T, p, a) => E.retire(T, p, +a[0]),
+  sell: (T, p, a) => E.sell(T, p, a[0] === 'mesa' ? 'mesa' : 'hand', +a[1]),
   cede: (T, p, a) => E.cede(T, a[0], a[1], a[2] === 'hp' ? 'hp' : 'atk', p),
 };
 async function vs4Handle(cfg, act, body, u) {

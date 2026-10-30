@@ -274,6 +274,18 @@
     var P = s.p[p], i = P.hand[handIdx];
     return !!(s.mode === 'revive' && i && P.mesa.some(function (x) { return x && !x.dead && x.id === i.id; }));
   }
+  // Vender (solo en la tienda): devuelve el coste de la carta (x3 por cada estrella de fusión)
+  function sellValue(i) { return card(i).cost * Math.pow(3, (i.gl || 1) - 1); }
+  function sell(s, p, where, idx) {
+    var P = s.p[p];
+    if (!s.shopOpen || s.phase !== 'prep' || s.over) return false;
+    var i = where === 'mesa' ? P.mesa[idx] : P.hand[idx];
+    if (!i || i.dead) return false;
+    if (where === 'mesa') { P.mesa[idx] = null; delete P.target[i.uid]; } else P.hand.splice(idx, 1);
+    P.gold += sellValue(i);
+    checkShop(s);
+    return true;
+  }
   function buy(s, p, idx) {
     var P = s.p[p], id = P.offers[idx];
     if (!s.shopOpen || s.phase !== 'prep' || !id) return false;
@@ -884,7 +896,7 @@
     bindRng: bindRng, revive: revive, income: income, openShop: openShop, noTroops: noTroops, shopStuck: shopStuck, cleanup: cleanup, newPlayer: newPlayer, resolveText: function (x, seat) { return x.replace(/\u0001(\d)\u0002([^\u0002]*)\u0002([^\u0003]*)\u0003/g, function (m, p, a, b) { return +p === seat ? a : b; }); }, mirror: mirror, pv: pv, CFG: CFG, FX: FX, CARD: CARD, DATA: DATA,
     newGame: newGame, randomDeck: randomDeck, deckSize: deckSize, mulberry32: mulberry32,
     place: place, playAction: playAction, setTarget: setTarget, clearTargets: clearTargets, forfeit: forfeit, setVoley: setVoley, actionBlock: actionBlock, validTarget: validTarget,
-    handCap: handCap, dupBlock: dupBlock, buy: buy, mergeCheck: mergeCheck, willMerge: willMerge, refresh: refresh, refreshCost: refreshCost, pickFromDeck: pickFromDeck, retire: retire,
+    sell: sell, sellValue: sellValue, handCap: handCap, dupBlock: dupBlock, buy: buy, mergeCheck: mergeCheck, willMerge: willMerge, refresh: refresh, refreshCost: refreshCost, pickFromDeck: pickFromDeck, retire: retire,
     aiDeck: aiDeck, aiShop: aiShop, aiPrep: aiPrep, aiTargets: aiTargets, fight: fight, endShop: endShop, pendingTargets: pendingTargets, cede: cede, nextRound: nextRound,
     themeCounts: themeCounts, tiers: tiers, tierOf: tierOf, atk: atk, maxHp: maxHp, card: card, isTroop: isTroop, has: has, mesaTroops: mesaTroops, viewOf: viewOf,
   };

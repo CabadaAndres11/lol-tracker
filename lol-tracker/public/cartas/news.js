@@ -1,6 +1,8 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-10-30', tag: 'Novedad', title: 'Moneda para decidir quién ataca primero',
+      items: ['Al empezar cada combate una moneda gira y cae del lado de quien ataca primero (TÚ o RIVAL), con un mensaje que lo confirma.'] },
     { date: '2026-10-30', tag: 'Novedad', title: 'Nueva acción Comebacker: Pedir refuerzos',
       items: ['Nueva carta de acción Rara (2 de oro): si tu vida es menor que la del rival, consigues en tu mano un Lihone Viego o un AitoRLG Renata al azar.'] },
     { date: '2026-10-30', tag: 'Novedad', title: 'Números de daño más visibles',

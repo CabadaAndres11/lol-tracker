@@ -807,9 +807,22 @@
     if (s.shopOpen) showSplash({ kind: 'shop', title: '' + ic('carrito') + ' ¡RONDA DE TIENDA!', sub: s.round === 1 ? 'Compra tus primeras tropas · no hay combate' : 'Compra, coloca y retira tropas · no hay combate' });
     else showSplash({ kind: 'combat', title: '' + ic('espadas') + ' RONDA ' + s.round, sub: s.first === 0 ? 'Atacas primero' : 'Ataca primero el rival' });
   }
+  // Moneda al inicio del combate: gira y cae del lado de quien ataca primero
+  function coinFlip(first) {
+    var old = document.getElementById('coinov'); if (old) old.remove();
+    var el = document.createElement('div'); el.id = 'coinov'; el.className = 'coinov';
+    el.innerHTML = '<div class="coinhop"><div class="coin3d ' + (first === 0 ? 'me' : 'foe') + '"><div class="cf cfm">TÚ</div><div class="cf cfr">RIVAL</div></div></div><div class="coinlbl ' + (first === 0 ? 'me' : 'foe') + '">' + (first === 0 ? '¡Atacas primero!' : '¡Ataca primero el rival!') + '</div>';
+    document.body.appendChild(el);
+    setTimeout(function () { if (el.parentNode) el.remove(); }, 2300);
+  }
   function play() {
     ui.frames = ui.s.frames.slice(); ui.shown = 0; ui.playing = true; ui.sel = null;
-    clearTimeout(timer); ui.floats = []; step();
+    clearTimeout(timer); ui.floats = [];
+    if (ui.frames.length && ui.s.first != null) { // el tablero se queda como estaba mientras gira la moneda
+      ui.view = ui.frames[0].view; ui.hl = null; render(); coinFlip(ui.s.first);
+      timer = setTimeout(step, 2200); return;
+    }
+    step();
   }
   function step() {
     if (ui.shown >= ui.frames.length) { stopPlay(); return; }
@@ -821,6 +834,7 @@
     if (lg) lg.innerHTML = '<div class="cur">' + esc(f.text) + '</div>' + ui.frames.slice(0, ui.shown - 1).reverse().slice(0, 7).map(function (x) { return '<div>' + esc(x.text) + '</div>'; }).join('');
   }
   function stopPlay() {
+    var cv = document.getElementById('coinov'); if (cv) cv.remove();
     clearTimeout(timer); timer = null; ui.playing = false; ui.view = null; ui.hl = null; ui.floats = [];
     var s = ui.s;
     if (s.phase === 'post' && !s.over && s.p[0].anime <= 0) {

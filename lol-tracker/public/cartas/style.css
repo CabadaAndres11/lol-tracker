@@ -946,3 +946,18 @@ img.timg[src$="comebacker.png"] { filter: drop-shadow(0 0 1.5px #fff) drop-shado
 .card .pastip b{display:block;color:#ffd75e;margin-bottom:3px}
 .card .pasn:hover .pastip{display:block}
 .deckgrid .card:has(.pasn:hover){opacity:1;filter:none;z-index:50}
+
+/* Moneda de inicio de combate */
+.coinov { position: fixed; inset: 0; z-index: 950; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.6rem; pointer-events: none; background: radial-gradient(circle, rgba(5,8,20,.35), rgba(5,8,20,.7)); animation: coinbg 2.2s ease both; perspective: 900px; }
+@keyframes coinbg { 0% { opacity: 0; } 10%, 85% { opacity: 1; } 100% { opacity: 0; } }
+.coinhop { animation: coinhop 1.5s cubic-bezier(.3,.6,.4,1) both; }
+@keyframes coinhop { 0% { transform: translateY(90px) scale(.5); } 42% { transform: translateY(-110px) scale(1.35); } 78% { transform: translateY(0) scale(1); } 88% { transform: translateY(-16px) scale(1.04); } 100% { transform: none; } }
+.coin3d { width: min(38vw, 170px); aspect-ratio: 1; position: relative; transform-style: preserve-3d; animation: coinspin 1.5s cubic-bezier(.25,.6,.3,1) both; }
+.coin3d.me { --end: 1800deg; } .coin3d.foe { --end: 1980deg; }
+@keyframes coinspin { from { transform: rotateY(0); } to { transform: rotateY(var(--end)); } }
+.cf { position: absolute; inset: 0; border-radius: 50%; backface-visibility: hidden; display: grid; place-items: center; font: 900 clamp(1.4rem, 6vw, 2.4rem) 'Fredoka', Inter, sans-serif; letter-spacing: .06em; border: 7px solid; box-shadow: 0 0 40px rgba(0,0,0,.6), inset 0 0 22px rgba(0,0,0,.25); text-shadow: 0 2px 0 rgba(0,0,0,.35); }
+.cfm { background: radial-gradient(circle at 35% 30%, #fff3b0, #f5b301 60%, #b87400); border-color: #7dd3fc; color: #3b2a00; }
+.cfr { background: radial-gradient(circle at 35% 30%, #ffd0d0, #ef4444 60%, #8f1515); border-color: #fecaca; color: #fff; transform: rotateY(180deg); }
+.coinlbl { font: 900 clamp(1.3rem, 4.4vw, 2.2rem) 'Fredoka', Inter, sans-serif; letter-spacing: .08em; padding: .4rem 1.4rem; border-radius: 999px; opacity: 0; animation: coinlbl .5s 1.4s ease both; text-shadow: 0 3px 0 rgba(0,0,0,.4); }
+.coinlbl.me { background: rgba(14,116,144,.9); color: #e0f7ff; border: 3px solid #7dd3fc; } .coinlbl.foe { background: rgba(127,29,29,.92); color: #fff; border: 3px solid #fecaca; }
+@keyframes coinlbl { from { opacity: 0; transform: translateY(14px) scale(.8); } to { opacity: 1; transform: none; } }

@@ -65,7 +65,8 @@
     if (o.size) h += '<span class="pips" title="Espacio que ocupa en el mazo: ' + c.size + '">' + pips(c.size) + '</span>';
     h += '<div class="nm">' + esc(c.name) + '</div>';
     if (troop) {
-      var a = o.atk != null ? o.atk : c.atk, hp = o.hp != null ? o.hp : c.hp, mx = o.max != null ? o.max : hp;
+      var lb = o.lv > 1 && o.atk == null ? o.lv - 1 : 0; // nivel de carta: +1/+1 por nivel (en tienda, mazo y colección)
+      var a = o.atk != null ? o.atk : c.atk + lb, hp = o.hp != null ? o.hp : c.hp + lb, mx = o.max != null ? o.max : hp;
       h += '<div class="mono">' + esc(c.person.charAt(0)) + '</div><div class="tags">' + c.themes.map(tagHtml).join('') + '</div>';
       var dA = a - c.atk, dH = mx - c.hp;
       if (dA) h += '<i class="dl a ' + (dA > 0 ? 'pos' : 'neg') + '">' + (dA > 0 ? '+' : '') + dA + '</i>';

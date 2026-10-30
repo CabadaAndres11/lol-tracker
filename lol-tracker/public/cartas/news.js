@@ -1,6 +1,9 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-10-30', tag: 'Corrección', title: 'Los niveles de carta ahora se ven en las estadísticas',
+      items: ['Las tropas con nivel ★2 o ★3 muestran ya sus estadísticas mejoradas (+1/+1 por nivel) en la tienda, el mazo y la colección.',
+        'En partida ya se aplicaban; ahora lo que ves antes de comprar coincide con lo que juegas.'] },
     { date: '2026-10-30', tag: 'Equilibrio', title: 'Rework de la sinergia Informático',
       items: ['Nivel 1 (2 cartas): la primera actualización de cada tienda es gratis.',
         'Nivel 2 (4 cartas): las 3 primeras actualizaciones de cada tienda son gratis.',

@@ -1,6 +1,8 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-10-30', tag: 'Novedad', title: 'Ver solo las cartas del mazo',
+      items: ['En la pantalla de mazo hay una nueva casilla «Solo cartas del mazo» para ver únicamente las cartas que ya has añadido.'] },
     { date: '2026-10-30', tag: 'Balance', title: 'Pokémon sin tope de estadísticas',
       items: ['Las mejoras permanentes de las bolas Pokémon ya no tienen tope (antes +10/+10 por carta).'] },
     { date: '2026-10-30', tag: 'Novedad', title: 'Botón Cancelar tras pulsar listo',

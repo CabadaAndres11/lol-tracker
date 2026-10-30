@@ -207,17 +207,22 @@
   }
   function renderModes() {
     var modes = [
-      ['ai', ic('robot'), 'Contra la IA', 'Duelo 1 contra 1 con tu mazo. Disponible ahora.', true],
+      ['ai', ic('robot'), 'Contra la IA', 'Duelo 1 contra 1 con tu mazo contra la IA.', true],
       ['pvp', ic('espadas'), 'Jugador contra jugador', 'Reta a otro jugador en un duelo 1 contra 1. Sala con código o búsqueda automática.', true],
-      ['rev', ic('brillo'), 'Resurrección · IA', 'Las tropas no mueren: reviven cada ronda. Cada golpe a una carta también daña la vida de su dueño (80 de vida).', true],
-      ['revpvp', ic('brillo'), 'Resurrección · 1 vs 1', 'El mismo modo contra otro jugador. Sala con código o búsqueda automática.', true],
+      ['rev', ic('robot'), 'Contra la IA', 'Tropas que reviven y 80 de vida. Cada golpe también daña la vida del dueño de la carta.', true],
+      ['revpvp', ic('espadas'), 'Jugador contra jugador', 'Duelo 1 contra 1 en modo Resurrección. Sala con código o búsqueda automática.', true],
       ['vs4', ic('grupo'), 'Versus de 4', 'Cuatro jugadores, duelos rotando hasta que quede uno. Sala con código o búsqueda.', true],
     ];
-    app.innerHTML = head('play', '' + ic('espadas') + ' Elige modo de juego') + '<p class="mut">Tu mazo actual (' + deckSize() + '/' + CFG.deckBudget + ') se usará en cualquier modo.</p><div class="modes">' +
-      modes.map(function (m) {
-        return '<button class="mode m-' + m[0] + (m[4] ? '' : ' off') + '"' + (m[4] ? ' data-act="' + (m[0] === 'pvp' ? 'openpvp' : m[0] === 'revpvp' ? 'openrevpvp' : m[0] === 'rev' ? 'startrev' : m[0] === 'vs4' ? 'openvs4' : 'startai') + '"' : ' disabled aria-disabled="true"') + '><span class="mi">' + m[1] + '</span><b>' + m[2] + '</b><span class="mut">' + m[3] + '</span>' +
-          (m[4] ? '<span class="go">¡Jugar!</span>' : '<span class="soon">' + ic('candado') + ' Próximamente</span>') + '</button>';
-      }).join('') + '</div></div>';
+    var tile = function (m) {
+      return '<button class="mode m-' + m[0] + (m[4] ? '' : ' off') + '"' + (m[4] ? ' data-act="' + (m[0] === 'pvp' ? 'openpvp' : m[0] === 'revpvp' ? 'openrevpvp' : m[0] === 'rev' ? 'startrev' : m[0] === 'vs4' ? 'openvs4' : 'startai') + '"' : ' disabled aria-disabled="true"') + '><span class="mi">' + m[1] + '</span><b>' + m[2] + '</b><span class="mut">' + m[3] + '</span>' +
+        (m[4] ? '<span class="go">¡Jugar!</span>' : '<span class="soon">' + ic('candado') + ' Próximamente</span>') + '</button>';
+    };
+    var group = function (title, sub, ids) {
+      return '<h2 class="mgtitle">' + title + '</h2><p class="mut mgsub">' + sub + '</p><div class="modes">' + modes.filter(function (m) { return ids.indexOf(m[0]) >= 0; }).map(tile).join('') + '</div>';
+    };
+    app.innerHTML = head('play', '' + ic('espadas') + ' Elige modo de juego') + '<p class="mut">Tu mazo actual (' + deckSize() + '/' + CFG.deckBudget + ') se usará en cualquier modo.</p>' +
+      group('Modo clásico', 'Las tropas que caen se pierden. Gana quien se queda con tropas en pie y deja sin vida al rival.', ['ai', 'pvp', 'vs4']) +
+      group('Modo Resurrección', 'Las tropas reviven cada ronda y cada golpe a una carta también daña la vida de su dueño.', ['rev', 'revpvp']) + '</div>';
   }
   function renderRules() {
     var sec = function (t, items) { return '<div class="panel"><h2>' + t + '</h2><ul class="rules">' + items.map(function (i) { return '<li>' + i + '</li>'; }).join('') + '</ul></div>'; };

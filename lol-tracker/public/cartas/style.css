@@ -911,3 +911,9 @@ img.timg[src$="comebacker.png"] { filter: drop-shadow(0 0 1.5px #fff) drop-shado
 /* fusión en partida */
 .glb{position:absolute;left:5px;top:34px;z-index:3;font-size:.62rem;letter-spacing:-1px;color:#ffd75e;background:rgba(0,0,0,.65);border:1px solid #ffd75e;border-radius:8px;padding:0 4px;line-height:1.2}
 .offer.mergeable{box-shadow:0 0 0 2px #ffd75e,0 0 18px 4px rgba(255,215,94,.55)}
+
+/* modos agrupados en filas con título */
+.mgtitle{margin:1.4rem 0 .1rem;font-size:1.25rem;letter-spacing:.06em;text-transform:uppercase}
+.mgsub{margin:0 0 .2rem}
+.modes{margin:.6rem 0 .4rem}
+.mode.m-rev{--mc:#c6f1dc}.mode.m-revpvp{--mc:#ffd1c7}

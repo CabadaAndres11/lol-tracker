@@ -191,7 +191,7 @@ var D={
    "cost": 1,
    "atk": 3,
    "hp": 3,
-   "rarity": "Común",
+   "rarity": "Rara",
    "type": "tropa",
    "size": 1
   },
@@ -445,7 +445,7 @@ var D={
    "cost": 1,
    "atk": 3,
    "hp": 3,
-   "rarity": "Común",
+   "rarity": "Rara",
    "type": "tropa",
    "size": 1
   },
@@ -815,9 +815,9 @@ var D={
    ],
    "color": "#22d3ee",
    "tx": [
-    "Las cartas Rara o superior salen el doble de probable en la tienda.",
-    "Además: una actualización gratis por tienda.",
-    "Además: eliges a dedo una carta de tu mazo como oferta extra."
+    "La primera actualización de cada tienda es gratis.",
+    "Las 3 primeras actualizaciones de cada tienda son gratis.",
+    "Además: las Informático ganan +1/+1 permanente por cada actualización de tienda hecha en la partida."
    ]
   },
   "Trabajo": {

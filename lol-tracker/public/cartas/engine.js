@@ -199,10 +199,8 @@
       var cm = pool.filter(function (id) { return CARD[id].type === 'accion' || (CARD[id].type === 'tropa' && CARD[id].rarity === 'Común'); });
       if (cm.some(function (id) { return CARD[id].type === 'tropa'; })) elig = cm;
     }
-    var boost = (t['Informático'] || 0) >= 1;
     return elig.map(function (id) {
       var w = CFG.rarityWeight[CARD[id].rarity] || 10;
-      if (boost && CARD[id].rarity !== 'Común') w *= 2;
       return { id: id, w: w };
     });
   }
@@ -247,7 +245,8 @@
   }
   function refreshCost(s, p) {
     var P = s.p[p], t = tiers(P);
-    return ((t['Informático'] || 0) >= 2 && P.refreshes === 0) ? 0 : CFG.refreshCost;
+    var il = t['Informático'] || 0, free = il >= 2 ? 3 : il >= 1 ? 1 : 0;
+    return P.refreshes < free ? 0 : CFG.refreshCost;
   }
   function refresh(s, p) {
     var P = s.p[p];
@@ -264,9 +263,7 @@
   }
   function pickFromDeck(s, p, id) {
     var P = s.p[p], t = tiers(P);
-    if (!s.shopOpen || (t['Informático'] || 0) < 3 || P.pickUsed || P.deck.indexOf(id) < 0) return false;
-    P.pickUsed = true; P.offers.push(id);
-    return true;
+    return false; // retirado: ya no existe la oferta a dedo
   }
   function buy(s, p, idx) {
     var P = s.p[p], id = P.offers[idx];
@@ -519,6 +516,14 @@
           if (du.length) fxFrame(s, p, 'duo', 'Dúo Inseparable', '+' + FX.duo.stat + '/+' + FX.duo.stat + ' permanente', du.map(function (i) { return i.uid; }));
         }
 
+      }
+      // Informático nivel 3: +1/+1 permanente por cada actualización de tienda de la partida (se acredita lo que falta)
+      if ((t['Informático'] || 0) >= 3) {
+        var inf = troops.filter(function (i) { return has(i, 'Informático') && (i.caps.inf || 0) < s.refreshN[p]; });
+        if (inf.length) {
+          inf.forEach(function (i) { var d = s.refreshN[p] - (i.caps.inf || 0); i.caps.inf = s.refreshN[p]; grow(i, 'atk', d); grow(i, 'hp', d); });
+          fxFrame(s, p, 'inf', 'Actualizaciones', '+1/+1 por actualización de tienda (' + s.refreshN[p] + ' en total)', inf.map(function (i) { return i.uid; }));
+        }
       }
       // Pokémon: bola (las acciones pueden añadir bolas extra esta ronda)
       if (t['Pokémon']) {

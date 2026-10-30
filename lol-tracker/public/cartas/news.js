@@ -1,6 +1,12 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-10-30', tag: 'Equilibrio', title: 'Rework de la sinergia Informático',
+      items: ['Nivel 1 (2 cartas): la primera actualización de cada tienda es gratis.',
+        'Nivel 2 (4 cartas): las 3 primeras actualizaciones de cada tienda son gratis.',
+        'Nivel 3 (6 cartas): las Informático ganan +1/+1 permanente por cada actualización de tienda hecha en la partida.',
+        'Se elimina el bonus de rareza en tienda y la oferta a dedo.',
+        'Javihi y Computer Chipy pasan de Común a Rara.'] },
     { date: '2026-10-30', tag: 'Novedad', title: 'Skins de cartas',
       items: ['Nueva sección «Skins» en Sobres: compra con monedas ilustraciones alternativas para tus cartas.',
         'Primera skin: AitoRLG Koisito «Piel azul» (120 monedas). Necesitas tener la carta.',

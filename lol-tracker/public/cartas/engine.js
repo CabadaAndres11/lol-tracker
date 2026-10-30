@@ -1,4 +1,4 @@
-/* Motor del juego de cartas (prototipo). Sin DOM: se usa igual en el navegador y en Node para simular partidas. */
+/* Motor del juego de cartas. Sin DOM: se usa igual en el navegador y en Node para simular partidas. */
 (function (root) {
   'use strict';
   var DATA = root.CARTAS || (typeof require !== 'undefined' ? require('./cards.js') : null);

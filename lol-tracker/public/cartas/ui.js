@@ -76,7 +76,7 @@
   var NAV = [['home', 'casa', 'Inicio'], ['play', 'espadas', 'Jugar'], ['deck', 'cartas', 'Mazo'], ['packs', 'regalo', 'Sobres'], ['themes', 'brillo', 'Sinergias'], ['rules', 'libro', 'Normas']];
   function navHtml(cur) {
     return '<nav class="nav">' + NAV.map(function (n) { return '<button class="navb' + (n[0] === cur ? ' on' : '') + '" data-act="nav" data-to="' + n[0] + '">' + ic(n[1]) + ' ' + n[2] + '</button>'; }).join('') +
-      '<span class="navsp"></span>' + (ui.acct ? '<button class="navb coinpill" data-act="nav" data-to="packs" title="Tus monedas">' + ic('moneda') + ' ' + ui.acct.coins + '</button><span class="acctw"><button class="navb who" data-act="acctmenu" title="Tu cuenta">' + ic('usuario') + ' ' + esc(ui.acct.name) + ' ▾</button><div class="acctmenu"><div class="am-name">Sesión de <b>' + esc(ui.acct.name) + '</b></div><button data-act="logout">' + ic('puerta') + ' Cerrar sesión</button></div></span>' : '') + '<a class="navb" href="/">← Hub</a><button class="navb" data-act="lock" title="Bloquear">' + ic('candado') + '</button></nav>';
+      '<span class="navsp"></span>' + (ui.acct ? '<button class="navb coinpill" data-act="nav" data-to="packs" title="Tus monedas">' + ic('moneda') + ' ' + ui.acct.coins + '</button><span class="acctw"><button class="navb who" data-act="acctmenu" title="Tu cuenta">' + ic('usuario') + ' ' + esc(ui.acct.name) + ' ▾</button><div class="acctmenu"><div class="am-name">Sesión de <b>' + esc(ui.acct.name) + '</b></div><button data-act="logout">' + ic('puerta') + ' Cerrar sesión</button></div></span>' : '') + '<a class="navb" href="/">← Hub</a></nav>';
   }
   function head(cur, title) { return '<div class="wrap">' + navHtml(cur) + (title ? '<h1 class="ptitle">' + title + '</h1>' : ''); }
   function deckSize() { return E.deckSize(ui.deck); }
@@ -101,7 +101,7 @@
       ['themes', ic('brillo'), 'Sinergias', n + ' sinergias con sus niveles y cartas.'],
       ['rules', ic('libro'), 'Normas', 'Cómo funcionan las rondas, la tienda y el combate.'],
     ].map(function (m) { return '<button class="menu-i m-' + m[0] + '" data-act="nav" data-to="' + m[0] + '"><span class="mi">' + m[1] + '</span><b>' + m[2] + '</b><span class="mut">' + m[3] + '</span></button>'; }).join('') + '</div>';
-    h += '<p class="mut" style="text-align:center">' + D.cards.length + ' tropas · ' + D.actions.length + ' acciones · prototipo</p></div>';
+    h += '<p class="mut" style="text-align:center">' + D.cards.length + ' tropas · ' + D.actions.length + ' acciones</p></div>';
     app.innerHTML = h;
   }
 
@@ -699,7 +699,6 @@
     if (Date.now() - noClick < 350 || ui.busy) return;
     var el = e.target.closest('[data-act]'); if (!el) return;
     var act = el.dataset.act, s = ui.s, P = s && s.p[0];
-    if (act === 'lock') return window.cartasLock();
     if (act === 'acctmenu') { var w = el.closest('.acctw'); if (w) w.classList.toggle('open'); return; }
     if (act === 'logout') return logout();
     if (act === 'register') {

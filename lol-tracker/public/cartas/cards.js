@@ -1,4 +1,4 @@
-/* Datos generados: tropas, acciones y temáticas del juego de cartas (prototipo). */
+/* Datos generados: tropas, acciones y temáticas del juego de cartas . */
 (function(root){
 var D={
  "cards": [

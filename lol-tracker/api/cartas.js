@@ -1,4 +1,4 @@
-// Cuentas, monedas y sobres del juego de cartas (prototipo).
+// Cuentas, monedas y sobres del juego de cartas.
 // Todo se guarda en Redis (Upstash). Una cuenta = nombre + PIN de 4 dígitos.
 // Las monedas y la colección viven en el servidor: el navegador solo pide acciones.
 const crypto = require('crypto');

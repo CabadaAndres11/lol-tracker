@@ -3,58 +3,19 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<meta name="robots" content="noindex, nofollow" />
 <meta name="theme-color" content="#bfe3ff">
-<title>Juego de Cartas · Prototipo</title>
+<title>Juego de Cartas</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-<div id="gate" class="gate">
-  <form id="gate-form" class="gate-box" autocomplete="off">
-    <div class="gate-icon" id="gate-ic"></div>
-    <h1>Juego de Cartas</h1>
-    <p>Prototipo privado. Introduce la contraseña para entrar.</p>
-    <input id="gate-pw" type="password" placeholder="Contraseña" autocomplete="off" autofocus />
-    <button type="submit">Entrar</button>
-    <p id="gate-err" class="gate-err" hidden>Contraseña incorrecta.</p>
-    <a class="gate-back" href="/">← Volver</a>
-  </form>
-</div>
-<div id="app" hidden></div>
+<div id="app"></div>
 <script src="icons.js"></script>
 <script>
 (function () {
-  try { document.getElementById("gate-ic").innerHTML = ic("cartas"); } catch (e) {}
-  var HASH = '7d88d6b06256e7b2e42c694d0065e5e2d78fc513e03ec84bfed62891319cd67b';
-  var loaded = false;
-  function unlock() {
-    if (loaded) return; loaded = true;
-    try { localStorage.setItem('cartas_ok', '1'); } catch (e) {}
-    document.getElementById('gate').hidden = true;
-    document.getElementById('app').hidden = false;
-    ['icons.js', 'cards.js', 'engine.js', 'ui.js'].reduce(function (p, src) {
-      return p.then(function () { return new Promise(function (ok, ko) { var s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = ko; document.body.appendChild(s); }); });
-    }, Promise.resolve());
-  }
-  function sha(text) {
-    var data = new TextEncoder().encode(text);
-    return crypto.subtle.digest('SHA-256', data).then(function (b) {
-      return Array.prototype.map.call(new Uint8Array(b), function (x) { return ('0' + x.toString(16)).slice(-2); }).join('');
-    });
-  }
-  window.cartasLock = function () { try { localStorage.removeItem('cartas_ok'); } catch (e) {} location.href = '/'; };
-  var stored = false;
-  try { stored = localStorage.getItem('cartas_ok') === '1'; } catch (e) {}
-  if (stored) { unlock(); return; }
-  document.getElementById('gate-form').addEventListener('submit', function (e) {
-    e.preventDefault();
-    var err = document.getElementById('gate-err');
-    if (!window.crypto || !crypto.subtle) { err.textContent = 'Este navegador no permite comprobar la contraseña (necesita https).'; err.hidden = false; return; }
-    sha(document.getElementById('gate-pw').value).then(function (h) {
-      if (h === HASH) unlock(); else { err.textContent = 'Contraseña incorrecta.'; err.hidden = false; document.getElementById('gate-pw').select(); }
-    });
-  });
+  ['cards.js', 'engine.js', 'ui.js'].reduce(function (p, src) {
+    return p.then(function () { return new Promise(function (ok, ko) { var s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = ko; document.body.appendChild(s); }); });
+  }, Promise.resolve());
 })();
 </script>
 </body>

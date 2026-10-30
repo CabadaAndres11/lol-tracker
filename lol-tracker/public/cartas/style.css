@@ -899,6 +899,8 @@ img.timg[src$="comebacker.png"] { filter: drop-shadow(0 0 1.5px #fff) drop-shado
 
 /* clasificación */
 .ladderbox{max-width:760px;margin:1.4rem auto}
+@media (min-width:1260px){.ladderbox{position:fixed;top:92px;right:16px;width:232px;max-width:none;margin:0;z-index:5}.ladderbox .lrow{padding:.4rem .5rem;gap:.5rem}.ladderbox h2{font-size:1rem}}
+.lme{margin:.3rem 0 0;font-size:.85rem}
 .ladder{list-style:none;margin:.4rem 0;padding:0;display:flex;flex-direction:column;gap:6px}
 .lrow{display:flex;align-items:center;gap:.8rem;padding:.45rem .7rem;border-radius:10px;background:rgba(255,255,255,.04)}
 .lrow.me{outline:1px solid var(--gold,#e0b64c);background:rgba(224,182,76,.1)}

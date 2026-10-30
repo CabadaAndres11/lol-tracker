@@ -109,7 +109,7 @@
     var rows = L && L.top && L.top.length ? L.top.map(function (r, k) {
       return '<li class="lrow' + (ui.acct && r.name === ui.acct.name ? ' me' : '') + '"><span class="lpos">' + (k + 1) + '</span><b>' + esc(r.name) + '</b><span class="lpts">' + r.pts + ' pts</span></li>';
     }).join('') : '<li class="mut">' + (L ? 'Aún no hay partidas puntuadas. ¡Juega un 1 vs 1 o un Versus de 4!' : 'Cargando…') + '</li>';
-    return '<div class="panel ladderbox"><h2>' + ic('trofeo') + ' Clasificación</h2><ol class="ladder">' + rows + '</ol><p class="mut">1 vs 1: +20 al ganar, −20 al perder. Versus de 4: +40 · +20 · −20 · −40 según tu puesto.' + (L ? ' Tus puntos: <b>' + L.me + '</b>.' : '') + '</p></div>';
+    return '<div class="panel ladderbox"><h2>' + ic('trofeo') + ' Clasificación</h2><ol class="ladder">' + rows + '</ol><p class="mut lme">' + (L ? 'Tus puntos: <b>' + L.me + '</b>' : '') + '</p></div>';
   }
   function newsHtml() {
     var N = window.CARTAS_NEWS || [];
@@ -128,8 +128,8 @@
       ['themes', ic('brillo'), 'Sinergias', n + ' sinergias con sus niveles y cartas.'],
       ['rules', ic('libro'), 'Normas', 'Cómo funcionan las rondas, la tienda y el combate.'],
     ].map(function (m) { return '<button class="menu-i m-' + m[0] + '" data-act="nav" data-to="' + m[0] + '"><span class="mi">' + m[1] + '</span><b>' + m[2] + '</b><span class="mut">' + m[3] + '</span></button>'; }).join('') + '</div>';
-    h += ladderHtml();
     h += newsHtml();
+    h += ladderHtml();
     h += '<p class="mut" style="text-align:center">' + D.cards.length + ' tropas · ' + D.actions.length + ' acciones</p></div>';
     app.innerHTML = h;
   }

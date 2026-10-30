@@ -126,6 +126,7 @@
     bindRng(s);
     if (opts && opts.pvp) s.pvp = true;
     if (opts && opts.lv) s.lv = opts.lv;
+    if (opts && opts.sk) s.sk = opts.sk;
     startRound(s);
     return s;
   }
@@ -786,7 +787,7 @@
     c.frames.forEach(function (f) { f.text = txt(f.text); });
     if (sw) {
       c.p.reverse();
-      ['lastBall', 'refreshN', 'tiers', 'uidn', 'lv'].forEach(function (k) { if (c[k]) c[k].reverse(); });
+      ['lastBall', 'refreshN', 'tiers', 'uidn', 'lv', 'sk'].forEach(function (k) { if (c[k]) c[k].reverse(); });
       c.first = 1 - c.first;
       if (c.winner >= 0) c.winner = 1 - c.winner;
       c.p.forEach(function (P) {

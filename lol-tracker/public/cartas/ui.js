@@ -49,6 +49,7 @@
   var ARTS = {"aitorlg-friki":1,"aitorlg-koisito":1,"aitorlg-regla":1,"aitorlg-renata":1,"chipy-correa":1,"chipy-lloron":1,"computer-chipy":1,"computer-dashlight":1,"computer-hellbramn":1,"computer-lihone":1,"computer-petea":1,"dashlight-akali":1,"dashlight-correa":1,"haikyuu-lihone":1,"hellbramn":1,"javihi":1,"javihi-duo":1,"javihi-friki":1,"javihi-koisito":1,"javihi-prime":1,"lihone":1,"lihone-correa":1,"lihone-viego":1,"mertens":1,"mertens-prime":1,"pampert":1,"pampert-friki":1,"pampert-koisito":1,"petea-koisito":1,"petea-pokemaniaco":1,"potango":1,"sech":1,"sech-duo":1,"sech-koisito":1,"sech-thresh":1};
   // Nivel de carta por repetidas: 2 copias = ★2, 4 copias = ★3
   function lvOf(id) { var n = 1 + ((ui.acct && ui.acct.dups && ui.acct.dups[id]) || 0); return n >= 4 ? 3 : n >= 2 ? 2 : 1; }
+  function skG(side, id) { var s = ui.s; return (s && s.sk && s.sk[side] && s.sk[side][id]) || ''; }
   function lvG(side, id) { var s = ui.s; return (s && s.lv && s.lv[side] && s.lv[side][id]) || 1; }
   function cardHtml(c, o) {
     o = o || {};
@@ -57,7 +58,8 @@
     else if (c.theme) { c1 = D.themes[c.theme].color; c2 = hexMix(c1, '#0b0716', .62); } else { c1 = '#2dd4bf'; c2 = '#0f3f3a'; }
     var tag = o.tag || 'div';
     var art = troop && ARTS[c.id];
-    var h = '<' + tag + ' class="card r-' + c.rarity + (troop ? '' : ' accion') + (art ? ' art' : '') + (o.cls ? ' ' + o.cls : '') + '" style="--c1:' + c1 + ';--c2:' + c2 + (art ? ';--art:url(/cartas/art/' + c.id + '.webp)' : '') + '"' + (o.attrs ? ' ' + o.attrs : '') + '>';
+    if (o.skin === undefined) o.skin = ui.screen === 'game' ? '' : (ui.acct && ui.acct.skinSel && ui.acct.skinSel[c.id] && ui.acct.skins.indexOf(ui.acct.skinSel[c.id]) >= 0 ? ui.acct.skinSel[c.id] : '');
+    var h = '<' + tag + ' class="card r-' + c.rarity + (troop ? '' : ' accion') + (art ? ' art' : '') + (o.cls ? ' ' + o.cls : '') + '" style="--c1:' + c1 + ';--c2:' + c2 + (art ? ';--art:url(/cartas/art/' + (o.skin || c.id) + '.webp)' : '') + '"' + (o.attrs ? ' ' + o.attrs : '') + '>';
     h += '<span class="coin" title="Coste en oro para comprarla">' + c.cost + '</span>';
     if (o.lv > 1) h += '<span class="lvb" title="Nivel ' + o.lv + ' por cartas repetidas">★' + o.lv + '</span>';
     if (o.size) h += '<span class="pips" title="Espacio que ocupa en el mazo: ' + c.size + '">' + pips(c.size) + '</span>';
@@ -137,12 +139,23 @@
   }
   var GEM = { 'Común': '●', 'Rara': '◆', 'Épica': '✦', 'Legendaria': '★' };
   var RANK = ['Común', 'Rara', 'Épica', 'Legendaria'];
+  function skinShop(a) {
+    var SK = window.CARTAS_SKINS || [];
+    if (!SK.length) return '';
+    return '<div class="panel skinshop"><h2>' + ic('estrella') + ' Skins</h2><p class="mut">Cambian solo la ilustración de una carta. Necesitas tener la carta. Se ven en tus partidas.</p><div class="skgrid">' + SK.map(function (s) {
+      var c = CARD[s.card], hasCard = a.owned.indexOf(s.card) >= 0, own = (a.skins || []).indexOf(s.id) >= 0, eq = a.skinSel && a.skinSel[s.card] === s.id;
+      var btn = own ? (eq ? '<button class="btn sec sm" data-act="skinequip" data-skin="" data-card="' + s.card + '">' + ic('check') + ' Equipada · usar clásica</button>' : '<button class="btn sm" data-act="skinequip" data-skin="' + s.id + '" data-card="' + s.card + '">Equipar</button>')
+        : !hasCard ? '<button class="btn sm" disabled>Necesitas la carta</button>'
+        : '<button class="btn sm" data-act="skinbuy" data-skin="' + s.id + '"' + (a.coins < (a.admin ? 0 : s.price) ? ' disabled' : '') + '>Comprar · ' + (a.admin ? 'gratis' : s.price + ' ' + ic('moneda')) + '</button>';
+      return '<div class="skitem"><div class="skcard">' + cardHtml(c, { skin: s.id, lv: 1 }) + '</div><b>' + esc(c.name) + '</b><span class="mut">' + esc(s.name) + '</span>' + btn + '</div>';
+    }).join('') + '</div></div>';
+  }
   function renderPacks() {
     var a = ui.acct, total = D.cards.length + D.actions.length, can = a.coins >= a.packCost && !ui.pack;
     var h = head('packs', '' + ic('regalo') + ' Sobres') + '<div class="packs-grid">' +
       '<div class="panel packbox">' + bpkHtml('') + '<h2>Sobre estándar</h2><p class="mut">' + a.packSize + ' cartas al azar de todo el juego (tropas y acciones). La última siempre es Rara o mejor. Las cartas que ya tengas se cambian por monedas.</p>' +
       '<button class="btn cta big" data-act="openpack"' + (can ? '' : ' disabled') + '>' + (a.packCost ? 'Abrir sobre · ' + a.packCost + ' ' + ic('moneda') + '' : 'Abrir sobre · gratis') + '</button>' + (a.coins < a.packCost ? '<p class="mut">Te faltan ' + (a.packCost - a.coins) + ' monedas.</p>' : '') + (ui.msg ? '<div class="hint" style="color:var(--bad)">' + esc(ui.msg) + '</div>' : '') + '</div>' +
-      (a.admin ? adminStarters() : '') + '<div class="panel"><h2>Tus monedas</h2><div class="coinbig">' + ic('moneda') + ' ' + a.coins + '</div>' +
+      (a.admin ? adminStarters() : '') + skinShop(a) + '<div class="panel"><h2>Tus monedas</h2><div class="coinbig">' + ic('moneda') + ' ' + a.coins + '</div>' +
       '<div class="dailybox">' + (a.dailyAvailable ? '<button class="btn" data-act="daily">' + ic('regalo') + ' Recompensa diaria · +' + a.dailyCoins + ' ' + ic('moneda') + '</button>' : '<p class="mut">' + ic('check') + ' Ya cobraste la recompensa de hoy. Vuelve mañana.</p>') + '</div>' +
       '<h2 style="margin-top:1rem">Cómo conseguir monedas</h2><ul class="rules"><li><b>Recompensa diaria:</b> +' + a.dailyCoins + ' ' + ic('moneda') + ' cada día.</li><li><b>Partidas contra la IA:</b> +10 ' + ic('moneda') + ' por partida y +20 ' + ic('moneda') + ' más si ganas (hoy llevas ' + a.gamesToday + '/' + a.maxGamesToday + ' partidas con premio). Las partidas muy cortas no dan monedas.</li><li><b>Cartas repetidas:</b> no dan monedas, pero suben la carta de nivel (ver Normas).</li></ul></div>' +
       '<div class="panel"><h2>Tu colección</h2><div class="coinbig">' + a.owned.length + ' / ' + total + '</div><div class="meter colm"><i class="on" style="width:' + Math.round(a.owned.length / total * 100) + '%"></i></div><p class="mut">Solo puedes usar en tu mazo las cartas que tienes. Mira cuáles te faltan en la pestaña Mazo.</p>' +
@@ -371,7 +384,7 @@
     if (!an.some(function (i) { return i.uid === A.to; })) A.to = null;
     function row(role) {
       return '<div class="anc">' + an.map(function (i) {
-        return '<div class="amc' + (A[role] === i.uid ? ' sel' : '') + (A[role === 'from' ? 'to' : 'from'] === i.uid ? ' dim' : '') + '" data-act="anpick" data-role="' + role + '" data-uid="' + i.uid + '">' + cardHtml(CARD[i.id], { lv: lvG(0, i.id), atk: E.atk(i), hp: i.hp, max: E.maxHp(i) }) + '</div>';
+        return '<div class="amc' + (A[role] === i.uid ? ' sel' : '') + (A[role === 'from' ? 'to' : 'from'] === i.uid ? ' dim' : '') + '" data-act="anpick" data-role="' + role + '" data-uid="' + i.uid + '">' + cardHtml(CARD[i.id], { lv: lvG(0, i.id), skin: skG(0, i.id), atk: E.atk(i), hp: i.hp, max: E.maxHp(i) }) + '</div>';
       }).join('') + '</div>';
     }
     var dbl = P.fl && P.fl.anime ? ' <b>(duplicado por Capítulo especial)</b>' : '', ready = A.from != null && A.to != null;
@@ -412,7 +425,8 @@
   function startGame() {
     var seed = Math.floor(Math.random() * 1e9), r = E.mulberry32(seed + 7);
     var mylv = {}; ui.deck.forEach(function (id) { var l = lvOf(id); if (l > 1) mylv[id] = l; });
-    ui.s = E.newGame(ui.deck, E.aiDeck(r), seed, { lv: [mylv, {}] });
+    var mysk = {}; ui.deck.forEach(function (id) { var k = ui.acct && ui.acct.skinSel && ui.acct.skinSel[id]; if (k && ui.acct.skins.indexOf(k) >= 0) mysk[id] = k; });
+    ui.s = E.newGame(ui.deck, E.aiDeck(r), seed, { lv: [mylv, {}], sk: [mysk, {}] });
     ui.reward = null; api('gameStart');
     ui.screen = 'game'; ui.sel = null; ui.view = null; ui.playing = false; ui.hint = ''; ui.landed = null; ui.busy = false;
     announce(); render();
@@ -466,7 +480,7 @@
         if (prep && sel && (sel.k === 'mine' || (sel.k === 'act' && CARD[s.p[0].hand[sel.i].id].target === 'enemy'))) o.cls += ' tgtable';
         if (prep && aim[v.uid]) o.extra = '<span class="aim">' + ic('diana') + '×' + aim[v.uid] + '</span>';
       }
-      o.lv = lvG(side, v.id); h += '<div class="cw">' + cardHtml(c, o) + under + '</div>';
+      o.lv = lvG(side, v.id); o.skin = skG(side, v.id); h += '<div class="cw">' + cardHtml(c, o) + under + '</div>';
     });
     return h + '</div>';
   }
@@ -502,7 +516,7 @@
     h += '<div class="handwrap' + (ui.dragMesa ? ' dropzone' : '') + '"><div class="hl">Tu mano ' + P.hand.length + '/' + CFG.handMax + '</div><div class="hand">';
     P.hand.forEach(function (i, k) {
       var c = CARD[i.id], sel = ui.sel && (ui.sel.k === 'hand' || ui.sel.k === 'act') && ui.sel.i === k;
-      h += '<div class="cw">' + cardHtml(c, { lv: lvG(0, i.id), atk: E.atk(i), hp: i.hp, max: E.maxHp(i), cls: 'hcard' + (sel ? ' sel' : ''), attrs: 'data-act="hand" data-i="' + k + '" title="Pulsa o arrastra a la mesa"', tag: 'button' }) + '</div>';
+      h += '<div class="cw">' + cardHtml(c, { lv: lvG(0, i.id), skin: skG(0, i.id), atk: E.atk(i), hp: i.hp, max: E.maxHp(i), cls: 'hcard' + (sel ? ' sel' : ''), attrs: 'data-act="hand" data-i="' + k + '" title="Pulsa o arrastra a la mesa"', tag: 'button' }) + '</div>';
     });
     for (var f = P.hand.length; f < CFG.handMax; f++) h += '<div class="cw"><div class="slot">—</div></div>';
     h += '</div></div>';
@@ -758,6 +772,8 @@
         ui.msg = ''; ui.lgPin = ''; setAcct(r.data.user); loadLocal(); ui.screen = 'home'; render();
       });
     }
+    if (act === 'skinbuy') return api('skinBuy', { id: el.dataset.skin }).then(function (r) { if (r.data && r.data.user) setAcct(r.data.user); ui.msg = r.ok ? '' : (r.data.error || ''); render(); });
+    if (act === 'skinequip') return api('skinEquip', { id: el.dataset.skin, card: el.dataset.card }).then(function (r) { if (r.data && r.data.user) setAcct(r.data.user); render(); });
     if (act === 'daily') { return api('daily').then(function (r) { if (r.data && r.data.user) setAcct(r.data.user); ui.msg = r.ok ? '' : (r.data.error || ''); render(); }); }
     if (act === 'openpack') {
       if (ui.pack) return; ui.msg = ''; ui.pack = { cards: null, rev: [] }; render();

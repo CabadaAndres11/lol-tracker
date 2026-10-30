@@ -880,3 +880,9 @@ img.timg[src$="comebacker.png"] { filter: drop-shadow(0 0 1.5px #fff) drop-shado
 .v4vs b{font:700 1.35rem Cinzel,serif;color:#fff0e0;letter-spacing:.06em;text-shadow:0 0 14px rgba(229,100,107,.6);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
 .v4spec{margin:2px auto 6px;padding:6px 18px;border:1px solid rgba(212,175,90,.55);border-radius:999px;background:rgba(212,175,90,.1);color:#f3d98b;font-size:.9rem;display:flex;align-items:center;gap:8px;width:max-content;max-width:94%}
 .v4spec .ic{width:1.1em;height:1.1em}
+
+/* skins */
+.skgrid{display:flex;gap:16px;flex-wrap:wrap;margin-top:8px}
+.skitem{display:flex;flex-direction:column;gap:6px;align-items:center;text-align:center;width:150px}
+.skcard{width:130px}
+.skinshop{grid-column:1/-1}

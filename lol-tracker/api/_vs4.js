@@ -8,13 +8,13 @@ const PLACE_BONUS = [0, 45, 20, 5, 0]; // por puesto 1º..4º (se suma a la reco
 
 function aliveSeats(T) { return [0, 1, 2, 3].filter((p) => !T.out[p]); }
 
-function newTable(decks, names, seed, lv) {
+function newTable(decks, names, seed, lv, sk) {
   const T = {
     vs4: true, pvp: true, names, rs: seed | 0, uidn: [1, 1, 1, 1], uidm: 4, uidk: [0, 1, 2, 3], inc: CFG4.income,
     fightN: 0, round: 0, shops: 0, combat: 0, phase: 'prep', shopOpen: false, first: 0, over: false, winner: -1, reason: '',
     log: [], frames: [], acts: [], actN: 0, err: '', lastBall: [null, null, null, null], refreshN: [0, 0, 0, 0],
     out: [false, false, false, false], place: [0, 0, 0, 0], logs: [[], [], [], []], pairs: [], rest: -1, opp: [-1, -1, -1, -1],
-    lv: lv || [{}, {}, {}, {}], fx: [null, null, null, null], firstOf: [0, 0, 0, 0], rdy: [false, false, false, false], stuck: {},
+    lv: lv || [{}, {}, {}, {}], sk: sk || [{}, {}, {}, {}], fx: [null, null, null, null], firstOf: [0, 0, 0, 0], rdy: [false, false, false, false], stuck: {},
     p: decks.map((d) => { const P = E.newPlayer(d); P.life = CFG4.life; P.gold = CFG4.gold; return P; }),
   };
   E.bindRng(T);
@@ -32,7 +32,7 @@ function duelState(T, a, b) {
   const S = {
     pvp: true, uidm: 4, uidk: [a, b >= 0 ? b : a], inc: T.inc, rs: T.rs, uidn: [T.uidn[a], b >= 0 ? T.uidn[b] : 1],
     refreshN: [T.refreshN[a], b >= 0 ? T.refreshN[b] : 0], lastBall: [T.lastBall[a], b >= 0 ? T.lastBall[b] : null],
-    lv: [T.lv[a] || {}, b >= 0 ? T.lv[b] || {} : {}], lvl: 1, p: [Pa, Pb], round: T.round, shops: T.shops, phase: T.phase, shopOpen: T.shopOpen, first: T.firstOf[a] || 0, over: false, winner: -1,
+    lv: [T.lv[a] || {}, b >= 0 ? T.lv[b] || {} : {}], sk: [T.sk[a] || {}, b >= 0 ? T.sk[b] || {} : {}], lvl: 1, p: [Pa, Pb], round: T.round, shops: T.shops, phase: T.phase, shopOpen: T.shopOpen, first: T.firstOf[a] || 0, over: false, winner: -1,
     reason: '', log: [], frames: [], acts: [], actN: T.actN, err: '', fightN: T.fightN,
   };
   E.bindRng(S);

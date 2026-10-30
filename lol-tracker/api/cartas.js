@@ -4,6 +4,8 @@
 const crypto = require('crypto');
 const { redisConfig, redis } = require('./_redis');
 const DATA = require('../public/cartas/cards.js');
+const SKINS = require('../public/cartas/skins.js');
+const SKIN_BY_ID = {}; SKINS.forEach((s) => { SKIN_BY_ID[s.id] = s; });
 
 const START_COINS = 150;
 const PACK_COST = 50;
@@ -14,6 +16,7 @@ const MAX_GAME_REWARDS_PER_DAY = 15;
 const MIN_GAME_SECONDS = 60;
 const MIN_GAME_ROUNDS = 3;
 const levelOf = (u, id) => { const c = 1 + ((u.dups || {})[id] || 0); return c >= 4 ? 3 : c >= 2 ? 2 : 1; }; // 2 copias = ★2, 4 copias = ★3
+const skinsOf = (u, deck) => { const o = {}; Object.keys(u.skinSel || {}).forEach((c) => { if (deck.includes(c) && (u.skins || []).includes(u.skinSel[c])) o[c] = u.skinSel[c]; }); return o; };
 const levelsOf = (u, deck) => { const o = {}; deck.forEach((id) => { const l = levelOf(u, id); if (l > 1) o[id] = l; }); return o; };
 const DUP_COINS = { 'Común': 0, 'Rara': 0, 'Épica': 0, 'Legendaria': 0 }; // las repetidas ya no dan monedas
 const WEIGHTS = { 'Común': 50, 'Rara': 30, 'Épica': 15, 'Legendaria': 5 };
@@ -53,7 +56,7 @@ function drawCard(minRarity) {
 }
 function publicUser(u) {
   return {
-    name: u.name, coins: u.coins, owned: u.owned, dups: u.dups || {},
+    name: u.name, coins: u.coins, owned: u.owned, dups: u.dups || {}, skins: u.skins || [], skinSel: u.skinSel || {},
     dailyAvailable: u.lastDaily !== today(),
     gamesToday: u.rewardDay === today() ? u.rewardCount : 0,
     maxGamesToday: MAX_GAME_REWARDS_PER_DAY,
@@ -125,7 +128,7 @@ function deadlineFor(g) {
 async function newPvpGame(cfg, a, b) { // a, b: { name, deck }
   if (crypto.randomInt(0, 2)) { const t = a; a = b; b = t; }
   const id = crypto.randomBytes(8).toString('hex');
-  const s = E.newGame(a.deck, b.deck, crypto.randomInt(1, 2 ** 30), { pvp: true, lv: [a.lv || {}, b.lv || {}] });
+  const s = E.newGame(a.deck, b.deck, crypto.randomInt(1, 2 ** 30), { pvp: true, lv: [a.lv || {}, b.lv || {}], sk: [a.sk || {}, b.sk || {}] });
   const now = Date.now();
   const g = { id, names: [a.name, b.name], s, v: 1, hb: [now, now], t0: now, paid: false, rew: [null, null], ab: -1 };
   deadlineFor(g);
@@ -204,7 +207,7 @@ async function pvpHandle(cfg, act, body, u) {
     const cur = await redis(cfg, ['GET', pKey(me)]);
     if (cur) { const g = await loadGame(cfg, cur); if (g && !g.s.over) return viewFor(g, g.names.indexOf(me)); }
     const err = checkDeck(u, body.deck); if (err) return { status: 400, error: err };
-    const mine = { name: me, deck: body.deck, lv: levelsOf(u, body.deck) };
+    const mine = { name: me, deck: body.deck, lv: levelsOf(u, body.deck), sk: skinsOf(u, body.deck) };
     if (act === 'pvpCreate') {
       const old = await redis(cfg, ['GET', `cartas:pvp:host:${me.toLowerCase()}`]);
       if (old) await redis(cfg, ['DEL', `cartas:pvp:room:${old}`]);
@@ -300,7 +303,7 @@ function v4Deadline(g) {
 async function newV4Game(cfg, players) {
   const order = players.slice().sort(() => crypto.randomInt(0, 2) - 0.5);
   const id = crypto.randomBytes(8).toString('hex'), now = Date.now();
-  const T = V4.newTable(order.map((p) => p.deck), order.map((p) => p.name), crypto.randomInt(1, 2 ** 30), order.map((p) => p.lv || {}));
+  const T = V4.newTable(order.map((p) => p.deck), order.map((p) => p.name), crypto.randomInt(1, 2 ** 30), order.map((p) => p.lv || {}), order.map((p) => p.sk || {}));
   const g = { id, names: order.map((p) => p.name), T, v: 1, hb: [now, now, now, now], t0: now, paid: [false, false, false, false], rew: [null, null, null, null] };
   v4Deadline(g);
   await saveV4(cfg, g);
@@ -389,7 +392,7 @@ async function vs4Handle(cfg, act, body, u) {
       return { ok: true };
     }
     const err = checkDeck(u, body.deck); if (err) return { status: 400, error: err };
-    const mine = { name: me, deck: body.deck, lv: levelsOf(u, body.deck) };
+    const mine = { name: me, deck: body.deck, lv: levelsOf(u, body.deck), sk: skinsOf(u, body.deck) };
     return withLock(cfg, 'v4q', async () => {
       if (act === 'vs4Create') {
         const AL = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let code = '';
@@ -545,6 +548,25 @@ module.exports = async function handler(req, res) {
     }
     if (act === 'me') { res.status(200).json({ user: publicUser(u) }); return; }
 
+    if (act === 'skinBuy' || act === 'skinEquip') {
+      const sk = SKIN_BY_ID[String(body.id || body.skin || '')];
+      u.skins = u.skins || []; u.skinSel = u.skinSel || {};
+      if (act === 'skinBuy') {
+        if (!sk) { res.status(400).json({ error: 'Skin no válida.' }); return; }
+        if (u.skins.includes(sk.id)) { res.status(409).json({ error: 'Ya tienes esa skin.', user: publicUser(u) }); return; }
+        if (u.owned.indexOf(sk.card) < 0) { res.status(403).json({ error: 'Necesitas tener la carta para comprar su skin.' }); return; }
+        const cost = isAdmin(u) ? 0 : sk.price;
+        if (u.coins < cost) { res.status(402).json({ error: `Necesitas ${sk.price} monedas.`, user: publicUser(u) }); return; }
+        u.coins -= cost; u.skins.push(sk.id); u.skinSel[sk.card] = sk.id;
+      } else {
+        const card = String(body.card || '');
+        if (!sk) delete u.skinSel[card];
+        else if (!u.skins.includes(sk.id)) { res.status(403).json({ error: 'No tienes esa skin.' }); return; }
+        else u.skinSel[sk.card] = sk.id;
+      }
+      await saveUser(cfg, u);
+      res.status(200).json({ user: publicUser(u) }); return;
+    }
     if (act === 'daily') {
       if (u.lastDaily === today()) { res.status(409).json({ error: 'Ya has cobrado la recompensa de hoy.', user: publicUser(u) }); return; }
       u.lastDaily = today(); u.coins += DAILY_COINS;

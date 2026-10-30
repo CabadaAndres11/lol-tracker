@@ -1,6 +1,11 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-10-30', tag: 'Novedad', title: 'Fusión de copias en partida',
+      items: ['Si juntas 3 copias iguales de una tropa (entre mesa y mano) se fusionan solas en una carta ★2 con las estadísticas base ×2.',
+        'Con 3 cartas ★2 iguales se fusionan en una ★3 con las estadísticas base ×4.',
+        'La carta fusionada se queda en la mesa si alguna copia estaba en ella. Puedes comprar la 3ª copia aunque tengas la mano llena.',
+        'En la tienda, las cartas que completan una fusión se marcan con un brillo dorado.'] },
     { date: '2026-10-30', tag: 'Equilibrio', title: 'Ajuste a Informático',
       items: ['Nivel 3: las Informático ganan +1/+1 por cada 3 actualizaciones de tienda (antes, por cada una).',
         'Parche de actualización: +1 de ataque por cada 5 actualizaciones (antes, por cada una). Necesita al menos 5 para poder usarse.'] },

@@ -61,6 +61,7 @@
     if (o.skin === undefined) o.skin = ui.screen === 'game' ? '' : (ui.acct && ui.acct.skinSel && ui.acct.skinSel[c.id] && ui.acct.skins.indexOf(ui.acct.skinSel[c.id]) >= 0 ? ui.acct.skinSel[c.id] : '');
     var h = '<' + tag + ' class="card r-' + c.rarity + (troop ? '' : ' accion') + (art ? ' art' : '') + (o.cls ? ' ' + o.cls : '') + '" style="--c1:' + c1 + ';--c2:' + c2 + (art ? ';--art:url(/cartas/art/' + (o.skin || c.id) + '.webp)' : '') + '"' + (o.attrs ? ' ' + o.attrs : '') + '>';
     h += '<span class="coin" title="Coste en oro para comprarla">' + c.cost + '</span>';
+    if (o.gl > 1) h += '<span class="glb" title="Fusionada en partida: ★' + o.gl + '">' + '★'.repeat(o.gl) + '</span>';
     if (o.lv > 1) h += '<span class="lvb" title="Nivel ' + o.lv + ' por cartas repetidas">★' + o.lv + '</span>';
     if (o.size) h += '<span class="pips" title="Espacio que ocupa en el mazo: ' + c.size + '">' + pips(c.size) + '</span>';
     h += '<div class="nm">' + esc(c.name) + '</div>';
@@ -227,6 +228,7 @@
       sec('Tienda', ['Hay tienda <b>cada 3 rondas</b> (rondas 1, 4, 7…). En una ronda de tienda <b>no hay combate</b>.', 'La tienda ofrece 5 cartas al azar de tu propio mazo; pulsa una para comprarla. El botón redondo ' + ic('cambio') + ' la actualiza por 1 de oro.', '<b>Solo en las rondas de tienda</b> puedes retirar tropas de la mesa; el resto del tiempo puedes colocar si hay hueco, pero no quitar.', 'Las tropas de coste 5 aparecen a partir de la segunda tienda.']) +
       sec('Combate', ['Los ataques se resuelven de uno en uno, alternando bandos de izquierda a derecha. Cada tropa ataca <b>una vez por ronda</b>. El bando que empieza se alterna cada ronda.', 'Si el objetivo ya murió, el ataque va a una tropa rival viva al azar.', 'No se puede atacar al jugador directamente: <b>recibes daño solo si todas tus tropas han muerto</b> y a tu rival le quedan tropas por atacar; el daño es igual a su ataque.', '<b>Las tropas no se curan entre rondas</b>: el daño se acumula. Solo se curan del todo al volver a tu mano (retirándolas en la tienda). Las muertas liberan su hueco y los bonus de «esta ronda» desaparecen.', 'Si en una ronda sin tienda no tienes tropas ni en mesa ni en mano, <b>pierdes automáticamente</b>.']) +
       sec('Jugador contra jugador', ['Crea una sala y pasa el <b>código de 5 letras</b> a un amigo, o usa <b>Buscar rival</b> para emparejarte con cualquiera.', 'Las dos tiendas y los combates son simultáneos: cada ronda la partida avanza cuando <b>los dos pulsáis listo</b> o se acaba el tiempo (45 s en combate, 60 s en tienda).', 'Ganas <b>15 monedas</b> por partida y <b>40 más</b> si ganas (con el mismo límite diario que contra la IA). Si abandonas o pasas <b>más de 60 s desconectado</b>, pierdes y no cobras.']) +
+      sec('Fusión de copias', ['Si juntas <b>3 copias iguales</b> de una tropa (entre la mesa y la mano) se fusionan solas en <b>una</b> con más estadísticas: <b>★2</b> = estadísticas base ×2 y, con 3 cartas ★2 iguales, <b>★3</b> = ×4.', 'La carta fusionada se queda en la mesa si alguna copia estaba en ella. Puedes comprar la 3ª copia aunque tengas la mano llena. En la tienda, las cartas que completan una fusión se marcan con un brillo.']),
       sec('Niveles de carta', ['Cada vez que te sale una carta que ya tienes, cuenta como una <b>copia</b>. Con <b>2 copias</b> la carta pasa a <b>★2</b> y con <b>4 copias</b> a <b>★3</b>.', 'Las <b>tropas</b> ganan <b>+1/+1 por nivel</b> al entrar en juego. Las <b>acciones con cifras</b> (daño, ataque, vida, oro…) mejoran un <b>50% por nivel</b>; las que no tienen cifras no cambian.', 'El nivel lo ves como ★ en la carta, tanto en el mazo como en la partida.']) +
       sec('Versus de 4', ['Cuatro jugadores en la misma partida: <b>30 de vida</b>, <b>14 de oro</b> al empezar y <b>+3 de oro</b> por ronda.', 'Cada ronda de combate se juegan <b>2 duelos a la vez</b> y los emparejamientos rotan para que todos se crucen. Las rondas de tienda (1, 4, 7…) son para los cuatro y no hay combate.', 'Quien llega a 0 de vida o se queda sin tropas queda <b>eliminado</b>. Con 3 vivos, uno <b>descansa</b> cada ronda (cobra oro y prepara su mesa). Gana el último en pie.', 'Monedas: <b>15</b> por jugar + <b>45</b> (1º), <b>20</b> (2º) o <b>5</b> (3º). Si abandonas o pasas más de 60 s desconectado, quedas eliminado y no cobras.']) +
       sec('Sinergias', ['Cada tropa tiene 1 o 2 sinergias. Cuentan las <b>cartas distintas</b> de cada sinergia entre mesa y mano (las copias no suman; las acciones no cuentan para la sinergia, aunque las de color pertenecen a una).', 'Al llegar a ciertos números (niveles) la sinergia da su bonificación. <b>Las mejoras de estadísticas son permanentes</b> (con un tope por tropa), salvo las de Voley, que solo duran la ronda, así que tus tropas se hacen más fuertes con la partida. En la partida ves a un lado cuántas llevas y cuántas necesitas.', 'Voley solo funciona con 2 o más cartas distintas de Voley entre mesa y mano; hasta entonces no puedes elegir ataque o defensa.']) +
@@ -503,7 +505,7 @@
         if (prep && sel && (sel.k === 'mine' || (sel.k === 'act' && CARD[s.p[0].hand[sel.i].id].target === 'enemy'))) o.cls += ' tgtable';
         if (prep && aim[v.uid]) o.extra = '<span class="aim">' + ic('diana') + '×' + aim[v.uid] + '</span>';
       }
-      o.lv = lvG(side, v.id); o.skin = skG(side, v.id); h += '<div class="cw">' + cardHtml(c, o) + under + '</div>';
+      o.gl = I ? I.gl : 1; o.lv = lvG(side, v.id); o.skin = skG(side, v.id); h += '<div class="cw">' + cardHtml(c, o) + under + '</div>';
     });
     return h + '</div>';
   }
@@ -539,7 +541,7 @@
     h += '<div class="handwrap' + (ui.dragMesa ? ' dropzone' : '') + '"><div class="hl">Tu mano ' + P.hand.length + '/' + CFG.handMax + '</div><div class="hand">';
     P.hand.forEach(function (i, k) {
       var c = CARD[i.id], sel = ui.sel && (ui.sel.k === 'hand' || ui.sel.k === 'act') && ui.sel.i === k;
-      h += '<div class="cw">' + cardHtml(c, { lv: lvG(0, i.id), skin: skG(0, i.id), atk: E.atk(i), hp: i.hp, max: E.maxHp(i), cls: 'hcard' + (sel ? ' sel' : ''), attrs: 'data-act="hand" data-i="' + k + '" title="Pulsa o arrastra a la mesa"', tag: 'button' }) + '</div>';
+      h += '<div class="cw">' + cardHtml(c, { gl: i.gl, lv: lvG(0, i.id), skin: skG(0, i.id), atk: E.atk(i), hp: i.hp, max: E.maxHp(i), cls: 'hcard' + (sel ? ' sel' : ''), attrs: 'data-act="hand" data-i="' + k + '" title="Pulsa o arrastra a la mesa"', tag: 'button' }) + '</div>';
     });
     for (var f = P.hand.length; f < CFG.handMax; f++) h += '<div class="cw"><div class="slot">—</div></div>';
     h += '</div></div>';
@@ -551,8 +553,8 @@
       for (var k = 0; k < CFG.shopOffers; k++) {
         var id = P.offers[k];
         if (!id) { h += '<div class="cw"><div class="slot">Vendida</div></div>'; continue; }
-        var c2 = CARD[id], cant = P.gold < c2.cost || P.hand.length >= CFG.handMax;
-        h += '<div class="cw">' + cardHtml(c2, { lv: lvG(0, c2.id), tag: 'button', cls: 'offer' + (cant ? ' cant' : ''), attrs: 'data-act="buy" data-i="' + k + '" title="Comprar por ' + c2.cost + ' de oro"' }) + '</div>';
+        var c2 = CARD[id], mg = c2.type === 'tropa' && E.willMerge(P, c2.id), cant = P.gold < c2.cost || (P.hand.length >= CFG.handMax && !mg);
+        h += '<div class="cw">' + cardHtml(c2, { lv: lvG(0, c2.id), tag: 'button', cls: 'offer' + (cant ? ' cant' : '') + (mg ? ' mergeable' : ''), attrs: 'data-act="buy" data-i="' + k + '" title="Comprar por ' + c2.cost + ' de oro"' }) + '</div>';
       }
       h += '<div class="refwrap"><button class="refresh" data-act="refresh" title="Actualizar tienda (' + rc + ' oro)"' + (P.gold < rc ? ' disabled' : '') + '>' + REFRESH_SVG + '</button><span class="rlabel">Actualizar · ' + rc + ' oro</span></div></div>';
       h += '</div>';

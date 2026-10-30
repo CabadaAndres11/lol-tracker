@@ -7,6 +7,7 @@
   var CFG = {
     slots: 4, handMax: 5, life: 12, gold: 8, income: 2, shopEvery: 3, shopOffers: 5,
     refreshCost: 1, deckBudget: 20, maxRounds: 40,
+    merge: [1, 2, 4], // fusión de 3 copias iguales (estilo TFT): multiplicador de las estadísticas base por estrella
     hpMult: 1.1, hpGrow: 1.25, hpMin: 5, // vida base de las tropas: x hpMult x hpGrow^(coste-1)
     rarityWeight: { 'Común': 50, 'Rara': 30, 'Épica': 15, 'Legendaria': 5 },
   };
@@ -57,7 +58,7 @@
   // ---------- Instancias ----------
   function mk(s, id, owner) {
     var c = CARD[id];
-    var i = { uid: (s.uidn[owner]++) * (s.uidm || 2) + (s.uidk ? s.uidk[owner] : owner), id: id, owner: owner, perm: { atk: 0, hp: 0 }, tmp: { atk: 0, hp: 0, red: 0 }, dead: false, caps: { lol: 0, pueblo: 0, nini: 0, pel: 0, tilt: 0, pk: 0, duo: 0, nov: 0, cb: 0, vol: 0, koi: 0 } };
+    var i = { uid: (s.uidn[owner]++) * (s.uidm || 2) + (s.uidk ? s.uidk[owner] : owner), id: id, owner: owner, gl: 1, perm: { atk: 0, hp: 0 }, tmp: { atk: 0, hp: 0, red: 0 }, dead: false, caps: { lol: 0, pueblo: 0, nini: 0, pel: 0, tilt: 0, pk: 0, duo: 0, nov: 0, cb: 0, vol: 0, koi: 0 } };
     i.hp = c.hp || 0;
     var L = s.lv && s.lv[owner] && s.lv[owner][id];
     if (L > 1 && c.type === 'tropa') { i.perm.atk += L - 1; i.perm.hp += L - 1; i.hp += L - 1; } // nivel de carta: +1/+1 por nivel
@@ -269,11 +270,42 @@
     var P = s.p[p], id = P.offers[idx];
     if (!s.shopOpen || s.phase !== 'prep' || !id) return false;
     var c = CARD[id];
-    if (P.gold < c.cost || P.hand.length >= CFG.handMax) return false;
+    if (P.gold < c.cost || (P.hand.length >= CFG.handMax && !willMerge(P, id))) return false;
     P.gold -= c.cost; P.offers.splice(idx, 1);
     P.hand.push(mk(s, id, p));
+    mergeCheck(s, p);
     checkShop(s);
     return true;
+  }
+  // ---------- Fusión de copias (estilo TFT) ----------
+  // 3 copias iguales (misma carta y misma estrella) entre mesa y mano se fusionan en 1 con estadísticas mejoradas.
+  function sameStar(P, id, gl) {
+    return P.mesa.concat(P.hand).filter(function (i) { return i && !i.dead && i.id === id && (i.gl || 1) === gl; });
+  }
+  function willMerge(P, id) { return isTroop({ id: id }) && sameStar(P, id, 1).length >= 2; }
+  function mergeCheck(s, p) {
+    var P = s.p[p], again = true, guard = 0;
+    while (again && guard++ < 6) {
+      again = false;
+      var all = P.mesa.concat(P.hand).filter(function (i) { return i && !i.dead && isTroop(i) && (i.gl || 1) < CFG.merge.length; });
+      for (var k = 0; k < all.length; k++) {
+        var g = sameStar(P, all[k].id, all[k].gl || 1);
+        if (g.length < 3 || (all[k].gl || 1) >= CFG.merge.length) continue;
+        var inMesa = g.filter(function (i) { return P.mesa.indexOf(i) >= 0; });
+        var keep = inMesa.length ? inMesa[0] : g[0];
+        var others = g.filter(function (i) { return i !== keep; }).sort(function (a, b) { return (P.mesa.indexOf(a) >= 0 ? 1 : 0) - (P.mesa.indexOf(b) >= 0 ? 1 : 0); }).slice(0, 2);
+        others.forEach(function (o) {
+          var mi = P.mesa.indexOf(o); if (mi >= 0) P.mesa[mi] = null;
+          var hi = P.hand.indexOf(o); if (hi >= 0) P.hand.splice(hi, 1);
+          delete P.target[o.uid];
+        });
+        var c = card(keep), from = keep.gl || 1, d = CFG.merge[from] - CFG.merge[from - 1];
+        keep.gl = from + 1;
+        keep.perm.atk += Math.round(c.atk * d); keep.perm.hp += Math.round(c.hp * d); keep.hp += Math.round(c.hp * d);
+        say(s, pv(s, p, 'Fusión: 3 × ' + c.name + ' → ★' + keep.gl + ' (' + atk(keep) + '/' + maxHp(keep) + ').', 'El rival fusiona 3 × ' + c.name + ' → ★' + keep.gl + '.'));
+        again = true; break;
+      }
+    }
   }
   function retire(s, p, slot) {
     var P = s.p[p], i = P.mesa[slot];
@@ -333,7 +365,7 @@
     'fiesta-del-pueblo': { ok: function (s, p) { return (tiers(s.p[p])['Pueblo'] || 0) >= 1 ? '' : 'Necesitas el nivel 1 de Pueblo (2 cartas distintas).'; }, run: function (s, p) { s.p[p].fl.pueblo = true; return 'el crecimiento del pueblo se duplica'; } },
     'hermano-del-alma': {
       ok: function (s, p) { return duoPartner(s.p[p]) ? '' : 'Necesitas un Dúo Inseparable en la mesa.'; },
-      run: function (s, p) { var id = duoPartner(s.p[p]); s.p[p].hand.push(mk(s, id, p)); return 'consigues una copia de ' + CARD[id].name; } },
+      run: function (s, p) { var id = duoPartner(s.p[p]); s.p[p].hand.push(mk(s, id, p)); mergeCheck(s, p); return 'consigues una copia de ' + CARD[id].name; } },
     'sofa-compartido': {
       ok: function (s, p) { var P = s.p[p]; return mesaTroops(P).some(function (i) { return has(i, 'NINI'); }) && P.hand.some(function (i) { return isTroop(i) && has(i, 'NINI'); }) ? '' : 'Necesitas una NINI en la mesa y otra en la mano.'; },
       run: function (s, p) { var P = s.p[p], n = sc(s, 2); mesaTroops(P).concat(P.hand.filter(isTroop)).filter(function (i) { return has(i, 'NINI'); }).forEach(function (i) { grow(i, 'atk', n); grow(i, 'hp', n); }); return '+' + n + '/+' + n + ' permanente a las NINI'; } },
@@ -824,7 +856,7 @@
     bindRng: bindRng, revive: revive, income: income, openShop: openShop, noTroops: noTroops, shopStuck: shopStuck, cleanup: cleanup, newPlayer: newPlayer, resolveText: function (x, seat) { return x.replace(/\u0001(\d)\u0002([^\u0002]*)\u0002([^\u0003]*)\u0003/g, function (m, p, a, b) { return +p === seat ? a : b; }); }, mirror: mirror, pv: pv, CFG: CFG, FX: FX, CARD: CARD, DATA: DATA,
     newGame: newGame, randomDeck: randomDeck, deckSize: deckSize, mulberry32: mulberry32,
     place: place, playAction: playAction, setTarget: setTarget, clearTargets: clearTargets, forfeit: forfeit, setVoley: setVoley, actionBlock: actionBlock, validTarget: validTarget,
-    buy: buy, refresh: refresh, refreshCost: refreshCost, pickFromDeck: pickFromDeck, retire: retire,
+    buy: buy, mergeCheck: mergeCheck, willMerge: willMerge, refresh: refresh, refreshCost: refreshCost, pickFromDeck: pickFromDeck, retire: retire,
     aiDeck: aiDeck, aiShop: aiShop, aiPrep: aiPrep, aiTargets: aiTargets, fight: fight, endShop: endShop, pendingTargets: pendingTargets, cede: cede, nextRound: nextRound,
     themeCounts: themeCounts, tiers: tiers, tierOf: tierOf, atk: atk, maxHp: maxHp, card: card, isTroop: isTroop, has: has, mesaTroops: mesaTroops, viewOf: viewOf,
   };

@@ -189,8 +189,8 @@ var D={
     "Trabajo"
    ],
    "cost": 1,
-   "atk": 3,
-   "hp": 3,
+   "atk": 4,
+   "hp": 4,
    "rarity": "Rara",
    "type": "tropa",
    "size": 1
@@ -443,8 +443,8 @@ var D={
     "Trabajo"
    ],
    "cost": 1,
-   "atk": 3,
-   "hp": 3,
+   "atk": 4,
+   "hp": 4,
    "rarity": "Rara",
    "type": "tropa",
    "size": 1

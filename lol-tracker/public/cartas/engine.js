@@ -57,7 +57,7 @@
   // ---------- Instancias ----------
   function mk(s, id, owner) {
     var c = CARD[id];
-    var i = { uid: (s.uidn[owner]++) * 2 + owner, id: id, owner: owner, perm: { atk: 0, hp: 0 }, tmp: { atk: 0, hp: 0, red: 0 }, dead: false, caps: { lol: 0, pueblo: 0, nini: 0, pel: 0, tilt: 0, pk: 0, duo: 0, nov: 0, cb: 0, vol: 0, koi: 0 } };
+    var i = { uid: (s.uidn[owner]++) * (s.uidm || 2) + (s.uidk ? s.uidk[owner] : owner), id: id, owner: owner, perm: { atk: 0, hp: 0 }, tmp: { atk: 0, hp: 0, red: 0 }, dead: false, caps: { lol: 0, pueblo: 0, nini: 0, pel: 0, tilt: 0, pk: 0, duo: 0, nov: 0, cb: 0, vol: 0, koi: 0 } };
     i.hp = c.hp || 0;
     return i;
   }
@@ -143,7 +143,7 @@
   }
 
   function income(s, p) {
-    var P = s.p[p], t = tiers(P), g = CFG.income, extra = 0;
+    var P = s.p[p], t = tiers(P), g = s.inc || CFG.income, extra = 0;
     if (mesaTroops(P).some(function (i) { return has(i, 'Trabajo'); })) {
       var tw = t['Trabajo'] || 0;
       if (tw === 1 && s.round % 2 === 0) extra = 1;
@@ -225,7 +225,8 @@
     return !P.offers.some(function (id) { return CARD[id].type === 'tropa' && CARD[id].cost <= P.gold; });
   }
   function checkShop(s) {
-    [0, 1].forEach(function (p) {
+    s.p.forEach(function (_, p) {
+      if (s.vs4) { if (shopStuck(s, p)) (s.stuck = s.stuck || {})[p] = 1; return; }
       if (shopStuck(s, p)) forfeit(s, p, pv(s, p, 'Te quedaste', 'El rival se quedó') + ' sin oro y sin tropas en la tienda.');
     });
   }
@@ -770,7 +771,7 @@
     var c = JSON.parse(JSON.stringify(s, function (k, v) { return k === 'rng' ? undefined : v; }));
     var sw = seat === 1;
     function txt(x) { return typeof x !== 'string' ? x : x.replace(/\u0001(\d)\u0002([^\u0002]*)\u0002([^\u0003]*)\u0003/g, function (m, p, a, b) { return +p === seat ? a : b; }); }
-    function fu(u) { return sw && typeof u === 'number' ? u ^ 1 : u; }
+    function fu(u) { return sw && !s.uidm && typeof u === 'number' ? u ^ 1 : u; }
     function fobj(o) { if (!sw) return o; var r = {}; Object.keys(o).forEach(function (k) { r[fu(+k)] = o[k]; }); return r; }
     c.log.forEach(function (l) { l.text = txt(l.text); });
     c.reason = txt(c.reason);
@@ -805,7 +806,7 @@
   // ---------- Utilidades para la interfaz ----------
   var API = {
     _mk: mk, _startEffects: startEffects, _tiers: tiers,
-    bindRng: bindRng, revive: revive, mirror: mirror, pv: pv, CFG: CFG, FX: FX, CARD: CARD, DATA: DATA,
+    bindRng: bindRng, revive: revive, income: income, openShop: openShop, noTroops: noTroops, shopStuck: shopStuck, cleanup: cleanup, newPlayer: newPlayer, resolveText: function (x, seat) { return x.replace(/\u0001(\d)\u0002([^\u0002]*)\u0002([^\u0003]*)\u0003/g, function (m, p, a, b) { return +p === seat ? a : b; }); }, mirror: mirror, pv: pv, CFG: CFG, FX: FX, CARD: CARD, DATA: DATA,
     newGame: newGame, randomDeck: randomDeck, deckSize: deckSize, mulberry32: mulberry32,
     place: place, playAction: playAction, setTarget: setTarget, clearTargets: clearTargets, forfeit: forfeit, setVoley: setVoley, actionBlock: actionBlock, validTarget: validTarget,
     buy: buy, refresh: refresh, refreshCost: refreshCost, pickFromDeck: pickFromDeck, retire: retire,

@@ -278,6 +278,204 @@ async function pvpHandle(cfg, act, body, u) {
   });
 }
 
+// ---------- Versus de 4 ----------
+const V4 = require('./_vs4');
+const v4Key = (id) => `cartas:vs4:g:${id}`;
+const v4Ptr = (n) => `cartas:vs4:user:${n.toLowerCase()}`;
+const v4In = (n) => `cartas:vs4:in:${n.toLowerCase()}`;
+async function loadV4(cfg, id) {
+  const raw = await redis(cfg, ['GET', v4Key(id)]);
+  if (!raw) return null;
+  const g = JSON.parse(raw); E.revive(g.T); return g;
+}
+const saveV4 = (cfg, g) => redis(cfg, ['SET', v4Key(g.id), JSON.stringify(g), 'EX', PVP_TTL]);
+function v4Deadline(g) {
+  const T = g.T, now = Date.now();
+  if (T.over) { g.dl = 0; return; }
+  if (T.phase === 'prep') g.dl = now + ((T.shopOpen ? 60 : 45) + 3) * 1000;
+  else g.dl = now + (14 + Math.max(0, ...T.fx.map((f) => (f && f.frames ? f.frames.length : 0))) * 1.2) * 1000;
+}
+async function newV4Game(cfg, players) {
+  const order = players.slice().sort(() => crypto.randomInt(0, 2) - 0.5);
+  const id = crypto.randomBytes(8).toString('hex'), now = Date.now();
+  const T = V4.newTable(order.map((p) => p.deck), order.map((p) => p.name), crypto.randomInt(1, 2 ** 30));
+  const g = { id, names: order.map((p) => p.name), T, v: 1, hb: [now, now, now, now], t0: now, paid: [false, false, false, false], rew: [null, null, null, null] };
+  v4Deadline(g);
+  await saveV4(cfg, g);
+  for (const p of order) { await redis(cfg, ['SET', v4Ptr(p.name), id, 'EX', PVP_TTL]); await redis(cfg, ['DEL', v4In(p.name)]); }
+  return g;
+}
+function v4View(g, seat) {
+  const T = g.T, opp = T.opp[seat], s = V4.viewFor(T, seat);
+  s.acts = s.acts || [];
+  return {
+    ok: true, id: g.id, v: g.v, seat, vs4: true, names: [g.names[seat], opp >= 0 ? g.names[opp] : 'Descanso'],
+    rdy: [!!T.rdy[seat], opp >= 0 ? !!T.rdy[opp] : false], dl: g.dl ? Math.max(0, g.dl - Date.now()) : 0, reward: g.rew[seat], s,
+  };
+}
+async function payV4(cfg, g) {
+  const T = g.T, valid = T.round >= MIN_GAME_ROUNDS && Date.now() - g.t0 >= MIN_GAME_SECONDS * 1000;
+  for (let seat = 0; seat < 4; seat++) {
+    if (!(T.out[seat] || T.over) || g.paid[seat]) continue;
+    g.paid[seat] = true; g.v++;
+    const u = await loadUser(cfg, g.names[seat]); if (!u) continue;
+    if (u.rewardDay !== today()) { u.rewardDay = today(); u.rewardCount = 0; }
+    const abandoned = (T.ab || []).includes(seat);
+    let gained = 0;
+    if (valid && !abandoned && u.rewardCount < MAX_GAME_REWARDS_PER_DAY) {
+      gained = PVP_COINS.played + (V4.PLACE_BONUS[T.place[seat]] || 0); u.rewardCount++; u.coins += gained;
+    }
+    g.rew[seat] = { gained, capped: valid && !abandoned && gained === 0, place: T.place[seat] };
+    await saveUser(cfg, u);
+  }
+}
+async function v4Tick(cfg, g, seat) {
+  const T = g.T, now = Date.now();
+  if (seat != null) g.hb[seat] = now;
+  if (!T.over) {
+    for (let o = 0; o < 4; o++) {
+      if (o !== seat && !T.out[o] && now - g.hb[o] > PVP_DC_MS) { V4.eliminate(T, o, 'Te desconectaste: eliminado.', true); g.v++; }
+    }
+    if (!T.over && g.dl && now > g.dl && V4.resolve(T, true, E.CFG.maxRounds)) { v4Deadline(g); g.v++; }
+    if (!T.over && V4.aliveSeats(T).length && V4.aliveSeats(T).every((p) => T.rdy[p]) && V4.resolve(T, false, E.CFG.maxRounds)) { v4Deadline(g); g.v++; }
+  }
+  await payV4(cfg, g);
+}
+const V4_OPS = {
+  place: (T, p, a) => E.place(T, p, +a[0], +a[1]),
+  target: (T, p, a) => { E.setTarget(T, p, a[0], a[1] == null ? null : a[1]); return true; },
+  clear: (T, p) => { E.clearTargets(T, p); return true; },
+  voley: (T, p, a) => { E.setVoley(T, p, a[0], a[1] === 'def' ? 'def' : 'atk'); return true; },
+  buy: (T, p, a) => E.buy(T, p, +a[0]),
+  refresh: (T, p) => E.refresh(T, p),
+  pick: (T, p, a) => E.pickFromDeck(T, p, String(a[0])),
+  retire: (T, p, a) => E.retire(T, p, +a[0]),
+  cede: (T, p, a) => E.cede(T, a[0], a[1], a[2] === 'hp' ? 'hp' : 'atk', p),
+};
+async function vs4Handle(cfg, act, body, u) {
+  const me = u.name, lme = me.toLowerCase();
+  const wantsGame = act === 'vs4Create' || act === 'vs4Join' || act === 'vs4Search' || (act === 'vs4Poll' && !body.id);
+  if (wantsGame || act === 'vs4Cancel') {
+    const cur = await redis(cfg, ['GET', v4Ptr(me)]);
+    if (cur && act !== 'vs4Cancel') {
+      const g = await loadV4(cfg, cur), seat = g ? g.names.indexOf(me) : -1;
+      if (g && seat >= 0 && !g.T.over && !g.T.out[seat]) return v4View(g, seat);
+    }
+    if (act === 'vs4Poll') { // ¿sigo en una sala o en la cola?
+      const where = await redis(cfg, ['GET', v4In(me)]);
+      if (!where) return { ok: true, none: true };
+      if (where === 'Q') return { ok: true, none: true };
+      const raw = await redis(cfg, ['GET', `cartas:vs4:room:${where}`]);
+      if (!raw) { await redis(cfg, ['DEL', v4In(me)]); return { ok: true, gone: true }; }
+      return { ok: true, wait: true, code: where, players: JSON.parse(raw).players.map((p) => p.name) };
+    }
+    if (act === 'vs4Cancel') {
+      const where = await redis(cfg, ['GET', v4In(me)]);
+      await withLock(cfg, 'v4q', async () => {
+        if (where && where !== 'Q') {
+          const raw = await redis(cfg, ['GET', `cartas:vs4:room:${where}`]);
+          if (raw) {
+            const room = JSON.parse(raw); room.players = room.players.filter((p) => p.name.toLowerCase() !== lme);
+            if (!room.players.length || room.host === lme) { await redis(cfg, ['DEL', `cartas:vs4:room:${where}`]); }
+            else await redis(cfg, ['SET', `cartas:vs4:room:${where}`, JSON.stringify(room), 'EX', 900]);
+          }
+        }
+        const q = JSON.parse((await redis(cfg, ['GET', 'cartas:vs4:q'])) || '[]').filter((e) => e.name.toLowerCase() !== lme);
+        await redis(cfg, ['SET', 'cartas:vs4:q', JSON.stringify(q), 'EX', 30]);
+      });
+      await redis(cfg, ['DEL', v4In(me)]);
+      return { ok: true };
+    }
+    const err = checkDeck(u, body.deck); if (err) return { status: 400, error: err };
+    const mine = { name: me, deck: body.deck };
+    return withLock(cfg, 'v4q', async () => {
+      if (act === 'vs4Create') {
+        const AL = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let code = '';
+        for (let i = 0; i < 5; i++) code += AL[crypto.randomInt(0, AL.length)];
+        await redis(cfg, ['SET', `cartas:vs4:room:${code}`, JSON.stringify({ host: lme, players: [mine] }), 'EX', 900]);
+        await redis(cfg, ['SET', v4In(me), code, 'EX', 900]);
+        return { ok: true, wait: true, code, players: [me] };
+      }
+      if (act === 'vs4Join') {
+        const code = String(body.code || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+        const raw = code.length === 5 ? await redis(cfg, ['GET', `cartas:vs4:room:${code}`]) : null;
+        if (!raw) return { status: 404, error: 'Ese código no existe o ha caducado.' };
+        const room = JSON.parse(raw);
+        if (!room.players.some((p) => p.name.toLowerCase() === lme)) {
+          if (room.players.length >= 4) return { status: 409, error: 'La sala ya está llena.' };
+          room.players.push(mine);
+        }
+        if (room.players.length === 4) {
+          await redis(cfg, ['DEL', `cartas:vs4:room:${code}`]);
+          const g = await newV4Game(cfg, room.players);
+          return v4View(g, g.names.indexOf(me));
+        }
+        await redis(cfg, ['SET', `cartas:vs4:room:${code}`, JSON.stringify(room), 'EX', 900]);
+        await redis(cfg, ['SET', v4In(me), code, 'EX', 900]);
+        return { ok: true, wait: true, code, players: room.players.map((p) => p.name) };
+      }
+      // búsqueda automática: cola de jugadores; arranca al juntarse 4
+      const now = Date.now();
+      let q = JSON.parse((await redis(cfg, ['GET', 'cartas:vs4:q'])) || '[]').filter((e) => e.name.toLowerCase() !== lme && now - e.t < 12000);
+      q.push({ ...mine, t: now });
+      if (q.length >= 4) {
+        const take = q.slice(0, 4); q = q.slice(4);
+        await redis(cfg, ['SET', 'cartas:vs4:q', JSON.stringify(q), 'EX', 30]);
+        const g = await newV4Game(cfg, take);
+        return g.names.includes(me) ? v4View(g, g.names.indexOf(me)) : { ok: true, wait: true, players: q.map((e) => e.name) };
+      }
+      await redis(cfg, ['SET', 'cartas:vs4:q', JSON.stringify(q), 'EX', 30]);
+      await redis(cfg, ['SET', v4In(me), 'Q', 'EX', 60]);
+      return { ok: true, wait: true, players: q.map((e) => e.name) };
+    });
+  }
+  // ---- con partida ----
+  const gid = String(body.id || '');
+  if (!/^[0-9a-f]{16}$/.test(gid)) return { ok: true, none: true };
+  return withLock(cfg, gid, async () => {
+    const g = await loadV4(cfg, gid);
+    if (!g) return { ok: true, none: true };
+    const seat = g.names.findIndex((n) => n.toLowerCase() === lme);
+    if (seat < 0) return { status: 403, error: 'Esa partida no es tuya.' };
+    const T = g.T, v0 = g.v; let hint = '';
+    if (act === 'vs4Leave') {
+      if (!T.out[seat]) { V4.eliminate(T, seat, 'Abandonaste la partida.', true); g.v++; }
+    } else if (act === 'vs4Op' && !T.out[seat] && !T.over) {
+      const op = String(body.op || ''), a = Array.isArray(body.a) ? body.a : [];
+      const opp = T.opp[seat];
+      if (op === 'ready') {
+        const pend = T.phase === 'prep' && !T.shopOpen && opp >= 0 ? E.pendingTargets(V4.duelState(T, seat, opp), 0).length : 0;
+        if (T.rdy[seat]) { /* ya estaba */ }
+        else if (pend) hint = 'Elige objetivo para todas tus tropas.';
+        else { T.rdy[seat] = true; g.v++; if (V4.resolve(T, false, E.CFG.maxRounds)) v4Deadline(g); }
+      } else if (!T.rdy[seat]) {
+        T.err = '';
+        if (op === 'action') {
+          const S = V4.duelState(T, seat, opp);
+          const ok = E.playAction(S, 0, +a[0], a[1] == null ? null : a[1]);
+          V4.commit(T, S, seat, opp);
+          if (ok === false) hint = S.err || 'No se puede.';
+          else {
+            S.log.forEach((l) => { V4.note(T, seat, E.resolveText(l.text, 0)); if (opp >= 0) V4.note(T, opp, E.resolveText(l.text, 1)); });
+            S.acts.forEach((x) => { T.acts.push({ n: x.n, by: seat, id: x.id, res: x.res, tgt: x.tgt }); }); T.acts = T.acts.slice(-16);
+          }
+          g.v++;
+        } else if (V4_OPS[op]) {
+          const ok = V4_OPS[op](T, seat, a);
+          if (ok === false) hint = T.err || 'No se puede.';
+          V4.processStuck(T);
+          T.log.length = 0; g.v++;
+        }
+      }
+    }
+    await v4Tick(cfg, g, seat);
+    await saveV4(cfg, g);
+    if (act === 'vs4Poll' && g.v === Number(body.v) && g.v === v0) return { ok: true, same: true, dl: g.dl ? Math.max(0, g.dl - Date.now()) : 0, rdy: [!!T.rdy[seat], T.opp[seat] >= 0 ? !!T.rdy[T.opp[seat]] : false] };
+    const out = v4View(g, seat); if (hint) out.hint = hint;
+    return out;
+  });
+}
+
 module.exports = async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
   if (req.method !== 'POST') { res.status(405).json({ error: 'Método no permitido.' }); return; }
@@ -332,6 +530,11 @@ module.exports = async function handler(req, res) {
       } else { u.adminView = false; u.owned = ALL.map((c) => c.id); }
       await saveUser(cfg, u);
       res.status(200).json({ user: publicUser(u) }); return;
+    }
+    if (act.startsWith('vs4')) {
+      const r = await vs4Handle(cfg, act, body, u);
+      if (r.status) { res.status(r.status).json({ error: r.error }); return; }
+      res.status(200).json(r); return;
     }
     if (act.startsWith('pvp')) {
       const r = await pvpHandle(cfg, act, body, u);

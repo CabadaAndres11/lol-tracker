@@ -843,3 +843,17 @@ img.timg[src$="comebacker.png"] { filter: drop-shadow(0 0 1.5px #fff) drop-shado
 
 /* el menú de cuenta debe quedar por encima de las cartas de la portada */
 .nav { position: relative; z-index: 300; }
+
+/* ===== Versus de 4 ===== */
+.vs4b{margin-bottom:10px}
+.b4{display:grid;grid-template-columns:1fr auto;gap:0 8px;padding:6px 8px;border-radius:6px;border:1px solid transparent;font-size:.88rem}
+.b4 .n{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.b4 .l{font-weight:700;color:#f3d98b;text-align:right}
+.b4 .t{grid-column:1/3;font-size:.72rem;color:var(--mut);text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;gap:4px;min-height:.9em}
+.b4 .t .ic{width:.9em;height:.9em}
+.b4.me{border-color:rgba(212,175,90,.5);background:rgba(212,175,90,.08)}
+.b4.opp{border-color:rgba(229,100,107,.55);background:rgba(229,100,107,.08)}
+.b4.out{opacity:.45}
+.v4list{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;align-items:center}
+.v4list b{color:#f3d98b;margin-right:4px}
+.v4list span{padding:4px 10px;border:1px solid rgba(212,175,90,.45);border-radius:999px;font-size:.9rem}

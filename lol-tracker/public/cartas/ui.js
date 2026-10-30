@@ -222,7 +222,7 @@
     };
     app.innerHTML = head('play', '' + ic('espadas') + ' Elige modo de juego') + '<p class="mut">Tu mazo actual (' + deckSize() + '/' + CFG.deckBudget + ') se usará en cualquier modo.</p>' +
       group('Modo clásico', 'Las tropas que caen se pierden. Gana quien se queda con tropas en pie y deja sin vida al rival.', ['ai', 'pvp', 'vs4']) +
-      group('Modo Resurrección', 'Las tropas reviven cada ronda y al atacar también recibes el ataque de la carta atacada.', ['rev', 'revpvp']) + '</div>';
+      group('Modo Resurrección <span class="betatag">En fase de prueba</span>', 'Las tropas reviven cada ronda y al atacar también recibes el ataque de la carta atacada.', ['rev', 'revpvp']) + '</div>';
   }
   function renderRules() {
     var sec = function (t, items) { return '<div class="panel"><h2>' + t + '</h2><ul class="rules">' + items.map(function (i) { return '<li>' + i + '</li>'; }).join('') + '</ul></div>'; };

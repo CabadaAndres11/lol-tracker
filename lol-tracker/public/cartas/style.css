@@ -917,3 +917,5 @@ img.timg[src$="comebacker.png"] { filter: drop-shadow(0 0 1.5px #fff) drop-shado
 .mgsub{margin:0 0 .2rem}
 .modes{margin:.6rem 0 .4rem}
 .mode.m-rev{--mc:#c6f1dc}.mode.m-revpvp{--mc:#ffd1c7}
+
+.betatag{display:inline-block;vertical-align:middle;margin-left:.6rem;padding:.15rem .6rem;border-radius:99px;font-size:.7rem;letter-spacing:.06em;background:#c70;color:#fff;font-weight:700}

@@ -13,6 +13,8 @@ const GAME_COINS = { played: 10, win: 20 };
 const MAX_GAME_REWARDS_PER_DAY = 15;
 const MIN_GAME_SECONDS = 60;
 const MIN_GAME_ROUNDS = 3;
+const levelOf = (u, id) => { const c = 1 + ((u.dups || {})[id] || 0); return c >= 4 ? 3 : c >= 2 ? 2 : 1; }; // 2 copias = ★2, 4 copias = ★3
+const levelsOf = (u, deck) => { const o = {}; deck.forEach((id) => { const l = levelOf(u, id); if (l > 1) o[id] = l; }); return o; };
 const DUP_COINS = { 'Común': 0, 'Rara': 0, 'Épica': 0, 'Legendaria': 0 }; // las repetidas ya no dan monedas
 const WEIGHTS = { 'Común': 50, 'Rara': 30, 'Épica': 15, 'Legendaria': 5 };
 const TOKEN_DAYS = 30;
@@ -51,7 +53,7 @@ function drawCard(minRarity) {
 }
 function publicUser(u) {
   return {
-    name: u.name, coins: u.coins, owned: u.owned,
+    name: u.name, coins: u.coins, owned: u.owned, dups: u.dups || {},
     dailyAvailable: u.lastDaily !== today(),
     gamesToday: u.rewardDay === today() ? u.rewardCount : 0,
     maxGamesToday: MAX_GAME_REWARDS_PER_DAY,
@@ -123,7 +125,7 @@ function deadlineFor(g) {
 async function newPvpGame(cfg, a, b) { // a, b: { name, deck }
   if (crypto.randomInt(0, 2)) { const t = a; a = b; b = t; }
   const id = crypto.randomBytes(8).toString('hex');
-  const s = E.newGame(a.deck, b.deck, crypto.randomInt(1, 2 ** 30), { pvp: true });
+  const s = E.newGame(a.deck, b.deck, crypto.randomInt(1, 2 ** 30), { pvp: true, lv: [a.lv || {}, b.lv || {}] });
   const now = Date.now();
   const g = { id, names: [a.name, b.name], s, v: 1, hb: [now, now], t0: now, paid: false, rew: [null, null], ab: -1 };
   deadlineFor(g);
@@ -202,7 +204,7 @@ async function pvpHandle(cfg, act, body, u) {
     const cur = await redis(cfg, ['GET', pKey(me)]);
     if (cur) { const g = await loadGame(cfg, cur); if (g && !g.s.over) return viewFor(g, g.names.indexOf(me)); }
     const err = checkDeck(u, body.deck); if (err) return { status: 400, error: err };
-    const mine = { name: me, deck: body.deck };
+    const mine = { name: me, deck: body.deck, lv: levelsOf(u, body.deck) };
     if (act === 'pvpCreate') {
       const old = await redis(cfg, ['GET', `cartas:pvp:host:${me.toLowerCase()}`]);
       if (old) await redis(cfg, ['DEL', `cartas:pvp:room:${old}`]);
@@ -298,7 +300,7 @@ function v4Deadline(g) {
 async function newV4Game(cfg, players) {
   const order = players.slice().sort(() => crypto.randomInt(0, 2) - 0.5);
   const id = crypto.randomBytes(8).toString('hex'), now = Date.now();
-  const T = V4.newTable(order.map((p) => p.deck), order.map((p) => p.name), crypto.randomInt(1, 2 ** 30));
+  const T = V4.newTable(order.map((p) => p.deck), order.map((p) => p.name), crypto.randomInt(1, 2 ** 30), order.map((p) => p.lv || {}));
   const g = { id, names: order.map((p) => p.name), T, v: 1, hb: [now, now, now, now], t0: now, paid: [false, false, false, false], rew: [null, null, null, null] };
   v4Deadline(g);
   await saveV4(cfg, g);
@@ -387,7 +389,7 @@ async function vs4Handle(cfg, act, body, u) {
       return { ok: true };
     }
     const err = checkDeck(u, body.deck); if (err) return { status: 400, error: err };
-    const mine = { name: me, deck: body.deck };
+    const mine = { name: me, deck: body.deck, lv: levelsOf(u, body.deck) };
     return withLock(cfg, 'v4q', async () => {
       if (act === 'vs4Create') {
         const AL = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let code = '';
@@ -526,7 +528,7 @@ module.exports = async function handler(req, res) {
       const th = String(body.starter || '');
       if (act === 'adminstarter') {
         if (!STARTER_THEMES.includes(th)) { res.status(400).json({ error: 'Mazo inicial no válido.' }); return; }
-        u.adminView = true; u.owned = starterFor(th); u.coins = START_COINS;
+        u.adminView = true; u.owned = starterFor(th); u.coins = START_COINS; u.dups = {};
       } else { u.adminView = false; u.owned = ALL.map((c) => c.id); }
       await saveUser(cfg, u);
       res.status(200).json({ user: publicUser(u) }); return;
@@ -559,8 +561,11 @@ module.exports = async function handler(req, res) {
       const cards = ids.map((id) => {
         const isNew = u.owned.indexOf(id) < 0;
         let dup = 0;
-        if (isNew) u.owned.push(id); else { dup = DUP_COINS[BY_ID[id].rarity]; u.coins += dup; }
-        return { id, isNew, dupCoins: dup };
+        let lvl = 1, lvlUp = false, copies = 1;
+        if (isNew) u.owned.push(id);
+        else { u.dups = u.dups || {}; const before = levelOf(u, id); u.dups[id] = (u.dups[id] || 0) + 1; lvl = levelOf(u, id); lvlUp = lvl > before; }
+        if (!isNew) copies = 1 + u.dups[id]; else lvl = 1;
+        return { id, isNew, dupCoins: 0, lvl, lvlUp, copies };
       });
       await saveUser(cfg, u);
       res.status(200).json({ cards, user: publicUser(u) }); return;

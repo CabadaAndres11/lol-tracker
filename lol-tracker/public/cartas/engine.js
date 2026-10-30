@@ -11,7 +11,7 @@
     rarityWeight: { 'Común': 50, 'Rara': 30, 'Épica': 15, 'Legendaria': 5 },
   };
   var FX = {
-    pokemon: { cap: 10, probs: [[70, 25, 5], [45, 40, 15], [25, 45, 30]], bonus: [1, 2, 3], names: ['Pokéball', 'Superball', 'Ultraball'] },
+    pokemon: { cap: 10, probs: [[70, 25, 5], [45, 40, 15], [25, 45, 30]], bonus: [0, 1, 2], names: ['Pokéball', 'Superball', 'Ultraball'] },
     comebacker: { atk: [1, 2, 2], others: [0, 0, 1], cap: 8 },
     lol: { atk: [1, 1, 2], hp: [0, 1, 2], cap: [4, 6, 8] },
     trabajo: { shop: [0, 0, 2] },
@@ -59,6 +59,8 @@
     var c = CARD[id];
     var i = { uid: (s.uidn[owner]++) * (s.uidm || 2) + (s.uidk ? s.uidk[owner] : owner), id: id, owner: owner, perm: { atk: 0, hp: 0 }, tmp: { atk: 0, hp: 0, red: 0 }, dead: false, caps: { lol: 0, pueblo: 0, nini: 0, pel: 0, tilt: 0, pk: 0, duo: 0, nov: 0, cb: 0, vol: 0, koi: 0 } };
     i.hp = c.hp || 0;
+    var L = s.lv && s.lv[owner] && s.lv[owner][id];
+    if (L > 1 && c.type === 'tropa') { i.perm.atk += L - 1; i.perm.hp += L - 1; i.hp += L - 1; } // nivel de carta: +1/+1 por nivel
     return i;
   }
   function card(i) { return CARD[i.id]; }
@@ -123,6 +125,7 @@
     var s = { rs: (seed == null ? (Date.now() & 0xffffff) : seed) | 0, uidn: [1, 1], fightN: 0, round: 0, shops: 0, phase: 'prep', shopOpen: false, first: 0, over: false, winner: -1, reason: '', log: [], frames: [], p: [newPlayer(deckA), newPlayer(deckB)], lastBall: [null, null], refreshN: [0, 0], err: '', acts: [] };
     bindRng(s);
     if (opts && opts.pvp) s.pvp = true;
+    if (opts && opts.lv) s.lv = opts.lv;
     startRound(s);
     return s;
   }
@@ -300,15 +303,17 @@
   }
   function validTarget(c, i) { return !c.only || has(i, c.only); }
   // Cada acción: ok(s,p,tgt) devuelve '' si se puede jugar o el motivo; run(s,p,tgt) la aplica y devuelve el texto del registro.
+  // Nivel de la acción (por repetidas): +50% por nivel sobre su cifra base
+  function sc(s, n) { return Math.round(n * (1 + .5 * ((s.lvl || 1) - 1))); }
   var ACT = {
-    entrenamiento: { run: function (s, p, t) { grow(t, 'atk', 3); return '+3 ataque permanente'; } },
-    armadura: { run: function (s, p, t) { grow(t, 'hp', 5); return '+5 vida máxima permanente'; } },
-    arenga: { run: function (s, p) { mesaTroops(s.p[p]).forEach(function (i) { grow(i, 'atk', 1); }); return '+1 ataque permanente a todas'; } },
-    banquete: { run: function (s, p) { mesaTroops(s.p[p]).forEach(function (i) { grow(i, 'hp', 2); }); return '+2 vida máxima permanente a todas'; } },
-    intimidacion: { run: function (s, p, t) { t.perm.atk -= 3; return '-3 ataque permanente'; } },
-    'mal-de-ojo': { ok: function (s, p) { return mesaTroops(s.p[1 - p]).length ? '' : 'El rival no tiene tropas.'; }, run: function (s, p) { mesaTroops(s.p[1 - p]).forEach(function (i) { i.perm.atk -= 1; }); return '-1 ataque permanente a todas las rivales'; } },
-    'golpe-certero': { run: function (s, p, t) { t.hp -= 6; if (t.hp <= 0) dropDead(s, 1 - p, t); return '6 de daño'; } },
-    lluvia: { ok: function (s, p) { return mesaTroops(s.p[1 - p]).length ? '' : 'El rival no tiene tropas.'; }, run: function (s, p) { mesaTroops(s.p[1 - p]).forEach(function (i) { i.hp -= 2; if (i.hp <= 0) dropDead(s, 1 - p, i); }); return '2 de daño a todas las rivales'; } },
+    entrenamiento: { run: function (s, p, t) { var n = sc(s, 3); grow(t, 'atk', n); return '+' + n + ' ataque permanente'; } },
+    armadura: { run: function (s, p, t) { var n = sc(s, 5); grow(t, 'hp', n); return '+' + n + ' vida máxima permanente'; } },
+    arenga: { run: function (s, p) { var n = sc(s, 1); mesaTroops(s.p[p]).forEach(function (i) { grow(i, 'atk', n); }); return '+' + n + ' ataque permanente a todas'; } },
+    banquete: { run: function (s, p) { var n = sc(s, 2); mesaTroops(s.p[p]).forEach(function (i) { grow(i, 'hp', n); }); return '+' + n + ' vida máxima permanente a todas'; } },
+    intimidacion: { run: function (s, p, t) { var n = sc(s, 3); t.perm.atk -= n; return '-' + n + ' ataque permanente'; } },
+    'mal-de-ojo': { ok: function (s, p) { return mesaTroops(s.p[1 - p]).length ? '' : 'El rival no tiene tropas.'; }, run: function (s, p) { var n = sc(s, 1); mesaTroops(s.p[1 - p]).forEach(function (i) { i.perm.atk -= n; }); return '-' + n + ' ataque permanente a todas las rivales'; } },
+    'golpe-certero': { run: function (s, p, t) { var n = sc(s, 6); t.hp -= n; if (t.hp <= 0) dropDead(s, 1 - p, t); return n + ' de daño'; } },
+    lluvia: { ok: function (s, p) { return mesaTroops(s.p[1 - p]).length ? '' : 'El rival no tiene tropas.'; }, run: function (s, p) { var n = sc(s, 2); mesaTroops(s.p[1 - p]).forEach(function (i) { i.hp -= n; if (i.hp <= 0) dropDead(s, 1 - p, i); }); return n + ' de daño a todas las rivales'; } },
     'bola-extra': { ok: function (s, p) { return (tiers(s.p[p])['Pokémon'] || 0) >= 1 ? '' : 'Necesitas el nivel 1 de Pokémon (2 cartas distintas).'; }, run: function (s, p) { s.p[p].fl.pk = (s.p[p].fl.pk || 0) + 1; return 'bola extra esta ronda'; } },
     'segundo-aliento': {
       ok: function (s, p) { return mesaTroops(s.p[p]).some(function (i) { return has(i, 'Comebacker') && i.hp < maxHp(i); }) ? '' : 'Ninguna Comebacker en mesa está herida.'; },
@@ -317,7 +322,7 @@
     parche: {
       ok: function (s, p) { return s.refreshN[p] > 0 ? '' : 'Aún no has actualizado la tienda en esta partida.'; },
       run: function (s, p) { var P = s.p[p], n = s.refreshN[p]; P.mesa.concat(P.hand).filter(function (i) { return i && isTroop(i) && !i.dead && has(i, 'Informático'); }).forEach(function (i) { grow(i, 'atk', n); }); return '+' + n + ' ataque permanente a las Informático'; } },
-    'horas-extra': { run: function (s, p) { s.p[p].fl.work = true; return 'si ganas esta ronda: +5 de oro'; } },
+    'horas-extra': { run: function (s, p) { var n = sc(s, 5); s.p[p].fl.work = n; return 'si ganas esta ronda: +' + n + ' de oro'; } },
     'capitulo-especial': { ok: function (s, p) { return (tiers(s.p[p])['Anime'] || 0) >= 1 ? '' : 'Necesitas el nivel 1 de Anime (2 cartas distintas).'; }, run: function (s, p) { s.p[p].fl.anime = true; return 'lo que cedan tus Anime se duplica'; } },
     'segunda-temporada': {
       ok: function (s, p) { return graveKoi(s.p[p]) ? '' : 'Todavía no ha caído ninguna tropa KOI.'; },
@@ -326,14 +331,14 @@
     'cita-sorpresa': {
       ok: function (s, p) { return (tiers(s.p[p])['Novia'] || 0) >= 1 && mesaTroops(s.p[p]).length ? '' : 'Necesitas el nivel 1 de Novia (2 cartas distintas) y tropas en mesa.'; },
       run: function (s, p) { var P = s.p[p], t = tiers(P), r = noviaRoll(P, t, mesaTroops(P), s); return r.up ? '¡tu novia te apoya! +' + FX.novia.up[t['Novia'] - 1] + '/+' + FX.novia.up[t['Novia'] - 1] + ' permanente' : '¡tu novia te regaña! -1/-1 esta ronda'; } },
-    'rabia-contenida': { run: function (s, p) { s.p[p].fl.tilt = true; return 'si ganas esta ronda: +1 ataque a las Tilt'; } },
+    'rabia-contenida': { run: function (s, p) { var n = sc(s, 1); s.p[p].fl.tilt = n; return 'si ganas esta ronda: +' + n + ' ataque a las Tilt'; } },
     'fiesta-del-pueblo': { ok: function (s, p) { return (tiers(s.p[p])['Pueblo'] || 0) >= 1 ? '' : 'Necesitas el nivel 1 de Pueblo (2 cartas distintas).'; }, run: function (s, p) { s.p[p].fl.pueblo = true; return 'el crecimiento del pueblo se duplica'; } },
     'hermano-del-alma': {
       ok: function (s, p) { return duoPartner(s.p[p]) ? '' : 'Necesitas un Dúo Inseparable en la mesa.'; },
       run: function (s, p) { var id = duoPartner(s.p[p]); s.p[p].hand.push(mk(s, id, p)); return 'consigues una copia de ' + CARD[id].name; } },
     'sofa-compartido': {
       ok: function (s, p) { var P = s.p[p]; return mesaTroops(P).some(function (i) { return has(i, 'NINI'); }) && P.hand.some(function (i) { return isTroop(i) && has(i, 'NINI'); }) ? '' : 'Necesitas una NINI en la mesa y otra en la mano.'; },
-      run: function (s, p) { var P = s.p[p]; mesaTroops(P).concat(P.hand.filter(isTroop)).filter(function (i) { return has(i, 'NINI'); }).forEach(function (i) { grow(i, 'atk', 2); grow(i, 'hp', 2); }); return '+2/+2 permanente a las NINI'; } },
+      run: function (s, p) { var P = s.p[p], n = sc(s, 2); mesaTroops(P).concat(P.hand.filter(isTroop)).filter(function (i) { return has(i, 'NINI'); }).forEach(function (i) { grow(i, 'atk', n); grow(i, 'hp', n); }); return '+' + n + '/+' + n + ' permanente a las NINI'; } },
     madrugon: { ok: function (s, p) { return mesaTroops(s.p[p]).some(function (i) { return has(i, 'Pelayos'); }) ? '' : 'Necesitas una Pelayos en la mesa.'; }, run: function (s, p) { s.p[p].fl.pel = true; return 'tus Pelayos atacan primero'; } },
   };
   function graveKoi(P) {
@@ -366,7 +371,9 @@
     var why = actionBlock(s, p, c, tgt);
     if (why) { s.err = why; return false; }
     P.hand.splice(handIdx, 1); P.grave.push(i);
+    s.lvl = (s.lv && s.lv[p] && s.lv[p][c.id]) || 1;
     var res = ACT[c.id].run(s, p, tgt);
+    s.lvl = 1;
     say(s, pv(s, p, 'Juegas ', 'El rival juega ') + c.name + (tgt ? ' sobre ' + card(tgt).name : '') + ': ' + res + '.');
     s.acts.push({ n: (s.actN = (s.actN || 0) + 1), p: p, id: c.id, res: res, tgt: tgt ? tgt.uid : null });
     return true;
@@ -520,7 +527,7 @@
           if (r < probs[0]) ball = 0; else if (r < probs[0] + probs[1]) ball = 1; else ball = 2;
           s.lastBall[p] = ball;
           var b = FX.pokemon.bonus[ball];
-          pk = pk.filter(function (i) { return gainCap(i, 'pk', 'both', b, FX.pokemon.cap) > 0; });
+          if (b > 0) pk = pk.filter(function (i) { return gainCap(i, 'pk', 'both', b, FX.pokemon.cap) > 0; });
           if (pk.length) { fxFrame(s, p, 'pokemon', FX.pokemon.names[ball] + (bn ? ' (extra)' : ''), '+' + b + '/+' + b + ' permanente a las Pokémon', pk.map(function (i) { return i.uid; })); s.frames[s.frames.length - 1].hl.fx.ball = ball; }
         }
       }
@@ -688,11 +695,12 @@
       });
       [0, 1].forEach(function (p) {
         var P = s.p[p], won = al[p] > al[1 - p];
-        if (P.fl.work && won) { P.gold += 5; fxFrame(s, p, 'trabajo', 'Horas extra', '+5 de oro por ganar la ronda', []); }
+        if (P.fl.work && won) { var wg = P.fl.work === true ? 5 : P.fl.work; P.gold += wg; fxFrame(s, p, 'trabajo', 'Horas extra', '+' + wg + ' de oro por ganar la ronda', []); }
         if (P.fl.tilt && won) {
           var tl = mesaTroops(P).filter(function (i) { return has(i, 'Tilt'); });
-          tl.forEach(function (i) { grow(i, 'atk', 1); });
-          if (tl.length) fxFrame(s, p, 'tilt', 'Rabia contenida', '+1 ataque permanente a las Tilt', tl.map(function (i) { return i.uid; }));
+          var tg = P.fl.tilt === true ? 1 : P.fl.tilt;
+          tl.forEach(function (i) { grow(i, 'atk', tg); });
+          if (tl.length) fxFrame(s, p, 'tilt', 'Rabia contenida', '+' + tg + ' ataque permanente a las Tilt', tl.map(function (i) { return i.uid; }));
         }
       });
       cleanup(s);
@@ -778,7 +786,7 @@
     c.frames.forEach(function (f) { f.text = txt(f.text); });
     if (sw) {
       c.p.reverse();
-      ['lastBall', 'refreshN', 'tiers', 'uidn'].forEach(function (k) { if (c[k]) c[k].reverse(); });
+      ['lastBall', 'refreshN', 'tiers', 'uidn', 'lv'].forEach(function (k) { if (c[k]) c[k].reverse(); });
       c.first = 1 - c.first;
       if (c.winner >= 0) c.winner = 1 - c.winner;
       c.p.forEach(function (P) {

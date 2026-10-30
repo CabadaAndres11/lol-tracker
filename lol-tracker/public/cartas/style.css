@@ -857,3 +857,26 @@ img.timg[src$="comebacker.png"] { filter: drop-shadow(0 0 1.5px #fff) drop-shado
 .v4list{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;align-items:center}
 .v4list b{color:#f3d98b;margin-right:4px}
 .v4list span{padding:4px 10px;border:1px solid rgba(212,175,90,.45);border-radius:999px;font-size:.9rem}
+
+/* nivel de carta (repetidas) */
+.card .lvb{position:absolute;top:-3cqw;right:-3cqw;z-index:4;padding:.5cqw 3.4cqw;border-radius:999px;font:800 9.5cqw/1.25 Inter,sans-serif;color:#2a1a00;background:linear-gradient(180deg,#ffe28a,#d4a52c);border:.8cqw solid #fff3c4;box-shadow:0 2px 5px rgba(0,0,0,.5)}
+
+/* Anime: ventana central */
+.animeov{position:fixed;inset:0;z-index:260;display:grid;place-items:center;background:rgba(3,6,14,.72);backdrop-filter:blur(4px);padding:12px}
+.animed{width:min(880px,96vw);max-height:94vh;overflow:auto;display:flex;flex-direction:column;gap:12px;align-items:center;text-align:center;border-color:rgba(212,175,90,.6)!important}
+.animed h2{margin:0;font-size:1.25rem}.animed h3{margin:0 0 6px;font:600 .8rem Cinzel,serif;letter-spacing:.14em;text-transform:uppercase;color:#d4af5a}
+.anrow{display:flex;gap:18px;align-items:center;justify-content:center;flex-wrap:wrap}
+.anarrow{font-size:2rem;color:#f3d98b}
+.anc{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.amc{width:104px;cursor:pointer;border-radius:10px;border:2px solid transparent;padding:3px;transition:transform .15s,border-color .15s,opacity .15s}
+.amc:hover{transform:translateY(-3px)}.amc.sel{border-color:#f3d98b;box-shadow:0 0 18px rgba(243,217,139,.55)}.amc.dim{opacity:.4}
+.amc .card{pointer-events:none}
+.animed .sm{font-size:.82rem;margin:0}
+.animed .btn[disabled]{opacity:.45}
+
+/* Versus de 4: contra quién juegas / espectador */
+.v4vs{display:flex;flex-direction:column;align-items:center;gap:0;margin:40px auto 4px;padding:4px 26px 6px;border:1px solid rgba(229,100,107,.6);border-radius:999px;background:linear-gradient(180deg,rgba(229,100,107,.22),rgba(120,30,40,.18));width:max-content;max-width:90%}
+.v4vs span{font:600 .68rem Cinzel,serif;letter-spacing:.22em;text-transform:uppercase;color:#f0a0a6}
+.v4vs b{font:700 1.35rem Cinzel,serif;color:#fff0e0;letter-spacing:.06em;text-shadow:0 0 14px rgba(229,100,107,.6);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+.v4spec{margin:2px auto 6px;padding:6px 18px;border:1px solid rgba(212,175,90,.55);border-radius:999px;background:rgba(212,175,90,.1);color:#f3d98b;font-size:.9rem;display:flex;align-items:center;gap:8px;width:max-content;max-width:94%}
+.v4spec .ic{width:1.1em;height:1.1em}

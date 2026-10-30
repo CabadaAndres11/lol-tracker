@@ -47,6 +47,9 @@
   var AICON = { entrenamiento: 'espadas', arenga: 'megafono', armadura: 'escudo', banquete: 'carne', intimidacion: 'enfado', 'mal-de-ojo': 'ojo', 'golpe-certero': 'diana', lluvia: 'arco',
     'bola-extra': 'beisbol', 'segundo-aliento': 'viento', 'cambio-de-linea': 'cambio', parche: 'disquete', 'horas-extra': 'maletin', 'capitulo-especial': 'tele', 'segunda-temporada': 'trofeo', 'remate-doble': 'voley', 'cita-sorpresa': 'corazon', 'rabia-contenida': 'enfado', 'fiesta-del-pueblo': 'fiesta', 'hermano-del-alma': 'duo', 'sofa-compartido': 'sofa', madrugon: 'reloj' };
   var ARTS = {"aitorlg-friki":1,"aitorlg-koisito":1,"aitorlg-regla":1,"aitorlg-renata":1,"chipy-correa":1,"chipy-lloron":1,"computer-chipy":1,"computer-dashlight":1,"computer-hellbramn":1,"computer-lihone":1,"computer-petea":1,"dashlight-akali":1,"dashlight-correa":1,"haikyuu-lihone":1,"hellbramn":1,"javihi":1,"javihi-duo":1,"javihi-friki":1,"javihi-koisito":1,"javihi-prime":1,"lihone":1,"lihone-correa":1,"lihone-viego":1,"mertens":1,"mertens-prime":1,"pampert":1,"pampert-friki":1,"pampert-koisito":1,"petea-koisito":1,"petea-pokemaniaco":1,"potango":1,"sech":1,"sech-duo":1,"sech-koisito":1,"sech-thresh":1};
+  // Nivel de carta por repetidas: 2 copias = ★2, 4 copias = ★3
+  function lvOf(id) { var n = 1 + ((ui.acct && ui.acct.dups && ui.acct.dups[id]) || 0); return n >= 4 ? 3 : n >= 2 ? 2 : 1; }
+  function lvG(side, id) { var s = ui.s; return (s && s.lv && s.lv[side] && s.lv[side][id]) || 1; }
   function cardHtml(c, o) {
     o = o || {};
     var troop = c.type === 'tropa', c1, c2;
@@ -56,6 +59,7 @@
     var art = troop && ARTS[c.id];
     var h = '<' + tag + ' class="card r-' + c.rarity + (troop ? '' : ' accion') + (art ? ' art' : '') + (o.cls ? ' ' + o.cls : '') + '" style="--c1:' + c1 + ';--c2:' + c2 + (art ? ';--art:url(/cartas/art/' + c.id + '.webp)' : '') + '"' + (o.attrs ? ' ' + o.attrs : '') + '>';
     h += '<span class="coin" title="Coste en oro para comprarla">' + c.cost + '</span>';
+    if (o.lv > 1) h += '<span class="lvb" title="Nivel ' + o.lv + ' por cartas repetidas">★' + o.lv + '</span>';
     if (o.size) h += '<span class="pips" title="Espacio que ocupa en el mazo: ' + c.size + '">' + pips(c.size) + '</span>';
     h += '<div class="nm">' + esc(c.name) + '</div>';
     if (troop) {
@@ -140,7 +144,7 @@
       '<button class="btn cta big" data-act="openpack"' + (can ? '' : ' disabled') + '>' + (a.packCost ? 'Abrir sobre · ' + a.packCost + ' ' + ic('moneda') + '' : 'Abrir sobre · gratis') + '</button>' + (a.coins < a.packCost ? '<p class="mut">Te faltan ' + (a.packCost - a.coins) + ' monedas.</p>' : '') + (ui.msg ? '<div class="hint" style="color:var(--bad)">' + esc(ui.msg) + '</div>' : '') + '</div>' +
       (a.admin ? adminStarters() : '') + '<div class="panel"><h2>Tus monedas</h2><div class="coinbig">' + ic('moneda') + ' ' + a.coins + '</div>' +
       '<div class="dailybox">' + (a.dailyAvailable ? '<button class="btn" data-act="daily">' + ic('regalo') + ' Recompensa diaria · +' + a.dailyCoins + ' ' + ic('moneda') + '</button>' : '<p class="mut">' + ic('check') + ' Ya cobraste la recompensa de hoy. Vuelve mañana.</p>') + '</div>' +
-      '<h2 style="margin-top:1rem">Cómo conseguir monedas</h2><ul class="rules"><li><b>Recompensa diaria:</b> +' + a.dailyCoins + ' ' + ic('moneda') + ' cada día.</li><li><b>Partidas contra la IA:</b> +10 ' + ic('moneda') + ' por partida y +20 ' + ic('moneda') + ' más si ganas (hoy llevas ' + a.gamesToday + '/' + a.maxGamesToday + ' partidas con premio). Las partidas muy cortas no dan monedas.</li><li><b>Cartas repetidas:</b> no dan monedas.</li></ul></div>' +
+      '<h2 style="margin-top:1rem">Cómo conseguir monedas</h2><ul class="rules"><li><b>Recompensa diaria:</b> +' + a.dailyCoins + ' ' + ic('moneda') + ' cada día.</li><li><b>Partidas contra la IA:</b> +10 ' + ic('moneda') + ' por partida y +20 ' + ic('moneda') + ' más si ganas (hoy llevas ' + a.gamesToday + '/' + a.maxGamesToday + ' partidas con premio). Las partidas muy cortas no dan monedas.</li><li><b>Cartas repetidas:</b> no dan monedas, pero suben la carta de nivel (ver Normas).</li></ul></div>' +
       '<div class="panel"><h2>Tu colección</h2><div class="coinbig">' + a.owned.length + ' / ' + total + '</div><div class="meter colm"><i class="on" style="width:' + Math.round(a.owned.length / total * 100) + '%"></i></div><p class="mut">Solo puedes usar en tu mazo las cartas que tienes. Mira cuáles te faltan en la pestaña Mazo.</p>' +
       '<button class="btn sec" data-act="nav" data-to="deck">' + ic('cartas') + ' Ir al mazo</button></div></div>';
     app.innerHTML = h + packOverlay() + '</div>';
@@ -161,7 +165,7 @@
     return '<div class="packov' + (best === 'Legendaria' ? ' rainbowpost' : '') + '" data-act="packbg"><div class="pcards">' + pk.cards.map(function (c, i) {
       var cd = CARD[c.id];
       return '<div class="pcard r-' + cd.rarity + (pk.rev[i] ? ' flipped' : '') + '" data-act="flipcard" data-i="' + i + '" style="--d:' + i * 0.12 + 's"><div class="pin"><div class="pback"><span>' + GEM[cd.rarity] + '</span></div><div class="pfront">' + cardHtml(cd, {}) +
-        (c.isNew ? '<span class="pnew">¡NUEVA!</span>' : '<span class="pdup">Repetida</span>') + '</div></div></div>';
+        (c.isNew ? '<span class="pnew">¡NUEVA!</span>' : '<span class="pdup">' + (c.lvUp ? '¡Sube a ★' + c.lvl + '!' : 'Repetida · ' + c.copies + ' copias') + '</span>') + '</div></div></div>';
     }).join('') + '</div><div class="pactions"><button class="btn sec" data-act="flipall"' + (allRev ? ' style="visibility:hidden"' : '') + '>Girar todas</button></div>' + (gain ? '<p class="pgain">+' + gain + ' ' + ic('moneda') + ' por cartas repetidas</p>' : '') + '<p class="pmsg' + (allRev ? ' pulse' : '') + '">' + (allRev ? 'Haz clic en un espacio vacío para continuar' : 'Pulsa cada carta para girarla · el color del reverso te dice su rareza') + '</p></div>';
   }
   function renderModes() {
@@ -187,6 +191,7 @@
       sec('Tienda', ['Hay tienda <b>cada 3 rondas</b> (rondas 1, 4, 7…). En una ronda de tienda <b>no hay combate</b>.', 'La tienda ofrece 5 cartas al azar de tu propio mazo; pulsa una para comprarla. El botón redondo ' + ic('cambio') + ' la actualiza por 1 de oro.', '<b>Solo en las rondas de tienda</b> puedes retirar tropas de la mesa; el resto del tiempo puedes colocar si hay hueco, pero no quitar.', 'Las tropas de coste 5 aparecen a partir de la segunda tienda.']) +
       sec('Combate', ['Los ataques se resuelven de uno en uno, alternando bandos de izquierda a derecha. Cada tropa ataca <b>una vez por ronda</b>. El bando que empieza se alterna cada ronda.', 'Si el objetivo ya murió, el ataque va a una tropa rival viva al azar.', 'No se puede atacar al jugador directamente: <b>recibes daño solo si todas tus tropas han muerto</b> y a tu rival le quedan tropas por atacar; el daño es igual a su ataque.', '<b>Las tropas no se curan entre rondas</b>: el daño se acumula. Solo se curan del todo al volver a tu mano (retirándolas en la tienda). Las muertas liberan su hueco y los bonus de «esta ronda» desaparecen.', 'Si en una ronda sin tienda no tienes tropas ni en mesa ni en mano, <b>pierdes automáticamente</b>.']) +
       sec('Jugador contra jugador', ['Crea una sala y pasa el <b>código de 5 letras</b> a un amigo, o usa <b>Buscar rival</b> para emparejarte con cualquiera.', 'Las dos tiendas y los combates son simultáneos: cada ronda la partida avanza cuando <b>los dos pulsáis listo</b> o se acaba el tiempo (45 s en combate, 60 s en tienda).', 'Ganas <b>15 monedas</b> por partida y <b>40 más</b> si ganas (con el mismo límite diario que contra la IA). Si abandonas o pasas <b>más de 60 s desconectado</b>, pierdes y no cobras.']) +
+      sec('Niveles de carta', ['Cada vez que te sale una carta que ya tienes, cuenta como una <b>copia</b>. Con <b>2 copias</b> la carta pasa a <b>★2</b> y con <b>4 copias</b> a <b>★3</b>.', 'Las <b>tropas</b> ganan <b>+1/+1 por nivel</b> al entrar en juego. Las <b>acciones con cifras</b> (daño, ataque, vida, oro…) mejoran un <b>50% por nivel</b>; las que no tienen cifras no cambian.', 'El nivel lo ves como ★ en la carta, tanto en el mazo como en la partida.']) +
       sec('Versus de 4', ['Cuatro jugadores en la misma partida: <b>30 de vida</b>, <b>14 de oro</b> al empezar y <b>+3 de oro</b> por ronda.', 'Cada ronda de combate se juegan <b>2 duelos a la vez</b> y los emparejamientos rotan para que todos se crucen. Las rondas de tienda (1, 4, 7…) son para los cuatro y no hay combate.', 'Quien llega a 0 de vida o se queda sin tropas queda <b>eliminado</b>. Con 3 vivos, uno <b>descansa</b> cada ronda (cobra oro y prepara su mesa). Gana el último en pie.', 'Monedas: <b>15</b> por jugar + <b>45</b> (1º), <b>20</b> (2º) o <b>5</b> (3º). Si abandonas o pasas más de 60 s desconectado, quedas eliminado y no cobras.']) +
       sec('Sinergias', ['Cada tropa tiene 1 o 2 sinergias. Cuentan las <b>cartas distintas</b> de cada sinergia entre mesa y mano (las copias no suman; las acciones no cuentan para la sinergia, aunque las de color pertenecen a una).', 'Al llegar a ciertos números (niveles) la sinergia da su bonificación. <b>Las mejoras de estadísticas son permanentes</b> (con un tope por tropa), salvo las de Voley, que solo duran la ronda, así que tus tropas se hacen más fuertes con la partida. En la partida ves a un lado cuántas llevas y cuántas necesitas.', 'Voley solo funciona con 2 o más cartas distintas de Voley entre mesa y mano; hasta entonces no puedes elegir ataque o defensa.']) +
       sec('Acciones', ['Se juegan en las <b>rondas de combate</b> (no en la tienda) y ocupan 1 de espacio. Las mejoras de estadísticas de las acciones son <b>permanentes</b>.', 'Generales: dar ataque o vida a una tropa o a todas las tuyas, y quitar ataque o hacer daño a una tropa rival o a todas.', 'Las de color son de una sinergia concreta y algunas piden condiciones (p. ej. tener el nivel 1 de esa sinergia); si no se cumplen, la carta te dice qué falta y no se gasta.', 'Comebacker compara la <b>vida actual</b> de las tropas en mesa, no la máxima.']) +
@@ -236,7 +241,7 @@
   }
   function deckCard(c) {
     var inn = ui.deck.indexOf(c.id) >= 0, own = owns(c.id);
-    return cardHtml(c, { size: true, cls: (inn ? 'in' : '') + (own ? '' : ' locked'), extra: own ? '' : '<span class="lockb">' + ic('candado') + '</span>', attrs: 'data-act="toggle" data-id="' + c.id + '"', tag: 'button' });
+    return cardHtml(c, { lv: own ? lvOf(c.id) : 1, size: true, cls: (inn ? 'in' : '') + (own ? '' : ' locked'), extra: own ? '' : '<span class="lockb">' + ic('candado') + '</span>', attrs: 'data-act="toggle" data-id="' + c.id + '"', tag: 'button' });
   }
   function filtered() {
     var f = ui.filters, all = D.cards.concat(D.actions).filter(function (c) { return !ui.onlyOwned || owns(c.id); });
@@ -359,6 +364,23 @@
     if (newRound && !ns.over) { ui.sel = null; ui.hint = d.hint || ''; announce(); ui.deadline = d.dl ? Date.now() + d.dl : null; }
     render();
   }
+  // Ventana central de Anime: elegir quién cede, quién recibe y qué cede
+  function animeModal(P) {
+    var an = P.mesa.filter(function (i) { return i && !i.dead && E.has(i, 'Anime'); }), A = ui.anm = ui.anm || { from: null, to: null };
+    if (!an.some(function (i) { return i.uid === A.from; })) A.from = null;
+    if (!an.some(function (i) { return i.uid === A.to; })) A.to = null;
+    function row(role) {
+      return '<div class="anc">' + an.map(function (i) {
+        return '<div class="amc' + (A[role] === i.uid ? ' sel' : '') + (A[role === 'from' ? 'to' : 'from'] === i.uid ? ' dim' : '') + '" data-act="anpick" data-role="' + role + '" data-uid="' + i.uid + '">' + cardHtml(CARD[i.id], { lv: lvG(0, i.id), atk: E.atk(i), hp: i.hp, max: E.maxHp(i) }) + '</div>';
+      }).join('') + '</div>';
+    }
+    var dbl = P.fl && P.fl.anime ? ' <b>(duplicado por Capítulo especial)</b>' : '', ready = A.from != null && A.to != null;
+    return '<div class="overlay animeov"><div class="panel animed"><h2>' + ic('tele') + ' Anime · ceder estadísticas</h2><p class="mut">Te quedan <b>' + P.anime + '</b> cesiones esta ronda' + dbl + '. Elige quién cede y quién recibe.</p>' +
+      '<div class="anrow"><div><h3>Cede</h3>' + row('from') + '</div><span class="anarrow">→</span><div><h3>Recibe</h3>' + row('to') + '</div></div>' +
+      '<div class="btnrow"><button class="btn big" data-act="cede" data-stat="atk"' + (ready ? '' : ' disabled') + '>Ceder todo el ataque</button><button class="btn big" data-act="cede" data-stat="hp"' + (ready ? '' : ' disabled') + '>Ceder la vida (cae)</button></div>' +
+      '<p class="mut sm">' + (ready ? 'Ataque: el que cede se queda a 0 de ataque. Vida: el que cede cae y el otro gana la mitad de su vida máxima.' : 'Pulsa una carta en cada columna.') + '</p>' +
+      '<button class="btn sec" data-act="next">Continuar sin ceder ▶</button></div></div>';
+  }
   function boardHtml(s) {
     if (!s.board) return '';
     return '<div class="synside panel vs4b"><h2>' + ic('grupo') + ' La mesa</h2>' + s.board.map(function (b) {
@@ -389,7 +411,8 @@
   function inst(P, uid) { return P.mesa.filter(function (i) { return i && i.uid === uid; })[0]; }
   function startGame() {
     var seed = Math.floor(Math.random() * 1e9), r = E.mulberry32(seed + 7);
-    ui.s = E.newGame(ui.deck, E.aiDeck(r), seed);
+    var mylv = {}; ui.deck.forEach(function (id) { var l = lvOf(id); if (l > 1) mylv[id] = l; });
+    ui.s = E.newGame(ui.deck, E.aiDeck(r), seed, { lv: [mylv, {}] });
     ui.reward = null; api('gameStart');
     ui.screen = 'game'; ui.sel = null; ui.view = null; ui.playing = false; ui.hint = ''; ui.landed = null; ui.busy = false;
     announce(); render();
@@ -443,7 +466,7 @@
         if (prep && sel && (sel.k === 'mine' || (sel.k === 'act' && CARD[s.p[0].hand[sel.i].id].target === 'enemy'))) o.cls += ' tgtable';
         if (prep && aim[v.uid]) o.extra = '<span class="aim">' + ic('diana') + '×' + aim[v.uid] + '</span>';
       }
-      h += '<div class="cw">' + cardHtml(c, o) + under + '</div>';
+      o.lv = lvG(side, v.id); h += '<div class="cw">' + cardHtml(c, o) + under + '</div>';
     });
     return h + '</div>';
   }
@@ -454,7 +477,10 @@
     var pend = prep ? E.pendingTargets(s).length : 0, hasT = Object.keys(P.target).length > 0;
     var h = '<div class="gwrap' + (shopMode ? ' shopmode' : '') + '"><div class="top"><div><h1>Ronda ' + s.round + ' · ' + (s.shopOpen ? '' + ic('carrito') + ' Tienda' + (s.round === 1 ? ' inicial' : '') : '' + ic('espadas') + ' Combate') + (!s.shopOpen ? ' <span class="mut">· ' + (s.first === 0 ? 'atacas primero' : 'ataca primero el rival') + '</span>' : '') + '</h1></div><div><button class="lnk" data-act="menu" data-to="deck">' + ic('cartas') + ' Mazo</button> · <button class="lnk" data-act="menu" data-to="home">' + ic('casa') + ' Menú</button></div></div>' + timerHtml(prep || shop) + '';
     h += '<div class="gmain"><aside class="gl">' + boardHtml(s) + synergyHtml(P) + '</aside><section class="gc"><div class="board" id="board">';
-    if (!shopMode && !s.rest) h += '<div class="hud top">' + orb('life', view.life[1], CFG.life, PV.on ? esc(PV.names[1]) : 'Rival', 1) + '</div>' + mesaRow(1, view, s, false) + '<div class="gap"></div>';
+    var ML = s.maxLife || CFG.life;
+    if (s.vs4 && s.spec && ui.playing) h += '<div class="v4spec">' + ic('ojo') + ' Descansas: estás viendo el duelo <b>' + esc(s.spec[0]) + '</b> contra <b>' + esc(s.spec[1]) + '</b></div>';
+    else if (s.vs4 && !shopMode && !s.rest) h += '<div class="v4vs"><span>Duelo contra</span><b>' + esc(PV.names[1]) + '</b></div>';
+    if (!shopMode && (!s.rest || (s.spec && ui.playing))) h += '<div class="hud top">' + orb('life', view.life[1], ML, s.spec && ui.playing ? esc(s.spec[1]) : PV.on ? esc(PV.names[1]) : 'Rival', 1) + '</div>' + mesaRow(1, view, s, false) + '<div class="gap"></div>';
     h += mesaRow(0, view, s, true);
     // HUD inferior: vida, oro y acciones
     var acts = '';
@@ -470,13 +496,13 @@
       acts = '<div class="hint">' + esc(msg) + '</div><div class="btnrow"><button class="btn big" data-act="fight"' + (pend || (!P.mesa.some(Boolean) && E.mesaTroops(R).length) ? ' disabled' : '') + '>' + ic('espadas') + (s.rest ? ' ¡Listo!' : ' ¡Combatir!') + '</button><button class="btn sec sm" data-act="undo"' + (hasT ? '' : ' disabled') + ' title="Quitar todos los objetivos elegidos">' + ic('deshacer') + ' Deshacer</button></div>';
     } else if (s.phase === 'post') acts = ui.busy ? '' : '<div class="hint">Puedes ceder estadísticas Anime antes de seguir.</div><button class="btn big" data-act="next">Continuar ▶</button>';
     if (PV.on && PV.rdy[1] && !PV.rdy[0] && (shop || prep || s.phase === 'post')) acts = '<div class="hint rivrdy">' + ic('aviso') + ' El rival ya está listo.</div>' + acts;
-    h += '<div class="hud bottom">' + orb('life', view.life[0], CFG.life, 'Tu vida', 0) + orb('gold', P.gold, 0, 'Tu oro') + '<div class="acts">' + acts + '</div></div></div>';
+    h += '<div class="hud bottom">' + orb('life', view.life[0], ML, s.spec && ui.playing ? esc(s.spec[0]) : 'Tu vida', 0) + orb('gold', P.gold, 0, 'Tu oro') + '<div class="acts">' + acts + '</div></div></div>';
 
     // Mano
     h += '<div class="handwrap' + (ui.dragMesa ? ' dropzone' : '') + '"><div class="hl">Tu mano ' + P.hand.length + '/' + CFG.handMax + '</div><div class="hand">';
     P.hand.forEach(function (i, k) {
       var c = CARD[i.id], sel = ui.sel && (ui.sel.k === 'hand' || ui.sel.k === 'act') && ui.sel.i === k;
-      h += '<div class="cw">' + cardHtml(c, { atk: E.atk(i), hp: i.hp, max: E.maxHp(i), cls: 'hcard' + (sel ? ' sel' : ''), attrs: 'data-act="hand" data-i="' + k + '" title="Pulsa o arrastra a la mesa"', tag: 'button' }) + '</div>';
+      h += '<div class="cw">' + cardHtml(c, { lv: lvG(0, i.id), atk: E.atk(i), hp: i.hp, max: E.maxHp(i), cls: 'hcard' + (sel ? ' sel' : ''), attrs: 'data-act="hand" data-i="' + k + '" title="Pulsa o arrastra a la mesa"', tag: 'button' }) + '</div>';
     });
     for (var f = P.hand.length; f < CFG.handMax; f++) h += '<div class="cw"><div class="slot">—</div></div>';
     h += '</div></div>';
@@ -489,7 +515,7 @@
         var id = P.offers[k];
         if (!id) { h += '<div class="cw"><div class="slot">Vendida</div></div>'; continue; }
         var c2 = CARD[id], cant = P.gold < c2.cost || P.hand.length >= CFG.handMax;
-        h += '<div class="cw">' + cardHtml(c2, { tag: 'button', cls: 'offer' + (cant ? ' cant' : ''), attrs: 'data-act="buy" data-i="' + k + '" title="Comprar por ' + c2.cost + ' de oro"' }) + '</div>';
+        h += '<div class="cw">' + cardHtml(c2, { lv: lvG(0, c2.id), tag: 'button', cls: 'offer' + (cant ? ' cant' : ''), attrs: 'data-act="buy" data-i="' + k + '" title="Comprar por ' + c2.cost + ' de oro"' }) + '</div>';
       }
       h += '<div class="refwrap"><button class="refresh" data-act="refresh" title="Actualizar tienda (' + rc + ' oro)"' + (P.gold < rc ? ' disabled' : '') + '>' + REFRESH_SVG + '</button><span class="rlabel">Actualizar · ' + rc + ' oro</span></div></div>';
       if ((t['Informático'] || 0) >= 3 && !P.pickUsed) {
@@ -498,11 +524,7 @@
       h += '</div>';
     }
     h += '</section><aside class="gr">';
-    if (s.phase === 'post' && !ui.playing && P.anime > 0) {
-      var an = P.mesa.filter(function (i) { return i && !i.dead && E.has(i, 'Anime'); });
-      var opts = an.map(function (i) { return '<option value="' + i.uid + '">' + esc(CARD[i.id].name) + ' (' + E.atk(i) + '/' + E.maxHp(i) + ')</option>'; }).join('');
-      h += '<div class="panel"><h2>Anime · ceder (' + P.anime + ')</h2><div class="bar"><select id="an-from">' + opts + '</select><span>→</span><select id="an-to">' + opts + '</select></div><div class="bar"><button class="btn sec sm" data-act="cede" data-stat="atk">Ceder ataque</button><button class="btn sec sm" data-act="cede" data-stat="hp">Ceder vida</button></div></div>';
-    } else h += '<div></div>';
+    h += '<div></div>';
     h += '<div class="foesyn">' + (s.shopOpen ? '<div class="synside panel foe locked"><h2>' + ic('aviso') + ' Sinergias del RIVAL</h2><p class="mut">' + ic('candado') + ' Ocultas durante la tienda. Se revelan cuando empieza el combate.</p></div>' : synergyHtml(R, true)) + '</div>';
     var shown = s.log.slice(-14);
     h += '<div class="panel logp"><h2>Registro</h2><div class="log" id="log">' + shown.map(function (l, n) { return '<div' + (n === shown.length - 1 ? ' class="cur"' : '') + '>' + esc(l.text) + '</div>'; }).join('') + '</div></div></aside></div>';
@@ -521,6 +543,7 @@
       var conf = ''; if (win) for (var q = 0; q < 36; q++) conf += '<i style="left:' + (q * 2.8 + (q % 3)) + '%;--d:' + ((q * 37) % 100) / 100 * 1.2 + 's;--c:' + ['#ffc533', '#ff6b8b', '#4f9dff', '#38d39f', '#a78bfa'][q % 5] + '"></i>';
       h += '<div class="overlay ' + (win ? 'owin' : 'olose') + '">' + (win ? '<div class="confetti">' + conf + '</div>' : '') + '<div class="panel over"><div class="obig">' + (win ? '' + ic('trofeo') + '' : '' + ic('corazonroto') + '') + '</div><h2>' + (win ? '¡Victoria!' : (s.vs4 ? 'Eliminado · puesto ' + s.place + 'º de 4' : 'Derrota')) + '</h2><p class="mut">' + esc(s.reason) + ' · ronda ' + s.round + '</p>' + rw + '<button class="btn big" data-act="' + (PV.on ? (PV.px === 'vs4' ? 'openvs4' : 'openpvp') : 'play') + '">' + (PV.on ? 'Otra partida' : 'Jugar otra vez') + '</button> <button class="btn sec" data-act="menu" data-to="deck">Cambiar mazo</button> <button class="btn sec" data-act="menu" data-to="home">Menú</button></div></div>';
     }
+    if (s.phase === 'post' && !s.over && !ui.playing && !ui.busy && P.anime > 0 && !(PV.on && PV.rdy[0])) h += animeModal(P);
     h += '</div>';
     app.innerHTML = h;
     document.body.classList.toggle('shopbg', !!shopMode);
@@ -664,7 +687,7 @@
     void el.offsetWidth; el.classList.add('show'); ui.splashUntil = Date.now() + 1500;
   }
   function announce() {
-    var s = ui.s; if (!s || s.over) { ui.deadline = null; return; }
+    var s = ui.s; ui.anm = null; if (!s || s.over) { ui.deadline = null; return; }
     ui.deadline = Date.now() + (s.shopOpen ? SHOP_LIMIT : TIME_LIMIT) * 1000 + 1400; // 1,4 s de cartel de ronda
     if (s.shopOpen) showSplash({ kind: 'shop', title: '' + ic('carrito') + ' ¡RONDA DE TIENDA!', sub: s.round === 1 ? 'Compra tus primeras tropas · no hay combate' : 'Compra, coloca y retira tropas · no hay combate' });
     else showSplash({ kind: 'combat', title: '' + ic('espadas') + ' RONDA ' + s.round, sub: s.first === 0 ? 'Atacas primero' : 'Ataca primero el rival' });
@@ -688,7 +711,7 @@
     if (s.phase === 'post' && !s.over && s.p[0].anime <= 0) {
       ui.busy = true;
       var a = E.mesaTroops(s.p[0]).length, b = E.mesaTroops(s.p[1]).length;
-      showSplash({ kind: 'end', title: 'FIN DE LA RONDA ' + s.round, sub: 'Tropas en pie: tú ' + a + ' · rival ' + b });
+      showSplash({ kind: 'end', title: 'FIN DE LA RONDA ' + s.round, sub: s.spec ? '' : 'Tropas en pie: tú ' + a + ' · rival ' + b });
       render();
       setTimeout(function () {
         ui.busy = false;
@@ -811,10 +834,12 @@
     if (act === 'fight') { if (E.fight(s) === false) return; ui.deadline = null; ui.sel = null; ui.hint = ''; return play(); }
     if (act === 'endshop') { E.endShop(s); ui.sel = null; ui.hint = ''; announce(); return render(); }
     if (act === 'next') { E.nextRound(s); ui.sel = null; ui.hint = ''; announce(); return render(); }
+    if (act === 'anpick') { var A1 = ui.anm = ui.anm || { from: null, to: null }, ro = el.dataset.role, uu = +el.dataset.uid, other = ro === 'from' ? 'to' : 'from'; A1[ro] = A1[ro] === uu ? null : uu; if (A1[other] === uu) A1[other] = null; return render(); }
     if (act === 'cede') {
-      var cf = +document.getElementById('an-from').value, ct = +document.getElementById('an-to').value;
+      var A0 = ui.anm || {}, cf = A0.from, ct = A0.to; if (cf == null || ct == null) return;
       var ok = E.cede(s, cf, ct, el.dataset.stat);
       if (ok) pvs('cede', [cf, ct, el.dataset.stat]);
+      if (ok) ui.anm = null;
       ui.hint = ok ? '' : 'Elige dos tropas Anime distintas.'; return render();
     }
     if (act === 'buy') { var bi = +el.dataset.i, bc = CARD[P.offers[bi]]; if (!E.buy(s, 0, bi)) ui.hint = bc && P.gold < bc.cost ? 'No tienes oro suficiente.' : 'Tu mano está llena.'; else { ui.hint = ''; pvs('buy', [bi]); } return render(); }

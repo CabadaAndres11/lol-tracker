@@ -701,6 +701,16 @@
       });
     }
     var hl = f.hl;
+    if (prev) { // daño de pasivas y de área: cualquier tropa que pierde vida sin ser el objetivo ni el atacante con contraataque
+      var pa = map(prev), pb = map(f.view);
+      Object.keys(pb).forEach(function (u) {
+        var x = pa[u], y = pb[u]; if (!x || y.max < x.max) return;
+        var dh = x.hp - y.hp; if (dh <= 0) return;
+        if (hl && hl.tgt === +u && hl.dmg > 0) return;
+        if (hl && hl.att === +u && hl.rec > 0) return;
+        out.push({ uid: +u, text: '-' + dh, cls: 'dmg', delay: .7 });
+      });
+    }
     if (hl && hl.tgt && hl.dmg > 0) out.push({ uid: hl.tgt, text: '-' + hl.dmg, cls: 'dmg', delay: .34 });
     if (hl && hl.life != null && hl.dmg > 0) out.push({ orb: hl.life, text: '-' + hl.dmg, cls: 'dmg', delay: .3 });
     if (hl && hl.plife != null && hl.pdmg > 0) out.push({ orb: hl.plife, text: '-' + hl.pdmg, cls: 'dmg', delay: .6 });

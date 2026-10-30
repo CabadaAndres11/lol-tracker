@@ -1,6 +1,9 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-10-30', tag: 'Novedad', title: 'Números de daño más visibles',
+      items: ['El daño que recibe cada carta en un golpe aparece ahora como un número rojo más grande que salta sobre la carta, tanto al recibir un ataque como al recibir el contraataque.',
+        'También se muestra el daño de las pasivas y de área (Saque, Remate, Llanto final, Dúo en sintonía…) en cada carta afectada.'] },
     { date: '2026-10-30', tag: 'Balance', title: 'Más rareza en cada tienda',
       items: ['Cuanto más avanza la partida, más probable es encontrar cartas de mayor rareza en la tienda y menos comunes. Cada tienda nueva: comunes -8, raras +2, épicas +5 y legendarias +3 de peso (comunes nunca por debajo de 10).'] },
     { date: '2026-10-30', tag: 'Novedad', title: 'Pasivas de las cartas épicas',

@@ -653,7 +653,7 @@ var D={
    "type": "accion",
    "size": 1,
    "target": "none",
-   "text": "Tus tropas Informático ganan +1 de ataque permanente por cada actualización de la tienda hecha en la partida.",
+   "text": "Tus tropas Informático ganan +1 de ataque permanente por cada 5 actualizaciones de la tienda hechas en la partida.",
    "theme": "Informático"
   },
   {
@@ -817,7 +817,7 @@ var D={
    "tx": [
     "La primera actualización de cada tienda es gratis.",
     "Las 3 primeras actualizaciones de cada tienda son gratis.",
-    "Además: las Informático ganan +1/+1 permanente por cada actualización de tienda hecha en la partida."
+    "Además: las Informático ganan +1/+1 permanente por cada 3 actualizaciones de tienda hechas en la partida."
    ]
   },
   "Trabajo": {

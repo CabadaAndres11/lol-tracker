@@ -318,8 +318,8 @@
       run: function (s, p) { mesaTroops(s.p[p]).filter(function (i) { return has(i, 'Comebacker'); }).forEach(function (i) { i.hp = maxHp(i); }); return 'las Comebacker recuperan su vida'; } },
     'cambio-de-linea': { run: function (s, p, t) { var P = s.p[p]; P.mesa[P.mesa.indexOf(t)] = null; t.hp = maxHp(t); t.tmp = { atk: 0, hp: 0, red: 0 }; delete P.target[t.uid]; P.hand.push(t); return 'vuelve a la mano con la vida completa'; } },
     parche: {
-      ok: function (s, p) { return s.refreshN[p] > 0 ? '' : 'Aún no has actualizado la tienda en esta partida.'; },
-      run: function (s, p) { var P = s.p[p], n = s.refreshN[p]; P.mesa.concat(P.hand).filter(function (i) { return i && isTroop(i) && !i.dead && has(i, 'Informático'); }).forEach(function (i) { grow(i, 'atk', n); }); return '+' + n + ' ataque permanente a las Informático'; } },
+      ok: function (s, p) { return s.refreshN[p] >= 5 ? '' : 'Necesitas al menos 5 actualizaciones de tienda en esta partida.'; },
+      run: function (s, p) { var P = s.p[p], n = Math.floor(s.refreshN[p] / 5); P.mesa.concat(P.hand).filter(function (i) { return i && isTroop(i) && !i.dead && has(i, 'Informático'); }).forEach(function (i) { grow(i, 'atk', n); }); return '+' + n + ' ataque permanente a las Informático'; } },
     'horas-extra': { run: function (s, p) { var n = sc(s, 5); s.p[p].fl.work = n; return 'si ganas esta ronda: +' + n + ' de oro'; } },
     'capitulo-especial': { ok: function (s, p) { return (tiers(s.p[p])['Anime'] || 0) >= 1 ? '' : 'Necesitas el nivel 1 de Anime (2 cartas distintas).'; }, run: function (s, p) { s.p[p].fl.anime = true; return 'lo que cedan tus Anime se duplica'; } },
     'segunda-temporada': {
@@ -519,10 +519,11 @@
       }
       // Informático nivel 3: +1/+1 permanente por cada actualización de tienda de la partida (se acredita lo que falta)
       if ((t['Informático'] || 0) >= 3) {
-        var inf = troops.filter(function (i) { return has(i, 'Informático') && (i.caps.inf || 0) < s.refreshN[p]; });
+        var infN = Math.floor(s.refreshN[p] / 3);
+        var inf = troops.filter(function (i) { return has(i, 'Informático') && (i.caps.inf || 0) < infN; });
         if (inf.length) {
-          inf.forEach(function (i) { var d = s.refreshN[p] - (i.caps.inf || 0); i.caps.inf = s.refreshN[p]; grow(i, 'atk', d); grow(i, 'hp', d); });
-          fxFrame(s, p, 'inf', 'Actualizaciones', '+1/+1 por actualización de tienda (' + s.refreshN[p] + ' en total)', inf.map(function (i) { return i.uid; }));
+          inf.forEach(function (i) { var d = infN - (i.caps.inf || 0); i.caps.inf = infN; grow(i, 'atk', d); grow(i, 'hp', d); });
+          fxFrame(s, p, 'inf', 'Actualizaciones', '+1/+1 por cada 3 actualizaciones de tienda (' + s.refreshN[p] + ' en total)', inf.map(function (i) { return i.uid; }));
         }
       }
       // Pokémon: bola (las acciones pueden añadir bolas extra esta ronda)

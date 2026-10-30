@@ -1,6 +1,9 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-10-30', tag: 'Equilibrio', title: 'Ajuste a Informático',
+      items: ['Nivel 3: las Informático ganan +1/+1 por cada 3 actualizaciones de tienda (antes, por cada una).',
+        'Parche de actualización: +1 de ataque por cada 5 actualizaciones (antes, por cada una). Necesita al menos 5 para poder usarse.'] },
     { date: '2026-10-30', tag: 'Novedad', title: 'Clasificación (Ladder)',
       items: ['Nueva clasificación en el inicio con los 5 mejores jugadores.',
         '1 vs 1: +20 puntos al ganar y −20 al perder.',

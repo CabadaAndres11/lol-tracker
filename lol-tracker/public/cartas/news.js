@@ -1,6 +1,8 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-10-30', tag: 'Cambio', title: 'Sobres ahora es «Tienda»',
+      items: ['El apartado Sobres pasa a llamarse Tienda y estrena icono. Sigue incluyendo los sobres, las skins y la recompensa diaria.'] },
     { date: '2026-10-30', tag: 'Novedad', title: 'Nuevo constructor de mazos',
       items: ['Nuevo panel a la izquierda con las sinergias de tu mazo: icono, cuántas cartas llevas y el nivel alcanzado.',
         'El panel de la derecha sigue explicando cada sinergia.',
@@ -39,7 +41,7 @@
         'Se elimina el bonus de rareza en tienda y la oferta a dedo.',
         'Javihi y Computer Chipy pasan de Común a Rara y mejoran sus estadísticas: de 3/3 a 4/4.'] },
     { date: '2026-10-30', tag: 'Novedad', title: 'Skins de cartas',
-      items: ['Nueva sección «Skins» en Sobres: compra con monedas ilustraciones alternativas para tus cartas.',
+      items: ['Nueva sección «Skins» en la Tienda: compra con monedas ilustraciones alternativas para tus cartas.',
         'Primera skin: AitoRLG Koisito «Piel azul» (120 monedas). Necesitas tener la carta.',
         'Se equipan desde la tienda y las verán tus rivales en 1 vs 1 y Versus de 4.'] },
     { date: '2026-10-30', tag: 'Novedad', title: 'Niveles de carta',

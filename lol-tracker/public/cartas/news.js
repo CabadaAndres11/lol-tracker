@@ -1,6 +1,8 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-10-30', tag: 'Novedad', title: 'Nueva skin: Javihi Friki · Javihi Volibear',
+      items: ['Ya está en la tienda la skin «Javihi Volibear» para Javihi Friki (120 monedas). Necesitas tener la carta para comprarla.'] },
     { date: '2026-10-30', tag: 'Novedad', title: 'Nueva skin: Lihone Viego · Hoja espectral',
       items: ['Ya está en la tienda la skin «Hoja espectral» para Lihone Viego (120 monedas). Necesitas tener la carta para comprarla.'] },
     { date: '2026-10-30', tag: 'Novedad', title: 'Moneda para decidir quién ataca primero',

@@ -1,6 +1,8 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-10-30', tag: 'Novedad', title: 'Nueva skin: Lihone Viego · Hoja espectral',
+      items: ['Ya está en la tienda la skin «Hoja espectral» para Lihone Viego (120 monedas). Necesitas tener la carta para comprarla.'] },
     { date: '2026-10-30', tag: 'Novedad', title: 'Moneda para decidir quién ataca primero',
       items: ['Al empezar cada combate una moneda gira y cae del lado de quien ataca primero (TÚ o RIVAL), con un mensaje que lo confirma.'] },
     { date: '2026-10-30', tag: 'Novedad', title: 'Nueva acción Comebacker: Pedir refuerzos',

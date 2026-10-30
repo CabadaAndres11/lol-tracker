@@ -97,6 +97,13 @@
     var pick = ['Rara', 'Legendaria', 'Épica'].map(function (r) { return D.cards.filter(function (c) { return c.rarity === r && (r !== 'Rara' || c.person === 'AitoRLG'); })[0] || D.cards.filter(function (c) { return c.rarity === r; })[0]; }).filter(Boolean);
     return '<div class="fan">' + pick.map(function (c, k) { return '<div class="fc f' + k + '">' + cardHtml(c, { atk: c.atk, hp: c.hp, max: c.hp, cls: '' }) + '</div>'; }).join('') + '</div>';
   }
+  function newsHtml() {
+    var N = window.CARTAS_NEWS || [];
+    if (!N.length) return '';
+    return '<div class="panel newsbox"><h2>' + ic('libro') + ' Parches y noticias</h2>' + N.slice(0, 6).map(function (n) {
+      return '<div class="newsi"><div class="newsh"><span class="ntag nt-' + esc(n.tag) + '">' + esc(n.tag) + '</span><b>' + esc(n.title) + '</b><span class="mut">' + esc(n.date.split('-').reverse().join('/')) + '</span></div><ul>' + n.items.map(function (i) { return '<li>' + esc(i) + '</li>'; }).join('') + '</ul></div>';
+    }).join('') + '</div>';
+  }
   function renderHome() {
     var n = Object.keys(D.themes).length;
     var h = head('home') + '<div class="hero">' + heroCards() + '<img src="/cartas/logo.svg" alt="" class="hero-logo"><h1>Juego de Cartas</h1><p class="mut">Mazos con sinergias combinables, combates por rondas y memes de la pandilla.</p><button class="btn big cta" data-act="nav" data-to="play">' + ic('espadas') + ' ¡Jugar ahora!</button></div>';
@@ -107,6 +114,7 @@
       ['themes', ic('brillo'), 'Sinergias', n + ' sinergias con sus niveles y cartas.'],
       ['rules', ic('libro'), 'Normas', 'Cómo funcionan las rondas, la tienda y el combate.'],
     ].map(function (m) { return '<button class="menu-i m-' + m[0] + '" data-act="nav" data-to="' + m[0] + '"><span class="mi">' + m[1] + '</span><b>' + m[2] + '</b><span class="mut">' + m[3] + '</span></button>'; }).join('') + '</div>';
+    h += newsHtml();
     h += '<p class="mut" style="text-align:center">' + D.cards.length + ' tropas · ' + D.actions.length + ' acciones</p></div>';
     app.innerHTML = h;
   }

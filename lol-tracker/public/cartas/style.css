@@ -886,3 +886,13 @@ img.timg[src$="comebacker.png"] { filter: drop-shadow(0 0 1.5px #fff) drop-shado
 .skitem{display:flex;flex-direction:column;gap:6px;align-items:center;text-align:center;width:150px}
 .skcard{width:130px}
 .skinshop{grid-column:1/-1}
+
+/* noticias */
+.newsbox{max-width:760px;margin:1.4rem auto}
+.newsi{padding:.7rem 0;border-top:1px solid rgba(255,255,255,.08)}
+.newsi:first-of-type{border-top:0}
+.newsh{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap}
+.newsh .mut{margin-left:auto;font-size:.8rem}
+.newsi ul{margin:.4rem 0 0 1.1rem;padding:0;color:var(--mut,#9aa7c0);font-size:.9rem}
+.ntag{font-size:.7rem;padding:.1rem .5rem;border-radius:99px;background:#2a6;color:#fff;text-transform:uppercase;letter-spacing:.05em}
+.ntag.nt-Equilibrio{background:#c70}

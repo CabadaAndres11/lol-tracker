@@ -33,7 +33,7 @@ var D={
    "size": 3,
    "pas": {
     "n": "Racha de bajas",
-    "t": "Si al atacar derrota a una tropa rival, toma su ataque y vuelve a atacar, y así mientras siga derrotando. Al terminar recupera su propio ataque."
+    "t": "Si al atacar derrota a una tropa rival, toma su ataque y vuelve a atacar, y así mientras siga derrotando. Si derrota a la última, ese ataque golpea al jugador rival. Al terminar recupera su propio ataque."
    }
   },
   {

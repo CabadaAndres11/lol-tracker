@@ -352,7 +352,7 @@
   function validTarget(c, i) { return !c.only || has(i, c.only); }
   // Cada acción: ok(s,p,tgt) devuelve '' si se puede jugar o el motivo; run(s,p,tgt) la aplica y devuelve el texto del registro.
   // Nivel de la acción (por repetidas): +50% por nivel sobre su cifra base
-  function sc(s, n) { return Math.round(n * (1 + .5 * ((s.lvl || 1) - 1))); }
+  function sc(s, n) { return n; } // las acciones no mejoran con el nivel de carta
   var ACT = {
     entrenamiento: { run: function (s, p, t) { var n = sc(s, 3); grow(t, 'atk', n); return '+' + n + ' ataque permanente'; } },
     armadura: { run: function (s, p, t) { var n = sc(s, 5); grow(t, 'hp', n); return '+' + n + ' vida máxima permanente'; } },
@@ -819,6 +819,11 @@
       // Racha de bajas (Lihone Viego): al derrotar a una tropa toma su ataque y vuelve a atacar
       if (pas(a) === 'racha') {
         if (tgt.dead && !a.dead && mesaTroops(E).length) { a.tmp.loan = atk(tgt); line += ' Racha de bajas: toma ' + a.tmp.loan + ' de ataque y vuelve a atacar.'; seq.splice(n + 1, 0, a); }
+        else if (tgt.dead && !a.dead) { // mató a la última tropa rival: su ataque golpea al jugador rival
+          var rd = atk(tgt);
+          if (rd > 0) { E.life -= rd; plife = tgt.owner; pdmg = rd; line += ' Racha de bajas: toma ' + rd + ' de ataque y golpea ' + pv(s, a.owner, 'la vida del rival', 'tu vida') + '.'; }
+          if (a.tmp.loan != null) delete a.tmp.loan;
+        }
         else if (a.tmp.loan != null) { delete a.tmp.loan; line += ' Recupera su ataque.'; }
       }
       // Resurrección: la carta que ataca también recibe el ataque de la carta atacada (contraataque)

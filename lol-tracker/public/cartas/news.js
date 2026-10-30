@@ -16,7 +16,7 @@
       items: ['Cuanto más avanza la partida, más probable es encontrar cartas de mayor rareza en la tienda y menos comunes. Cada tienda nueva: comunes -8, raras +2, épicas +5 y legendarias +3 de peso (comunes nunca por debajo de 10).'] },
     { date: '2026-10-30', tag: 'Novedad', title: 'Pasivas de las cartas épicas',
       items: ['Las 5 épicas estrenan pasiva (píldora morada; pasa el cursor para leerla).',
-        'Lihone Viego — Racha de bajas: si al atacar derrota a una tropa rival, toma su ataque y vuelve a atacar, mientras siga derrotando. Al terminar recupera su ataque.',
+        'Lihone Viego — Racha de bajas: si al atacar derrota a una tropa rival, toma su ataque y vuelve a atacar, mientras siga derrotando. Si derrota a la última, ese ataque golpea al jugador rival. Al terminar recupera su ataque.',
         'AitoRLG Renata — Prórroga: la tropa que tiene justo a su derecha no cae a 0 de vida hasta que ataque; si derrota a una rival recupera la mitad de su vida máxima, y si no, cae.',
         'Haikyuu Lihone — Saque: en modo atacar, cada golpe hace 1 de daño a las tropas rivales contiguas a su objetivo.',
         'Lihone — Captura: cada bola Pokémon le da +1/+1 permanente extra a ella sola (tope +6/+6).',

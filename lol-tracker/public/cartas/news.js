@@ -1,6 +1,8 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-10-30', tag: 'Balance', title: 'Más rareza en cada tienda',
+      items: ['Cuanto más avanza la partida, más probable es encontrar cartas de mayor rareza en la tienda y menos comunes. Cada tienda nueva: comunes -8, raras +2, épicas +5 y legendarias +3 de peso (comunes nunca por debajo de 10).'] },
     { date: '2026-10-30', tag: 'Novedad', title: 'Pasivas de las cartas épicas',
       items: ['Las 5 épicas estrenan pasiva (píldora morada; pasa el cursor para leerla).',
         'Lihone Viego — Racha de bajas: si al atacar derrota a una tropa rival, toma su ataque y vuelve a atacar, mientras siga derrotando. Al terminar recupera su ataque.',

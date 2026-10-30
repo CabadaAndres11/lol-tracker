@@ -10,6 +10,7 @@
     reviveLife: 20, // modo Resurrección: vida inicial (la vida solo se pierde con golpes directos; la carta que ataca recibe el ataque de la atacada)
     merge: [1, 2, 4], // fusión de 3 copias iguales (estilo TFT): multiplicador de las estadísticas base por estrella
     rarityWeight: { 'Común': 50, 'Rara': 30, 'Épica': 15, 'Legendaria': 5 },
+    rarityRamp: { 'Común': -8, 'Rara': 2, 'Épica': 5, 'Legendaria': 3 }, // cambio de peso por cada tienda tras la primera (mín. 10, máx. 40)
   };
   var FX = {
     pokemon: { cap: 1e9, probs: [[70, 25, 5], [45, 40, 15], [25, 45, 30]], bonus: [0, 1, 2], names: ['Pokéball', 'Superball', 'Ultraball'] },
@@ -198,7 +199,8 @@
       if (cm.some(function (id) { return CARD[id].type === 'tropa'; })) elig = cm;
     }
     return elig.map(function (id) {
-      var w = CFG.rarityWeight[CARD[id].rarity] || 10;
+      var rr = CARD[id].rarity, w = (CFG.rarityWeight[rr] || 10) + (CFG.rarityRamp[rr] || 0) * Math.max(0, s.shops - 1);
+      w = Math.max(rr === 'Común' ? 10 : 1, Math.min(40, w));
       return { id: id, w: w };
     });
   }

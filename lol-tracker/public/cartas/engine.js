@@ -12,7 +12,7 @@
     rarityWeight: { 'Común': 50, 'Rara': 30, 'Épica': 15, 'Legendaria': 5 },
   };
   var FX = {
-    pokemon: { cap: 10, probs: [[70, 25, 5], [45, 40, 15], [25, 45, 30]], bonus: [0, 1, 2], names: ['Pokéball', 'Superball', 'Ultraball'] },
+    pokemon: { cap: 1e9, probs: [[70, 25, 5], [45, 40, 15], [25, 45, 30]], bonus: [0, 1, 2], names: ['Pokéball', 'Superball', 'Ultraball'] },
     comebacker: { atk: [1, 2, 2], others: [0, 0, 1], cap: 8 },
     lol: { atk: [1, 1, 2], hp: [0, 1, 2], cap: [4, 6, 8] },
     trabajo: { shop: [0, 0, 2] },

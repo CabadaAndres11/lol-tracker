@@ -803,7 +803,7 @@ var D={
    ],
    "color": "#ff5a5f",
    "tx": [
-    "Cada ronda se abre una bola (70% Pokéball, 25% Superball, 5% Ultraball): +0/+0, +1/+1 o +2/+2 a las Pokémon.",
+    "Cada ronda se abre una bola (70% Pokéball, 25% Superball, 5% Ultraball): +0/+0, +1/+1 o +2/+2 permanente a las Pokémon (sin tope).",
     "Probabilidades 45% / 40% / 15%.",
     "Probabilidades 25% / 45% / 30%."
    ]

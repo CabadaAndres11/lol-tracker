@@ -1,6 +1,8 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-10-30', tag: 'Balance', title: 'Pokémon sin tope de estadísticas',
+      items: ['Las mejoras permanentes de las bolas Pokémon ya no tienen tope (antes +10/+10 por carta).'] },
     { date: '2026-10-30', tag: 'Novedad', title: 'Botón Cancelar tras pulsar listo',
       items: ['En las partidas contra otros jugadores (1 contra 1 y de 4), después de pulsar listo aparece un botón Cancelar para volver a preparar tu turno si te has precipitado.'] },
     { date: '2026-10-30', tag: 'Balance', title: 'Estadísticas y precios por rareza',

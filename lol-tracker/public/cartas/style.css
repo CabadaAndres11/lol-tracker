@@ -969,3 +969,10 @@ img.timg[src$="comebacker.png"] { filter: drop-shadow(0 0 1.5px #fff) drop-shado
 .surrp { max-width: 420px; text-align: center; padding: 1.4rem; }
 .surrp .btnrow { justify-content: center; margin-top: 1rem; }
 .overlay.surro { z-index: 980; }
+
+/* Probabilidades de rareza en la tienda de partida */
+.odds { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: .35rem .7rem; margin: .1rem 0 .6rem; font-size: .8rem; color: #fde68a; }
+.odds .olbl { font-weight: 800; letter-spacing: .12em; text-transform: uppercase; font-size: .7rem; opacity: .8; }
+.odds .od { padding: .12rem .6rem; border-radius: 999px; background: rgba(0,0,0,.32); border: 1.5px solid var(--oc, #9ca3af); color: #fff; white-space: nowrap; }
+.odds .od i { font-style: normal; color: var(--oc); } .odds .od b { color: var(--oc); }
+.odds .od.r-Común { --oc: #cbd5e1; } .odds .od.r-Rara { --oc: #60a5fa; } .odds .od.r-Épica { --oc: #c084fc; } .odds .od.r-Legendaria { --oc: #fbbf24; }

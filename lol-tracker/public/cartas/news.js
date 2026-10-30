@@ -1,6 +1,8 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-10-30', tag: 'Novedad', title: 'Probabilidades de rareza en la tienda',
+      items: ['La tienda de la partida muestra ahora la probabilidad de cada rareza (Común, Rara, Épica y Legendaria) para las cartas que te pueden salir, según tu mazo y lo avanzada que va la partida.'] },
     { date: '2026-10-30', tag: 'Novedad', title: 'Botón Rendirse',
       items: ['Durante la partida hay un botón «Rendirse» arriba a la derecha. Pide confirmación y, si aceptas, das la partida por perdida (en partidas contra jugadores cuenta como derrota; en el versus de 4 quedas eliminado).'] },
     { date: '2026-10-30', tag: 'Novedad', title: 'Nueva skin: Javihi Friki · Javihi Volibear',

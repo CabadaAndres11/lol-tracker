@@ -87,6 +87,11 @@
     return '<nav class="nav">' + NAV.map(function (n) { return '<button class="navb' + (n[0] === cur ? ' on' : '') + '" data-act="nav" data-to="' + n[0] + '">' + ic(n[1]) + ' ' + n[2] + '</button>'; }).join('') +
       '<span class="navsp"></span>' + (ui.acct ? '<button class="navb coinpill" data-act="nav" data-to="packs" title="Tus monedas">' + ic('moneda') + ' ' + ui.acct.coins + '</button><span class="acctw"><button class="navb who" data-act="acctmenu" title="Tu cuenta">' + ic('usuario') + ' ' + esc(ui.acct.name) + ' ▾</button><div class="acctmenu"><div class="am-name">Sesión de <b>' + esc(ui.acct.name) + '</b></div><button data-act="logout">' + ic('puerta') + ' Cerrar sesión</button></div></span>' : '') + '<a class="navb" href="/">← Hub</a></nav>';
   }
+  function oddsHtml(s) {
+    var o = E.shopOdds(s, 0), keys = Object.keys(o);
+    if (!keys.length) return '';
+    return '<div class="odds" title="Probabilidad de cada rareza en las cartas de esta tienda (según tu mazo)"><span class="olbl">Probabilidades</span>' + keys.map(function (r) { return '<span class="od r-' + r + '"><i>' + GEM[r] + '</i> ' + r + ' <b>' + o[r] + '%</b></span>'; }).join('') + '</div>';
+  }
   function head(cur, title) { return '<div class="wrap">' + navHtml(cur) + (title ? '<h1 class="ptitle">' + title + '</h1>' : ''); }
   function deckSize() { return E.deckSize(ui.deck); }
   function deckError() {
@@ -591,7 +596,7 @@
     // Tienda (bajo la mano): pulsar una carta para comprarla
     if (shop) {
       var t = E.tiers(P), rc = E.refreshCost(s, 0);
-      h += '<div class="shopwrap"><div class="hl">' + ic('carrito') + ' Tienda' + (s.round === 1 ? ' (solo Comunes)' : '') + ' · pulsa una carta para comprarla</div><div class="shoprow">';
+      h += '<div class="shopwrap"><div class="hl">' + ic('carrito') + ' Tienda' + (s.round === 1 ? ' (solo Comunes)' : '') + ' · pulsa una carta para comprarla</div>' + oddsHtml(s) + '<div class="shoprow">';
       for (var k = 0; k < CFG.shopOffers; k++) {
         var id = P.offers[k];
         if (!id) { h += '<div class="cw"><div class="slot">Vendida</div></div>'; continue; }

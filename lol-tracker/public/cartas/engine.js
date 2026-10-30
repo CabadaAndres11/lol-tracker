@@ -204,6 +204,15 @@
       return { id: id, w: w };
     });
   }
+  // Probabilidad (%) de cada rareza en la próxima oferta de la tienda de p
+  function shopOdds(s, p) {
+    var pool = offerPool(s, p), tot = 0, by = {};
+    pool.forEach(function (x) { by[CARD[x.id].rarity] = (by[CARD[x.id].rarity] || 0) + x.w; tot += x.w; });
+    var out = {}, sum = 0, last = null;
+    ['Común', 'Rara', 'Épica', 'Legendaria'].forEach(function (r) { if (by[r]) { out[r] = Math.round(by[r] / tot * 100); sum += out[r]; last = r; } });
+    if (last && sum !== 100) out[last] += 100 - sum;
+    return out;
+  }
   function drawOffer(s, p) {
     var pool = offerPool(s, p), tot = pool.reduce(function (a, b) { return a + b.w; }, 0), r = s.rng() * tot;
     for (var k = 0; k < pool.length; k++) { r -= pool[k].w; if (r <= 0) return pool[k].id; }
@@ -1002,7 +1011,7 @@
     bindRng: bindRng, revive: revive, income: income, openShop: openShop, noTroops: noTroops, shopStuck: shopStuck, cleanup: cleanup, newPlayer: newPlayer, resolveText: function (x, seat) { return x.replace(/\u0001(\d)\u0002([^\u0002]*)\u0002([^\u0003]*)\u0003/g, function (m, p, a, b) { return +p === seat ? a : b; }); }, mirror: mirror, pv: pv, CFG: CFG, FX: FX, CARD: CARD, DATA: DATA,
     newGame: newGame, randomDeck: randomDeck, deckSize: deckSize, mulberry32: mulberry32,
     place: place, playAction: playAction, setTarget: setTarget, clearTargets: clearTargets, forfeit: forfeit, setVoley: setVoley, actionBlock: actionBlock, validTarget: validTarget,
-    sell: sell, sellValue: sellValue, handCap: handCap, dupBlock: dupBlock, buy: buy, mergeCheck: mergeCheck, willMerge: willMerge, refresh: refresh, refreshCost: refreshCost, pickFromDeck: pickFromDeck, retire: retire,
+    sell: sell, sellValue: sellValue, handCap: handCap, dupBlock: dupBlock, buy: buy, mergeCheck: mergeCheck, willMerge: willMerge, shopOdds: shopOdds, refresh: refresh, refreshCost: refreshCost, pickFromDeck: pickFromDeck, retire: retire,
     aiDeck: aiDeck, aiShop: aiShop, aiPrep: aiPrep, aiTargets: aiTargets, fight: fight, endShop: endShop, pendingTargets: pendingTargets, cede: cede, nextRound: nextRound,
     themeCounts: themeCounts, tiers: tiers, tierOf: tierOf, atk: atk, maxHp: maxHp, card: card, isTroop: isTroop, has: has, mesaTroops: mesaTroops, viewOf: viewOf,
   };

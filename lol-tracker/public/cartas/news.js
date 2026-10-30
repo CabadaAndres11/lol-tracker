@@ -1,6 +1,8 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-10-30', tag: 'Novedad', title: 'Nueva acción Comebacker: Pedir refuerzos',
+      items: ['Nueva carta de acción Rara (2 de oro): si tu vida es menor que la del rival, consigues en tu mano un Lihone Viego o un AitoRLG Renata al azar.'] },
     { date: '2026-10-30', tag: 'Novedad', title: 'Números de daño más visibles',
       items: ['El daño que recibe cada carta en un golpe aparece ahora como un número rojo más grande que salta sobre la carta, tanto al recibir un ataque como al recibir el contraataque.',
         'También se muestra el daño de las pasivas y de área (Saque, Remate, Llanto final, Dúo en sintonía…) en cada carta afectada.'] },

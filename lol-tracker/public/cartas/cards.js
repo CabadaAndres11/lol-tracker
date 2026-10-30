@@ -681,6 +681,17 @@ var D={
    "theme": "Comebacker"
   },
   {
+   "id": "pedir-refuerzos",
+   "name": "Pedir refuerzos",
+   "cost": 2,
+   "rarity": "Rara",
+   "type": "accion",
+   "size": 1,
+   "target": "none",
+   "text": "Si tu vida es menor que la del rival, consigues en tu mano un Lihone Viego o un AitoRLG Renata al azar.",
+   "theme": "Comebacker"
+  },
+  {
    "id": "cambio-de-linea",
    "name": "Cambio de línea",
    "cost": 1,

@@ -961,3 +961,7 @@ img.timg[src$="comebacker.png"] { filter: drop-shadow(0 0 1.5px #fff) drop-shado
 .coinlbl { font: 900 clamp(1.3rem, 4.4vw, 2.2rem) 'Fredoka', Inter, sans-serif; letter-spacing: .08em; padding: .4rem 1.4rem; border-radius: 999px; opacity: 0; animation: coinlbl .5s 1.4s ease both; text-shadow: 0 3px 0 rgba(0,0,0,.4); }
 .coinlbl.me { background: rgba(14,116,144,.9); color: #e0f7ff; border: 3px solid #7dd3fc; } .coinlbl.foe { background: rgba(127,29,29,.92); color: #fff; border: 3px solid #fecaca; }
 @keyframes coinlbl { from { opacity: 0; transform: translateY(14px) scale(.8); } to { opacity: 1; transform: none; } }
+
+/* Acciones con sinergia: el logo de la sinergia en el centro */
+.card.accion .mono.ico.tl { font-size: 38cqw; inset: 15% 8% 51% 8%; }
+.card.accion .tlogo { width: 1em; height: 1em; display: block; margin: 0 auto; object-fit: contain; filter: drop-shadow(0 .03em 0 rgba(0,0,0,.35)) drop-shadow(0 0 .12em rgba(0,0,0,.4)); }

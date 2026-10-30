@@ -75,7 +75,7 @@
       if (dH) h += '<i class="dl h ' + (dH > 0 ? 'pos' : 'neg') + '">' + (dH > 0 ? '+' : '') + dH + '</i>';
       h += '<span class="sc a' + (a > c.atk ? ' up' : '') + '" title="Ataque"><b>' + a + '</b></span><span class="sc h' + (mx > c.hp ? ' up' : '') + (hp < mx ? ' low' : '') + '" title="Vida' + (hp < mx ? ' (' + hp + '/' + mx + ')' : '') + '"><b>' + hp + '</b></span>';
     } else {
-      h += '<div class="mono ico">' + ic(AICON[c.id] || 'brillo') + '</div><div class="adesc">' + esc(c.text) + '</div>' + (c.theme ? '<div class="tags">' + tagHtml(c.theme) + '</div>' : '');
+      h += (c.theme ? '<div class="mono ico tl">' + (TIMG[c.theme] ? '<img class="tlogo" src="/cartas/img/' + TIMG[c.theme] + '.png" alt="">' : ic('t-' + c.theme, 'tlogo')) + '</div>' : '<div class="mono ico">' + ic(AICON[c.id] || 'brillo') + '</div>') + '<div class="adesc">' + esc(c.text) + '</div>' + (c.theme ? '<div class="tags">' + tagHtml(c.theme) + '</div>' : '');
     }
     if (o.extra) h += o.extra;
     return h + '</' + tag + '>';

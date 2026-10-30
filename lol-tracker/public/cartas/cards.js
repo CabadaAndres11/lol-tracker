@@ -223,7 +223,8 @@ var D={
    "hp": 5,
    "rarity": "Legendaria",
    "type": "tropa",
-   "size": 3
+   "size": 3,
+   "pas": {"n": "Dúo en sintonía", "t": "Solo con su pareja Dúo (Javihi Dúo + Sech Dúo) viva en la mesa: cuando una recibe un ataque, hace la mitad de ese daño (redondeado hacia arriba) a todas las tropas rivales. Si acaban el combate las dos vivas, tu jugador recupera 1 de vida."}
   },
   {
    "id": "javihi-koisito",
@@ -253,7 +254,8 @@ var D={
    "hp": 7,
    "rarity": "Legendaria",
    "type": "tropa",
-   "size": 2
+   "size": 2,
+   "pas": {"n": "Remate", "t": "Cada vez que ataca, el balón rebota: la mitad de su ataque (redondeado hacia arriba) golpea a otra tropa rival al azar."}
   },
   {
    "id": "sech-thresh",
@@ -283,7 +285,8 @@ var D={
    "hp": 5,
    "rarity": "Legendaria",
    "type": "tropa",
-   "size": 3
+   "size": 3,
+   "pas": {"n": "Dúo en sintonía", "t": "Solo con su pareja Dúo (Javihi Dúo + Sech Dúo) viva en la mesa: cuando una recibe un ataque, hace la mitad de ese daño (redondeado hacia arriba) a todas las tropas rivales. Si acaban el combate las dos vivas, tu jugador recupera 1 de vida."}
   },
   {
    "id": "sech",
@@ -298,7 +301,8 @@ var D={
    "hp": 7,
    "rarity": "Legendaria",
    "type": "tropa",
-   "size": 2
+   "size": 2,
+   "pas": {"n": "Embargo", "t": "Cuando mata a una tropa con su ataque, el jugador rival pierde 2 de vida directamente y tú ganas 1 de oro."}
   },
   {
    "id": "sech-koisito",
@@ -402,7 +406,8 @@ var D={
    "hp": 7,
    "rarity": "Legendaria",
    "type": "tropa",
-   "size": 2
+   "size": 2,
+   "pas": {"n": "Aliento final", "t": "Si un ataque rival la mataría antes de haber atacado en este combate, ataca primero y después cae."}
   },
   {
    "id": "mertens",
@@ -432,7 +437,8 @@ var D={
    "hp": 7,
    "rarity": "Legendaria",
    "type": "tropa",
-   "size": 3
+   "size": 3,
+   "pas": {"n": "Pereza contagiosa", "t": "Al empezar cada combate, todas las tropas rivales pierden 1/1 de forma permanente (máximo -4/-4 por tropa)."}
   },
   {
    "id": "computer-chipy",
@@ -477,7 +483,8 @@ var D={
    "hp": 5,
    "rarity": "Legendaria",
    "type": "tropa",
-   "size": 3
+   "size": 3,
+   "pas": {"n": "Llanto final", "t": "Al caer, hace la mitad de su ataque (redondeado hacia arriba) a todas las tropas rivales."}
   },
   {
    "id": "pampert-friki",

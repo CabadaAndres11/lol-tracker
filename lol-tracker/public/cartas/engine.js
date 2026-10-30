@@ -579,6 +579,11 @@
           fxFrame(s, p, 'inf', 'Actualizaciones', '+1/+1 por cada 3 actualizaciones de tienda (' + s.refreshN[p] + ' en total)', inf.map(function (i) { return i.uid; }));
         }
       }
+      // Mertens PRIME: Pereza contagiosa, -1/-1 permanente a las tropas rivales (tope -4/-4)
+      if (troops.some(function (i) { return pas(i) === 'pereza'; })) {
+        var pz = mesaTroops(s.p[1 - p]).filter(function (i) { var d = Math.min(1, 4 - (i.caps.mert || 0)); if (d <= 0) return false; i.caps.mert = (i.caps.mert || 0) + d; i.perm.atk -= d; i.perm.hp -= d; i.hp = Math.min(i.hp, maxHp(i)); return true; });
+        if (pz.length) fxFrame(s, p, 'pereza', 'Pereza contagiosa', '-1/-1 permanente a las tropas rivales', pz.map(function (i) { return i.uid; }), true);
+      }
       // Pokémon: bola (las acciones pueden añadir bolas extra esta ronda)
       if (t['Pokémon']) {
         for (var bn = 0; bn < 1 + (P.fl.pk || 0); bn++) {
@@ -670,8 +675,23 @@
   }
 
   // Efectos al caer una tropa (KOI, Dúo Inseparable). Devuelve texto de registro y animación.
-  function deathFx(s, d) {
-    var line = '', fxk = null;
+  // ---------- Pasivas de legendarias ----------
+  var PAS = { 'javihi-duo': 'duo', 'sech-duo': 'duo', 'javihi-prime': 'remate', 'sech': 'embargo', 'potango': 'aliento', 'mertens-prime': 'pereza', 'chipy-lloron': 'llanto' };
+  function pas(i) { return PAS[i.id] || ''; }
+  function duoLinked(s, i) { var o = i.id === 'javihi-duo' ? 'sech-duo' : 'javihi-duo'; return mesaTroops(s.p[i.owner]).some(function (x) { return x.id === o; }); }
+  // Daño de pasiva a una tropa (sin contraataque). Devuelve texto de registro.
+  function passiveHit(s, v, n, depth) {
+    if (!v || v.dead || n <= 0) return '';
+    v.hp -= n;
+    var tv = s.tiers[v.owner];
+    if (has(v, 'Tilt') && tv && tv['Tilt']) gainCap(v, 'tilt', 'atk', FX.tilt.hit[tv['Tilt'] - 1], FX.tilt.cap);
+    var out = ' ' + card(v).name + ' -' + n + '.';
+    if (v.hp <= 0) { v.dead = true; v.hp = 0; out += ' ¡Cae!'; out += deathFx(s, v, depth + 1).line; }
+    return out;
+  }
+  // Efectos al caer una tropa (KOI, Dúo Inseparable). Devuelve texto de registro y animación.
+  function deathFx(s, d, depth) {
+    var line = '', fxk = null; depth = depth || 0;
         var tt2 = s.tiers[d.owner];
         if (has(d, 'KOI') && tt2['KOI']) {
           var kb = FX.koi.atk[tt2['KOI'] - 1];
@@ -684,6 +704,10 @@
           dd.forEach(function (i) { gainCap(i, 'duo', 'atk', FX.duo.death, FX.duo.cap); });
           if (dd.length && !fxk) fxk = { type: 'duo', side: d.owner, title: 'Su dúo se ha roto', sub: '+' + FX.duo.death + ' ataque', uids: dd.map(function (i) { return i.uid; }), neg: false };
         }
+    if (pas(d) === 'llanto' && depth < 4) { // Chipy Llorón: la mitad de su ataque a todas las tropas rivales
+      var ln = Math.ceil(atk(d) / 2), lf = mesaTroops(s.p[1 - d.owner]);
+      if (lf.length && ln > 0) { line += ' Llanto final: ' + ln + ' de daño a todas las tropas rivales.'; lf.forEach(function (f) { line += passiveHit(s, f, ln, depth); }); }
+    }
     return { line: line, fx: fxk };
   }
   function fight(s) {
@@ -709,9 +733,19 @@
       });
     });
     if (Object.keys(dbl).length) { var sq2 = []; seq.forEach(function (i) { sq2.push(i); if (dbl[i.uid]) sq2.push(i); }); seq = sq2; }
+    // Aliento final (PotAnGo): tras su ataque de última hora, cae
+    function finishDying(u) {
+      if (!u.tmp.dying) return;
+      u.tmp.dying = false;
+      if (u.dead) return;
+      u.dead = true; u.hp = 0;
+      var dd = deathFx(s, u, 0);
+      frame(s, card(u).name + ' cae.' + dd.line, { fx: dd.fx });
+    }
     for (var n = 0; n < seq.length && !s.over; n++) {
       var a = seq[n];
-      if (a.dead || a.tmp.noAtk) continue;
+      if ((a.dead && !a.tmp.dying) || a.tmp.noAtk) continue;
+      a.tmp.acted = true;
       var P = s.p[a.owner], E = s.p[1 - a.owner], foes = mesaTroops(E);
       var tgt = null, retarget = false;
       if (P.target[a.uid]) tgt = foes.filter(function (f) { return f.uid === P.target[a.uid]; })[0] || null;
@@ -721,6 +755,7 @@
         E.life -= dmg;
         frame(s, card(a).name + ' golpea directamente: ' + dmg + ' de daño a ' + pv(s, a.owner, 'la vida del rival', 'tu vida') + '.', { att: a.uid, life: 1 - a.owner, dmg: dmg });
         if (E.life <= 0) { s.over = true; s.phase = 'over'; s.winner = a.owner; s.reason = 'Vida a cero.'; break; }
+        finishDying(a);
         continue;
       }
       var fxk = null, real = Math.max(0, dmg - tgt.tmp.red);
@@ -741,9 +776,22 @@
           gainCap(tgt, 'tilt', 'atk', FX.tilt.hit[tt['Tilt'] - 1], FX.tilt.cap);
         }
       }
-      if (tgt.hp <= 0) {
+      if (tgt.hp <= 0 && pas(tgt) === 'aliento' && !tgt.tmp.acted && !tgt.tmp.noAtk && !tgt.tmp.dying && !tgt.dead) {
+        tgt.tmp.dying = true; line += ' ¡Aliento final! ' + card(tgt).name + ' ataca antes de caer.'; seq.splice(n + 1, 0, tgt);
+      } else if (tgt.hp <= 0) {
         tgt.dead = true; tgt.hp = 0; line += ' ¡Cae!';
         var df = deathFx(s, tgt); line += df.line; fxk = df.fx;
+      }
+      // Pasivas al golpear (Dúo en sintonía, Embargo)
+      var plife = null, pdmg = 0;
+      if (real > 0 && pas(tgt) === 'duo' && duoLinked(s, tgt)) {
+        var dn = Math.ceil(real / 2);
+        line += ' Dúo en sintonía: ' + dn + ' de daño a todas las tropas rivales.';
+        mesaTroops(s.p[a.owner]).forEach(function (v) { line += passiveHit(s, v, dn, 0); });
+      }
+      if (tgt.dead && pas(a) === 'embargo' && !a.dead) {
+        E.life -= 2; P.gold += 1; plife = tgt.owner; pdmg = 2;
+        line += ' Embargo: ' + pv(s, a.owner, 'el rival pierde 2 de vida y ganas 1 de oro.', 'pierdes 2 de vida y el rival gana 1 de oro.');
       }
       // Resurrección: la carta que ataca también recibe el ataque de la carta atacada (contraataque)
       var rec = 0;
@@ -751,13 +799,19 @@
         rec = Math.max(0, atk(tgt) - a.tmp.red);
         if (a.tmp.cap1) rec = Math.min(rec, 1);
         if (rec > 0) {
-          a.hp -= rec; line += ' Contraataque: ' + card(a).name + ' recibe ' + rec + '.';
+          if (!a.dead) a.hp -= rec; line += ' Contraataque: ' + card(a).name + ' recibe ' + rec + '.';
           var ta2 = s.tiers[a.owner];
           if (has(a, 'Tilt') && ta2['Tilt']) gainCap(a, 'tilt', 'atk', FX.tilt.hit[ta2['Tilt'] - 1], FX.tilt.cap);
-          if (a.hp <= 0) { a.dead = true; a.hp = 0; line += ' ¡Cae!'; var df2 = deathFx(s, a); line += df2.line; if (!fxk) fxk = df2.fx; }
+          if (a.hp <= 0 && !a.dead) { a.dead = true; a.hp = 0; line += ' ¡Cae!'; var df2 = deathFx(s, a); line += df2.line; if (!fxk) fxk = df2.fx; }
         }
       }
-      frame(s, line, { att: a.uid, tgt: tgt.uid, dmg: real, rec: rec, retarget: retarget, fx: fxk });
+      if (pas(a) === 'remate') { // Javihi Prime: el balón rebota a otra tropa rival
+        var rb = mesaTroops(E).filter(function (x) { return x !== tgt; });
+        if (rb.length) { var rv = rb[Math.floor(s.rng() * rb.length)], rn = Math.ceil(atk(a) / 2); line += ' Remate: rebota ' + rn + ' en ' + card(rv).name + '.'; line += passiveHit(s, rv, rn, 0); }
+      }
+      frame(s, line, { att: a.uid, tgt: tgt.uid, dmg: real, rec: rec, retarget: retarget, fx: fxk, plife: plife, pdmg: pdmg });
+      if (E.life <= 0 && !s.over) { s.over = true; s.phase = 'over'; s.winner = a.owner; s.reason = 'Vida a cero.'; break; }
+      finishDying(a);
     }
     if (!s.over) {
       // Tilt: si pierdes la ronda (menos tropas vivas), parte del ataque se queda
@@ -779,6 +833,14 @@
           var tg = P.fl.tilt === true ? 1 : P.fl.tilt;
           tl.forEach(function (i) { grow(i, 'atk', tg); });
           if (tl.length) fxFrame(s, p, 'tilt', 'Rabia contenida', '+' + tg + ' ataque permanente a las Tilt', tl.map(function (i) { return i.uid; }));
+        }
+      });
+      // Dúo en sintonía: si acaban las dos vivas, el jugador se cura 1
+      [0, 1].forEach(function (p) {
+        var m = mesaTroops(s.p[p]);
+        if (m.some(function (i) { return i.id === 'javihi-duo'; }) && m.some(function (i) { return i.id === 'sech-duo'; })) {
+          var ML = s.maxLife || CFG.life;
+          if (s.p[p].life < ML) { s.p[p].life += 1; fxFrame(s, p, 'duo', 'Dúo en sintonía', '+1 de vida', m.filter(function (i) { return pas(i) === 'duo'; }).map(function (i) { return i.uid; })); }
         }
       });
       cleanup(s);
@@ -880,6 +942,7 @@
         if (h.att != null) h.att = fu(h.att);
         if (h.tgt != null) h.tgt = fu(h.tgt);
         if (h.life != null) h.life = 1 - h.life;
+        if (h.plife != null) h.plife = 1 - h.plife;
         if (h.fx) { h.fx.side = 1 - h.fx.side; h.fx.uids = (h.fx.uids || []).map(fu); }
       });
       (c.acts || []).forEach(function (a) { a.p = 1 - a.p; if (a.tgt != null) a.tgt = fu(a.tgt); });

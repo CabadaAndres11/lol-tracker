@@ -1,6 +1,14 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-10-30', tag: 'Novedad', title: 'Pasivas de las cartas legendarias',
+      items: ['Las 7 legendarias estrenan pasiva (las cartas con ✦; pasa el cursor para leerla).',
+        'Javihi Dúo y Sech Dúo — Dúo en sintonía: solo con su pareja en mesa, al recibir un ataque hacen la mitad del daño a todas las tropas rivales, y si acaban las dos vivas curas 1 de vida.',
+        'Javihi Prime — Remate: cada ataque rebota con la mitad de su ataque en otra tropa rival.',
+        'Sech — Embargo: al matar una tropa, el rival pierde 2 de vida directamente y ganas 1 de oro.',
+        'PotAnGo — Aliento final: si un ataque rival la mata antes de haber atacado, ataca primero y luego cae.',
+        'Mertens PRIME — Pereza contagiosa: al empezar cada combate, las tropas rivales pierden 1/1 permanente (máx. -4/-4).',
+        'Chipy Llorón — Llanto final: al caer, la mitad de su ataque a todas las tropas rivales.'] },
     { date: '2026-10-30', tag: 'Novedad', title: 'Navegación mejorada',
       items: ['Cada sección tiene su propia dirección (#/mazo, #/tienda, #/sinergias, #/normas…): si recargas la página vuelves a donde estabas.',
         'El botón atrás del navegador funciona entre secciones y el título de la pestaña indica en cuál estás.',

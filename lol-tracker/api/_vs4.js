@@ -32,7 +32,7 @@ function duelState(T, a, b) {
   const S = {
     pvp: true, uidm: 4, uidk: [a, b >= 0 ? b : a], inc: T.inc, rs: T.rs, uidn: [T.uidn[a], b >= 0 ? T.uidn[b] : 1],
     refreshN: [T.refreshN[a], b >= 0 ? T.refreshN[b] : 0], lastBall: [T.lastBall[a], b >= 0 ? T.lastBall[b] : null],
-    lv: [T.lv[a] || {}, b >= 0 ? T.lv[b] || {} : {}], sk: [T.sk[a] || {}, b >= 0 ? T.sk[b] || {} : {}], lvl: 1, p: [Pa, Pb], round: T.round, shops: T.shops, phase: T.phase, shopOpen: T.shopOpen, first: T.firstOf[a] || 0, over: false, winner: -1,
+    maxLife: CFG4.life, lv: [T.lv[a] || {}, b >= 0 ? T.lv[b] || {} : {}], sk: [T.sk[a] || {}, b >= 0 ? T.sk[b] || {} : {}], lvl: 1, p: [Pa, Pb], round: T.round, shops: T.shops, phase: T.phase, shopOpen: T.shopOpen, first: T.firstOf[a] || 0, over: false, winner: -1,
     reason: '', log: [], frames: [], acts: [], actN: T.actN, err: '', fightN: T.fightN,
   };
   E.bindRng(S);

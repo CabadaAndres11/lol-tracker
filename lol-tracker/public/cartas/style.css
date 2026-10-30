@@ -937,3 +937,5 @@ img.timg[src$="comebacker.png"] { filter: drop-shadow(0 0 1.5px #fff) drop-shado
 .rdot{display:inline-block;width:.6rem;height:.6rem;border-radius:50%;background:var(--tc);margin-right:.35rem}
 .rtag{display:inline-block;padding:.1rem .7rem;border-radius:99px;border:2px solid var(--tc);color:var(--tc)}
 @media (max-width:900px){.deck-layout{grid-template-columns:1fr}.deck-left{position:static;display:flex;flex-wrap:wrap;gap:.4rem}.deck-left h2{width:100%}.dl-row{margin:0}}
+
+.card .pasb{position:absolute;right:2.5cqw;top:12cqw;z-index:6;width:11cqw;height:11cqw;display:grid;place-items:center;border-radius:50%;font-size:7.5cqw;line-height:1;color:#2a1a00;background:linear-gradient(180deg,#ffe28a,#d4a52c);border:.7cqw solid #fff3c4;box-shadow:0 1px 4px rgba(0,0,0,.6);cursor:help}

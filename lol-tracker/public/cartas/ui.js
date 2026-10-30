@@ -115,9 +115,9 @@
   function newsHtml() {
     var N = window.CARTAS_NEWS || [];
     if (!N.length) return '';
-    return '<div class="panel newsbox"><h2>' + ic('libro') + ' Parches y noticias</h2>' + N.slice(0, 6).map(function (n) {
+    return '<div class="panel newsbox' + (ui.newsOpen ? ' open' : '') + '"><h2>' + ic('libro') + ' Parches y noticias</h2><div class="newsbody">' + N.slice(0, 30).map(function (n) {
       return '<div class="newsi"><div class="newsh"><span class="ntag nt-' + esc(n.tag) + '">' + esc(n.tag) + '</span><b>' + esc(n.title) + '</b><span class="mut">' + esc(n.date.split('-').reverse().join('/')) + '</span></div><ul>' + n.items.map(function (i) { return '<li>' + esc(i) + '</li>'; }).join('') + '</ul></div>';
-    }).join('') + '</div>';
+    }).join('') + '</div><button class="btn sec sm newstog" data-act="newstog">' + (ui.newsOpen ? 'Ocultar ▴' : 'Ver todas las noticias ▾') + '</button></div>';
   }
   function renderHome() {
     var n = Object.keys(D.themes).length;
@@ -807,6 +807,7 @@
         ui.msg = ''; ui.lgPin = ''; setAcct(r.data.user); loadLocal(); ui.screen = 'home'; render();
       });
     }
+    if (act === 'newstog') { ui.newsOpen = !ui.newsOpen; return render(); }
     if (act === 'skinbuy') return api('skinBuy', { id: el.dataset.skin }).then(function (r) { if (r.data && r.data.user) setAcct(r.data.user); ui.msg = r.ok ? '' : (r.data.error || ''); render(); });
     if (act === 'skinequip') return api('skinEquip', { id: el.dataset.skin, card: el.dataset.card }).then(function (r) { if (r.data && r.data.user) setAcct(r.data.user); render(); });
     if (act === 'daily') { return api('daily').then(function (r) { if (r.data && r.data.user) setAcct(r.data.user); ui.msg = r.ok ? '' : (r.data.error || ''); render(); }); }

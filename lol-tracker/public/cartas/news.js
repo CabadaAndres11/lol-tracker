@@ -1,6 +1,8 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-10-30', tag: 'Novedad', title: 'Botón Rendirse',
+      items: ['Durante la partida hay un botón «Rendirse» arriba a la derecha. Pide confirmación y, si aceptas, das la partida por perdida (en partidas contra jugadores cuenta como derrota; en el versus de 4 quedas eliminado).'] },
     { date: '2026-10-30', tag: 'Novedad', title: 'Nueva skin: Javihi Friki · Javihi Volibear',
       items: ['Ya está en la tienda la skin «Javihi Volibear» para Javihi Friki (120 monedas). Necesitas tener la carta para comprarla.'] },
     { date: '2026-10-30', tag: 'Novedad', title: 'Nueva skin: Lihone Viego · Hoja espectral',

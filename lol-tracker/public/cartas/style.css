@@ -965,3 +965,7 @@ img.timg[src$="comebacker.png"] { filter: drop-shadow(0 0 1.5px #fff) drop-shado
 /* Acciones con sinergia: el logo de la sinergia en el centro */
 .card.accion .mono.ico.tl { font-size: 38cqw; inset: 15% 8% 51% 8%; }
 .card.accion .tlogo { width: 1em; height: 1em; display: block; margin: 0 auto; object-fit: contain; filter: drop-shadow(0 .03em 0 rgba(0,0,0,.35)) drop-shadow(0 0 .12em rgba(0,0,0,.4)); }
+.lnk.surr { color: #f87171; }
+.surrp { max-width: 420px; text-align: center; padding: 1.4rem; }
+.surrp .btnrow { justify-content: center; margin-top: 1rem; }
+.overlay.surro { z-index: 980; }

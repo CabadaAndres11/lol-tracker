@@ -209,11 +209,13 @@
     var modes = [
       ['ai', ic('robot'), 'Contra la IA', 'Duelo 1 contra 1 con tu mazo. Disponible ahora.', true],
       ['pvp', ic('espadas'), 'Jugador contra jugador', 'Reta a otro jugador en un duelo 1 contra 1. Sala con código o búsqueda automática.', true],
+      ['rev', ic('brillo'), 'Resurrección · IA', 'Las tropas no mueren: reviven cada ronda. Cada golpe a una carta también daña la vida de su dueño (80 de vida).', true],
+      ['revpvp', ic('brillo'), 'Resurrección · 1 vs 1', 'El mismo modo contra otro jugador. Sala con código o búsqueda automática.', true],
       ['vs4', ic('grupo'), 'Versus de 4', 'Cuatro jugadores, duelos rotando hasta que quede uno. Sala con código o búsqueda.', true],
     ];
     app.innerHTML = head('play', '' + ic('espadas') + ' Elige modo de juego') + '<p class="mut">Tu mazo actual (' + deckSize() + '/' + CFG.deckBudget + ') se usará en cualquier modo.</p><div class="modes">' +
       modes.map(function (m) {
-        return '<button class="mode m-' + m[0] + (m[4] ? '' : ' off') + '"' + (m[4] ? ' data-act="' + (m[0] === 'pvp' ? 'openpvp' : m[0] === 'vs4' ? 'openvs4' : 'startai') + '"' : ' disabled aria-disabled="true"') + '><span class="mi">' + m[1] + '</span><b>' + m[2] + '</b><span class="mut">' + m[3] + '</span>' +
+        return '<button class="mode m-' + m[0] + (m[4] ? '' : ' off') + '"' + (m[4] ? ' data-act="' + (m[0] === 'pvp' ? 'openpvp' : m[0] === 'revpvp' ? 'openrevpvp' : m[0] === 'rev' ? 'startrev' : m[0] === 'vs4' ? 'openvs4' : 'startai') + '"' : ' disabled aria-disabled="true"') + '><span class="mi">' + m[1] + '</span><b>' + m[2] + '</b><span class="mut">' + m[3] + '</span>' +
           (m[4] ? '<span class="go">¡Jugar!</span>' : '<span class="soon">' + ic('candado') + ' Próximamente</span>') + '</button>';
       }).join('') + '</div></div>';
   }
@@ -228,6 +230,7 @@
       sec('Tienda', ['Hay tienda <b>cada 3 rondas</b> (rondas 1, 4, 7…). En una ronda de tienda <b>no hay combate</b>.', 'La tienda ofrece 5 cartas al azar de tu propio mazo; pulsa una para comprarla. El botón redondo ' + ic('cambio') + ' la actualiza por 1 de oro.', '<b>Solo en las rondas de tienda</b> puedes retirar tropas de la mesa; el resto del tiempo puedes colocar si hay hueco, pero no quitar.', 'Las tropas de coste 5 aparecen a partir de la segunda tienda.']) +
       sec('Combate', ['Los ataques se resuelven de uno en uno, alternando bandos de izquierda a derecha. Cada tropa ataca <b>una vez por ronda</b>. El bando que empieza se alterna cada ronda.', 'Si el objetivo ya murió, el ataque va a una tropa rival viva al azar.', 'No se puede atacar al jugador directamente: <b>recibes daño solo si todas tus tropas han muerto</b> y a tu rival le quedan tropas por atacar; el daño es igual a su ataque.', '<b>Las tropas no se curan entre rondas</b>: el daño se acumula. Solo se curan del todo al volver a tu mano (retirándolas en la tienda). Las muertas liberan su hueco y los bonus de «esta ronda» desaparecen.', 'Si en una ronda sin tienda no tienes tropas ni en mesa ni en mano, <b>pierdes automáticamente</b>.']) +
       sec('Jugador contra jugador', ['Crea una sala y pasa el <b>código de 5 letras</b> a un amigo, o usa <b>Buscar rival</b> para emparejarte con cualquiera.', 'Las dos tiendas y los combates son simultáneos: cada ronda la partida avanza cuando <b>los dos pulsáis listo</b> o se acaba el tiempo (45 s en combate, 60 s en tienda).', 'Ganas <b>15 monedas</b> por partida y <b>40 más</b> si ganas (con el mismo límite diario que contra la IA). Si abandonas o pasas <b>más de 60 s desconectado</b>, pierdes y no cobras.']) +
+      sec('Modo Resurrección', ['Mismas reglas que el 1 contra 1, pero las tropas <b>no mueren</b>: las que caen en combate <b>reviven con la vida completa</b> al acabar la ronda y las acciones nunca las matan (las dejan a 1).', 'Cada vez que una carta golpea a otra, <b>su dueño también pierde vida</b> igual al daño causado. Se empieza con <b>80 de vida</b>.', 'Si un bando se queda sin tropas en pie, las del otro golpean directamente a la vida como siempre. Pierde quien llegue a 0 de vida.', 'Se puede jugar contra la IA o contra otro jugador (sala o búsqueda), y también puntúa en la clasificación y da monedas.']),
       sec('Fusión de copias', ['Si juntas <b>3 copias iguales</b> de una tropa (entre la mesa y la mano) se fusionan solas en <b>una</b> con más estadísticas: <b>★2</b> = estadísticas base ×2 y, con 3 cartas ★2 iguales, <b>★3</b> = ×4.', 'La carta fusionada se queda en la mesa si alguna copia estaba en ella. Puedes comprar la 3ª copia aunque tengas la mano llena. En la tienda, las cartas que completan una fusión se marcan con un brillo.']),
       sec('Niveles de carta', ['Cada vez que te sale una carta que ya tienes, cuenta como una <b>copia</b>. Con <b>2 copias</b> la carta pasa a <b>★2</b> y con <b>4 copias</b> a <b>★3</b>.', 'Las <b>tropas</b> ganan <b>+1/+1 por nivel</b> al entrar en juego. Las <b>acciones con cifras</b> (daño, ataque, vida, oro…) mejoran un <b>50% por nivel</b>; las que no tienen cifras no cambian.', 'El nivel lo ves como ★ en la carta, tanto en el mazo como en la partida.']) +
       sec('Versus de 4', ['Cuatro jugadores en la misma partida: <b>30 de vida</b>, <b>14 de oro</b> al empezar y <b>+3 de oro</b> por ronda.', 'Cada ronda de combate se juegan <b>2 duelos a la vez</b> y los emparejamientos rotan para que todos se crucen. Las rondas de tienda (1, 4, 7…) son para los cuatro y no hay combate.', 'Quien llega a 0 de vida o se queda sin tropas queda <b>eliminado</b>. Con 3 vivos, uno <b>descansa</b> cada ronda (cobra oro y prepara su mesa). Gana el último en pie.', 'Monedas: <b>15</b> por jugar + <b>45</b> (1º), <b>20</b> (2º) o <b>5</b> (3º). Si abandonas o pasas más de 60 s desconectado, quedas eliminado y no cobras.']) +
@@ -331,7 +334,7 @@
       if (PV.busy || PV.q.length) return pvpSchedule(600);
       call = api(PV.px + 'Poll', { id: PV.id, v: PV.v });
     } else if (ui.screen === 'pvp' && PV.wait) {
-      call = PV.wait.kind === 'search' ? api(PV.px + 'Search', { deck: ui.deck }) : api(PV.px + 'Poll', {});
+      call = PV.wait.kind === 'search' ? api(PV.px + 'Search', { deck: ui.deck, mode: PV.mode }) : api(PV.px + 'Poll', {});
     } else return;
     call.then(pvpGot);
   }
@@ -427,7 +430,7 @@
     }).join('') + '</div>';
   }
   function renderPvp() {
-    var w = PV.wait, v4 = ui.lobby === 'vs4', h = head('play', v4 ? '' + ic('grupo') + ' Versus de 4' : '' + ic('espadas') + ' Jugador contra jugador');
+    var w = PV.wait, v4 = ui.lobby === 'vs4', h = head('play', v4 ? '' + ic('grupo') + ' Versus de 4' : '' + ic('espadas') + (PV.mode === 'revive' ? ' Resurrección · 1 vs 1' : ' Jugador contra jugador'));
     if (w) {
       h += '<div class="panel pvpwait">' + (w.kind === 'code'
         ? '<h2>' + (v4 ? 'Sala de 4' : 'Sala creada') + '</h2><p class="mut">' + (v4 ? 'Pasa este código a 3 jugadores más. Cuando estéis los 4, empieza sola.' : 'Pásale este código a tu rival. Cuando lo escriba, la partida empieza sola.') + '</p><div class="pvpcode">' + esc(w.code || '·····') + '</div>'
@@ -451,7 +454,7 @@
     var seed = Math.floor(Math.random() * 1e9), r = E.mulberry32(seed + 7);
     var mylv = {}; ui.deck.forEach(function (id) { var l = lvOf(id); if (l > 1) mylv[id] = l; });
     var mysk = {}; ui.deck.forEach(function (id) { var k = ui.acct && ui.acct.skinSel && ui.acct.skinSel[id]; if (k && ui.acct.skins.indexOf(k) >= 0) mysk[id] = k; });
-    ui.s = E.newGame(ui.deck, E.aiDeck(r), seed, { lv: [mylv, {}], sk: [mysk, {}] });
+    ui.s = E.newGame(ui.deck, E.aiDeck(r), seed, { lv: [mylv, {}], sk: [mysk, {}], mode: ui.mode });
     ui.reward = null; api('gameStart');
     ui.screen = 'game'; ui.sel = null; ui.view = null; ui.playing = false; ui.hint = ''; ui.landed = null; ui.busy = false;
     announce(); render();
@@ -842,12 +845,13 @@
     if (act === 'slot-load') { var sl = ui.slots[+el.dataset.i]; if (sl) { ui.deck = sl.ids.filter(owns); saveDeck(); ui.slotTo = +el.dataset.i; ui.msg = 'Cargado «' + sl.name + '».'; } return renderDeck(); }
     if (act === 'slot-del') { var di = +el.dataset.i; if (ui.slots[di]) { ui.msg = 'Borrado «' + ui.slots[di].name + '».'; ui.slots[di] = null; saveSlots(); } return renderDeck(); }
     if (act === 'menu') { if (PV.on) { if (s && !s.over && !window.confirm('Si sales ahora pierdes la partida. ¿Salir?')) return; pvpLeaveGame(); } clearTimeout(timer); ui.playing = false; ui.screen = el.dataset.to || 'home'; return render(); }
-    if (act === 'openpvp') {
+    if (act === 'openpvp' || act === 'openrevpvp') {
       if (deckError()) { ui.screen = 'deck'; return render(); }
-      saveDeck(); if (PV.on) pvpLeaveGame(); ui.msg = ''; PV.wait = null; PV.px = 'pvp'; ui.lobby = 'pvp';
+      saveDeck(); if (PV.on) pvpLeaveGame(); ui.msg = ''; PV.wait = null; PV.px = 'pvp'; ui.lobby = 'pvp'; PV.mode = act === 'openrevpvp' ? 'revive' : '';
       return api('pvpPoll', {}).then(function (r) { if (r.ok && r.data.s && !r.data.s.over) return pvpBegin(r.data); ui.screen = 'pvp'; window.scrollTo(0, 0); render(); });
     }
     if (act === 'openvs4') {
+      PV.mode = '';
       if (deckError()) { ui.screen = 'deck'; return render(); }
       saveDeck(); if (PV.on) pvpLeaveGame(); ui.msg = ''; PV.wait = null; PV.px = 'vs4'; ui.lobby = 'vs4';
       return api('vs4Poll', {}).then(function (r) {
@@ -856,11 +860,11 @@
         ui.screen = 'pvp'; window.scrollTo(0, 0); render();
       });
     }
-    if (act === 'pvpsearch') { PV.wait = { kind: 'search' }; ui.msg = ''; render(); return api(PV.px + 'Search', { deck: ui.deck }).then(pvpGot); }
-    if (act === 'pvpcreate') { PV.wait = { kind: 'code', code: '' }; ui.msg = ''; render(); return api(PV.px + 'Create', { deck: ui.deck }).then(pvpGot); }
+    if (act === 'pvpsearch') { PV.wait = { kind: 'search' }; ui.msg = ''; render(); return api(PV.px + 'Search', { deck: ui.deck, mode: PV.mode }).then(pvpGot); }
+    if (act === 'pvpcreate') { PV.wait = { kind: 'code', code: '' }; ui.msg = ''; render(); return api(PV.px + 'Create', { deck: ui.deck, mode: PV.mode }).then(pvpGot); }
     if (act === 'pvpjoin') { var jc = (document.getElementById('pvp-code').value || '').trim(); if (jc.length !== 5) { ui.msg = 'El código tiene 5 letras.'; return render(); } ui.msg = ''; return api(PV.px + 'Join', { deck: ui.deck, code: jc }).then(pvpGot); }
     if (act === 'pvpcancel') { pvpCancelWait(); return render(); }
-    if (act === 'startai') { if (deckError()) { ui.screen = 'deck'; return render(); } saveDeck(); return startGame(); }
+    if (act === 'startai' || act === 'startrev') { if (deckError()) { ui.screen = 'deck'; return render(); } saveDeck(); ui.mode = act === 'startrev' ? 'revive' : ''; return startGame(); }
     if (act === 'play') { if (deckError()) { ui.screen = 'deck'; return render(); } saveDeck(); return startGame(); }
     if (act === 'skip') { clearTimeout(timer); ui.shown = ui.frames.length; return stopPlay(); }
     if (!s || ui.playing) return;

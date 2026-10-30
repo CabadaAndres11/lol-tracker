@@ -135,10 +135,10 @@ function deadlineFor(g) {
   else if (s.phase === 'prep') g.dl = now + ((s.shopOpen ? 60 : 45) + 3) * 1000;
   else g.dl = now + (14 + s.frames.length * 1.2) * 1000; // fase 'post': deja ver la animación
 }
-async function newPvpGame(cfg, a, b) { // a, b: { name, deck }
+async function newPvpGame(cfg, a, b, mode) { // a, b: { name, deck }
   if (crypto.randomInt(0, 2)) { const t = a; a = b; b = t; }
   const id = crypto.randomBytes(8).toString('hex');
-  const s = E.newGame(a.deck, b.deck, crypto.randomInt(1, 2 ** 30), { pvp: true, lv: [a.lv || {}, b.lv || {}], sk: [a.sk || {}, b.sk || {}] });
+  const s = E.newGame(a.deck, b.deck, crypto.randomInt(1, 2 ** 30), { pvp: true, mode: mode === 'revive' ? 'revive' : '', lv: [a.lv || {}, b.lv || {}], sk: [a.sk || {}, b.sk || {}] });
   const now = Date.now();
   const g = { id, names: [a.name, b.name], s, v: 1, hb: [now, now], t0: now, paid: false, rew: [null, null], ab: -1 };
   deadlineFor(g);
@@ -220,7 +220,8 @@ async function pvpHandle(cfg, act, body, u) {
     const cur = await redis(cfg, ['GET', pKey(me)]);
     if (cur) { const g = await loadGame(cfg, cur); if (g && !g.s.over) return viewFor(g, g.names.indexOf(me)); }
     const err = checkDeck(u, body.deck); if (err) return { status: 400, error: err };
-    const mine = { name: me, deck: body.deck, lv: levelsOf(u, body.deck), sk: skinsOf(u, body.deck) };
+    const mode = body.mode === 'revive' ? 'revive' : '', qk = mode ? 'cartas:pvp:q:rv' : 'cartas:pvp:q';
+    const mine = { name: me, deck: body.deck, lv: levelsOf(u, body.deck), sk: skinsOf(u, body.deck), mode };
     if (act === 'pvpCreate') {
       const old = await redis(cfg, ['GET', `cartas:pvp:host:${me.toLowerCase()}`]);
       if (old) await redis(cfg, ['DEL', `cartas:pvp:room:${old}`]);
@@ -238,26 +239,28 @@ async function pvpHandle(cfg, act, body, u) {
       if (host.name.toLowerCase() === me.toLowerCase()) return { status: 400, error: 'Es tu propia sala: pásale el código a tu rival.' };
       if ((await redis(cfg, ['GETDEL', `cartas:pvp:room:${code}`])) == null) return { status: 404, error: 'Ese código ya se ha usado.' };
       await redis(cfg, ['DEL', `cartas:pvp:host:${host.name.toLowerCase()}`]);
-      const g = await newPvpGame(cfg, host, mine);
+      const g = await newPvpGame(cfg, host, mine, host.mode);
       return viewFor(g, g.names.indexOf(me));
     }
     // búsqueda automática: se empareja con quien esté esperando
-    const raw = await redis(cfg, ['GETDEL', 'cartas:pvp:q']);
+    const raw = await redis(cfg, ['GETDEL', qk]);
     if (raw) {
       const o = JSON.parse(raw);
       if (o.name.toLowerCase() !== me.toLowerCase() && Date.now() - o.t < 12000) {
-        const g = await newPvpGame(cfg, o, mine);
+        const g = await newPvpGame(cfg, o, mine, mode);
         return viewFor(g, g.names.indexOf(me));
       }
     }
-    await redis(cfg, ['SET', 'cartas:pvp:q', JSON.stringify({ ...mine, t: Date.now() }), 'EX', 15]);
+    await redis(cfg, ['SET', qk, JSON.stringify({ ...mine, t: Date.now() }), 'EX', 15]);
     return { ok: true, wait: true };
   }
   if (act === 'pvpCancel') {
     const code = await redis(cfg, ['GET', `cartas:pvp:host:${me.toLowerCase()}`]);
     if (code) { await redis(cfg, ['DEL', `cartas:pvp:room:${code}`]); await redis(cfg, ['DEL', `cartas:pvp:host:${me.toLowerCase()}`]); }
-    const q = await redis(cfg, ['GET', 'cartas:pvp:q']);
-    if (q && JSON.parse(q).name.toLowerCase() === me.toLowerCase()) await redis(cfg, ['DEL', 'cartas:pvp:q']);
+    for (const qk of ['cartas:pvp:q', 'cartas:pvp:q:rv']) {
+      const q = await redis(cfg, ['GET', qk]);
+      if (q && JSON.parse(q).name.toLowerCase() === me.toLowerCase()) await redis(cfg, ['DEL', qk]);
+    }
     return { ok: true };
   }
   // ---- con partida ----

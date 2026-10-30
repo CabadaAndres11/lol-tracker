@@ -1,6 +1,11 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-10-30', tag: 'Novedad', title: 'Nuevo modo: Resurrección',
+      items: ['Disponible contra la IA y en 1 vs 1 (sala con código o búsqueda automática).',
+        'Las tropas no mueren: reviven con la vida completa al final de cada ronda.',
+        'Cada golpe a una carta también quita vida a su dueño, igual al daño del golpe. Empiezas con 80 de vida.',
+        'Las acciones no matan en este modo: dejan la tropa a 1 de vida.'] },
     { date: '2026-10-30', tag: 'Novedad', title: 'Fusión de copias en partida',
       items: ['Si juntas 3 copias iguales de una tropa (entre mesa y mano) se fusionan solas en una carta ★2 con las estadísticas base ×2.',
         'Con 3 cartas ★2 iguales se fusionan en una ★3 con las estadísticas base ×4.',

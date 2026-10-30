@@ -7,6 +7,7 @@
   var CFG = {
     slots: 4, handMax: 5, life: 12, gold: 8, income: 2, shopEvery: 3, shopOffers: 5,
     refreshCost: 1, deckBudget: 20, maxRounds: 40,
+    reviveLife: 80, // modo Resurrección: vida inicial (cada golpe a una carta también daña la vida del dueño)
     merge: [1, 2, 4], // fusión de 3 copias iguales (estilo TFT): multiplicador de las estadísticas base por estrella
     hpMult: 1.1, hpGrow: 1.25, hpMin: 5, // vida base de las tropas: x hpMult x hpGrow^(coste-1)
     rarityWeight: { 'Común': 50, 'Rara': 30, 'Épica': 15, 'Legendaria': 5 },
@@ -126,6 +127,7 @@
     var s = { rs: (seed == null ? (Date.now() & 0xffffff) : seed) | 0, uidn: [1, 1], fightN: 0, round: 0, shops: 0, phase: 'prep', shopOpen: false, first: 0, over: false, winner: -1, reason: '', log: [], frames: [], p: [newPlayer(deckA), newPlayer(deckB)], lastBall: [null, null], refreshN: [0, 0], err: '', acts: [] };
     bindRng(s);
     if (opts && opts.pvp) s.pvp = true;
+    if (opts && opts.mode === 'revive') { s.mode = 'revive'; s.maxLife = CFG.reviveLife; s.p.forEach(function (P) { P.life = CFG.reviveLife; }); }
     if (opts && opts.lv) s.lv = opts.lv;
     if (opts && opts.sk) s.sk = opts.sk;
     startRound(s);
@@ -327,6 +329,7 @@
   // Muere una tropa fuera del combate (daño de acciones): sale de la mesa al momento.
   function dropDead(s, p, i) {
     var P = s.p[p], k = P.mesa.indexOf(i);
+    if (s.mode === 'revive') { i.hp = Math.max(1, i.hp); return; } // Resurrección: las acciones no matan, la dejan a 1
     i.dead = true; i.hp = 0;
     if (k >= 0) P.mesa[k] = null;
     P.grave.push(i); delete P.target[i.uid];
@@ -688,6 +691,8 @@
       var fxk = null, real = Math.max(0, dmg - tgt.tmp.red);
       if (tgt.tmp.cap1) real = Math.min(real, 1);
       tgt.hp -= real;
+      var chip = 0;
+      if (s.mode === 'revive' && real > 0) { chip = real; E.life -= chip; } // Resurrección: el golpe también daña la vida del dueño
       var line = card(a).name + (retarget ? ' (su objetivo ya cayó) ataca a ' : ' ataca a ') + card(tgt).name + ': ' + real + ' de daño' + (tgt.tmp.red && real < dmg ? ' (reducido)' : '') + '.';
       if (real > 0) {
         var ta = s.tiers[a.owner], tt = s.tiers[tgt.owner];
@@ -718,7 +723,9 @@
           if (dd.length && !fxk) fxk = { type: 'duo', side: tgt.owner, title: 'Su dúo se ha roto', sub: '+' + FX.duo.death + ' ataque', uids: dd.map(function (i) { return i.uid; }), neg: false };
         }
       }
-      frame(s, line, { att: a.uid, tgt: tgt.uid, dmg: real, retarget: retarget, fx: fxk });
+      if (chip) line += ' ' + pv(s, a.owner, 'El rival pierde ' + chip + ' de vida.', 'Pierdes ' + chip + ' de vida.');
+      frame(s, line, { att: a.uid, tgt: tgt.uid, dmg: real, retarget: retarget, fx: fxk, life: chip ? tgt.owner : undefined });
+      if (chip && E.life <= 0) { s.over = true; s.phase = 'over'; s.winner = a.owner; s.reason = 'Vida a cero.'; break; }
     }
     if (!s.over) {
       // Tilt: si pierdes la ronda (menos tropas vivas), parte del ataque se queda
@@ -760,6 +767,7 @@
     s.p.forEach(function (P) {
       P.mesa.forEach(function (i, k) {
         if (!i) return;
+        if (s.mode === 'revive') { i.dead = false; i.tmp = { atk: 0, hp: 0, red: 0 }; i.hp = maxHp(i); return; } // Resurrección: todas vuelven con la vida completa
         if (i.dead) { P.grave.push(i); P.mesa[k] = null; delete P.target[i.uid]; return; }
         i.tmp = { atk: 0, hp: 0, red: 0 }; i.hp = Math.min(i.hp, maxHp(i)); // sin curación entre rondas
       });

@@ -1,6 +1,10 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-10-30', tag: 'Novedad', title: 'Nuevo constructor de mazos',
+      items: ['Nuevo panel a la izquierda con las sinergias de tu mazo: icono, cuántas cartas llevas y el nivel alcanzado.',
+        'El panel de la derecha sigue explicando cada sinergia.',
+        'Ahora puedes filtrar las cartas por rareza y agruparlas por rareza.'] },
     { date: '2026-10-30', tag: 'Novedad', title: 'Vender cartas',
       items: ['En la tienda puedes vender cartas de tu mano o de tu mesa y recuperas su valor en oro (su coste).',
         'Las cartas fusionadas valen más: ★2 = ×3 y ★3 = ×9 su coste.',

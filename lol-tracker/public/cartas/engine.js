@@ -7,7 +7,7 @@
   var CFG = {
     slots: 4, handMax: 5, life: 12, gold: 8, income: 2, shopEvery: 3, shopOffers: 5,
     refreshCost: 1, deckBudget: 20, maxRounds: 40,
-    reviveLife: 80, // modo Resurrección: vida inicial (cada golpe a una carta también daña la vida del dueño)
+    reviveLife: 20, // modo Resurrección: vida inicial (la vida solo se pierde con golpes directos; la carta que ataca recibe el ataque de la atacada)
     merge: [1, 2, 4], // fusión de 3 copias iguales (estilo TFT): multiplicador de las estadísticas base por estrella
     hpMult: 1.1, hpGrow: 1.25, hpMin: 5, // vida base de las tropas: x hpMult x hpGrow^(coste-1)
     rarityWeight: { 'Común': 50, 'Rara': 30, 'Épica': 15, 'Legendaria': 5 },
@@ -651,6 +651,23 @@
     return mesaTroops(s.p[p]).filter(function (i) { return !(T[i.uid] && foes.some(function (f) { return f.uid === T[i.uid]; })); });
   }
 
+  // Efectos al caer una tropa (KOI, Dúo Inseparable). Devuelve texto de registro y animación.
+  function deathFx(s, d) {
+    var line = '', fxk = null;
+        var tt2 = s.tiers[d.owner];
+        if (has(d, 'KOI') && tt2['KOI']) {
+          var kb = FX.koi.atk[tt2['KOI'] - 1];
+          mesaTroops(s.p[d.owner]).forEach(function (i) { gainCap(i, 'koi', 'atk', kb, FX.koi.cap); });
+          line += ' KOI anima al equipo: +' + kb + ' de ataque.';
+          fxk = { type: 'koi', side: d.owner, title: '¡KOI anima al equipo!', sub: '+' + kb + ' ataque permanente', uids: mesaTroops(s.p[d.owner]).map(function (i) { return i.uid; }), neg: false };
+        }
+        if (has(d, 'Dúo Inseparable') && tt2['Dúo Inseparable']) {
+          var dd = mesaTroops(s.p[d.owner]).filter(function (i) { return has(i, 'Dúo Inseparable'); });
+          dd.forEach(function (i) { gainCap(i, 'duo', 'atk', FX.duo.death, FX.duo.cap); });
+          if (dd.length && !fxk) fxk = { type: 'duo', side: d.owner, title: 'Su dúo se ha roto', sub: '+' + FX.duo.death + ' ataque', uids: dd.map(function (i) { return i.uid; }), neg: false };
+        }
+    return { line: line, fx: fxk };
+  }
   function fight(s) {
     if (s.phase !== 'prep' || s.over || s.shopOpen) return false;
     if (pendingTargets(s, 0).length || (s.pvp && pendingTargets(s, 1).length)) return false;
@@ -691,8 +708,6 @@
       var fxk = null, real = Math.max(0, dmg - tgt.tmp.red);
       if (tgt.tmp.cap1) real = Math.min(real, 1);
       tgt.hp -= real;
-      var chip = 0;
-      if (s.mode === 'revive' && real > 0) { chip = real; E.life -= chip; } // Resurrección: el golpe también daña la vida del dueño
       var line = card(a).name + (retarget ? ' (su objetivo ya cayó) ataca a ' : ' ataca a ') + card(tgt).name + ': ' + real + ' de daño' + (tgt.tmp.red && real < dmg ? ' (reducido)' : '') + '.';
       if (real > 0) {
         var ta = s.tiers[a.owner], tt = s.tiers[tgt.owner];
@@ -710,22 +725,21 @@
       }
       if (tgt.hp <= 0) {
         tgt.dead = true; tgt.hp = 0; line += ' ¡Cae!';
-        var tt2 = s.tiers[tgt.owner];
-        if (has(tgt, 'KOI') && tt2['KOI']) {
-          var kb = FX.koi.atk[tt2['KOI'] - 1];
-          mesaTroops(E).forEach(function (i) { gainCap(i, 'koi', 'atk', kb, FX.koi.cap); });
-          line += ' KOI anima al equipo: +' + kb + ' de ataque.';
-          fxk = { type: 'koi', side: tgt.owner, title: '¡KOI anima al equipo!', sub: '+' + kb + ' ataque permanente', uids: mesaTroops(E).map(function (i) { return i.uid; }), neg: false };
-        }
-        if (has(tgt, 'Dúo Inseparable') && tt2['Dúo Inseparable']) {
-          var dd = mesaTroops(E).filter(function (i) { return has(i, 'Dúo Inseparable'); });
-          dd.forEach(function (i) { gainCap(i, 'duo', 'atk', FX.duo.death, FX.duo.cap); });
-          if (dd.length && !fxk) fxk = { type: 'duo', side: tgt.owner, title: 'Su dúo se ha roto', sub: '+' + FX.duo.death + ' ataque', uids: dd.map(function (i) { return i.uid; }), neg: false };
+        var df = deathFx(s, tgt); line += df.line; fxk = df.fx;
+      }
+      // Resurrección: la carta que ataca también recibe el ataque de la carta atacada (contraataque)
+      var rec = 0;
+      if (s.mode === 'revive') {
+        rec = Math.max(0, atk(tgt) - a.tmp.red);
+        if (a.tmp.cap1) rec = Math.min(rec, 1);
+        if (rec > 0) {
+          a.hp -= rec; line += ' Contraataque: ' + card(a).name + ' recibe ' + rec + '.';
+          var ta2 = s.tiers[a.owner];
+          if (has(a, 'Tilt') && ta2['Tilt']) gainCap(a, 'tilt', 'atk', FX.tilt.hit[ta2['Tilt'] - 1], FX.tilt.cap);
+          if (a.hp <= 0) { a.dead = true; a.hp = 0; line += ' ¡Cae!'; var df2 = deathFx(s, a); line += df2.line; if (!fxk) fxk = df2.fx; }
         }
       }
-      if (chip) line += ' ' + pv(s, a.owner, 'El rival pierde ' + chip + ' de vida.', 'Pierdes ' + chip + ' de vida.');
-      frame(s, line, { att: a.uid, tgt: tgt.uid, dmg: real, retarget: retarget, fx: fxk, life: chip ? tgt.owner : undefined });
-      if (chip && E.life <= 0) { s.over = true; s.phase = 'over'; s.winner = a.owner; s.reason = 'Vida a cero.'; break; }
+      frame(s, line, { att: a.uid, tgt: tgt.uid, dmg: real, rec: rec, retarget: retarget, fx: fxk });
     }
     if (!s.over) {
       // Tilt: si pierdes la ronda (menos tropas vivas), parte del ataque se queda

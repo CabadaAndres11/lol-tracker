@@ -159,8 +159,9 @@
 
   function startRound(s) {
     s.round++;
-    if (s.round % CFG.shopEvery !== 1) s.cn = (s.cn || 0) + 1; // combates jugados hasta ahora (las rondas de tienda no cuentan)
-    s.first = ((s.cn || 0) + (s.first0 || 0)) % 2;
+    var shopRd = s.round % CFG.shopEvery === 1;
+    if (!shopRd) s.cn = (s.cn || 0) + 1; // combates jugados hasta ahora (las rondas de tienda no cuentan)
+    s.first = ((s.cn || 0) + (shopRd ? 1 : 0) + (s.first0 || 0)) % 2; // en tienda: quién abrirá el próximo combate
     s.frames = [];
     s.shopOpen = false;
     [0, 1].forEach(function (p) {

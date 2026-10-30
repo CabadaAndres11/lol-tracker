@@ -10,7 +10,7 @@
     { date: '2026-10-30', tag: 'Novedad', title: 'Nueva skin: Lihone Viego · Hoja espectral',
       items: ['Ya está en la tienda la skin «Hoja espectral» para Lihone Viego (120 monedas). Necesitas tener la carta para comprarla.'] },
     { date: '2026-10-30', tag: 'Novedad', title: 'Moneda para decidir quién ataca primero',
-      items: ['Antes del primer combate de la partida, una moneda gira y cae del lado de quien ataca primero (TÚ o RIVAL): ahora es al azar. En los siguientes combates el turno se va alternando.'] },
+      items: ['En la tienda inicial, una moneda gira y cae del lado de quien ataca primero en el primer combate (TÚ o RIVAL), para que sepas cómo colocar tus cartas. Es al azar; en los siguientes combates el turno se va alternando.'] },
     { date: '2026-10-30', tag: 'Novedad', title: 'Nueva acción Comebacker: Pedir refuerzos',
       items: ['Nueva carta de acción Rara (2 de oro): si tu vida es menor que la del rival, consigues en tu mano un Lihone Viego o un AitoRLG Renata al azar.'] },
     { date: '2026-10-30', tag: 'Novedad', title: 'Números de daño más visibles',

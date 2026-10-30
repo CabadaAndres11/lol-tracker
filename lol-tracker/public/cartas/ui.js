@@ -561,7 +561,7 @@
     var s = ui.s, view = ui.view || E.viewOf(s), P = s.p[0], R = s.p[1];
     var shopMode = s.shopOpen && !ui.playing, shop = shopMode && s.phase === 'prep', prep = s.phase === 'prep' && !ui.playing && !s.shopOpen;
     var pend = prep ? E.pendingTargets(s).length : 0, hasT = Object.keys(P.target).length > 0;
-    var h = '<div class="gwrap' + (shopMode ? ' shopmode' : '') + '"><div class="top"><div><h1>Ronda ' + s.round + ' · ' + (s.shopOpen ? '' + ic('carrito') + ' Tienda' + (s.round === 1 ? ' inicial' : '') : '' + ic('espadas') + ' Combate') + (!s.shopOpen ? ' <span class="mut">· ' + (s.first === 0 ? 'atacas primero' : 'ataca primero el rival') + '</span>' : '') + '</h1></div><div><button class="lnk" data-act="menu" data-to="deck">' + ic('cartas') + ' Mazo</button> · <button class="lnk" data-act="menu" data-to="home">' + ic('casa') + ' Menú</button>' + (s.over ? '' : ' · <button class="lnk surr" data-act="surrender">' + ic('bandera') + ' Rendirse</button>') + '</div></div>' + timerHtml(prep || shop) + '';
+    var h = '<div class="gwrap' + (shopMode ? ' shopmode' : '') + '"><div class="top"><div><h1>Ronda ' + s.round + ' · ' + (s.shopOpen ? '' + ic('carrito') + ' Tienda' + (s.round === 1 ? ' inicial' : '') : '' + ic('espadas') + ' Combate') + (!s.shopOpen ? ' <span class="mut">· ' + (s.first === 0 ? 'atacas primero' : 'ataca primero el rival') + '</span>' : '') + '</h1></div><div><button class="lnk" data-act="menu" data-to="deck">' + ic('cartas') + ' Mazo</button> · <button class="lnk" data-act="menu" data-to="home">' + ic('casa') + ' Menú</button>' + (s.over ? '' : ' · <button class="lnk surr" data-act="surrender">' + ic('puerta') + ' Rendirse</button>') + '</div></div>' + timerHtml(prep || shop) + '';
     h += '<div class="gmain"><aside class="gl">' + boardHtml(s) + synergyHtml(P) + '</aside><section class="gc"><div class="board" id="board">';
     var ML = s.maxLife || CFG.life;
     if (s.vs4 && s.spec && ui.playing) h += '<div class="v4spec">' + ic('ojo') + ' Descansas: estás viendo el duelo <b>' + esc(s.spec[0]) + '</b> contra <b>' + esc(s.spec[1]) + '</b></div>';
@@ -596,7 +596,7 @@
     // Tienda (bajo la mano): pulsar una carta para comprarla
     if (shop) {
       var t = E.tiers(P), rc = E.refreshCost(s, 0);
-      h += '<div class="shopwrap"><div class="hl">' + ic('carrito') + ' Tienda' + (s.round === 1 ? ' (solo Comunes)' : '') + ' · pulsa una carta para comprarla</div>' + oddsHtml(s) + '<div class="shoprow">';
+      h += '<div class="shopwrap"><div class="hl">' + ic('carrito') + ' Tienda' + (s.round === 1 ? ' (solo Comunes)' : '') + ' · pulsa una carta para comprarla' + (s.round === 1 && !s.vs4 ? ' · primer combate: ' + (s.first === 0 ? 'atacas primero' : 'ataca primero el rival') : '') + '</div>' + oddsHtml(s) + '<div class="shoprow">';
       for (var k = 0; k < CFG.shopOffers; k++) {
         var id = P.offers[k];
         if (!id) { h += '<div class="cw"><div class="slot">Vendida</div></div>'; continue; }
@@ -810,15 +810,18 @@
   function announce() {
     var s = ui.s; ui.anm = null; if (!s || s.over) { ui.deadline = null; return; }
     ui.deadline = Date.now() + (s.shopOpen ? SHOP_LIMIT : TIME_LIMIT) * 1000 + 1400; // 1,4 s de cartel de ronda
+    if (s.shopOpen && s.round === 1 && !s.vs4) { // tienda inicial: la moneda decide quién ataca primero en el primer combate (para saber dónde colocar)
+      var rs = s;
+      setTimeout(function () { if (ui.s === rs && ui.screen === 'game' && rs.round === 1 && rs.shopOpen) coinFlip(rs.first); }, 1600);
+    }
     if (s.shopOpen) showSplash({ kind: 'shop', title: '' + ic('carrito') + ' ¡RONDA DE TIENDA!', sub: s.round === 1 ? 'Compra tus primeras tropas · no hay combate' : 'Compra, coloca y retira tropas · no hay combate' });
-    else if (s.cn === 1 && !s.vs4) coinFlip(s.first); // primer combate: la moneda decide quién empieza (se ve antes de combatir)
     else showSplash({ kind: 'combat', title: '' + ic('espadas') + ' RONDA ' + s.round, sub: s.first === 0 ? 'Atacas primero' : 'Ataca primero el rival' });
   }
   // Moneda al inicio del combate: gira y cae del lado de quien ataca primero
   function coinFlip(first) {
     var old = document.getElementById('coinov'); if (old) old.remove();
     var el = document.createElement('div'); el.id = 'coinov'; el.className = 'coinov';
-    el.innerHTML = '<div class="coinhop"><div class="coin3d ' + (first === 0 ? 'me' : 'foe') + '"><div class="cf cfm">TÚ</div><div class="cf cfr">RIVAL</div></div></div><div class="coinlbl ' + (first === 0 ? 'me' : 'foe') + '">' + (first === 0 ? '¡Atacas primero!' : '¡Ataca primero el rival!') + '</div>';
+    el.innerHTML = '<div class="coinhop"><div class="coin3d ' + (first === 0 ? 'me' : 'foe') + '"><div class="cf cfm">TÚ</div><div class="cf cfr">RIVAL</div></div></div><div class="coinlbl ' + (first === 0 ? 'me' : 'foe') + '">' + (first === 0 ? 'Primer combate: ¡atacas primero!' : 'Primer combate: ¡ataca primero el rival!') + '</div>';
     document.body.appendChild(el);
     setTimeout(function () { if (el.parentNode) el.remove(); }, 2300);
   }

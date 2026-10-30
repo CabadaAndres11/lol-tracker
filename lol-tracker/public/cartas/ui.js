@@ -236,6 +236,7 @@
       sec('Combate', ['Los ataques se resuelven de uno en uno, alternando bandos de izquierda a derecha. Cada tropa ataca <b>una vez por ronda</b>. El bando que empieza se alterna cada ronda.', 'Si el objetivo ya murió, el ataque va a una tropa rival viva al azar.', 'No se puede atacar al jugador directamente: <b>recibes daño solo si todas tus tropas han muerto</b> y a tu rival le quedan tropas por atacar; el daño es igual a su ataque.', '<b>Las tropas no se curan entre rondas</b>: el daño se acumula. Solo se curan del todo al volver a tu mano (retirándolas en la tienda). Las muertas liberan su hueco y los bonus de «esta ronda» desaparecen.', 'Si en una ronda sin tienda no tienes tropas ni en mesa ni en mano, <b>pierdes automáticamente</b>.']) +
       sec('Jugador contra jugador', ['Crea una sala y pasa el <b>código de 5 letras</b> a un amigo, o usa <b>Buscar rival</b> para emparejarte con cualquiera.', 'Las dos tiendas y los combates son simultáneos: cada ronda la partida avanza cuando <b>los dos pulsáis listo</b> o se acaba el tiempo (45 s en combate, 60 s en tienda).', 'Ganas <b>15 monedas</b> por partida y <b>40 más</b> si ganas (con el mismo límite diario que contra la IA). Si abandonas o pasas <b>más de 60 s desconectado</b>, pierdes y no cobras.']) +
       sec('Modo Resurrección', ['Mismas reglas que el 1 contra 1, pero las tropas <b>no mueren</b>: las que caen en combate <b>reviven con la vida completa</b> al acabar la ronda y las acciones nunca las matan (las dejan a 1).', '<b>Contraataque:</b> cada vez que una carta ataca a otra, <b>la que ataca también recibe el ataque de la carta atacada</b> en su vida. Una tropa puede caer por el contraataque (y entonces ya no ataca esa ronda).', 'La vida de los jugadores solo baja con <b>golpes directos</b>: cuando al rival no le queda ninguna tropa en pie y a una de las tuyas aún le queda un ataque por hacer. Se empieza con <b>20 de vida</b>; pierde quien llegue a 0.', 'Se puede jugar contra la IA o contra otro jugador (sala o búsqueda), y también puntúa en la clasificación y da monedas.']),
+      sec('Modo Resurrección: mesa y mano', ['En este modo <b>no puedes tener la misma carta dos veces en la mesa</b>: los duplicados solo pueden estar en la mano (sirven para fusionar).', 'Además <b>no hay límite de cartas en la mano</b>.']),
       sec('Fusión de copias', ['Si juntas <b>3 copias iguales</b> de una tropa (entre la mesa y la mano) se fusionan solas en <b>una</b> con más estadísticas: <b>★2</b> = estadísticas base ×2 y, con 3 cartas ★2 iguales, <b>★3</b> = ×4.', 'La carta fusionada se queda en la mesa si alguna copia estaba en ella. Puedes comprar la 3ª copia aunque tengas la mano llena. En la tienda, las cartas que completan una fusión se marcan con un brillo.']),
       sec('Niveles de carta', ['Cada vez que te sale una carta que ya tienes, cuenta como una <b>copia</b>. Con <b>2 copias</b> la carta pasa a <b>★2</b> y con <b>4 copias</b> a <b>★3</b>.', 'Las <b>tropas</b> ganan <b>+1/+1 por nivel</b> al entrar en juego. Las <b>acciones con cifras</b> (daño, ataque, vida, oro…) mejoran un <b>50% por nivel</b>; las que no tienen cifras no cambian.', 'El nivel lo ves como ★ en la carta, tanto en el mazo como en la partida.']) +
       sec('Versus de 4', ['Cuatro jugadores en la misma partida: <b>30 de vida</b>, <b>14 de oro</b> al empezar y <b>+3 de oro</b> por ronda.', 'Cada ronda de combate se juegan <b>2 duelos a la vez</b> y los emparejamientos rotan para que todos se crucen. Las rondas de tienda (1, 4, 7…) son para los cuatro y no hay combate.', 'Quien llega a 0 de vida o se queda sin tropas queda <b>eliminado</b>. Con 3 vivos, uno <b>descansa</b> cada ronda (cobra oro y prepara su mesa). Gana el último en pie.', 'Monedas: <b>15</b> por jugar + <b>45</b> (1º), <b>20</b> (2º) o <b>5</b> (3º). Si abandonas o pasas más de 60 s desconectado, quedas eliminado y no cobras.']) +
@@ -546,7 +547,7 @@
     h += '<div class="hud bottom">' + orb('life', view.life[0], ML, s.spec && ui.playing ? esc(s.spec[0]) : 'Tu vida', 0) + orb('gold', P.gold, 0, 'Tu oro') + '<div class="acts">' + acts + '</div></div></div>';
 
     // Mano
-    h += '<div class="handwrap' + (ui.dragMesa ? ' dropzone' : '') + '"><div class="hl">Tu mano ' + P.hand.length + '/' + CFG.handMax + '</div><div class="hand">';
+    h += '<div class="handwrap' + (ui.dragMesa ? ' dropzone' : '') + '"><div class="hl">Tu mano ' + P.hand.length + (s.mode === 'revive' ? '' : '/' + CFG.handMax) + '</div><div class="hand">';
     P.hand.forEach(function (i, k) {
       var c = CARD[i.id], sel = ui.sel && (ui.sel.k === 'hand' || ui.sel.k === 'act') && ui.sel.i === k;
       h += '<div class="cw">' + cardHtml(c, { gl: i.gl, lv: lvG(0, i.id), skin: skG(0, i.id), atk: E.atk(i), hp: i.hp, max: E.maxHp(i), cls: 'hcard' + (sel ? ' sel' : ''), attrs: 'data-act="hand" data-i="' + k + '" title="Pulsa o arrastra a la mesa"', tag: 'button' }) + '</div>';
@@ -561,7 +562,7 @@
       for (var k = 0; k < CFG.shopOffers; k++) {
         var id = P.offers[k];
         if (!id) { h += '<div class="cw"><div class="slot">Vendida</div></div>'; continue; }
-        var c2 = CARD[id], mg = c2.type === 'tropa' && E.willMerge(P, c2.id), cant = P.gold < c2.cost || (P.hand.length >= CFG.handMax && !mg);
+        var c2 = CARD[id], mg = c2.type === 'tropa' && E.willMerge(P, c2.id), cant = P.gold < c2.cost || (P.hand.length >= E.handCap(s) && !mg);
         h += '<div class="cw">' + cardHtml(c2, { lv: lvG(0, c2.id), tag: 'button', cls: 'offer' + (cant ? ' cant' : '') + (mg ? ' mergeable' : ''), attrs: 'data-act="buy" data-i="' + k + '" title="Comprar por ' + c2.cost + ' de oro"' }) + '</div>';
       }
       h += '<div class="refwrap"><button class="refresh" data-act="refresh" title="Actualizar tienda (' + rc + ' oro)"' + (P.gold < rc ? ' disabled' : '') + '>' + REFRESH_SVG + '</button><span class="rlabel">Actualizar · ' + rc + ' oro</span></div></div>';
@@ -911,8 +912,9 @@
       return render();
     }
     if (act === 'slot') {
-      if (ui.sel && ui.sel.k === 'hand') { var sl2 = +el.dataset.i; if (E.place(s, 0, ui.sel.i, sl2)) { ui.landed = s.p[0].mesa[sl2].uid; pvs('place', [ui.sel.i, sl2]); } }
-      ui.sel = null; ui.hint = '';
+      ui.hint = '';
+      if (ui.sel && ui.sel.k === 'hand') { var sl2 = +el.dataset.i; if (E.place(s, 0, ui.sel.i, sl2)) { ui.landed = s.p[0].mesa[sl2].uid; pvs('place', [ui.sel.i, sl2]); } else if (E.dupBlock(s, 0, ui.sel.i)) ui.hint = 'Ya tienes esa carta en la mesa: los duplicados solo van en la mano.'; }
+      ui.sel = null;
       if (!s.shopOpen) nextPending(s);
       return render();
     }
@@ -954,7 +956,7 @@
     if (drag.kind === 'mesa') {
       var mi = inst(P, drag.uid);
       if (!mi || E.has(mi, 'Lol')) { ui.hint = mi ? 'Las tropas Lol no se pueden retirar.' : ''; render(); return false; }
-      if (P.hand.length >= CFG.handMax) { ui.hint = 'Tu mano está llena.'; render(); return false; }
+      if (P.hand.length >= E.handCap(s)) { ui.hint = 'Tu mano está llena.'; render(); return false; }
       ui.dragMesa = true; ui.sel = null; ui.hint = 'Suéltala sobre tu mano para retirarla.'; render();
       var src0 = app.querySelector('.row4.side0 [data-cuid="' + drag.uid + '"]'); if (!src0) return false;
       var r0 = src0.getBoundingClientRect(); drag.w = r0.width; drag.h = r0.height;

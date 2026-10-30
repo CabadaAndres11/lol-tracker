@@ -268,11 +268,17 @@
     var P = s.p[p], t = tiers(P);
     return false; // retirado: ya no existe la oferta a dedo
   }
+  // Resurrección: sin límite de mano; y no puede haber dos copias de la misma carta en la mesa
+  function handCap(s) { return s.mode === 'revive' ? 999 : CFG.handMax; }
+  function dupBlock(s, p, handIdx) {
+    var P = s.p[p], i = P.hand[handIdx];
+    return !!(s.mode === 'revive' && i && P.mesa.some(function (x) { return x && !x.dead && x.id === i.id; }));
+  }
   function buy(s, p, idx) {
     var P = s.p[p], id = P.offers[idx];
     if (!s.shopOpen || s.phase !== 'prep' || !id) return false;
     var c = CARD[id];
-    if (P.gold < c.cost || (P.hand.length >= CFG.handMax && !willMerge(P, id))) return false;
+    if (P.gold < c.cost || (P.hand.length >= handCap(s) && !willMerge(P, id))) return false;
     P.gold -= c.cost; P.offers.splice(idx, 1);
     P.hand.push(mk(s, id, p));
     mergeCheck(s, p);
@@ -313,7 +319,7 @@
     var P = s.p[p], i = P.mesa[slot];
     if (!s.shopOpen || s.phase !== 'prep' || !i || i.dead) return false;
     if (has(i, 'Lol')) return false;
-    if (P.hand.length >= CFG.handMax) return false;
+    if (P.hand.length >= handCap(s)) return false;
     P.mesa[slot] = null; i.hp = maxHp(i); P.hand.push(i);
     delete P.target[i.uid];
     return true;
@@ -322,7 +328,7 @@
   // ---------- Preparación ----------
   function place(s, p, handIdx, slot) {
     var P = s.p[p], i = P.hand[handIdx];
-    if (s.phase !== 'prep' || !i || !isTroop(i) || P.mesa[slot]) return false;
+    if (s.phase !== 'prep' || !i || !isTroop(i) || P.mesa[slot] || dupBlock(s, p, handIdx)) return false;
     P.hand.splice(handIdx, 1); P.mesa[slot] = i;
     return true;
   }
@@ -432,13 +438,13 @@
       var best = -1, bestScore = -1, troopsHeld = P.hand.filter(isTroop).length + mesaTroops(P).length;
       P.offers.forEach(function (id, k) {
         var c = CARD[id];
-        if (!c || c.cost > P.gold || P.hand.length >= CFG.handMax) return;
+        if (!c || c.cost > P.gold || P.hand.length >= handCap(s)) return;
         var score = c.type === 'tropa' ? (c.atk + c.hp * 0.45) / (1 + c.cost * 0.25) + (troopsHeld < 4 ? 6 : 0) : 1.5;
         score += s.rng() * 0.8;
         if (score > bestScore) { bestScore = score; best = k; }
       });
       if (best >= 0) { buy(s, p, best); continue; }
-      if (troopsHeld < 4 && refreshes < 3 && P.gold >= refreshCost(s, p) + 1 && P.hand.length < CFG.handMax) { if (refresh(s, p)) { refreshes++; continue; } }
+      if (troopsHeld < 4 && refreshes < 3 && P.gold >= refreshCost(s, p) + 1 && P.hand.length < handCap(s)) { if (refresh(s, p)) { refreshes++; continue; } }
       break;
     }
   }
@@ -449,7 +455,7 @@
       var slot = P.mesa.indexOf(null);
       if (slot < 0) break;
       var best = -1, bs = -1;
-      P.hand.forEach(function (i, k) { if (isTroop(i)) { var sc = atk(i) + maxHp(i) * 0.6 + s.rng(); if (sc > bs) { bs = sc; best = k; } } });
+      P.hand.forEach(function (i, k) { if (isTroop(i) && !dupBlock(s, p, k)) { var sc = atk(i) + maxHp(i) * 0.6 + s.rng(); if (sc > bs) { bs = sc; best = k; } } });
       if (best < 0) break;
       place(s, p, best, slot);
     }
@@ -878,7 +884,7 @@
     bindRng: bindRng, revive: revive, income: income, openShop: openShop, noTroops: noTroops, shopStuck: shopStuck, cleanup: cleanup, newPlayer: newPlayer, resolveText: function (x, seat) { return x.replace(/\u0001(\d)\u0002([^\u0002]*)\u0002([^\u0003]*)\u0003/g, function (m, p, a, b) { return +p === seat ? a : b; }); }, mirror: mirror, pv: pv, CFG: CFG, FX: FX, CARD: CARD, DATA: DATA,
     newGame: newGame, randomDeck: randomDeck, deckSize: deckSize, mulberry32: mulberry32,
     place: place, playAction: playAction, setTarget: setTarget, clearTargets: clearTargets, forfeit: forfeit, setVoley: setVoley, actionBlock: actionBlock, validTarget: validTarget,
-    buy: buy, mergeCheck: mergeCheck, willMerge: willMerge, refresh: refresh, refreshCost: refreshCost, pickFromDeck: pickFromDeck, retire: retire,
+    handCap: handCap, dupBlock: dupBlock, buy: buy, mergeCheck: mergeCheck, willMerge: willMerge, refresh: refresh, refreshCost: refreshCost, pickFromDeck: pickFromDeck, retire: retire,
     aiDeck: aiDeck, aiShop: aiShop, aiPrep: aiPrep, aiTargets: aiTargets, fight: fight, endShop: endShop, pendingTargets: pendingTargets, cede: cede, nextRound: nextRound,
     themeCounts: themeCounts, tiers: tiers, tierOf: tierOf, atk: atk, maxHp: maxHp, card: card, isTroop: isTroop, has: has, mesaTroops: mesaTroops, viewOf: viewOf,
   };

@@ -56,7 +56,7 @@ function drawCard(minRarity) {
 }
 function publicUser(u) {
   return {
-    name: u.name, coins: u.coins, owned: u.owned, dups: u.dups || {}, skins: u.skins || [], skinSel: u.skinSel || {},
+    name: u.name, pts: u.pts || 0, coins: u.coins, owned: u.owned, dups: u.dups || {}, skins: u.skins || [], skinSel: u.skinSel || {},
     dailyAvailable: u.lastDaily !== today(),
     gamesToday: u.rewardDay === today() ? u.rewardCount : 0,
     maxGamesToday: MAX_GAME_REWARDS_PER_DAY,
@@ -85,6 +85,16 @@ async function newSession(cfg, name) {
 // La partida vive en Redis (estado canónico del motor). Los clientes mandan acciones y reciben su vista (E.mirror).
 const E = require('../public/cartas/engine.js');
 const PVP_COINS = { played: 15, win: 40 };
+// Clasificación (ladder): puntos por partida. 1v1: +20/-20. Versus de 4: +40/+20/-20/-40 por puesto. Nunca baja de 0.
+const LADDER_KEY = 'cartas:ladder';
+const PTS_1V1 = { win: 20, lose: -20 };
+const PTS_V4 = [0, 40, 20, -20, -40];
+async function addPts(cfg, u, delta) {
+  const before = u.pts || 0;
+  u.pts = Math.max(0, before + delta);
+  if (!isAdmin(u)) await redis(cfg, ['HSET', LADDER_KEY, u.name, String(u.pts)]);
+  return u.pts - before;
+}
 const PVP_DC_MS = 60000, PVP_TTL = 7200;
 const gKey = (id) => `cartas:pvp:g:${id}`;
 const pKey = (n) => `cartas:pvp:user:${n.toLowerCase()}`;
@@ -175,7 +185,10 @@ async function payPvp(cfg, g) {
     if (valid && g.ab !== seat && u.rewardCount < MAX_GAME_REWARDS_PER_DAY) {
       gained = PVP_COINS.played + (won ? PVP_COINS.win : 0); u.rewardCount++; u.coins += gained;
     }
-    g.rew[seat] = { gained, capped: valid && g.ab !== seat && gained === 0 };
+    // puntos: solo en partidas válidas; quien abandona pierde siempre
+    const pd = g.ab === seat ? PTS_1V1.lose : valid ? (won ? PTS_1V1.win : PTS_1V1.lose) : 0;
+    const pts = pd ? await addPts(cfg, u, pd) : 0;
+    g.rew[seat] = { gained, capped: valid && g.ab !== seat && gained === 0, pts, total: u.pts || 0 };
     await saveUser(cfg, u);
   }
 }
@@ -330,7 +343,9 @@ async function payV4(cfg, g) {
     if (valid && !abandoned && u.rewardCount < MAX_GAME_REWARDS_PER_DAY) {
       gained = PVP_COINS.played + (V4.PLACE_BONUS[T.place[seat]] || 0); u.rewardCount++; u.coins += gained;
     }
-    g.rew[seat] = { gained, capped: valid && !abandoned && gained === 0, place: T.place[seat] };
+    const pd = PTS_V4[T.place[seat]] || 0;
+    const pts = (valid || (abandoned && pd < 0)) && pd ? await addPts(cfg, u, pd) : 0;
+    g.rew[seat] = { gained, capped: valid && !abandoned && gained === 0, place: T.place[seat], pts, total: u.pts || 0 };
     await saveUser(cfg, u);
   }
 }
@@ -545,6 +560,13 @@ module.exports = async function handler(req, res) {
       const r = await pvpHandle(cfg, act, body, u);
       if (r.status) { res.status(r.status).json({ error: r.error }); return; }
       res.status(200).json(r); return;
+    }
+    if (act === 'ladder') {
+      const flat = (await redis(cfg, ['HGETALL', LADDER_KEY])) || [];
+      const rows = [];
+      for (let k = 0; k + 1 < flat.length; k += 2) rows.push({ name: flat[k], pts: +flat[k + 1] || 0 });
+      rows.sort((a, b) => b.pts - a.pts || a.name.localeCompare(b.name));
+      res.status(200).json({ top: rows.slice(0, 5), me: u.pts || 0 }); return;
     }
     if (act === 'me') { res.status(200).json({ user: publicUser(u) }); return; }
 

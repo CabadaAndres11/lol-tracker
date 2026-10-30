@@ -98,6 +98,19 @@
     var pick = ['Rara', 'Legendaria', 'Épica'].map(function (r) { return D.cards.filter(function (c) { return c.rarity === r && (r !== 'Rara' || c.person === 'AitoRLG'); })[0] || D.cards.filter(function (c) { return c.rarity === r; })[0]; }).filter(Boolean);
     return '<div class="fan">' + pick.map(function (c, k) { return '<div class="fc f' + k + '">' + cardHtml(c, { atk: c.atk, hp: c.hp, max: c.hp, cls: '' }) + '</div>'; }).join('') + '</div>';
   }
+  function ladderHtml() {
+    if (!ui.ladder || Date.now() - (ui.ladderAt || 0) > 20000) {
+      if (!ui.ladderBusy) {
+        ui.ladderBusy = true;
+        api('ladder').then(function (r) { ui.ladderBusy = false; ui.ladderAt = Date.now(); if (r.ok) { ui.ladder = r.data; if (ui.screen === 'home') render(); } });
+      }
+    }
+    var L = ui.ladder;
+    var rows = L && L.top && L.top.length ? L.top.map(function (r, k) {
+      return '<li class="lrow' + (ui.acct && r.name === ui.acct.name ? ' me' : '') + '"><span class="lpos">' + (k + 1) + '</span><b>' + esc(r.name) + '</b><span class="lpts">' + r.pts + ' pts</span></li>';
+    }).join('') : '<li class="mut">' + (L ? 'Aún no hay partidas puntuadas. ¡Juega un 1 vs 1 o un Versus de 4!' : 'Cargando…') + '</li>';
+    return '<div class="panel ladderbox"><h2>' + ic('trofeo') + ' Clasificación</h2><ol class="ladder">' + rows + '</ol><p class="mut">1 vs 1: +20 al ganar, −20 al perder. Versus de 4: +40 · +20 · −20 · −40 según tu puesto.' + (L ? ' Tus puntos: <b>' + L.me + '</b>.' : '') + '</p></div>';
+  }
   function newsHtml() {
     var N = window.CARTAS_NEWS || [];
     if (!N.length) return '';
@@ -115,6 +128,7 @@
       ['themes', ic('brillo'), 'Sinergias', n + ' sinergias con sus niveles y cartas.'],
       ['rules', ic('libro'), 'Normas', 'Cómo funcionan las rondas, la tienda y el combate.'],
     ].map(function (m) { return '<button class="menu-i m-' + m[0] + '" data-act="nav" data-to="' + m[0] + '"><span class="mi">' + m[1] + '</span><b>' + m[2] + '</b><span class="mut">' + m[3] + '</span></button>'; }).join('') + '</div>';
+    h += ladderHtml();
     h += newsHtml();
     h += '<p class="mut" style="text-align:center">' + D.cards.length + ' tropas · ' + D.actions.length + ' acciones</p></div>';
     app.innerHTML = h;
@@ -559,7 +573,8 @@
           if (ui.s === s && ui.screen === 'game' && s.phase === 'over' && !ui.playing) render();
         });
       }
-      var rw = ui.reward ? (ui.reward.gained > 0 ? '<p class="reward">+' + ui.reward.gained + ' ' + ic('moneda') + ' monedas</p>' : '<p class="mut">Sin monedas esta vez (partida muy corta o límite diario alcanzado).</p>') : '<p class="mut">Calculando recompensa…</p>';
+      var pt = ui.reward && ui.reward.pts ? '<p class="' + (ui.reward.pts > 0 ? 'reward' : 'mut') + '">' + (ui.reward.pts > 0 ? '+' : '') + ui.reward.pts + ' puntos de clasificación</p>' : '';
+      var rw = pt + (ui.reward ? (ui.reward.gained > 0 ? '<p class="reward">+' + ui.reward.gained + ' ' + ic('moneda') + ' monedas</p>' : '<p class="mut">Sin monedas esta vez (partida muy corta o límite diario alcanzado).</p>') : '<p class="mut">Calculando recompensa…</p>');
       var conf = ''; if (win) for (var q = 0; q < 36; q++) conf += '<i style="left:' + (q * 2.8 + (q % 3)) + '%;--d:' + ((q * 37) % 100) / 100 * 1.2 + 's;--c:' + ['#ffc533', '#ff6b8b', '#4f9dff', '#38d39f', '#a78bfa'][q % 5] + '"></i>';
       h += '<div class="overlay ' + (win ? 'owin' : 'olose') + '">' + (win ? '<div class="confetti">' + conf + '</div>' : '') + '<div class="panel over"><div class="obig">' + (win ? '' + ic('trofeo') + '' : '' + ic('corazonroto') + '') + '</div><h2>' + (win ? '¡Victoria!' : (s.vs4 ? 'Eliminado · puesto ' + s.place + 'º de 4' : 'Derrota')) + '</h2><p class="mut">' + esc(s.reason) + ' · ronda ' + s.round + '</p>' + rw + '<button class="btn big" data-act="' + (PV.on ? (PV.px === 'vs4' ? 'openvs4' : 'openpvp') : 'play') + '">' + (PV.on ? 'Otra partida' : 'Jugar otra vez') + '</button> <button class="btn sec" data-act="menu" data-to="deck">Cambiar mazo</button> <button class="btn sec" data-act="menu" data-to="home">Menú</button></div></div>';
     }

@@ -1,6 +1,11 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-10-30', tag: 'Novedad', title: 'Clasificación (Ladder)',
+      items: ['Nueva clasificación en el inicio con los 5 mejores jugadores.',
+        '1 vs 1: +20 puntos al ganar y −20 al perder.',
+        'Versus de 4: 1º +40, 2º +20, 3º −20 y 4º −40.',
+        'Solo puntúan partidas completas (mínimo 3 rondas y 1 minuto); abandonar siempre resta. Los puntos nunca bajan de 0.'] },
     { date: '2026-10-30', tag: 'Corrección', title: 'Los niveles de carta ahora se ven en las estadísticas',
       items: ['Las tropas con nivel ★2 o ★3 muestran ya sus estadísticas mejoradas (+1/+1 por nivel) en la tienda, el mazo y la colección.',
         'En partida ya se aplicaban; ahora lo que ves antes de comprar coincide con lo que juegas.'] },

@@ -896,3 +896,12 @@ img.timg[src$="comebacker.png"] { filter: drop-shadow(0 0 1.5px #fff) drop-shado
 .newsi ul{margin:.4rem 0 0 1.1rem;padding:0;color:var(--mut,#9aa7c0);font-size:.9rem}
 .ntag{font-size:.7rem;padding:.1rem .5rem;border-radius:99px;background:#2a6;color:#fff;text-transform:uppercase;letter-spacing:.05em}
 .ntag.nt-Equilibrio{background:#c70}
+
+/* clasificación */
+.ladderbox{max-width:760px;margin:1.4rem auto}
+.ladder{list-style:none;margin:.4rem 0;padding:0;display:flex;flex-direction:column;gap:6px}
+.lrow{display:flex;align-items:center;gap:.8rem;padding:.45rem .7rem;border-radius:10px;background:rgba(255,255,255,.04)}
+.lrow.me{outline:1px solid var(--gold,#e0b64c);background:rgba(224,182,76,.1)}
+.lrow .lpos{width:1.6rem;height:1.6rem;border-radius:50%;display:grid;place-items:center;background:#334;font-weight:700;font-size:.85rem}
+.lrow:nth-child(1) .lpos{background:#d4a72c;color:#1a1200}.lrow:nth-child(2) .lpos{background:#aab;color:#111}.lrow:nth-child(3) .lpos{background:#b8733a;color:#1a0d00}
+.lrow .lpts{margin-left:auto;font-weight:700;color:var(--gold,#e0b64c)}

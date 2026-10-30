@@ -126,6 +126,7 @@
     if (opts && opts.mode === 'revive') { s.mode = 'revive'; s.maxLife = CFG.reviveLife; s.p.forEach(function (P) { P.life = CFG.reviveLife; }); }
     if (opts && opts.lv) s.lv = opts.lv;
     if (opts && opts.sk) s.sk = opts.sk;
+    s.first0 = s.rng() < .5 ? 0 : 1; s.cn = 0; // quién ataca primero en el primer combate es azar; después se alterna
     startRound(s);
     return s;
   }
@@ -158,7 +159,8 @@
 
   function startRound(s) {
     s.round++;
-    s.first = (s.round - 1) % 2;
+    if (s.round % CFG.shopEvery !== 1) s.cn = (s.cn || 0) + 1; // combates jugados hasta ahora (las rondas de tienda no cuentan)
+    s.first = ((s.cn || 0) + (s.first0 || 0)) % 2;
     s.frames = [];
     s.shopOpen = false;
     [0, 1].forEach(function (p) {

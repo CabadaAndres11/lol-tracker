@@ -13,7 +13,7 @@ const GAME_COINS = { played: 10, win: 20 };
 const MAX_GAME_REWARDS_PER_DAY = 15;
 const MIN_GAME_SECONDS = 60;
 const MIN_GAME_ROUNDS = 3;
-const DUP_COINS = { 'Común': 5, 'Rara': 15, 'Épica': 40, 'Legendaria': 100 };
+const DUP_COINS = { 'Común': 0, 'Rara': 0, 'Épica': 0, 'Legendaria': 0 }; // las repetidas ya no dan monedas
 const WEIGHTS = { 'Común': 50, 'Rara': 30, 'Épica': 15, 'Legendaria': 5 };
 const TOKEN_DAYS = 30;
 const MAX_FAILS = 10, BLOCK_SECONDS = 900;
@@ -63,6 +63,7 @@ const isAdmin = (u) => String(u.name).toLowerCase() === 'admin';
 async function loadUser(cfg, name) {
   const raw = await redis(cfg, ['GET', uKey(name)]);
   const u = raw ? JSON.parse(raw) : null;
+  if (u && !u.c100) { u.coins = 100; u.c100 = true; await redis(cfg, ['SET', uKey(u.name), JSON.stringify(u)]); } // ajuste único: todas las cuentas existentes pasan a 100 monedas
   if (u && isAdmin(u) && !u.adminView) u.owned = ALL.map((c) => c.id); // la cuenta ADMIN lo tiene todo (para pruebas), salvo en modo "vista de jugador nuevo"
   return u;
 }
@@ -298,7 +299,7 @@ module.exports = async function handler(req, res) {
         if (!STARTER_THEMES.includes(starter) && name.toLowerCase() !== 'admin') { res.status(400).json({ error: 'Elige un mazo inicial.' }); return; }
         if (await loadUser(cfg, name)) { res.status(409).json({ error: 'Ese nombre ya está cogido.' }); return; }
         const salt = crypto.randomBytes(16).toString('hex');
-        const u = { name, salt, hash: hashPin(pin, salt), coins: START_COINS, owned: starterFor(STARTER_THEMES.includes(starter) ? starter : STARTER_THEMES[0]), lastDaily: '', rewardDay: '', rewardCount: 0, startedAt: 0, createdAt: Date.now() };
+        const u = { name, salt, hash: hashPin(pin, salt), coins: START_COINS, owned: starterFor(STARTER_THEMES.includes(starter) ? starter : STARTER_THEMES[0]), lastDaily: '', rewardDay: '', rewardCount: 0, startedAt: 0, c100: true, createdAt: Date.now() };
         if (isAdmin(u)) u.owned = ALL.map((c) => c.id);
         await saveUser(cfg, u);
         res.status(200).json({ token: await newSession(cfg, name), user: publicUser(u) });

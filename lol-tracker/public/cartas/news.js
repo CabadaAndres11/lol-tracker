@@ -1,6 +1,10 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-10-30', tag: 'Novedad', title: 'Navegación mejorada',
+      items: ['Cada sección tiene su propia dirección (#/mazo, #/tienda, #/sinergias, #/normas…): si recargas la página vuelves a donde estabas.',
+        'El botón atrás del navegador funciona entre secciones y el título de la pestaña indica en cuál estás.',
+        'El juego de cartas tiene ahora su propio icono en la pestaña.'] },
     { date: '2026-10-30', tag: 'Cambio', title: 'Sobres ahora es «Tienda»',
       items: ['El apartado Sobres pasa a llamarse Tienda y estrena icono. Sigue incluyendo los sobres, las skins y la recompensa diaria.'] },
     { date: '2026-10-30', tag: 'Novedad', title: 'Nuevo constructor de mazos',

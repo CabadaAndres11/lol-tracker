@@ -738,11 +738,35 @@
   }
   window.addEventListener('resize', function () { var o = document.querySelector('#board svg.arrows'); if (o) o.remove(); drawArrows(); });
 
+  // ---------- Navegación por URL (#/mazo, #/tienda…): al recargar se vuelve a la misma sección ----------
+  var ROUTES = { home: 'inicio', modes: 'jugar', pvp: 'jugar', game: 'jugar', deck: 'mazo', packs: 'tienda', themes: 'sinergias', rules: 'normas' };
+  var ROUTE_SCREEN = { inicio: 'home', jugar: 'modes', mazo: 'deck', tienda: 'packs', sinergias: 'themes', normas: 'rules' };
+  var ROUTE_TITLE = { home: 'Inicio', modes: 'Jugar', pvp: 'Jugar', game: 'Partida', deck: 'Mazo', packs: 'Tienda', themes: 'Sinergias', rules: 'Normas' };
+  function hashScreen() { var m = /^#\/([a-z]+)/.exec(location.hash || ''); return m && ROUTE_SCREEN[m[1]] || null; }
+  function landing() { var sc = hashScreen() || 'home'; if (sc === 'modes' && deckError()) sc = 'deck'; return sc; }
+  function syncHash() {
+    if (!ui.acct || !ROUTES[ui.screen]) { if (!ui.acct) document.title = 'Juego de Cartas'; return; }
+    document.title = ROUTE_TITLE[ui.screen] + ' · Juego de Cartas';
+    var want = '#/' + ROUTES[ui.screen];
+    if (location.hash !== want) { try { history.pushState(null, '', want); } catch (e) { location.hash = want; } }
+  }
+  window.addEventListener('hashchange', function () { onRoute(); });
+  window.addEventListener('popstate', function () { onRoute(); });
+  function onRoute() {
+    if (!ui.acct) return;
+    var sc = hashScreen();
+    if (!sc || ROUTES[ui.screen] === ROUTES[sc]) return;
+    if (ui.screen === 'game' && ui.s && !ui.s.over) { syncHash(); return; } // en plena partida no se sale con el botón atrás
+    clearTimeout(timer); ui.playing = false;
+    if (sc === 'modes' && deckError()) sc = 'deck';
+    ui.screen = sc; ui.msg = ''; window.scrollTo(0, 0); render();
+  }
   function render() {
     document.body.classList.remove('shopbg');
     if (PV.wait && ui.screen !== 'pvp') pvpCancelWait();
     var f = { home: renderHome, deck: renderDeck, rules: renderRules, themes: renderThemes, modes: renderModes, pvp: renderPvp, login: renderLogin, starter: renderStarter, packs: renderPacks, boot: renderBoot }[ui.screen];
     if (f) f(); else renderGame();
+    syncHash();
   }
 
   // ---------- Animación del combate ----------
@@ -822,7 +846,7 @@
       return api(act === 'login' ? 'login' : 'register', { name: nm, pin: pn, starter: el.dataset.t }).then(function (r) {
         if (!r.ok) { ui.msg = (r.data && r.data.error) || 'No se pudo entrar.'; ui.screen = 'login'; return render(); }
         try { localStorage.setItem('cartas_tok', r.data.token); } catch (e) {}
-        ui.msg = ''; ui.lgPin = ''; setAcct(r.data.user); loadLocal(); ui.screen = 'home'; render();
+        ui.msg = ''; ui.lgPin = ''; setAcct(r.data.user); loadLocal(); ui.screen = landing(); render();
       });
     }
     if (act === 'newstog') { ui.newsOpen = !ui.newsOpen; return render(); }
@@ -1028,7 +1052,7 @@
   render();
   if (!getTok()) { ui.screen = 'login'; render(); }
   else api('me').then(function (r) {
-    if (r.ok) { setAcct(r.data.user); loadLocal(); ui.screen = 'home'; } else if (ui.screen === 'boot') ui.screen = 'login';
+    if (r.ok) { setAcct(r.data.user); loadLocal(); ui.screen = landing(); } else if (ui.screen === 'boot') ui.screen = 'login';
     render();
   });
 })();

@@ -341,7 +341,7 @@
     if (!s.shopOpen || s.phase !== 'prep' || !i || i.dead) return false;
     if (has(i, 'Lol')) return false;
     if (P.hand.length >= handCap(s)) return false;
-    P.mesa[slot] = null; i.hp = maxHp(i); P.hand.push(i);
+    P.mesa[slot] = null; P.hand.push(i); // conserva la vida actual
     delete P.target[i.uid];
     return true;
   }
@@ -915,7 +915,7 @@
         if (i.dead || i.hp <= 0) { P.grave.push(i); P.mesa[k] = null; delete P.target[i.uid]; return; }
         i.tmp = { atk: 0, hp: 0, red: 0 }; i.hp = Math.min(i.hp, maxHp(i)); // sin curación entre rondas
       });
-      P.hand.forEach(function (i) { if (isTroop(i)) { i.tmp = { atk: 0, hp: 0, red: 0 }; i.hp = maxHp(i); } });
+      P.hand.forEach(function (i) { if (isTroop(i)) { i.tmp = { atk: 0, hp: 0, red: 0 }; i.hp = s.mode === 'revive' ? maxHp(i) : Math.min(i.hp, maxHp(i)); } }); // en clásico las heridas se conservan en la mano
       P.target = {}; P.voley = {};
     });
   }

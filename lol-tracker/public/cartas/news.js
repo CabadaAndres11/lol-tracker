@@ -1,6 +1,8 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-10-31', tag: 'Corrección', title: 'Las tropas heridas conservan su vida al retirarlas',
+      items: ['En el modo clásico, si retiras a la mano una tropa herida, conserva su vida actual en lugar de curarse del todo. Solo la curan acciones como Segundo aliento o Cambio de línea. En Resurrección no cambia: todas vuelven con la vida completa cada ronda.'] },
     { date: '2026-10-30', tag: 'Novedad', title: 'Probabilidades de rareza en la tienda',
       items: ['La tienda de la partida muestra ahora la probabilidad de cada rareza (Común, Rara, Épica y Legendaria) para las cartas que te pueden salir, según tu mazo y lo avanzada que va la partida.'] },
     { date: '2026-10-30', tag: 'Novedad', title: 'Botón Rendirse',

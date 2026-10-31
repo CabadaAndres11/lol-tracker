@@ -1,6 +1,9 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-10-31', tag: 'Novedad', title: 'Versus de 4 en modo Resurrección',
+      items: ['Nuevo modo «Versus de 4» dentro de Resurrección: cuatro jugadores, sala con código o búsqueda, con las reglas de Resurrección (las tropas no mueren y reviven con la vida completa al acabar la ronda).',
+        'Empiezas con 40 de vida y 14 de oro. Modo en fase de prueba: si ves algo raro, avísanos.'] },
     { date: '2026-10-31', tag: 'Corrección', title: 'Las tropas heridas conservan su vida al retirarlas',
       items: ['En el modo clásico, si retiras a la mano una tropa herida, conserva su vida actual en lugar de curarse del todo. Solo la curan acciones como Segundo aliento o Cambio de línea. En Resurrección no cambia: todas vuelven con la vida completa cada ronda.'] },
     { date: '2026-10-30', tag: 'Novedad', title: 'Probabilidades de rareza en la tienda',

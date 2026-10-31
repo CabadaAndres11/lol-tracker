@@ -2,20 +2,22 @@
 // ejecuta como una partida de 2 con los jugadores emparejados (los datos de cada jugador son los mismos objetos).
 const E = require('../public/cartas/engine.js');
 
-const CFG4 = { life: 30, gold: 14, income: 3 };
+const CFG4 = { life: 30, reviveLife: 40, gold: 14, income: 3 }; // reviveLife: vida inicial en el modo Resurrección
 const MATCH = [[[0, 1], [2, 3]], [[0, 2], [1, 3]], [[0, 3], [1, 2]]];
 const PLACE_BONUS = [0, 45, 20, 5, 0]; // por puesto 1º..4º (se suma a la recompensa base por jugar)
 
 function aliveSeats(T) { return [0, 1, 2, 3].filter((p) => !T.out[p]); }
 
-function newTable(decks, names, seed, lv, sk) {
+function newTable(decks, names, seed, lv, sk, mode) {
+  const ML = mode === 'revive' ? CFG4.reviveLife : CFG4.life;
   const T = {
+    mode: mode === 'revive' ? 'revive' : '', maxLife: ML,
     vs4: true, pvp: true, names, rs: seed | 0, uidn: [1, 1, 1, 1], uidm: 4, uidk: [0, 1, 2, 3], inc: CFG4.income,
     fightN: 0, round: 0, shops: 0, combat: 0, phase: 'prep', shopOpen: false, first: 0, over: false, winner: -1, reason: '',
     log: [], frames: [], acts: [], actN: 0, err: '', lastBall: [null, null, null, null], refreshN: [0, 0, 0, 0],
     out: [false, false, false, false], place: [0, 0, 0, 0], logs: [[], [], [], []], pairs: [], rest: -1, opp: [-1, -1, -1, -1],
     lv: lv || [{}, {}, {}, {}], sk: sk || [{}, {}, {}, {}], fx: [null, null, null, null], firstOf: [0, 0, 0, 0], rdy: [false, false, false, false], stuck: {},
-    p: decks.map((d) => { const P = E.newPlayer(d); P.life = CFG4.life; P.gold = CFG4.gold; return P; }),
+    p: decks.map((d) => { const P = E.newPlayer(d); P.life = ML; P.gold = CFG4.gold; return P; }),
   };
   E.bindRng(T);
   startRound(T);
@@ -32,7 +34,7 @@ function duelState(T, a, b) {
   const S = {
     pvp: true, uidm: 4, uidk: [a, b >= 0 ? b : a], inc: T.inc, rs: T.rs, uidn: [T.uidn[a], b >= 0 ? T.uidn[b] : 1],
     refreshN: [T.refreshN[a], b >= 0 ? T.refreshN[b] : 0], lastBall: [T.lastBall[a], b >= 0 ? T.lastBall[b] : null],
-    maxLife: CFG4.life, lv: [T.lv[a] || {}, b >= 0 ? T.lv[b] || {} : {}], sk: [T.sk[a] || {}, b >= 0 ? T.sk[b] || {} : {}], lvl: 1, p: [Pa, Pb], round: T.round, shops: T.shops, phase: T.phase, shopOpen: T.shopOpen, first: T.firstOf[a] || 0, over: false, winner: -1,
+    mode: T.mode || undefined, maxLife: T.maxLife || CFG4.life, lv: [T.lv[a] || {}, b >= 0 ? T.lv[b] || {} : {}], sk: [T.sk[a] || {}, b >= 0 ? T.sk[b] || {} : {}], lvl: 1, p: [Pa, Pb], round: T.round, shops: T.shops, phase: T.phase, shopOpen: T.shopOpen, first: T.firstOf[a] || 0, over: false, winner: -1,
     reason: '', log: [], frames: [], acts: [], actN: T.actN, err: '', fightN: T.fightN,
   };
   E.bindRng(S);
@@ -59,7 +61,7 @@ function viewFor(T, seat) {
   S.winner = S.over ? (T.place[seat] === 1 ? 0 : 1) : -1;
   S.reason = T.out[seat] ? (T.place[seat] === 1 ? 'Último en pie.' : 'Eliminado.') : '';
   S.board = T.p.map((P, k) => ({ name: T.names[k], life: Math.max(0, P.life), out: T.out[k], me: k === seat, opp: k === opp, rest: T.rest === k && !T.shopOpen, rdy: !T.out[k] && T.rdy[k], place: T.place[k] }));
-  S.maxLife = CFG4.life;
+  S.maxLife = T.maxLife || CFG4.life;
   S.spec = (T.fx[seat] && T.fx[seat].spec) || null;
   const V = E.mirror(S, 0); // copia profunda y sin secretos del rival
   V.shopOpen = T.shopOpen;

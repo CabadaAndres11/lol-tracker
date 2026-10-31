@@ -976,3 +976,5 @@ img.timg[src$="comebacker.png"] { filter: drop-shadow(0 0 1.5px #fff) drop-shado
 .odds .od { padding: .12rem .6rem; border-radius: 999px; background: rgba(0,0,0,.32); border: 1.5px solid var(--oc, #9ca3af); color: #fff; white-space: nowrap; }
 .odds .od i { font-style: normal; color: var(--oc); } .odds .od b { color: var(--oc); }
 .odds .od.r-Común { --oc: #cbd5e1; } .odds .od.r-Rara { --oc: #60a5fa; } .odds .od.r-Épica { --oc: #c084fc; } .odds .od.r-Legendaria { --oc: #fbbf24; }
+
+.mode.m-revvs4{--mc:#cdd9ff}

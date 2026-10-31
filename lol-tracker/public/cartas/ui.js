@@ -228,9 +228,10 @@
       ['rev', ic('robot'), 'Contra la IA', 'Las tropas reviven y la carta que ataca también recibe el ataque de la carta atacada.', true],
       ['revpvp', ic('espadas'), 'Jugador contra jugador', 'Duelo 1 contra 1 en modo Resurrección. Sala con código o búsqueda automática.', true],
       ['vs4', ic('grupo'), 'Versus de 4', 'Cuatro jugadores, duelos rotando hasta que quede uno. Sala con código o búsqueda.', true],
+      ['revvs4', ic('grupo'), 'Versus de 4', 'Cuatro jugadores en modo Resurrección. Sala con código o búsqueda.', true],
     ];
     var tile = function (m) {
-      return '<button class="mode m-' + m[0] + (m[4] ? '' : ' off') + '"' + (m[4] ? ' data-act="' + (m[0] === 'pvp' ? 'openpvp' : m[0] === 'revpvp' ? 'openrevpvp' : m[0] === 'rev' ? 'startrev' : m[0] === 'vs4' ? 'openvs4' : 'startai') + '"' : ' disabled aria-disabled="true"') + '><span class="mi">' + m[1] + '</span><b>' + m[2] + '</b><span class="mut">' + m[3] + '</span>' +
+      return '<button class="mode m-' + m[0] + (m[4] ? '' : ' off') + '"' + (m[4] ? ' data-act="' + (m[0] === 'pvp' ? 'openpvp' : m[0] === 'revpvp' ? 'openrevpvp' : m[0] === 'rev' ? 'startrev' : m[0] === 'vs4' ? 'openvs4' : m[0] === 'revvs4' ? 'openrevvs4' : 'startai') + '"' : ' disabled aria-disabled="true"') + '><span class="mi">' + m[1] + '</span><b>' + m[2] + '</b><span class="mut">' + m[3] + '</span>' +
         (m[4] ? '<span class="go">¡Jugar!</span>' : '<span class="soon">' + ic('candado') + ' Próximamente</span>') + '</button>';
     };
     var group = function (title, sub, ids) {
@@ -238,7 +239,7 @@
     };
     app.innerHTML = head('play', '' + ic('espadas') + ' Elige modo de juego') + '<p class="mut">Tu mazo actual (' + deckSize() + '/' + CFG.deckBudget + ') se usará en cualquier modo.</p>' +
       group('Modo clásico', 'Las tropas que caen se pierden. Gana quien se queda con tropas en pie y deja sin vida al rival.', ['ai', 'pvp', 'vs4']) +
-      group('Modo Resurrección <span class="betatag">En fase de prueba</span>', 'Las tropas reviven cada ronda y al atacar también recibes el ataque de la carta atacada.', ['rev', 'revpvp']) + '</div>';
+      group('Modo Resurrección <span class="betatag">En fase de prueba</span>', 'Las tropas reviven cada ronda y al atacar también recibes el ataque de la carta atacada.', ['rev', 'revpvp', 'revvs4']) + '</div>';
   }
   function renderRules() {
     var sec = function (t, items) { return '<div class="panel"><h2>' + t + '</h2><ul class="rules">' + items.map(function (i) { return '<li>' + i + '</li>'; }).join('') + '</ul></div>'; };
@@ -257,7 +258,7 @@
       sec('Pasivas de las legendarias', D.cards.filter(function (c) { return c.pas; }).reduce(function (a, c) { if (!a.some(function (x) { return x.indexOf(c.pas.n) >= 0 && c.pas.n === 'Dúo en sintonía'; })) a.push('<b>' + esc(c.name) + (c.pas.n === 'Dúo en sintonía' ? ' / ' + (c.id === 'javihi-duo' ? 'Sech Dúo' : 'Javihi Dúo') : '') + ' · ' + esc(c.pas.n) + ':</b> ' + esc(c.pas.t)); return a; }, []).concat(['Las cartas con pasiva llevan una <b>✦</b>: pasa el cursor por encima para leerla.'])) +
       sec('Fusión de copias', ['Si juntas <b>3 copias iguales</b> de una tropa (entre la mesa y la mano) se fusionan solas en <b>una</b> con más estadísticas: <b>★2</b> = estadísticas base ×2 y, con 3 cartas ★2 iguales, <b>★3</b> = ×4.', 'La carta fusionada se queda en la mesa si alguna copia estaba en ella. Puedes comprar la 3ª copia aunque tengas la mano llena. En la tienda, las cartas que completan una fusión se marcan con un brillo.']) +
       sec('Niveles de carta', ['Cada vez que te sale una carta que ya tienes, cuenta como una <b>copia</b>. Con <b>2 copias</b> la carta pasa a <b>★2</b> y con <b>4 copias</b> a <b>★3</b>.', 'Las <b>tropas</b> ganan <b>+1/+1 por nivel</b> al entrar en juego. Las <b>acciones</b> no mejoran con el nivel.', 'El nivel lo ves como ★ en la carta, tanto en el mazo como en la partida.']) +
-      sec('Versus de 4', ['Cuatro jugadores en la misma partida: <b>30 de vida</b>, <b>14 de oro</b> al empezar y <b>+3 de oro</b> por ronda.', 'Cada ronda de combate se juegan <b>2 duelos a la vez</b> y los emparejamientos rotan para que todos se crucen. Las rondas de tienda (1, 4, 7…) son para los cuatro y no hay combate.', 'Quien llega a 0 de vida o se queda sin tropas queda <b>eliminado</b>. Con 3 vivos, uno <b>descansa</b> cada ronda (cobra oro y prepara su mesa). Gana el último en pie.', 'Monedas: <b>15</b> por jugar + <b>45</b> (1º), <b>20</b> (2º) o <b>5</b> (3º). Si abandonas o pasas más de 60 s desconectado, quedas eliminado y no cobras.']) +
+      sec('Versus de 4', ['Cuatro jugadores en la misma partida: <b>30 de vida</b> (<b>40</b> en Resurrección, donde las tropas no mueren y reviven al acabar la ronda), <b>14 de oro</b> al empezar y <b>+3 de oro</b> por ronda.', 'Cada ronda de combate se juegan <b>2 duelos a la vez</b> y los emparejamientos rotan para que todos se crucen. Las rondas de tienda (1, 4, 7…) son para los cuatro y no hay combate.', 'Quien llega a 0 de vida o se queda sin tropas queda <b>eliminado</b>. Con 3 vivos, uno <b>descansa</b> cada ronda (cobra oro y prepara su mesa). Gana el último en pie.', 'Monedas: <b>15</b> por jugar + <b>45</b> (1º), <b>20</b> (2º) o <b>5</b> (3º). Si abandonas o pasas más de 60 s desconectado, quedas eliminado y no cobras.']) +
       sec('Sinergias', ['Cada tropa tiene 1 o 2 sinergias. Cuentan las <b>cartas distintas</b> de cada sinergia entre mesa y mano (las copias no suman; las acciones no cuentan para la sinergia, aunque las de color pertenecen a una).', 'Al llegar a ciertos números (niveles) la sinergia da su bonificación. <b>Las mejoras de estadísticas son permanentes</b> (con un tope por tropa), salvo las de Voley, que solo duran la ronda, así que tus tropas se hacen más fuertes con la partida. En la partida ves a un lado cuántas llevas y cuántas necesitas.', 'Voley solo funciona con 2 o más cartas distintas de Voley entre mesa y mano; hasta entonces no puedes elegir ataque o defensa.']) +
       sec('Acciones', ['Se juegan en las <b>rondas de combate</b> (no en la tienda) y ocupan 1 de espacio. Las mejoras de estadísticas de las acciones son <b>permanentes</b>.', 'Generales: dar ataque o vida a una tropa o a todas las tuyas, y quitar ataque o hacer daño a una tropa rival o a todas.', 'Las de color son de una sinergia concreta y algunas piden condiciones (p. ej. tener el nivel 1 de esa sinergia); si no se cumplen, la carta te dice qué falta y no se gasta.', 'Comebacker compara la <b>vida actual</b> de las tropas en mesa, no la máxima.']) +
       sec('Todavía por llegar', ['Pasivas para las cartas épicas, raras y comunes.']) + '</div>';
@@ -473,7 +474,7 @@
     }).join('') + '</div>';
   }
   function renderPvp() {
-    var w = PV.wait, v4 = ui.lobby === 'vs4', h = head('play', v4 ? '' + ic('grupo') + ' Versus de 4' : '' + ic('espadas') + (PV.mode === 'revive' ? ' Resurrección · 1 vs 1' : ' Jugador contra jugador'));
+    var w = PV.wait, v4 = ui.lobby === 'vs4', h = head('play', v4 ? '' + ic('grupo') + (PV.mode === 'revive' ? ' Resurrección · Versus de 4' : ' Versus de 4') : '' + ic('espadas') + (PV.mode === 'revive' ? ' Resurrección · 1 vs 1' : ' Jugador contra jugador'));
     if (w) {
       h += '<div class="panel pvpwait">' + (w.kind === 'code'
         ? '<h2>' + (v4 ? 'Sala de 4' : 'Sala creada') + '</h2><p class="mut">' + (v4 ? 'Pasa este código a 3 jugadores más. Cuando estéis los 4, empieza sola.' : 'Pásale este código a tu rival. Cuando lo escriba, la partida empieza sola.') + '</p><div class="pvpcode">' + esc(w.code || '·····') + '</div>'
@@ -482,7 +483,7 @@
         '<div class="waitdots"><i></i><i></i><i></i></div><button class="btn sec" data-act="pvpcancel">Cancelar</button></div></div>';
       app.innerHTML = h; return;
     }
-    h += '<p class="mut">Usarás tu mazo actual (' + deckSize() + '/' + CFG.deckBudget + '). ' + (v4 ? 'Empiezas con <b>30 de vida</b> y <b>14 de oro</b> (+3 por ronda). Ganas <b>+15</b> monedas por jugar y hasta <b>+45</b> más según tu puesto (1º +45, 2º +20, 3º +5). ' : 'Ganas <b>+15</b> monedas por partida y <b>+40</b> más si ganas. ') + 'Si abandonas o pierdes la conexión más de 60 s, quedas eliminado.</p>' +
+    h += '<p class="mut">Usarás tu mazo actual (' + deckSize() + '/' + CFG.deckBudget + '). ' + (v4 ? 'Empiezas con <b>' + (PV.mode === 'revive' ? 40 : 30) + ' de vida</b> y <b>14 de oro</b> (+3 por ronda). Ganas <b>+15</b> monedas por jugar y hasta <b>+45</b> más según tu puesto (1º +45, 2º +20, 3º +5). ' : 'Ganas <b>+15</b> monedas por partida y <b>+40</b> más si ganas. ') + 'Si abandonas o pierdes la conexión más de 60 s, quedas eliminado.</p>' +
       (ui.msg ? '<p class="err">' + esc(ui.msg) + '</p>' : '') + '<div class="pvpgrid">' +
       '<div class="panel"><h2>' + ic('dado') + ' Buscar rival</h2><p class="mut">' + (v4 ? 'Emparejamiento automático: empieza al juntarse 4 jugadores.' : 'Emparejamiento automático con cualquier jugador que esté buscando.') + '</p><button class="btn big" data-act="pvpsearch">Buscar partida</button></div>' +
       '<div class="panel"><h2>' + ic('espadas') + ' Crear sala</h2><p class="mut">' + (v4 ? 'Te damos un código para que se unan otros 3 jugadores.' : 'Te damos un código para que tu amigo se una.') + '</p><button class="btn big" data-act="pvpcreate">Crear sala</button></div>' +
@@ -949,8 +950,8 @@
       saveDeck(); if (PV.on) pvpLeaveGame(); ui.msg = ''; PV.wait = null; PV.px = 'pvp'; ui.lobby = 'pvp'; PV.mode = act === 'openrevpvp' ? 'revive' : '';
       return api('pvpPoll', {}).then(function (r) { if (r.ok && r.data.s && !r.data.s.over) return pvpBegin(r.data); ui.screen = 'pvp'; window.scrollTo(0, 0); render(); });
     }
-    if (act === 'openvs4') {
-      PV.mode = '';
+    if (act === 'openvs4' || act === 'openrevvs4') {
+      PV.mode = act === 'openrevvs4' ? 'revive' : '';
       if (deckError()) { ui.screen = 'deck'; return render(); }
       saveDeck(); if (PV.on) pvpLeaveGame(); ui.msg = ''; PV.wait = null; PV.px = 'vs4'; ui.lobby = 'vs4';
       return api('vs4Poll', {}).then(function (r) {

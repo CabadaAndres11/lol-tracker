@@ -319,10 +319,10 @@ function v4Deadline(g) {
   if (T.phase === 'prep') g.dl = now + ((T.shopOpen ? 60 : 45) + 3) * 1000;
   else g.dl = now + (14 + Math.max(0, ...T.fx.map((f) => (f && f.frames ? f.frames.length : 0))) * 1.2) * 1000;
 }
-async function newV4Game(cfg, players) {
+async function newV4Game(cfg, players, mode) {
   const order = players.slice().sort(() => crypto.randomInt(0, 2) - 0.5);
   const id = crypto.randomBytes(8).toString('hex'), now = Date.now();
-  const T = V4.newTable(order.map((p) => p.deck), order.map((p) => p.name), crypto.randomInt(1, 2 ** 30), order.map((p) => p.lv || {}), order.map((p) => p.sk || {}));
+  const T = V4.newTable(order.map((p) => p.deck), order.map((p) => p.name), crypto.randomInt(1, 2 ** 30), order.map((p) => p.lv || {}), order.map((p) => p.sk || {}), mode === 'revive' ? 'revive' : '');
   const g = { id, names: order.map((p) => p.name), T, v: 1, hb: [now, now, now, now], t0: now, paid: [false, false, false, false], rew: [null, null, null, null] };
   v4Deadline(g);
   await saveV4(cfg, g);
@@ -407,19 +407,22 @@ async function vs4Handle(cfg, act, body, u) {
             else await redis(cfg, ['SET', `cartas:vs4:room:${where}`, JSON.stringify(room), 'EX', 900]);
           }
         }
-        const q = JSON.parse((await redis(cfg, ['GET', 'cartas:vs4:q'])) || '[]').filter((e) => e.name.toLowerCase() !== lme);
-        await redis(cfg, ['SET', 'cartas:vs4:q', JSON.stringify(q), 'EX', 30]);
+        for (const qk of ['cartas:vs4:q', 'cartas:vs4:q:rv']) {
+          const q = JSON.parse((await redis(cfg, ['GET', qk])) || '[]').filter((e) => e.name.toLowerCase() !== lme);
+          await redis(cfg, ['SET', qk, JSON.stringify(q), 'EX', 30]);
+        }
       });
       await redis(cfg, ['DEL', v4In(me)]);
       return { ok: true };
     }
     const err = checkDeck(u, body.deck); if (err) return { status: 400, error: err };
+    const vmode = body.mode === 'revive' ? 'revive' : '', vqk = vmode ? 'cartas:vs4:q:rv' : 'cartas:vs4:q';
     const mine = { name: me, deck: body.deck, lv: levelsOf(u, body.deck), sk: skinsOf(u, body.deck) };
     return withLock(cfg, 'v4q', async () => {
       if (act === 'vs4Create') {
         const AL = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let code = '';
         for (let i = 0; i < 5; i++) code += AL[crypto.randomInt(0, AL.length)];
-        await redis(cfg, ['SET', `cartas:vs4:room:${code}`, JSON.stringify({ host: lme, players: [mine] }), 'EX', 900]);
+        await redis(cfg, ['SET', `cartas:vs4:room:${code}`, JSON.stringify({ host: lme, mode: vmode, players: [mine] }), 'EX', 900]);
         await redis(cfg, ['SET', v4In(me), code, 'EX', 900]);
         return { ok: true, wait: true, code, players: [me] };
       }
@@ -434,7 +437,7 @@ async function vs4Handle(cfg, act, body, u) {
         }
         if (room.players.length === 4) {
           await redis(cfg, ['DEL', `cartas:vs4:room:${code}`]);
-          const g = await newV4Game(cfg, room.players);
+          const g = await newV4Game(cfg, room.players, room.mode);
           return v4View(g, g.names.indexOf(me));
         }
         await redis(cfg, ['SET', `cartas:vs4:room:${code}`, JSON.stringify(room), 'EX', 900]);
@@ -443,15 +446,15 @@ async function vs4Handle(cfg, act, body, u) {
       }
       // búsqueda automática: cola de jugadores; arranca al juntarse 4
       const now = Date.now();
-      let q = JSON.parse((await redis(cfg, ['GET', 'cartas:vs4:q'])) || '[]').filter((e) => e.name.toLowerCase() !== lme && now - e.t < 12000);
+      let q = JSON.parse((await redis(cfg, ['GET', vqk])) || '[]').filter((e) => e.name.toLowerCase() !== lme && now - e.t < 12000);
       q.push({ ...mine, t: now });
       if (q.length >= 4) {
         const take = q.slice(0, 4); q = q.slice(4);
-        await redis(cfg, ['SET', 'cartas:vs4:q', JSON.stringify(q), 'EX', 30]);
-        const g = await newV4Game(cfg, take);
+        await redis(cfg, ['SET', vqk, JSON.stringify(q), 'EX', 30]);
+        const g = await newV4Game(cfg, take, vmode);
         return g.names.includes(me) ? v4View(g, g.names.indexOf(me)) : { ok: true, wait: true, players: q.map((e) => e.name) };
       }
-      await redis(cfg, ['SET', 'cartas:vs4:q', JSON.stringify(q), 'EX', 30]);
+      await redis(cfg, ['SET', vqk, JSON.stringify(q), 'EX', 30]);
       await redis(cfg, ['SET', v4In(me), 'Q', 'EX', 60]);
       return { ok: true, wait: true, players: q.map((e) => e.name) };
     });

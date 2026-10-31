@@ -2,7 +2,7 @@
   'use strict';
   var E = window.CartasEngine, D = E.DATA, CARD = E.CARD, CFG = E.CFG;
   var app = document.getElementById('app');
-  var ui = { screen: 'boot', acct: null, ownedSet: null, pack: null, onlyOwned: false, filters: [], rar: [], groupRar: false, fmode: 'any', group: false, deck: [], slots: [null, null, null], slotTo: 0, slotName: '', msg: '', s: null, sel: null, view: null, playing: false, shown: 0, frames: [], hl: null, hint: '' };
+  var ui = { screen: 'boot', acct: null, ownedSet: null, pack: null, onlyOwned: false, filters: [], rar: [], groupRar: false, sortLv: false, fmode: 'any', group: false, deck: [], slots: [null, null, null], slotTo: 0, slotName: '', msg: '', s: null, sel: null, view: null, playing: false, shown: 0, frames: [], hl: null, hint: '' };
 
   // El mazo y los huecos guardados son por cuenta (en este navegador); la colección vive en el servidor.
   function lk(n) { return 'cartas_' + n + ':' + (ui.acct ? ui.acct.name.toLowerCase() : ''); }
@@ -321,8 +321,9 @@
     var inn = ui.deck.indexOf(c.id) >= 0, own = owns(c.id);
     return cardHtml(c, { lv: own ? lvOf(c.id) : 1, size: true, cls: (inn ? 'in' : '') + (own ? '' : ' locked'), extra: own ? '' : '<span class="lockb">' + ic('candado') + '</span>', attrs: 'data-act="toggle" data-id="' + c.id + '"', tag: 'button' });
   }
+  function byLv(arr) { if (!ui.sortLv) return arr; return arr.map(function (c, i) { return [c, i]; }).sort(function (a, b) { return (owns(b[0].id) ? lvOf(b[0].id) : 1) - (owns(a[0].id) ? lvOf(a[0].id) : 1) || a[1] - b[1]; }).map(function (x) { return x[0]; }); }
   function filtered() {
-    var f = ui.filters, all = D.cards.concat(D.actions).filter(function (c) { return (!ui.onlyOwned || owns(c.id)) && (!ui.onlyDeck || ui.deck.indexOf(c.id) >= 0) && (!ui.rar.length || ui.rar.indexOf(c.rarity) >= 0); });
+    var f = ui.filters, all = byLv(D.cards.concat(D.actions)).filter(function (c) { return (!ui.onlyOwned || owns(c.id)) && (!ui.onlyDeck || ui.deck.indexOf(c.id) >= 0) && (!ui.rar.length || ui.rar.indexOf(c.rarity) >= 0); });
     if (!f.length) return all;
     var th = f.filter(function (x) { return x !== '__act'; }), act = f.indexOf('__act') >= 0;
     return all.filter(function (c) {
@@ -346,7 +347,7 @@
       Object.keys(D.themes).map(function (t) { return '<button class="chip' + (ui.filters.indexOf(t) >= 0 ? ' on' : '') + '" style="--tc:' + D.themes[t].color + '" data-act="filter" data-t="' + esc(t) + '">' + tic(t) + esc(t) + ' ' + cnt(t) + '</button>'; }).join('') +
       '<button class="chip' + (ui.filters.indexOf('__act') >= 0 ? ' on' : '') + '" data-act="filter" data-t="__act">Acciones</button></div>';
     h += '<div class="chips filt rarf">' + RARS.map(function (r) { var n = D.cards.concat(D.actions).filter(function (c) { return c.rarity === r; }).length; return '<button class="chip' + (ui.rar.indexOf(r) >= 0 ? ' on' : '') + '" style="--tc:' + RCOL[r] + '" data-act="rarfilter" data-r="' + r + '"><i class="rdot"></i>' + r + ' ' + n + '</button>'; }).join('') + '</div>';
-    h += '<div class="bar" style="margin:.2rem 0 .6rem"><label class="grp"><input type="checkbox" data-act="groupr"' + (ui.groupRar ? ' checked' : '') + '> Agrupar por rareza</label><label class="grp"><input type="checkbox" data-act="group"' + (ui.group ? ' checked' : '') + '> Agrupar por sinergia</label><label class="grp"><input type="checkbox" data-act="onlyowned"' + (ui.onlyOwned ? ' checked' : '') + '> Solo mis cartas (' + ui.acct.owned.length + '/' + (D.cards.length + D.actions.length) + ')</label>' + '<label class="grp"><input type="checkbox" data-act="onlydeck"' + (ui.onlyDeck ? ' checked' : '') + '> Solo cartas del mazo (' + ui.deck.length + ')</label>';
+    h += '<div class="bar" style="margin:.2rem 0 .6rem"><label class="grp"><input type="checkbox" data-act="groupr"' + (ui.groupRar ? ' checked' : '') + '> Agrupar por rareza</label><label class="grp"><input type="checkbox" data-act="group"' + (ui.group ? ' checked' : '') + '> Agrupar por sinergia</label><label class="grp"><input type="checkbox" data-act="onlyowned"' + (ui.onlyOwned ? ' checked' : '') + '> Solo mis cartas (' + ui.acct.owned.length + '/' + (D.cards.length + D.actions.length) + ')</label>' + '<label class="grp"><input type="checkbox" data-act="onlydeck"' + (ui.onlyDeck ? ' checked' : '') + '> Solo cartas del mazo (' + ui.deck.length + ')</label>' + '<label class="grp"><input type="checkbox" data-act="sortlv"' + (ui.sortLv ? ' checked' : '') + '> Ordenar por nivel de carta</label>';
     if (ui.filters.length > 1) h += '<span class="seg"><button class="' + (ui.fmode === 'any' ? 'on' : '') + '" data-act="fmode" data-m="any">Cualquiera de las elegidas</button><button class="' + (ui.fmode === 'all' ? 'on' : '') + '" data-act="fmode" data-m="all">Todas a la vez</button></span>';
     h += '</div>';
     var rf = function (c) { return !ui.rar.length || ui.rar.indexOf(c.rarity) >= 0; };
@@ -355,8 +356,8 @@
       RARS.forEach(function (r) { var g = lst.filter(function (c) { return c.rarity === r; }); if (g.length) h += '<h3 class="gh"><span class="rtag" style="--tc:' + RCOL[r] + '">' + r + '</span> <span class="mut">' + g.length + '</span></h3><div class="deckgrid">' + g.map(deckCard).join('') + '</div>'; });
       if (!lst.length) h += '<p class="mut">Ninguna carta cumple los filtros.</p>';
     } else if (ui.group && !ui.filters.length) {
-      Object.keys(D.themes).forEach(function (t) { var g = themeCards(t).filter(rf); if (g.length) h += '<h3 class="gh">' + tagHtml(t) + '</h3><div class="deckgrid">' + g.map(deckCard).join('') + '</div>'; });
-      var ga = D.actions.filter(function (a) { return !a.theme; }).filter(rf); if (ga.length) h += '<h3 class="gh">Acciones</h3><div class="deckgrid">' + ga.map(deckCard).join('') + '</div>';
+      Object.keys(D.themes).forEach(function (t) { var g = byLv(themeCards(t).filter(rf)); if (g.length) h += '<h3 class="gh">' + tagHtml(t) + '</h3><div class="deckgrid">' + g.map(deckCard).join('') + '</div>'; });
+      var ga = byLv(D.actions.filter(function (a) { return !a.theme; }).filter(rf)); if (ga.length) h += '<h3 class="gh">Acciones</h3><div class="deckgrid">' + ga.map(deckCard).join('') + '</div>';
     } else {
       var list = filtered();
       h += list.length ? '<div class="deckgrid">' + list.map(deckCard).join('') + '</div>' : '<p class="mut">Ninguna carta cumple todas las sinergias elegidas.</p>';
@@ -926,6 +927,7 @@
     if (act === 'groupr') { ui.groupRar = el.checked; if (ui.groupRar) ui.group = false; return render(); }
     if (act === 'rarfilter') { var rr = el.dataset.r, ri = ui.rar.indexOf(rr); if (ri >= 0) ui.rar.splice(ri, 1); else ui.rar.push(rr); var y1 = window.scrollY; renderDeck(); window.scrollTo(0, y1); return; }
     if (act === 'onlyowned') { ui.onlyOwned = el.checked; return render(); }
+    if (act === 'sortlv') { ui.sortLv = el.checked; return render(); }
     if (act === 'onlydeck') { ui.onlyDeck = el.checked; return render(); }
     if (act === 'toggle') {
       var id = el.dataset.id, k = ui.deck.indexOf(id);

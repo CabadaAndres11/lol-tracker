@@ -1,6 +1,8 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-01', tag: 'Novedad', title: 'Ordenar el mazo por nivel de carta',
+      items: ['En «Tu mazo» hay una casilla nueva «Ordenar por nivel de carta»: muestra primero las cartas de mayor nivel (★3, ★2, ★1). Funciona junto a los filtros y las agrupaciones.'] },
     { date: '2026-10-31', tag: 'Novedad', title: 'Versus de 4 en modo Resurrección',
       items: ['Nuevo modo «Versus de 4» dentro de Resurrección: cuatro jugadores, sala con código o búsqueda, con las reglas de Resurrección (las tropas no mueren y reviven con la vida completa al acabar la ronda).',
         'Empiezas con 40 de vida y 14 de oro. Modo en fase de prueba: si ves algo raro, avísanos.'] },

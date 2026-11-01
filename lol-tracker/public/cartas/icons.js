@@ -62,6 +62,35 @@
   };
   I['t-Pokémon'] = I.huevo; I['t-Informático'] = I.chip; I['t-Trabajo'] = I.maletin; I['t-Lol'] = I.emblema; I['t-Comebacker'] = I.fuego; I['t-Voley'] = I.voley;
   I['t-Anime'] = I.shuriken; I['t-Correa'] = I.corazon; I['t-Tilt'] = I.humo; I['t-Pueblo'] = I.pueblo; I['t-KOI'] = I.pez; I['t-Dúo Inseparable'] = I.duo; I['t-NINI'] = I.sofa; I['t-Pelayos'] = I.escudo;
+  // ---- Iconos de interfaz: trazo fino minimalista (heredan el color del texto). Las sinergias y la moneda conservan su estilo. ----
+  function L(inner, w) { return '<g fill="none" stroke="currentColor" stroke-width="' + (w || 3.6) + '" stroke-linecap="round" stroke-linejoin="round">' + inner + '</g>'; }
+  var LN = {
+    casa: '<path d="M8 31 32 9l24 22"/><path d="M15 27v26h12V39h10v14h12V27"/>',
+    espadas: '<path d="M13 13l29 29M37 47l10-10M42 42l10 10"/><path d="M51 13 22 42M27 47 17 37M22 42 12 52"/>',
+    cartas: '<g transform="rotate(-10 28 34)"><rect x="12" y="12" width="26" height="38" rx="4"/></g><g transform="rotate(10 38 34)"><rect x="26" y="12" width="26" height="38" rx="4"/><path d="M39 24l4.5 8-4.5 8-4.5-8z"/></g>',
+    carrito: '<path d="M6 12h9l6 28h27l6-21H18"/><circle cx="26" cy="50" r="3.5"/><circle cx="43" cy="50" r="3.5"/>',
+    trofeo: '<path d="M20 10h24v16c0 8-5 13-12 13s-12-5-12-13z"/><path d="M20 15h-8c0 9 3 13 8 14M44 15h8c0 9-3 13-8 14"/><path d="M32 39v9M23 53h18M27 48h10"/>',
+    usuario: '<circle cx="32" cy="22" r="10"/><path d="M12 55c0-12 9-19 20-19s20 7 20 19"/>',
+    libro: '<path d="M8 14c8-2 17-1 24 5 7-6 16-7 24-5v37c-8-2-17-1-24 5-7-6-16-7-24-5z"/><path d="M32 19v37"/>',
+    ojo: '<path d="M5 32c8-14 17-20 27-20s19 6 27 20c-8 14-17 20-27 20S13 46 5 32z"/><circle cx="32" cy="32" r="8"/>',
+    candado: '<rect x="14" y="28" width="36" height="25" rx="5"/><path d="M21 28v-7a11 11 0 0 1 22 0v7"/><circle cx="32" cy="40" r="3"/>',
+    regalo: '<rect x="9" y="25" width="46" height="13" rx="2"/><path d="M13 38v17h38V38M32 25v30"/><path d="M32 25c-7-1-13-4-13-10a6 6 0 0 1 12 0zM32 25c7-1 13-4 13-10a6 6 0 0 0-12 0z"/>',
+    robot: '<rect x="12" y="21" width="40" height="29" rx="7"/><path d="M32 21v-8"/><circle cx="32" cy="10" r="3"/><circle cx="23" cy="35" r="3"/><circle cx="41" cy="35" r="3"/><path d="M26 44h12M7 33v6M57 33v6"/>',
+    grupo: '<circle cx="32" cy="21" r="8"/><path d="M18 52c0-11 6-17 14-17s14 6 14 17"/><circle cx="12" cy="28" r="5.5"/><circle cx="52" cy="28" r="5.5"/><path d="M3 50c0-8 4-13 10-13M61 50c0-8-4-13-10-13"/>',
+    puerta: '<path d="M26 10H14v44h12"/><path d="M26 10l16 5v34l-16 5z"/><path d="M47 32h12M54 25l7 7-7 7"/>',
+    check: '<path d="M12 34l14 14 26-30"/>',
+    cambio: '<path d="M52 26A21 21 0 0 0 15 20"/><path d="M13 8v13h13"/><path d="M12 38a21 21 0 0 0 37 6"/><path d="M51 56V43H38"/>',
+    deshacer: '<path d="M24 18 11 31l13 13"/><path d="M11 31h30c9 0 14 5 14 15"/>',
+    disquete: '<path d="M10 10h34l10 10v34H10z"/><path d="M19 10v13h22V10M18 54V38h28v16"/>',
+    papelera: '<path d="M10 17h44M25 17v-6h14v6"/><path d="M15 17l3 38h28l3-38M26 28v18M38 28v18"/>',
+    diana: '<circle cx="32" cy="32" r="23"/><circle cx="32" cy="32" r="13"/><circle cx="32" cy="32" r="3"/>',
+    reloj: '<circle cx="32" cy="32" r="23"/><path d="M32 17v16l10 6"/>',
+    aviso: '<path d="M32 9 58 54H6z"/><path d="M32 26v15"/><circle cx="32" cy="47" r="1.2"/>',
+    estrella: '<path d="M32 8l7.6 15.6 17.2 2.4-12.5 12 3 17L32 46.6 16.7 55l3-17L7.2 26l17.2-2.4z"/>',
+    avance: '<path d="M12 14l17 18-17 18M34 14l17 18-17 18"/>',
+    brillo: '<path d="M32 6c2 14 6 20 20 26-14 6-18 12-20 26-2-14-6-20-20-26 14-6 18-12 20-26z"/>'
+  };
+  Object.keys(LN).forEach(function (k) { I[k] = L(LN[k]); });
   // alias: nombres con varios usos
   I.ataque = I.espadas; I.pvp = I.espadas; I.mazo = I.cartas; I.sinergias = I.brillo; I.normas = I.libro; I.tienda = I.carrito; I.bloqueo = I.candado;
   I.derrota = I.corazonroto; I.victoria = I.trofeo; I.ia = I.robot; I.vs4 = I.grupo; I.inicio = I.casa; I.cuenta = I.usuario; I.salir = I.puerta;

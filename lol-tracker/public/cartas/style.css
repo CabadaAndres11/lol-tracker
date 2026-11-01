@@ -1424,3 +1424,9 @@ body.tutmode .refresh{pointer-events:none;opacity:.35}
 .zs.on i{border-color:var(--gold);box-shadow:0 0 10px var(--gold)}.zs:hover i{border-color:#fff}
 .zs.locked i{filter:grayscale(.85) brightness(.7)}.zs em{font-style:normal;line-height:1.1;text-align:center}
 @media(max-width:860px){.dktiles{grid-template-columns:1fr 1fr 1fr;gap:8px}.dkt b{font-size:.8rem;padding:0 6px}.dkt .dks{display:none}.dedlayout{grid-template-columns:1fr}.dedleft{position:static}.zs i{width:52px;height:52px}}
+
+/* Iconos de trazo fino */
+.rii{color:var(--gold)}.ricon:hover .rii{color:#fff3c4}
+.rpl{color:#f0e6d2}
+.navb .ic{color:#c9b98a}.navb.on .ic,.navb:hover .ic{color:var(--gold)}
+.ic{stroke-linecap:round}

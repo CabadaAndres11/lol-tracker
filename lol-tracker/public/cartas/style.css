@@ -1143,3 +1143,23 @@ img.timg[src$="comebacker.png"] { filter: drop-shadow(0 0 1.5px #fff) drop-shado
 .qgot { margin-left: -1.2rem; padding: 0 2.4rem 0 2rem; display: grid; place-items: center; min-width: 11rem; clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 50%, calc(100% - 16px) 100%, 0 100%); background: linear-gradient(180deg, #1c6b8a, #0f3d55); border-top: 2px solid #3ec1e0; border-bottom: 2px solid #3ec1e0; color: #e8f6ff; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; font-size: .9rem; transition: filter .2s; }
 .qgo:hover .qgot { filter: brightness(1.25); } .qgo:hover .qx { box-shadow: 0 0 16px rgba(240,201,106,.6); }
 @media (max-width: 700px) { .qbody { grid-template-columns: 1fr; } .qart { display: none; } .qleft { background: none; } .qsub { display: none; } .qframe { width: 3.6rem; height: 3.6rem; font-size: 2rem; } .qtypes button { padding: .5rem .7rem; font-size: .72rem; } }
+
+/* Efectos al cambiar de selección */
+.qart { animation: qartin .55s ease-out both; }
+@keyframes qartin { from { opacity: 0; transform: scale(1.08) translateX(24px); } to { opacity: .55; transform: none; } }
+.qmode { position: relative; }
+.qmode.on::after { content: ''; position: absolute; left: 0; bottom: -3px; height: 3px; width: 100%; background: var(--gold); box-shadow: 0 0 12px var(--gold); }
+.fx-mode .qmode.on::after { animation: qsweep .5s ease-out both; }
+@keyframes qsweep { from { width: 0; } to { width: 100%; } }
+.fx-mode .qmode.on .qframe { animation: qpop .55s cubic-bezier(.2, .9, .3, 1.4) both; }
+@keyframes qpop { 0% { transform: scale(.75) rotate(-20deg); box-shadow: 0 0 0 0 rgba(240,201,106,.8); } 60% { transform: scale(1.14) rotate(6deg); } 100% { transform: none; box-shadow: 0 0 22px 6px rgba(240,201,106,.0); } }
+.fx-mode .qmode.on b, .fx-mode .qmode.on .qsub { animation: qtxt .5s ease-out both; }
+@keyframes qtxt { from { opacity: 0; transform: translateY(8px); letter-spacing: .3em; } to { opacity: 1; transform: none; } }
+.fx-mode .qleft > *, .fx-opt .qleft .qdesc, .fx-opt .qleft .qnote { animation: qslide .45s ease-out both; }
+.fx-mode .qleft > :nth-child(2) { animation-delay: .05s; } .fx-mode .qleft > :nth-child(3) { animation-delay: .1s; } .fx-mode .qleft > :nth-child(4) { animation-delay: .15s; }
+@keyframes qslide { from { opacity: 0; transform: translateX(-14px); } to { opacity: 1; transform: none; } }
+.fx-opt .qopt.on .qdia { animation: qdia .4s ease-out both; }
+@keyframes qdia { from { transform: rotate(45deg) scale(0); } 60% { transform: rotate(45deg) scale(1.5); } to { transform: rotate(45deg) scale(1); } }
+.fx-opt .qtypes button.on { animation: qtp .35s ease-out both; }
+@keyframes qtp { from { box-shadow: 0 0 0 0 rgba(240,201,106,.7); } to { box-shadow: 0 0 14px rgba(240,201,106,.18); } }
+@media (prefers-reduced-motion: reduce) { .qart, .qsel * { animation: none !important; } }

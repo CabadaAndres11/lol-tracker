@@ -335,9 +335,10 @@
     }).join('') + '</div><div class="pactions"><button class="btn sec" data-act="flipall"' + (allRev ? ' style="visibility:hidden"' : '') + '>Girar todas</button></div>' + (gain ? '<p class="pgain">+' + gain + ' ' + ic('moneda') + ' por cartas repetidas</p>' : '') + '<p class="pmsg' + (allRev ? ' pulse' : '') + '">' + (allRev ? 'Haz clic en un espacio vacío para continuar' : 'Pulsa cada carta para girarla · el color del reverso te dice su rareza') + '</p></div>';
   }
   var QMODES = [
-    { id: 'classic', name: 'Clásico', icon: 'escudo', sub: 'Las tropas que caen se pierden', art: 'dashlight-akali', desc: 'Las tropas que caen se pierden. Gana quien se queda con tropas en pie y deja sin vida al rival.' },
-    { id: 'revive', name: 'Resurrección', icon: 'cambio', sub: 'Las tropas reviven cada ronda', art: 'chipy-lloron', desc: 'Las tropas reviven cada ronda y al atacar también recibes el ataque de la carta atacada.' },
+    { id: 'classic', name: 'Clásico', icon: 'escudo', sub: 'Las tropas que caen se pierden', desc: 'Las tropas que caen se pierden. Gana quien se queda con tropas en pie y deja sin vida al rival.' },
+    { id: 'revive', name: 'Resurrección', icon: 'cambio', sub: 'Las tropas reviven cada ronda', desc: 'Las tropas reviven cada ronda y al atacar también recibes el ataque de la carta atacada.' },
   ];
+  var QART = { classic: { '1v1': 'lihone-viego', vs4: 'aitorlg-koisito' }, revive: { '1v1': 'chipy-lloron', vs4: 'potango' } };
   var QOPTS = {
     ia: [
       { id: '1v1', icon: 'espadas', name: '1 contra 1', sub: 'Duelo contra una IA con tu mazo.', act: { classic: 'startai', revive: 'startrev' } },
@@ -351,11 +352,12 @@
   function renderModes() {
     var qt = ui.qt === 'pl' ? 'pl' : 'ia', qm = QMODES.filter(function (m) { return m.id === ui.qm; })[0] || QMODES[0], qo = ui.qo === 'vs4' ? 'vs4' : '1v1';
     var opts = QOPTS[qt], cur = opts.filter(function (o) { return o.id === qo; })[0];
+    var fx = ui.qfx || ''; ui.qfx = '';
     app.innerHTML = head('play', '' + ic('espadas') + ' Elige modo de juego') + (ui.msg ? '<p class="err">' + esc(ui.msg) + '</p>' : '') +
-      '<div class="qsel">' +
+      '<div class="qsel' + (fx ? ' fx-' + fx : '') + '">' +
       '<div class="qtypes"><button class="' + (qt === 'ia' ? 'on' : '') + '" data-act="qtype" data-v="ia">' + ic('robot') + ' Contra IA</button><button class="' + (qt === 'pl' ? 'on' : '') + '" data-act="qtype" data-v="pl">' + ic('grupo') + ' Contra jugadores</button></div>' +
       '<div class="qmodes">' + QMODES.map(function (m) { return '<button class="qmode' + (m === qm ? ' on' : '') + '" data-act="qmode" data-v="' + m.id + '"><span class="qframe">' + ic(m.icon) + '</span><b>' + m.name + '</b><span class="qsub">' + m.sub + '</span></button>'; }).join('') + '</div>' +
-      '<div class="qbody" style="--qart:url(/cartas/art/' + qm.art + '.webp)"><div class="qleft"><p class="qdesc">' + qm.desc + '</p><p class="qdeck">Tu mazo actual (' + deckSize() + '/' + CFG.deckBudget + ') se usará en cualquier modo.</p>' +
+      '<div class="qbody" style="--qart:url(/cartas/art/' + QART[qm.id][qo] + '.webp)"><div class="qleft"><p class="qdesc">' + qm.desc + '</p><p class="qdeck">Tu mazo actual (' + deckSize() + '/' + CFG.deckBudget + ') se usará en cualquier modo.</p>' +
       '<div class="qopts">' + opts.map(function (o) { return '<button class="qopt' + (o === cur ? ' on' : '') + '" data-act="qopt" data-v="' + o.id + '"><i class="qdia"></i><span class="qot"><b>' + ic(o.icon) + ' ' + o.name + '</b><span>' + o.sub + '</span></span></button>'; }).join('') + '</div>' +
       '<p class="qnote ' + (qt === 'ia' ? 'ia' : 'pl') + '">' + (qt === 'ia' ? 'Contra IA: menos monedas y sin puntos de clasificación.' : 'Contra jugadores: puntúan en la clasificación.') + '</p></div><div class="qart" aria-hidden="true"></div></div>' +
       '<div class="qconfirm"><button class="qgo" data-act="' + cur.act[qm.id] + '"><span class="qx">' + ic('avance') + '</span><span class="qgot">Confirmar</span></button></div></div>';
@@ -1033,9 +1035,9 @@
         ui.msg = ''; ui.lgPin = ''; setAcct(r.data.user); loadLocal(); ui.screen = landing(); render();
       });
     }
-    if (act === 'qtype') { ui.qt = el.dataset.v; return renderModes(); }
-    if (act === 'qmode') { ui.qm = el.dataset.v; return renderModes(); }
-    if (act === 'qopt') { ui.qo = el.dataset.v; return renderModes(); }
+    if (act === 'qtype') { if (ui.qt === el.dataset.v) return; ui.qt = el.dataset.v; ui.qfx = 'opt'; return renderModes(); }
+    if (act === 'qmode') { if (ui.qm === el.dataset.v) return; ui.qm = el.dataset.v; ui.qfx = 'mode'; return renderModes(); }
+    if (act === 'qopt') { if (ui.qo === el.dataset.v) return; ui.qo = el.dataset.v; ui.qfx = 'opt'; return renderModes(); }
     if (act === 'newstog') { ui.newsOpen = !ui.newsOpen; return render(); }
     if (act === 'cardbuy') return api('cardBuy', { id: el.dataset.card }).then(function (r) { if (r.data && r.data.user) setAcct(r.data.user); ui.msg = r.ok ? '' : (r.data.error || ''); render(); });
     if (act === 'skinbuy') return api('skinBuy', { id: el.dataset.skin }).then(function (r) { if (r.data && r.data.user) setAcct(r.data.user); ui.msg = r.ok ? '' : (r.data.error || ''); render(); });

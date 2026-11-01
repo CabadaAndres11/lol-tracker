@@ -1,6 +1,8 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-01', tag: 'Novedad', title: 'Nueva animación al desplegar cartas',
+      items: ['Cada carta que entra en la mesa, tuya o del rival, ahora se acerca a la cámara, da un par de vueltas y aterriza en su hueco.'] },
     { date: '2026-11-01', tag: 'Novedad', title: 'Nueva Colección: cartas, mazos y skins',
       items: ['«Mazo» pasa a llamarse Colección y se divide en tres apartados: Cartas, Mazos y Skins.',
         'Cartas muestra todas las del juego con su aspecto clásico (las que aún no tienes aparecen apagadas). Al pulsar una se abre en 3D y debajo salen cuadros para ver cada una de sus skins, la tengas o no.',

@@ -703,7 +703,7 @@
     pvpReset(); PV.on = true; PV.id = d.id; PV.seat = d.seat; PV.names = d.names; PV.rdy = d.rdy; PV.v = d.v;
     PV.seenFight = d.s.fightN || 0; PV.seenAct = 0;
     d.s.acts.forEach(function (a) { PV.seenAct = Math.max(PV.seenAct, a.n); }); d.s.acts = [];
-    ui.s = d.s; ui.screen = 'game'; ui.reward = d.reward || null; ui.sel = null; ui.view = null; ui.playing = false; ui.hint = ''; ui.landed = null; ui.busy = false;
+    ui.s = d.s; ui.screen = 'game'; ui.reward = d.reward || null; ui.sel = null; ui.view = null; ui.playing = false; ui.hint = ''; ui.landed = null; ui.busy = false; ui.seenKey = null;
     announce(); ui.deadline = d.dl && !d.s.over ? Date.now() + d.dl : null; render(); pvpSchedule(1200);
   }
   function pvpAdopt(d) {
@@ -779,7 +779,7 @@
     var mysk = {}; ui.deck.forEach(function (id) { var k = ui.acct && ui.acct.skinSel && ui.acct.skinSel[id]; if (k && ui.acct.skins.indexOf(k) >= 0) mysk[id] = k; });
     ui.s = E.newGame(ui.deck, E.aiDeck(r), seed, { lv: [mylv, {}], sk: [mysk, {}], mode: ui.mode });
     ui.reward = null; api('gameStart');
-    ui.screen = 'game'; ui.sel = null; ui.view = null; ui.playing = false; ui.hint = ''; ui.landed = null; ui.busy = false;
+    ui.screen = 'game'; ui.sel = null; ui.view = null; ui.playing = false; ui.hint = ''; ui.landed = null; ui.busy = false; ui.seenKey = null;
     announce(); render();
   }
   function startTutorial() {
@@ -787,7 +787,7 @@
     ui.s = E.newGame(T.deck, T.opp, T.seed, { lv: [{}, {}], sk: [{}, {}] });
     ui.s.p[1].life = 40; // el rival aguanta más para que la práctica llegue hasta la segunda tienda
     ui.s.rep = 1; ui.reward = null; ui.tut = { i: 0 }; ui.botGame = false;
-    ui.screen = 'game'; ui.sel = null; ui.view = null; ui.playing = false; ui.hint = ''; ui.landed = null; ui.busy = false;
+    ui.screen = 'game'; ui.sel = null; ui.view = null; ui.playing = false; ui.hint = ''; ui.landed = null; ui.busy = false; ui.seenKey = null;
     window.scrollTo(0, 0); announce(); render();
   }
   function orb(kind, val, max, label, idx) {
@@ -823,7 +823,8 @@
       if (v.dead) o.cls += ' dead';
       if (ui.hl && ui.hl.att === v.uid) o.cls += ' atk';
       if (ui.hl && ui.hl.tgt === v.uid) o.cls += ' hit';
-      if (ui.landed === v.uid) o.cls += ' landed';
+      var skey = side + ':' + v.uid, firstAt = ui.seen[skey] || (ui.seen[skey] = ui.seedSeen ? 1 : Date.now()), elapsed = Date.now() - firstAt, dealing = elapsed < 1700;
+      if (dealing) o.cls += ' deal'; else if (ui.landed === v.uid) o.cls += ' landed';
       if (ui.hl && ui.hl.fx && ui.hl.fx.uids.indexOf(v.uid) >= 0) o.cls += ui.hl.fx.neg ? ' debuffed' : ' buffed';
       o.attrs = 'data-cuid="' + v.uid + '" data-side="' + side + '"';
       if (mine) {
@@ -844,12 +845,13 @@
         if (prep && sel && (sel.k === 'mine' || (sel.k === 'act' && CARD[s.p[0].hand[sel.i].id].target === 'enemy'))) o.cls += ' tgtable';
         if (prep && aim[v.uid]) o.extra = '<span class="aim">' + ic('diana') + '×' + aim[v.uid] + '</span>';
       }
-      o.gl = I ? I.gl : 1; o.lv = lvG(side, v.id); o.skin = skG(side, v.id); h += '<div class="cw">' + cardHtml(c, o) + under + '</div>';
+      o.gl = I ? I.gl : 1; o.lv = lvG(side, v.id); o.skin = skG(side, v.id); h += '<div class="cw"' + (dealing ? ' style="--di:' + k + ';--el:' + (elapsed / 1000).toFixed(2) + 's"' : '') + '>' + cardHtml(c, o) + under + '</div>';
     });
     return h + '</div>';
   }
   var REFRESH_SVG = '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>';
   function renderGame() {
+    var gk0 = (PV.on ? PV.id : '') + ':' + ui.s.rs; ui.seedSeen = ui.seenKey !== gk0; if (ui.seedSeen) { ui.seenKey = gk0; ui.seen = {}; }
     var s = ui.s, view = ui.view || E.viewOf(s), P = s.p[0], R = s.p[1];
     var shopMode = s.shopOpen && !ui.playing, shop = shopMode && s.phase === 'prep', prep = s.phase === 'prep' && !ui.playing && !s.shopOpen;
     var pend = prep ? E.pendingTargets(s).length : 0, hasT = Object.keys(P.target).length > 0;

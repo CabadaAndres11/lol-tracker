@@ -21,7 +21,7 @@
     koi: { atk: [1, 2, 3], cap: 8 },
     voley: { atk: [1, 2, 3], red: [1, 1, 2], cap: 8 },
     novia: { p: [0.6, 0.75, 0.9], up: [1, 2, 3], down: 1, cap: 10 }, // solo la acción «Cita sorpresa»
-    novias: { eriko: 2, eCap: 10, lucia: 3, ari: 0.5 }, // novias del hueco 5 (sinergia Correa)
+    novias: { eriko: [2, 3, 4], eCap: [10, 15, 20], helena: [0, 2, 4], lucia: [3, 4, 5], ari: [0.5, 0.6, 0.7] }, // por nivel de Correa // novias del hueco 5 (sinergia Correa)
     tilt: { hit: [1, 1, 2], perm: [1, 2, 2], cap: 8 },
     pueblo: { per: [1, 2], cap: [4, 8] },
     duo: { stat: 2, death: 2, cap: 12 },
@@ -649,14 +649,17 @@
       // Novias del hueco 5 (sinergia Correa)
       var nv = P.mesa[4];
       if (nv && !nv.dead && (t['Correa'] || 0) >= 1) {
+        var cl = t['Correa'] - 1;
         if (nv.id === 'eriko') {
-          var er = troops.filter(function (i) { return gainCap(i, 'eri', 'both', FX.novias.eriko, FX.novias.eCap) > 0; });
-          if (er.length) fxFrame(s, p, 'eriko', 'Eriko te mima', '+' + FX.novias.eriko + '/+' + FX.novias.eriko + ' permanente a toda la mesa', er.map(function (i) { return i.uid; }));
+          var eg = FX.novias.eriko[cl], er = troops.filter(function (i) { return gainCap(i, 'eri', 'both', eg, FX.novias.eCap[cl]) > 0; });
+          if (er.length) fxFrame(s, p, 'eriko', 'Eriko te mima', '+' + eg + '/+' + eg + ' permanente a toda la mesa', er.map(function (i) { return i.uid; }));
+        } else if (nv.id === 'helena') {
+          nv.tmp.atk += FX.novias.helena[cl];
         } else if (nv.id === 'lucia') {
-          var lf2 = targetable(s.p[1 - p]);
+          var lf2 = targetable(s.p[1 - p]), ld = FX.novias.lucia[cl];
           if (lf2.length) {
-            var lt = ' Lucía:'; lf2.forEach(function (f) { lt += passiveHit(s, f, FX.novias.lucia, 0); });
-            frame(s, lt.trim(), { fx: { type: 'lucia', side: p, title: 'Mirada de Lucía', sub: FX.novias.lucia + ' de daño a las tropas rivales', uids: lf2.map(function (f) { return f.uid; }), neg: false } });
+            var lt = ' Lucía:'; lf2.forEach(function (f) { lt += passiveHit(s, f, ld, 0); });
+            frame(s, lt.trim(), { fx: { type: 'lucia', side: p, title: 'Mirada de Lucía', sub: ld + ' de daño a las tropas rivales', uids: lf2.map(function (f) { return f.uid; }), neg: false } });
           }
         }
       }
@@ -832,7 +835,7 @@
       var fxk = null, real = Math.max(0, dmg - tgt.tmp.red);
       if (tgt.tmp.cap1) real = Math.min(real, 1);
       var ariSave = false;
-      if (real > 0 && mesaTroops(s.p[tgt.owner]).some(function (x) { return x.id === 'ari'; }) && s.rng() < FX.novias.ari) { real = 0; ariSave = true; }
+      if (real > 0 && mesaTroops(s.p[tgt.owner]).some(function (x) { return x.id === 'ari'; }) && s.rng() < FX.novias.ari[Math.max(0, (s.tiers[tgt.owner]['Correa'] || 1) - 1)]) { real = 0; ariSave = true; }
       tgt.hp -= real;
       var line = card(a).name + (retarget ? ' (su objetivo ya cayó) ataca a ' : ' ataca a ') + card(tgt).name + ': ' + real + ' de daño' + (tgt.tmp.red && real < dmg ? ' (reducido)' : '') + (ariSave ? ' (¡Ari lo evita!)' : '') + '.';
       if (real > 0) {

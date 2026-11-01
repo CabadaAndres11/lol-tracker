@@ -1,6 +1,12 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-01', tag: 'Cambio', title: 'Correa vuelve a tener 3 niveles y mejora a las novias',
+      items: ['Correa vuelve a tener 3 niveles (2 / 3 / 4 cartas distintas). El hueco 5 y las 4 novias se desbloquean en el nivel 1 y los niveles mejoran sus efectos.',
+        'Eriko: +2/+2 → +3/+3 → +4/+4 a la mesa por combate (tope 10 → 15 → 20 por carta).',
+        'Helena: +0 → +2 → +4 de ataque.',
+        'Lucía: 3 → 4 → 5 de daño a todas las tropas rivales al empezar.',
+        'Ari: evita el 50% → 60% → 70% de los golpes.'] },
     { date: '2026-11-01', tag: 'Novedad', title: 'Novia pasa a llamarse Correa: hueco 5 y las 4 novias',
       items: ['La sinergia Novia ahora se llama Correa y se activa con 2 cartas distintas (un único nivel). Ya no tira el dado de «te apoya / te regaña» cada ronda (la acción Cita sorpresa sí lo conserva).',
         'Al activarla se desbloquea un hueco 5 en la mesa, reservado a las novias, y recibes a las 4 en una reserva. Solo una puede estar en el hueco 5 a la vez; puedes cambiarla en cualquier momento de la preparación. Si pierdes la sinergia, la novia vuelve a la reserva. Si una novia cae en combate, vuelve a la reserva con su vida.',

@@ -587,7 +587,7 @@ var D={
    "novia": true,
    "pas": {
     "n": "Mimos",
-    "t": "Al empezar cada combate da +2/+2 permanente a todas tus cartas en mesa (tope +10/+10 por carta)."
+    "t": "Al empezar cada combate da +2/+2 permanente a todas tus cartas en mesa (nivel 2: +3/+3, nivel 3: +4/+4; tope 10/15/20 por carta)."
    }
   },
   {
@@ -604,7 +604,7 @@ var D={
    "novia": true,
    "pas": {
     "n": "Intocable",
-    "t": "No puede recibir ataques ni ser objetivo, y no cuenta para proteger tu vida: si solo queda ella, los golpes rivales van a tu vida."
+    "t": "No puede recibir ataques ni ser objetivo, y no cuenta para proteger tu vida: si solo queda ella, los golpes rivales van a tu vida. Nivel 2: +2 de ataque; nivel 3: +4."
    }
   },
   {
@@ -621,7 +621,7 @@ var D={
    "novia": true,
    "pas": {
     "n": "Mirada letal",
-    "t": "Al empezar cada combate hace 3 de daño a todas las tropas rivales."
+    "t": "Al empezar cada combate hace 3 de daño a todas las tropas rivales (nivel 2: 4; nivel 3: 5)."
    }
   },
   {
@@ -638,7 +638,7 @@ var D={
    "novia": true,
    "pas": {
     "n": "Sueño de dragón",
-    "t": "Cada golpe que va a recibir una de tus tropas tiene un 50% de ser evitado."
+    "t": "Cada golpe que va a recibir una de tus tropas tiene un 50% de ser evitado (nivel 2: 60%; nivel 3: 70%)."
    }
   }
  ],
@@ -1001,11 +1001,15 @@ var D={
   },
   "Correa": {
    "th": [
-    2
+    2,
+    3,
+    4
    ],
    "color": "#fb7185",
    "tx": [
-    "Desbloquea el hueco 5 y recibes a las 4 novias (una sola puede estar en el hueco 5): Eriko +2/+2 a la mesa cada ronda, Helena no recibe ataques, Lucía hace 3 de daño a las tropas rivales al empezar y Ari evita golpes al azar."
+    "Desbloquea el hueco 5 y recibes a las 4 novias (una sola en el hueco 5). Eriko +2/+2 a la mesa cada combate (tope 10), Helena sin bonus, Lucía 3 de daño a las rivales, Ari evita el 50% de los golpes.",
+    "Eriko +3/+3 (tope 15), Helena +2 de ataque, Lucía 4 de daño, Ari evita el 60%.",
+    "Eriko +4/+4 (tope 20), Helena +4 de ataque, Lucía 5 de daño, Ari evita el 70%."
    ]
   },
  "Tilt": {

@@ -3,7 +3,7 @@
   var NEWS = [
     { date: '2026-11-01', tag: 'Balance', title: 'KOI: nuevas rarezas y pasivas',
       items: ['Javihi Koisito (3/7) y Sech Koisito (4/6) pasan a Comunes, de 2 de oro, para poder jugar KOI desde el nivel 1. Petea Koisito se queda como está (Rara).',
-        'Pampert Koisito pasa a Épica (4 de oro, 5/15) y gana la pasiva Cabezón: recibe 2 de daño menos por cada golpe.',
+        'Pampert Koisito pasa a Épica (4 de oro, 5/15) y gana la pasiva «No me tostes»: recibe 2 de daño menos por cada golpe.',
         'AitoRLG Koisito pasa a Legendaria (5 de oro, 6/19), solo con la sinergia KOI, y gana la pasiva Heredero: si está vivo en la mesa, siempre es el objetivo de la herencia de ataque de las KOI que caen.'] },
     { date: '2026-11-01', tag: 'Cambio', title: 'KOI: herencia de ataque',
       items: ['Cuando cae una KOI, parte de su ataque pasa de forma permanente a una KOI viva al azar: la mitad en el nivel 1, 3/4 en el nivel 2 y todo en el nivel 3. La herencia no tiene tope, así que la última KOI acumula todo lo cedido. En Resurrección el ataque se traspasa (la KOI caída lo pierde) para que no se multiplique.',

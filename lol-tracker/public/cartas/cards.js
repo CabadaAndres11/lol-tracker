@@ -590,7 +590,7 @@ var D={
    "size": 2,
    "novia": true,
    "pas": {
-    "n": "Cabezón",
+    "n": "No me tostes",
     "t": "Recibe 2 de daño menos por cada golpe (mínimo 0)."
    }
   },

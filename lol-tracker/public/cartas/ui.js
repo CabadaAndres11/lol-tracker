@@ -251,12 +251,16 @@
 
   function renderBoot() { app.innerHTML = '<div class="wrap"><p class="mut" style="text-align:center;margin-top:30vh">Cargando…</p></div>'; }
   function renderLogin() {
-    app.innerHTML = '<div class="wrap"><div class="loginbox panel"><div class="lg-ico">' + ic('cartas') + '</div><h1>Juego de Cartas</h1><p class="mut">Crea tu cuenta con un nombre y un PIN de 4 dígitos para guardar tus monedas y tu colección. Apunta el PIN: no se puede recuperar.</p>' +
+    var reg = ui.lgTab === 'reg';
+    app.innerHTML = '<div class="wrap"><div class="loginbox panel"><div class="lg-ico">' + ic('cartas') + '</div><h1>Juego de Cartas</h1>' +
+      '<div class="lgtabs"><button class="' + (reg ? '' : 'on') + '" data-act="lgtab" data-t="login">Iniciar sesión</button><button class="' + (reg ? 'on' : '') + '" data-act="lgtab" data-t="reg">Registrarse</button></div>' +
+      '<p class="mut">' + (reg ? 'Elige un nombre y un PIN de 4 dígitos para guardar tus monedas y tu colección. Apunta el PIN: no se puede recuperar.' : 'Entra con tu nombre y tu PIN para recuperar tus monedas, tu colección y tus mazos.') + '</p>' +
       '<label>Nombre<input id="lg-name" maxlength="16" autocomplete="username" placeholder="Tu nombre" value="' + esc(ui.lgName || '') + '"></label>' +
-      '<label>PIN<input id="lg-pin" type="password" inputmode="numeric" maxlength="4" autocomplete="current-password" placeholder="0000"></label>' +
+      '<label>PIN<input id="lg-pin" type="password" inputmode="numeric" maxlength="4" autocomplete="' + (reg ? 'new-password' : 'current-password') + '" placeholder="0000"></label>' +
+      (reg ? '<label>Repite el PIN<input id="lg-pin2" type="password" inputmode="numeric" maxlength="4" autocomplete="new-password" placeholder="0000"></label>' : '') +
       (ui.msg ? '<div class="hint" style="color:var(--bad)">' + esc(ui.msg) + '</div>' : '') +
-      '<div class="btnrow"><button class="btn" data-act="login">Entrar</button><button class="btn sec" data-act="register">Crear cuenta nueva</button></div>' +
-      '<p class="mut" style="margin:.6rem 0 0">Al crear la cuenta recibes ' + 150 + ' monedas y un mazo inicial a tu elección.</p></div></div>';
+      '<div class="btnrow">' + (reg ? '<button class="btn" data-act="register">Crear cuenta</button>' : '<button class="btn" data-act="login">Entrar</button>') + '</div>' +
+      (reg ? '<p class="mut" style="margin:.6rem 0 0">Al crear la cuenta recibes ' + 150 + ' monedas y un mazo inicial a tu elección.</p>' : '<p class="mut" style="margin:.6rem 0 0">¿Primera vez? Pulsa «Registrarse» para crear tu cuenta.</p>') + '</div></div>';
   }
   var STARTERS = ['Pokémon', 'Informático', 'Trabajo', 'Lol', 'Comebacker', 'KOI'];
   function starterCards(act) {
@@ -997,10 +1001,12 @@
     var act = el.dataset.act, s = ui.s, P = s && s.p[0];
     if (act === 'acctmenu') { var w = el.closest('.acctw'); if (w) w.classList.toggle('open'); return; }
     if (act === 'logout') return logout();
+    if (act === 'lgtab') { var ln = document.getElementById('lg-name'); if (ln) ui.lgName = ln.value; ui.lgTab = el.dataset.t; ui.msg = ''; return render(); }
     if (act === 'register') {
-      var rn = document.getElementById('lg-name').value.trim(), rp = document.getElementById('lg-pin').value; ui.lgName = rn;
+      var rn = document.getElementById('lg-name').value.trim(), rp = document.getElementById('lg-pin').value, rp2 = document.getElementById('lg-pin2').value; ui.lgName = rn;
       if (rn.length < 3 || rn.length > 16) { ui.msg = 'El nombre debe tener entre 3 y 16 caracteres.'; return render(); }
       if (!/^\d{4}$/.test(rp)) { ui.msg = 'El PIN son 4 dígitos.'; return render(); }
+      if (rp !== rp2) { ui.msg = 'Los dos PIN no coinciden.'; return render(); }
       ui.lgPin = rp; ui.msg = ''; ui.screen = 'starter'; return render();
     }
     if (act === 'adminstarter' || act === 'adminall') {
@@ -1010,11 +1016,11 @@
         ui.msg = act === 'adminall' ? 'Colección completa restaurada.' : 'Colección reiniciada como jugador nuevo con el mazo «' + el.dataset.t + '» (' + r.data.user.owned.length + ' cartas).'; render();
       });
     }
-    if (act === 'backlogin') { ui.screen = 'login'; ui.lgPin = ''; ui.msg = ''; return render(); }
+    if (act === 'backlogin') { ui.screen = 'login'; ui.lgTab = 'reg'; ui.lgPin = ''; ui.msg = ''; return render(); }
     if (act === 'login' || act === 'pickstarter') {
       var nm = act === 'login' ? document.getElementById('lg-name').value : ui.lgName, pn = act === 'login' ? document.getElementById('lg-pin').value : ui.lgPin; ui.lgName = nm;
       return api(act === 'login' ? 'login' : 'register', { name: nm, pin: pn, starter: el.dataset.t }).then(function (r) {
-        if (!r.ok) { ui.msg = (r.data && r.data.error) || 'No se pudo entrar.'; ui.screen = 'login'; return render(); }
+        if (!r.ok) { ui.msg = (r.data && r.data.error) || 'No se pudo entrar.'; ui.screen = 'login'; ui.lgTab = act === 'login' ? 'login' : 'reg'; return render(); }
         try { localStorage.setItem('cartas_tok', r.data.token); } catch (e) {}
         ui.msg = ''; ui.lgPin = ''; setAcct(r.data.user); loadLocal(); ui.screen = landing(); render();
       });
@@ -1241,7 +1247,7 @@
 
   window.CartasUI = ui; window.CartasRender = render; // depuración
   document.addEventListener('click', function (e) { if (!e.target.closest || !e.target.closest('.acctw')) { var o = document.querySelector('.acctw.open'); if (o) o.classList.remove('open'); } });
-  app.addEventListener('keydown', function (e) { if (e.key === 'Enter' && ui.screen === 'login' && e.target.id && e.target.id.indexOf('lg-') === 0) { var b = app.querySelector('[data-act=login]'); if (b) b.click(); } });
+  app.addEventListener('keydown', function (e) { if (e.key === 'Enter' && ui.screen === 'login' && e.target.id && e.target.id.indexOf('lg-') === 0) { var b = app.querySelector('[data-act=login],[data-act=register]'); if (b) b.click(); } });
   render();
   if (!getTok()) { ui.screen = 'login'; render(); }
   else api('me').then(function (r) {

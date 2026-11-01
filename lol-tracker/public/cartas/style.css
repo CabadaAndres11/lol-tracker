@@ -1086,3 +1086,8 @@ img.timg[src$="comebacker.png"] { filter: drop-shadow(0 0 1.5px #fff) drop-shado
 .inever { display: inline-flex; align-items: center; gap: .5rem; cursor: pointer; padding: .45rem .9rem; border-radius: 999px; background: rgba(255,255,255,.07); border: 1px solid var(--line); font-size: .9rem; user-select: none; }
 .inever input { width: 1.05rem; height: 1.05rem; accent-color: #fb7185; cursor: pointer; }
 .newslink { margin-left: .4rem; color: #fda4af; font-weight: 700; text-decoration: underline; cursor: pointer; }
+
+.lgtabs { display: flex; gap: .3rem; padding: .25rem; border-radius: 999px; background: rgba(0,0,0,.28); border: 1px solid rgba(255,255,255,.12); }
+.lgtabs button { flex: 1; border: 0; background: transparent; color: var(--mut); font: inherit; font-weight: 700; padding: .55rem .6rem; border-radius: 999px; cursor: pointer; transition: background .2s, color .2s; }
+.lgtabs button.on { background: var(--gold, #c8aa6e); color: #0d0a18; }
+.lgtabs button:not(.on):hover { color: var(--ink); }

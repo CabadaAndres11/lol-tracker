@@ -1242,3 +1242,13 @@ img.timg[src$="comebacker.png"] { filter: drop-shadow(0 0 1.5px #fff) drop-shado
 .rnmain.nologo { align-items: center; }
 @media (max-width: 800px) { .rnews { height: auto; } .rnmain { min-height: 340px; } .rnmain .rnbody { max-height: none; } .rnl { max-height: none; } }
 .rnmain.nologo.full .rnbody { max-width: 470px; }
+
+/* Botón de volver al hub (arriba a la izquierda, como en LoL y Pokémon) y cuenta más grande */
+.hubback { position: fixed; top: 20px; left: 20px; z-index: 400; display: inline-flex; align-items: center; gap: .45rem; padding: .65rem 1.1rem; background: rgba(11,26,46,.92); border: 1px solid rgba(200,170,110,.55); border-radius: 4px; color: var(--gold); font-family: var(--serif); font-weight: 700; font-size: .78rem; letter-spacing: .14em; text-transform: uppercase; text-decoration: none; backdrop-filter: blur(8px); transition: color .15s, box-shadow .15s, border-color .15s; }
+.hubback:hover { color: #fff; border-color: var(--gold); box-shadow: 0 0 16px rgba(240,201,106,.4); }
+.avt.sm { width: 2.9rem; height: 2.9rem; font-size: 1.5rem; border-width: 3px; }
+.navb.who { font-size: 1.05rem; font-weight: 700; padding: .5rem .6rem; }
+.navb.avtb { padding: .15rem .3rem; }
+.navb.coinpill { font-size: 1rem; padding: .55rem .8rem; }
+@media (max-width: 1300px) { .wrap:has(> .nav) { padding-top: 4rem; } }
+@media (max-width: 700px) { .hubback { top: 12px; left: 12px; padding: .5rem .8rem; font-size: .7rem; } }

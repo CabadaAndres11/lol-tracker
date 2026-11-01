@@ -989,3 +989,8 @@ img.timg[src$="comebacker.png"] { filter: drop-shadow(0 0 1.5px #fff) drop-shado
 .novon { flex: 1; min-width: 8rem; font-size: .85rem; color: #fda4af; }
 @media (max-width: 720px) { .row4.has5 { grid-template-columns: repeat(5, 1fr); } .novs .cw { width: 22%; } }
 .fxb.t-eriko, .fxb.t-lucia { --fc: #fb7185; }
+
+/* Miniatura de la novia en la carta de su Correa (pantalla Mazo) */
+.card .novt { position: absolute; left: 50%; bottom: 3cqw; transform: translateX(-50%); width: 21cqw; height: 21cqw; border-radius: 50%; overflow: hidden; z-index: 7; cursor: pointer; border: .8cqw solid #fb7185; box-shadow: 0 0 0 .6cqw rgba(0,0,0,.55), 0 2px 8px rgba(0,0,0,.6); background: #1a0b20; }
+.card .novt img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 22%; display: block; }
+.card .novt:hover { transform: translateX(-50%) scale(1.12); }

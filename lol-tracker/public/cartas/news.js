@@ -1,6 +1,8 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-01', tag: 'Novedad', title: 'Las novias en la pantalla Mazo',
+      items: ['Las cartas Correa (Lihone, Dashlight, PotAnGo y Chipy) muestran una miniatura de su novia en la parte inferior. Púlsala para ver la carta de la novia (Eriko, Helena, Lucía o Ari) y púlsala de nuevo para volver. No cambia tu mazo.'] },
     { date: '2026-11-01', tag: 'Cambio', title: 'Correa vuelve a tener 3 niveles y mejora a las novias',
       items: ['Correa vuelve a tener 3 niveles (2 / 3 / 4 cartas distintas). El hueco 5 y las 4 novias se desbloquean en el nivel 1 y los niveles mejoran sus efectos.',
         'Eriko: +2/+2 → +3/+3 → +4/+4 a la mesa por combate (tope 10 → 15 → 20 por carta).',

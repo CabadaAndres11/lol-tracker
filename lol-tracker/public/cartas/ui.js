@@ -252,12 +252,13 @@
   function renderBoot() { app.innerHTML = '<div class="wrap"><p class="mut" style="text-align:center;margin-top:30vh">Cargando…</p></div>'; }
   function renderLogin() {
     var reg = ui.lgTab === 'reg';
+    var pt = ui.showPin ? 'text' : 'password', eye = '<button type="button" class="pineye' + (ui.showPin ? ' on' : '') + '" data-act="pinshow" title="' + (ui.showPin ? 'Ocultar PIN' : 'Ver PIN') + '" aria-label="Ver u ocultar el PIN">' + ic('ojo') + '</button>';
     app.innerHTML = '<div class="wrap"><div class="loginbox panel"><div class="lg-ico">' + ic('cartas') + '</div><h1>Juego de Cartas</h1>' +
       '<div class="lgtabs"><button class="' + (reg ? '' : 'on') + '" data-act="lgtab" data-t="login">Iniciar sesión</button><button class="' + (reg ? 'on' : '') + '" data-act="lgtab" data-t="reg">Registrarse</button></div>' +
       '<p class="mut">' + (reg ? 'Elige un nombre y un PIN de 4 dígitos para guardar tus monedas y tu colección. Apunta el PIN: no se puede recuperar.' : 'Entra con tu nombre y tu PIN para recuperar tus monedas, tu colección y tus mazos.') + '</p>' +
       '<label>Nombre<input id="lg-name" maxlength="16" autocomplete="username" placeholder="Tu nombre" value="' + esc(ui.lgName || '') + '"></label>' +
-      '<label>PIN<input id="lg-pin" type="password" inputmode="numeric" maxlength="4" autocomplete="' + (reg ? 'new-password' : 'current-password') + '" placeholder="0000"></label>' +
-      (reg ? '<label>Repite el PIN<input id="lg-pin2" type="password" inputmode="numeric" maxlength="4" autocomplete="new-password" placeholder="0000"></label>' : '') +
+      '<label>PIN<span class="pinw"><input id="lg-pin" type="' + pt + '" inputmode="numeric" maxlength="4" autocomplete="' + (reg ? 'new-password' : 'current-password') + '" placeholder="0000">' + eye + '</span></label>' +
+      (reg ? '<label>Repite el PIN<span class="pinw"><input id="lg-pin2" type="' + pt + '" inputmode="numeric" maxlength="4" autocomplete="new-password" placeholder="0000">' + eye + '</span></label>' : '') +
       (ui.msg ? '<div class="hint" style="color:var(--bad)">' + esc(ui.msg) + '</div>' : '') +
       '<div class="btnrow">' + (reg ? '<button class="btn" data-act="register">Crear cuenta</button>' : '<button class="btn" data-act="login">Entrar</button>') + '</div>' +
       (reg ? '<p class="mut" style="margin:.6rem 0 0">Al crear la cuenta recibes ' + 150 + ' monedas y un mazo inicial a tu elección.</p>' : '<p class="mut" style="margin:.6rem 0 0">¿Primera vez? Pulsa «Registrarse» para crear tu cuenta.</p>') + '</div></div>';
@@ -1001,6 +1002,7 @@
     var act = el.dataset.act, s = ui.s, P = s && s.p[0];
     if (act === 'acctmenu') { var w = el.closest('.acctw'); if (w) w.classList.toggle('open'); return; }
     if (act === 'logout') return logout();
+    if (act === 'pinshow') { ui.showPin = !ui.showPin; app.querySelectorAll('#lg-pin,#lg-pin2').forEach(function (i) { i.type = ui.showPin ? 'text' : 'password'; }); app.querySelectorAll('.pineye').forEach(function (b) { b.classList.toggle('on', ui.showPin); b.title = ui.showPin ? 'Ocultar PIN' : 'Ver PIN'; }); return; }
     if (act === 'lgtab') { var ln = document.getElementById('lg-name'); if (ln) ui.lgName = ln.value; ui.lgTab = el.dataset.t; ui.msg = ''; return render(); }
     if (act === 'register') {
       var rn = document.getElementById('lg-name').value.trim(), rp = document.getElementById('lg-pin').value, rp2 = document.getElementById('lg-pin2').value; ui.lgName = rn;

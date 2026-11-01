@@ -8,11 +8,11 @@ const PLACE_BONUS = [0, 45, 20, 5, 0]; // por puesto 1º..4º (se suma a la reco
 
 function aliveSeats(T) { return [0, 1, 2, 3].filter((p) => !T.out[p]); }
 
-function newTable(decks, names, seed, lv, sk, mode) {
+function newTable(decks, names, seed, lv, sk, mode, bots) {
   const ML = mode === 'revive' ? CFG4.reviveLife : CFG4.life;
   const T = {
     mode: mode === 'revive' ? 'revive' : '', maxLife: ML,
-    vs4: true, pvp: true, names, rs: seed | 0, uidn: [1, 1, 1, 1], uidm: 4, uidk: [0, 1, 2, 3], inc: CFG4.income,
+    vs4: true, pvp: true, names, bots: bots || null, rs: seed | 0, uidn: [1, 1, 1, 1], uidm: 4, uidk: [0, 1, 2, 3], inc: CFG4.income,
     fightN: 0, round: 0, shops: 0, combat: 0, phase: 'prep', shopOpen: false, first: 0, over: false, winner: -1, reason: '',
     log: [], frames: [], acts: [], actN: 0, err: '', lastBall: [null, null, null, null], refreshN: [0, 0, 0, 0],
     out: [false, false, false, false], place: [0, 0, 0, 0], logs: [[], [], [], []], pairs: [], rest: -1, opp: [-1, -1, -1, -1],
@@ -96,6 +96,20 @@ function finish(T) {
   T.reason = 'Fin de la partida.';
 }
 
+// ---------- Bots (partida contra 3 IAs) ----------
+// Cada IA juega su preparación con el mismo motor de la IA 1 vs 1: compra en la tienda y coloca / usa cartas.
+function botsAct(T) {
+  if (!T.bots || T.over) return;
+  [0, 1, 2, 3].forEach((p) => {
+    if (!T.bots[p] || T.out[p] || T.over || T.phase !== 'prep') return;
+    if (T.shopOpen) { E.aiShop(T, p); processStuck(T); if (T.out[p] || T.over) return; }
+    const o = T.opp[p], S = duelState(T, p, o);
+    E.aiPrep(S, 0);
+    commit(T, S, p, o);
+    T.rdy[p] = true;
+  });
+}
+
 function startRound(T) {
   T.round++; T.phase = 'prep'; T.stuck = {}; T.rest = -1; T.opp = [-1, -1, -1, -1]; T.pairs = [];
   T.fx = [null, null, null, null];
@@ -116,6 +130,7 @@ function startRound(T) {
   }
   T.log.length = 0;
   T.rdy = [false, false, false, false];
+  botsAct(T);
 }
 function pairUp(T) {
   const al = aliveSeats(T);
@@ -137,6 +152,7 @@ function processStuck(T) {
 function autoTargets(T, seat) {
   const o = T.opp[seat]; if (o < 0) return;
   const S = duelState(T, seat, o);
+  if (T.bots && T.bots[seat]) { E.aiTargets(S, 0); commit(T, S, seat, o); return; }
   const foes = E.mesaTroops(S.p[1]);
   E.pendingTargets(S, 0).forEach((i) => { if (foes.length) E.setTarget(S, 0, i.uid, foes[Math.floor(S.rng() * foes.length)].uid); });
   commit(T, S, seat, o);
@@ -165,7 +181,7 @@ function resolveCombat(T) {
   T.log.length = 0;
   if (T.over) return;
   T.phase = 'post';
-  T.rdy = [0, 1, 2, 3].map((p) => T.out[p] || !fought[p]); // los que no han peleado no esperan
+  T.rdy = [0, 1, 2, 3].map((p) => T.out[p] || !fought[p] || !!(T.bots && T.bots[p])); // los que no han peleado no esperan
 }
 function advance(T, maxRounds) {
   if (T.round >= maxRounds) { finish(T); return; }
@@ -184,4 +200,4 @@ function resolve(T, forced, maxRounds) {
 }
 
 // Reparto de monedas: 15 por jugar + bonus por puesto. Lo calcula el servidor.
-module.exports = { CFG4, PLACE_BONUS, newTable, viewFor, duelState, commit, eliminate, resolve, processStuck, aliveSeats, note, noteAll };
+module.exports = { CFG4, PLACE_BONUS, finish, newTable, viewFor, duelState, commit, eliminate, resolve, processStuck, aliveSeats, note, noteAll };

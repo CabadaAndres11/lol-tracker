@@ -1,6 +1,10 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-01', tag: 'Novedad', title: 'Versus de 4 contra 3 IAs',
+      items: ['Ya puedes jugar el Versus de 4 tú solo contra 3 IAs, en modo clásico y en modo Resurrección. Funciona igual que el Versus de 4 contra jugadores (mesa de 4, duelos rotando, el que descansa mira un duelo), pero cada IA juega con un mazo de una temática distinta, y la partida empieza al instante.',
+        'Como en el resto de partidas contra la IA, las recompensas son menores: 10 monedas por jugar y hasta 20 más según tu puesto (1º +20, 2º +10, 3º +3), y no suman ni restan puntos de clasificación. Cuentan para el límite diario de partidas con recompensa.',
+        'La pantalla Jugar se reorganiza: dentro de cada modo (clásico y Resurrección) hay ahora dos bloques, «Contra bots» y «Contra jugadores», con un aspecto distinto para que se vean de un vistazo.'] },
     { date: '2026-11-01', tag: 'Novedad', title: 'El juego de cartas ahora es TCG Arena',
       items: ['El juego estrena nombre, TCG Arena, y logo propio, que aparece en el menú de retos, en la pantalla de entrada y como icono de la pestaña.',
         'La pantalla de entrada se divide en «Iniciar sesión» y «Registrarse». Al registrarte tienes que escribir el PIN dos veces, y en ambas pantallas puedes pulsar el ojo para ver el PIN que estás escribiendo.'] },

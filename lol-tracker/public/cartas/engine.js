@@ -550,8 +550,8 @@
     });
   }
   // Mazo de la IA: elige 3 temáticas y llena el mazo con las cartas que más encajan.
-  function aiDeck(rng) {
-    var themes = Object.keys(DATA.themes), pick = [];
+  function aiDeck(rng, forced) {
+    var themes = Object.keys(DATA.themes), pick = forced ? forced.slice() : [];
     while (pick.length < 3) { var t = themes[Math.floor(rng() * themes.length)]; if (pick.indexOf(t) < 0) pick.push(t); }
     var sc = DATA.cards.map(function (c) { return { c: c, v: c.themes.filter(function (t) { return pick.indexOf(t) >= 0; }).length * 10 + rng() * 6 }; }).sort(function (a, b) { return b.v - a.v; });
     var com = sc.filter(function (x) { return x.c.rarity === 'Común'; }).slice(0, 2);

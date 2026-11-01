@@ -335,24 +335,31 @@
     }).join('') + '</div><div class="pactions"><button class="btn sec" data-act="flipall"' + (allRev ? ' style="visibility:hidden"' : '') + '>Girar todas</button></div>' + (gain ? '<p class="pgain">+' + gain + ' ' + ic('moneda') + ' por cartas repetidas</p>' : '') + '<p class="pmsg' + (allRev ? ' pulse' : '') + '">' + (allRev ? 'Haz clic en un espacio vacío para continuar' : 'Pulsa cada carta para girarla · el color del reverso te dice su rareza') + '</p></div>';
   }
   function renderModes() {
+    // id, icono, título, descripción, activo, contra bots
     var modes = [
-      ['ai', ic('robot'), 'Contra la IA', 'Duelo 1 contra 1 con tu mazo contra la IA.', true],
-      ['pvp', ic('espadas'), 'Jugador contra jugador', 'Reta a otro jugador en un duelo 1 contra 1. Sala con código o búsqueda automática.', true],
-      ['rev', ic('robot'), 'Contra la IA', 'Las tropas reviven y la carta que ataca también recibe el ataque de la carta atacada.', true],
-      ['revpvp', ic('espadas'), 'Jugador contra jugador', 'Duelo 1 contra 1 en modo Resurrección. Sala con código o búsqueda automática.', true],
-      ['vs4', ic('grupo'), 'Versus de 4', 'Cuatro jugadores, duelos rotando hasta que quede uno. Sala con código o búsqueda.', true],
-      ['revvs4', ic('grupo'), 'Versus de 4', 'Cuatro jugadores en modo Resurrección. Sala con código o búsqueda.', true],
+      ['ai', ic('robot'), '1 contra 1', 'Duelo contra una IA con tu mazo.', true, true],
+      ['vs4b', ic('grupo'), 'Versus de 4', 'Tú contra 3 IAs, cada una con un mazo distinto. Duelos rotando hasta que quede uno.', true, true],
+      ['pvp', ic('espadas'), '1 contra 1', 'Reta a otro jugador. Sala con código o búsqueda automática.', true, false],
+      ['vs4', ic('grupo'), 'Versus de 4', 'Cuatro jugadores, duelos rotando hasta que quede uno. Sala con código o búsqueda.', true, false],
+      ['rev', ic('robot'), '1 contra 1', 'Duelo contra una IA en modo Resurrección.', true, true],
+      ['revvs4b', ic('grupo'), 'Versus de 4', 'Tú contra 3 IAs, cada una con un mazo distinto, en modo Resurrección.', true, true],
+      ['revpvp', ic('espadas'), '1 contra 1', 'Duelo contra otro jugador en modo Resurrección. Sala con código o búsqueda.', true, false],
+      ['revvs4', ic('grupo'), 'Versus de 4', 'Cuatro jugadores en modo Resurrección. Sala con código o búsqueda.', true, false],
     ];
+    var ACT = { pvp: 'openpvp', revpvp: 'openrevpvp', rev: 'startrev', vs4: 'openvs4', revvs4: 'openrevvs4', vs4b: 'startvs4b', revvs4b: 'startrevvs4b', ai: 'startai' };
     var tile = function (m) {
-      return '<button class="mode m-' + m[0] + (m[4] ? '' : ' off') + '"' + (m[4] ? ' data-act="' + (m[0] === 'pvp' ? 'openpvp' : m[0] === 'revpvp' ? 'openrevpvp' : m[0] === 'rev' ? 'startrev' : m[0] === 'vs4' ? 'openvs4' : m[0] === 'revvs4' ? 'openrevvs4' : 'startai') + '"' : ' disabled aria-disabled="true"') + '><span class="mi">' + m[1] + '</span><b>' + m[2] + '</b><span class="mut">' + m[3] + '</span>' +
+      return '<button class="mode m-' + m[0] + (m[5] ? ' bot' : '') + (m[4] ? '' : ' off') + '"' + (m[4] ? ' data-act="' + ACT[m[0]] + '"' : ' disabled aria-disabled="true"') + '>' + (m[5] ? '<span class="botbadge">' + ic('robot') + ' Bots</span>' : '') + '<span class="mi">' + m[1] + '</span><b>' + m[2] + '</b><span class="mut">' + m[3] + '</span>' +
         (m[4] ? '<span class="go">¡Jugar!</span>' : '<span class="soon">' + ic('candado') + ' Próximamente</span>') + '</button>';
     };
-    var group = function (title, sub, ids) {
-      return '<h2 class="mgtitle">' + title + '</h2><p class="mut mgsub">' + sub + '</p><div class="modes">' + modes.filter(function (m) { return ids.indexOf(m[0]) >= 0; }).map(tile).join('') + '</div>';
+    var sub = function (bot, ids) {
+      return '<div class="msub ' + (bot ? 'bots' : 'humans') + '"><span>' + ic(bot ? 'robot' : 'grupo') + ' ' + (bot ? 'Contra bots' : 'Contra jugadores') + '</span><i></i>' + (bot ? '<em>Menos monedas · sin puntos de clasificación</em>' : '<em>Puntúan en la clasificación</em>') + '</div><div class="modes two">' + modes.filter(function (m) { return ids.indexOf(m[0]) >= 0; }).map(tile).join('') + '</div>';
     };
-    app.innerHTML = head('play', '' + ic('espadas') + ' Elige modo de juego') + '<p class="mut">Tu mazo actual (' + deckSize() + '/' + CFG.deckBudget + ') se usará en cualquier modo.</p>' +
-      group('Modo clásico', 'Las tropas que caen se pierden. Gana quien se queda con tropas en pie y deja sin vida al rival.', ['ai', 'pvp', 'vs4']) +
-      group('Modo Resurrección', 'Las tropas reviven cada ronda y al atacar también recibes el ataque de la carta atacada.', ['rev', 'revpvp', 'revvs4']) + '</div>';
+    var group = function (title, subt, bots, humans) {
+      return '<h2 class="mgtitle">' + title + '</h2><p class="mut mgsub">' + subt + '</p>' + sub(true, bots) + sub(false, humans);
+    };
+    app.innerHTML = head('play', '' + ic('espadas') + ' Elige modo de juego') + '<p class="mut">Tu mazo actual (' + deckSize() + '/' + CFG.deckBudget + ') se usará en cualquier modo.</p>' + (ui.msg ? '<p class="err">' + esc(ui.msg) + '</p>' : '') +
+      group('Modo clásico', 'Las tropas que caen se pierden. Gana quien se queda con tropas en pie y deja sin vida al rival.', ['ai', 'vs4b'], ['pvp', 'vs4']) +
+      group('Modo Resurrección', 'Las tropas reviven cada ronda y al atacar también recibes el ataque de la carta atacada.', ['rev', 'revvs4b'], ['revpvp', 'revvs4']) + '</div>';
   }
   function renderRules() {
     var sec = function (t, items) { return '<div class="panel"><h2>' + t + '</h2><ul class="rules">' + items.map(function (i) { return '<li>' + i + '</li>'; }).join('') + '</ul></div>'; };
@@ -520,7 +527,7 @@
     var d = r.data || {};
     if (!r.ok) {
       if (PV.on) { if (d.error) ui.hint = d.error; return pvpSchedule(2500); }
-      PV.wait = null; ui.msg = d.error || 'Sin conexión con el servidor.'; if (ui.screen === 'pvp') render(); return;
+      PV.wait = null; ui.msg = d.error || 'Sin conexión con el servidor.'; if (ui.screen === 'pvp' || ui.screen === 'modes') render(); return;
     }
     if (d.none) {
       if (PV.on) { pvpReset(); ui.hint = ''; ui.screen = 'home'; return render(); }
@@ -757,7 +764,7 @@
       var pt = ui.reward && ui.reward.pts ? '<p class="' + (ui.reward.pts > 0 ? 'reward' : 'mut') + '">' + (ui.reward.pts > 0 ? '+' : '') + ui.reward.pts + ' puntos de clasificación</p>' : '';
       var rw = pt + (ui.reward ? (ui.reward.gained > 0 ? '<p class="reward">+' + ui.reward.gained + ' ' + ic('moneda') + ' monedas</p>' : '<p class="mut">Sin monedas esta vez (partida muy corta o límite diario alcanzado).</p>') : '<p class="mut">Calculando recompensa…</p>');
       var conf = ''; if (win) for (var q = 0; q < 36; q++) conf += '<i style="left:' + (q * 2.8 + (q % 3)) + '%;--d:' + ((q * 37) % 100) / 100 * 1.2 + 's;--c:' + ['#ffc533', '#ff6b8b', '#4f9dff', '#38d39f', '#a78bfa'][q % 5] + '"></i>';
-      h += '<div class="overlay ' + (win ? 'owin' : 'olose') + '">' + (win ? '<div class="confetti">' + conf + '</div>' : '') + '<div class="panel over"><div class="obig">' + (win ? '' + ic('trofeo') + '' : '' + ic('corazonroto') + '') + '</div><h2>' + (win ? '¡Victoria!' : (s.vs4 ? 'Eliminado · puesto ' + s.place + 'º de 4' : 'Derrota')) + '</h2><p class="mut">' + esc(s.reason) + ' · ronda ' + s.round + '</p>' + rw + '<button class="btn big" data-act="' + (PV.on ? (PV.px === 'vs4' ? 'openvs4' : 'openpvp') : 'play') + '">' + (PV.on ? 'Otra partida' : 'Jugar otra vez') + '</button> <button class="btn sec" data-act="menu" data-to="deck">Cambiar mazo</button> <button class="btn sec" data-act="menu" data-to="home">Menú</button></div></div>';
+      h += '<div class="overlay ' + (win ? 'owin' : 'olose') + '">' + (win ? '<div class="confetti">' + conf + '</div>' : '') + '<div class="panel over"><div class="obig">' + (win ? '' + ic('trofeo') + '' : '' + ic('corazonroto') + '') + '</div><h2>' + (win ? '¡Victoria!' : (s.vs4 ? 'Eliminado · puesto ' + s.place + 'º de 4' : 'Derrota')) + '</h2><p class="mut">' + esc(s.reason) + ' · ronda ' + s.round + '</p>' + rw + '<button class="btn big" data-act="' + (PV.on ? (PV.px === 'vs4' ? (ui.botGame ? (PV.mode === 'revive' ? 'startrevvs4b' : 'startvs4b') : 'openvs4') : 'openpvp') : 'play') + '">' + (PV.on ? 'Otra partida' : 'Jugar otra vez') + '</button> <button class="btn sec" data-act="menu" data-to="deck">Cambiar mazo</button> <button class="btn sec" data-act="menu" data-to="home">Menú</button></div></div>';
     }
     if (ui.confirmSurr && !s.over) h += '<div class="overlay surro"><div class="panel surrp"><h2>' + ic('aviso') + ' ¿Seguro que quieres rendirte?</h2><p class="mut">Darás la partida por perdida' + (s.vs4 ? ' y quedarás eliminado.' : '.') + ' Esta acción no se puede deshacer.</p><div class="btnrow"><button class="btn" data-act="surrender-yes">Sí, rendirme</button><button class="btn sec" data-act="surrender-no">Cancelar</button></div></div></div>';
     if (s.phase === 'post' && !s.over && !ui.playing && !ui.busy && P.anime > 0 && !(PV.on && PV.rdy[0])) h += animeModal(P);
@@ -1084,12 +1091,13 @@
     if (act === 'slot-del') { var di = +el.dataset.i; if (ui.slots[di]) { ui.msg = 'Borrado «' + ui.slots[di].name + '».'; ui.slots[di] = null; saveSlots(); } return renderDeck(); }
     if (act === 'menu') { if (PV.on) { if (s && !s.over && !window.confirm('Si sales ahora pierdes la partida. ¿Salir?')) return; pvpLeaveGame(); } clearTimeout(timer); ui.playing = false; ui.screen = el.dataset.to || 'home'; return render(); }
     if (act === 'openpvp' || act === 'openrevpvp') {
+      ui.botGame = false;
       if (deckError()) { ui.screen = 'deck'; return render(); }
       saveDeck(); if (PV.on) pvpLeaveGame(); ui.msg = ''; PV.wait = null; PV.px = 'pvp'; ui.lobby = 'pvp'; PV.mode = act === 'openrevpvp' ? 'revive' : '';
       return api('pvpPoll', {}).then(function (r) { if (r.ok && r.data.s && !r.data.s.over) return pvpBegin(r.data); ui.screen = 'pvp'; window.scrollTo(0, 0); render(); });
     }
     if (act === 'openvs4' || act === 'openrevvs4') {
-      PV.mode = act === 'openrevvs4' ? 'revive' : '';
+      ui.botGame = false; PV.mode = act === 'openrevvs4' ? 'revive' : '';
       if (deckError()) { ui.screen = 'deck'; return render(); }
       saveDeck(); if (PV.on) pvpLeaveGame(); ui.msg = ''; PV.wait = null; PV.px = 'vs4'; ui.lobby = 'vs4';
       return api('vs4Poll', {}).then(function (r) {
@@ -1097,6 +1105,11 @@
         if (r.ok && r.data.wait) { PV.wait = { kind: 'code', code: r.data.code, players: r.data.players }; ui.screen = 'pvp'; render(); return pvpSchedule(1500); }
         ui.screen = 'pvp'; window.scrollTo(0, 0); render();
       });
+    }
+    if (act === 'startvs4b' || act === 'startrevvs4b') {
+      if (deckError()) { ui.screen = 'deck'; return render(); }
+      saveDeck(); if (PV.on) pvpLeaveGame(); ui.msg = ''; PV.wait = null; PV.px = 'vs4'; ui.lobby = 'vs4'; PV.mode = act === 'startrevvs4b' ? 'revive' : ''; ui.botGame = true;
+      return api('vs4Bots', { deck: ui.deck, mode: PV.mode }).then(pvpGot);
     }
     if (act === 'pvpsearch') { PV.wait = { kind: 'search' }; ui.msg = ''; render(); return api(PV.px + 'Search', { deck: ui.deck, mode: PV.mode }).then(pvpGot); }
     if (act === 'pvpcreate') { PV.wait = { kind: 'code', code: '' }; ui.msg = ''; render(); return api(PV.px + 'Create', { deck: ui.deck, mode: PV.mode }).then(pvpGot); }

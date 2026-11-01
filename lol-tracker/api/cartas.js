@@ -89,6 +89,7 @@ const PVP_COINS = { played: 15, win: 40 };
 const LADDER_KEY = 'cartas:ladder';
 const PTS_1V1 = { win: 20, lose: -20 };
 const PTS_V4 = [0, 40, 20, -20, -40];
+const BOT_COINS = { played: 10, place: [0, 20, 10, 3, 0] }; // Versus de 4 contra 3 IAs: menos monedas y sin puntos de clasificación
 async function addPts(cfg, u, delta) {
   const before = u.pts || 0;
   u.pts = Math.max(0, before + delta);
@@ -304,6 +305,7 @@ async function pvpHandle(cfg, act, body, u) {
 
 // ---------- Versus de 4 ----------
 const V4 = require('./_vs4');
+const ALL_THEMES = Object.keys(DATA.themes);
 const v4Key = (id) => `cartas:vs4:g:${id}`;
 const v4Ptr = (n) => `cartas:vs4:user:${n.toLowerCase()}`;
 const v4In = (n) => `cartas:vs4:in:${n.toLowerCase()}`;
@@ -322,11 +324,12 @@ function v4Deadline(g) {
 async function newV4Game(cfg, players, mode) {
   const order = players.slice().sort(() => crypto.randomInt(0, 2) - 0.5);
   const id = crypto.randomBytes(8).toString('hex'), now = Date.now();
-  const T = V4.newTable(order.map((p) => p.deck), order.map((p) => p.name), crypto.randomInt(1, 2 ** 30), order.map((p) => p.lv || {}), order.map((p) => p.sk || {}), mode === 'revive' ? 'revive' : '');
-  const g = { id, names: order.map((p) => p.name), T, v: 1, hb: [now, now, now, now], t0: now, paid: [false, false, false, false], rew: [null, null, null, null] };
+  const bots = order.map((p) => !!p.bot), hasBots = bots.some(Boolean);
+  const T = V4.newTable(order.map((p) => p.deck), order.map((p) => p.name), crypto.randomInt(1, 2 ** 30), order.map((p) => p.lv || {}), order.map((p) => p.sk || {}), mode === 'revive' ? 'revive' : '', hasBots ? bots : null);
+  const g = { id, names: order.map((p) => p.name), T, v: 1, hb: [now, now, now, now], t0: now, paid: [false, false, false, false], rew: [null, null, null, null], bots: hasBots ? bots : null };
   v4Deadline(g);
   await saveV4(cfg, g);
-  for (const p of order) { await redis(cfg, ['SET', v4Ptr(p.name), id, 'EX', PVP_TTL]); await redis(cfg, ['DEL', v4In(p.name)]); }
+  for (const p of order) { if (p.bot) continue; await redis(cfg, ['SET', v4Ptr(p.name), id, 'EX', PVP_TTL]); await redis(cfg, ['DEL', v4In(p.name)]); }
   return g;
 }
 function v4View(g, seat) {
@@ -342,14 +345,15 @@ async function payV4(cfg, g) {
   for (let seat = 0; seat < 4; seat++) {
     if (!(T.out[seat] || T.over) || g.paid[seat]) continue;
     g.paid[seat] = true; g.v++;
+    if (g.bots && g.bots[seat]) continue;
     const u = await loadUser(cfg, g.names[seat]); if (!u) continue;
     if (u.rewardDay !== today()) { u.rewardDay = today(); u.rewardCount = 0; }
     const abandoned = (T.ab || []).includes(seat);
     let gained = 0;
     if (valid && !abandoned && u.rewardCount < MAX_GAME_REWARDS_PER_DAY) {
-      gained = PVP_COINS.played + (V4.PLACE_BONUS[T.place[seat]] || 0); u.rewardCount++; u.coins += gained;
+      gained = g.bots ? BOT_COINS.played + (BOT_COINS.place[T.place[seat]] || 0) : PVP_COINS.played + (V4.PLACE_BONUS[T.place[seat]] || 0); u.rewardCount++; u.coins += gained;
     }
-    const pd = PTS_V4[T.place[seat]] || 0;
+    const pd = g.bots ? 0 : PTS_V4[T.place[seat]] || 0;
     const pts = (valid || (abandoned && pd < 0)) && pd ? await addPts(cfg, u, pd) : 0;
     g.rew[seat] = { gained, capped: valid && !abandoned && gained === 0, place: T.place[seat], pts, total: u.pts || 0 };
     await saveUser(cfg, u);
@@ -360,10 +364,10 @@ async function v4Tick(cfg, g, seat) {
   if (seat != null) g.hb[seat] = now;
   if (!T.over) {
     for (let o = 0; o < 4; o++) {
-      if (o !== seat && !T.out[o] && now - g.hb[o] > PVP_DC_MS) { V4.eliminate(T, o, 'Te desconectaste: eliminado.', true); g.v++; }
+      if (o !== seat && !T.out[o] && !(g.bots && g.bots[o]) && now - g.hb[o] > PVP_DC_MS) { V4.eliminate(T, o, 'Te desconectaste: eliminado.', true); g.v++; }
     }
     if (!T.over && g.dl && now > g.dl && V4.resolve(T, true, E.CFG.maxRounds)) { v4Deadline(g); g.v++; }
-    if (!T.over && V4.aliveSeats(T).length && V4.aliveSeats(T).every((p) => T.rdy[p]) && V4.resolve(T, false, E.CFG.maxRounds)) { v4Deadline(g); g.v++; }
+    if (!T.over && V4.aliveSeats(T).length && V4.aliveSeats(T).every((p) => T.rdy[p]) && V4.resolve(T, false, E.CFG.maxRounds)) { v4Deadline(g); g.v++; }    if (g.bots && !T.over && !V4.aliveSeats(T).some((p) => !g.bots[p])) { V4.finish(T); g.v++; } // solo quedan IAs: se acaba
   }
   await payV4(cfg, g);
 }
@@ -381,7 +385,7 @@ const V4_OPS = {
 };
 async function vs4Handle(cfg, act, body, u) {
   const me = u.name, lme = me.toLowerCase();
-  const wantsGame = act === 'vs4Create' || act === 'vs4Join' || act === 'vs4Search' || (act === 'vs4Poll' && !body.id);
+  const wantsGame = act === 'vs4Create' || act === 'vs4Join' || act === 'vs4Search' || act === 'vs4Bots' || (act === 'vs4Poll' && !body.id);
   if (wantsGame || act === 'vs4Cancel') {
     const cur = await redis(cfg, ['GET', v4Ptr(me)]);
     if (cur && act !== 'vs4Cancel') {
@@ -418,6 +422,17 @@ async function vs4Handle(cfg, act, body, u) {
     const err = checkDeck(u, body.deck); if (err) return { status: 400, error: err };
     const vmode = body.mode === 'revive' ? 'revive' : '', vqk = vmode ? 'cartas:vs4:q:rv' : 'cartas:vs4:q';
     const mine = { name: me, deck: body.deck, lv: levelsOf(u, body.deck), sk: skinsOf(u, body.deck) };
+    if (act === 'vs4Bots') { // partida contra 3 IAs, cada una con un mazo de una temática distinta
+      const lv = ALL_THEMES.slice().sort(() => crypto.randomInt(0, 2) - 0.5).slice(0, 3);
+      const rng = E.mulberry32(crypto.randomInt(1, 2 ** 30));
+      const bots = lv.map((lead) => {
+        const others = ALL_THEMES.filter((t) => t !== lead).sort(() => rng() - 0.5).slice(0, 2);
+        return { name: 'Bot · ' + lead, deck: E.aiDeck(rng, [lead].concat(others)), bot: true };
+      });
+      await redis(cfg, ['DEL', v4In(me)]);
+      const g = await newV4Game(cfg, [mine].concat(bots), vmode);
+      return v4View(g, g.names.indexOf(me));
+    }
     return withLock(cfg, 'v4q', async () => {
       if (act === 'vs4Create') {
         const AL = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let code = '';

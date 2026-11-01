@@ -2,7 +2,7 @@
 (function (root) {
   var NEWS = [
     { date: '2026-11-01', tag: 'Novedad', title: 'Efectos en la tienda: Meteoro dorado',
-      items: ['La tienda estrena la pestaña Efectos con un nuevo despliegue, «Meteoro dorado» (150 monedas): la carta cae envuelta en luz dorada, gira en el aire y se estrella en su hueco con una onda de choque y chispas.',
+      items: ['La tienda estrena la pestaña Efectos con un nuevo despliegue, «Meteoro dorado» (30 monedas): la carta cae envuelta en luz dorada, gira en el aire y se estrella en su hueco con una onda de choque y chispas.',
         'Puedes probarlo antes de comprarlo. También aparece en Colección → Efectos, pero hasta que lo compres no se puede equipar.'] },
     { date: '2026-11-01', tag: 'Novedad', title: 'Nuevo apartado de Efectos',
       items: ['Colección estrena el apartado Efectos, con un menú lateral. Por ahora incluye «Despliegues», el efecto con el que aparecen tus cartas en la mesa. Puedes probarlo ahí mismo y equiparlo.',

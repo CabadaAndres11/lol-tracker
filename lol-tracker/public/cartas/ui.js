@@ -948,7 +948,7 @@
   // Efectos de despliegue (cada uno devuelve la animación del contenedor .flyc). Se equipan en Colección → Efectos.
   var DEPLOY_LIST = [
     { id: 'default', name: 'Por defecto', desc: 'La carta aparece grande en mitad de la pantalla, da un par de vueltas y vuela hasta su hueco.', price: 0, ms: 2000, gap: 450 },
-    { id: 'meteoro', name: 'Meteoro dorado', desc: 'La carta cae como un meteoro envuelta en luz dorada, gira en el aire y se estrella en su hueco con una onda de choque y chispas.', price: 150, ms: 2900, gap: 600 }
+    { id: 'meteoro', name: 'Meteoro dorado', desc: 'La carta cae como un meteoro envuelta en luz dorada, gira en el aire y se estrella en su hueco con una onda de choque y chispas.', price: 30, ms: 2900, gap: 600 }
   ];
   function fxHas(id) { return !!(ui.acct && ((ui.acct.fxOwned || ['default']).indexOf(id) >= 0 || ui.acct.admin)); }
   // destello al aterrizar: onda de choque y chispas

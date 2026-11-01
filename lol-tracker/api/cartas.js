@@ -55,7 +55,7 @@ function drawCard(minRarity) {
   return pool[crypto.randomInt(0, pool.length)].id;
 }
 // Efectos cosméticos disponibles (por ahora todos son de todos los jugadores)
-const FX_PRICE = { default: 0, meteoro: 150 }; // precio en monedas de cada despliegue
+const FX_PRICE = { default: 0, meteoro: 30 }; // precio en monedas de cada despliegue
 const FX_DEPLOY = Object.keys(FX_PRICE);
 const fxOwned = (u) => ['default', ...((u.fxOwned || []).filter((x) => FX_DEPLOY.includes(x) && x !== 'default'))];
 function publicUser(u) {

@@ -53,6 +53,12 @@ body {
 .game-logo { width: clamp(150px, 24vw, 280px); height: auto; filter: drop-shadow(0 10px 30px rgba(0, 0, 0, .6)); transition: transform .5s cubic-bezier(.2, .8, .2, 1); }
 .game:hover .game-logo { transform: scale(1.07) rotate(-1.5deg); }
 
+@media (min-width: 801px) {
+  /* misma altura de logo y de descripción en las tres tarjetas, para que estado y botón queden alineados */
+  .game-logo, .cartas-logo { width: clamp(150px, 24vw, 280px); height: clamp(120px, 15vw, 190px); object-fit: contain; }
+  .game-desc { min-height: calc(1.55em * 4); }
+}
+@media (min-width: 801px) and (max-width: 1250px) { .game-name { min-height: 2.2em; display: flex; align-items: center; justify-content: center; } }
 .game-name { font-size: clamp(1.3rem, 2.4vw, 1.9rem); line-height: 1.1; }
 .game-desc { font-size: .95rem; line-height: 1.55; color: rgba(244, 241, 234, .78); max-width: 38ch; }
 
@@ -115,7 +121,7 @@ body {
   .games:hover .game, .games .game:hover, .games .game:focus-visible { flex-grow: 1; }
   .game:hover .game-body, .game:hover .game-logo, .game:hover .game-bg { transform: none; }
   .game-body { gap: .55rem; padding: .8rem .5rem; width: 100%; }
-  .game-logo { width: 62%; max-width: 150px; }
+  .game-logo, .cartas-logo { width: 62%; max-width: 150px; height: clamp(60px, 18vw, 100px); object-fit: contain; }
   .game-desc, .game-cta { display: none; }
   .game-name { font-size: .95rem; }
   .game-status { padding: .3rem .6rem; font-size: .58rem; letter-spacing: .06em; }

@@ -1438,3 +1438,19 @@ body.tutmode .refresh{pointer-events:none;opacity:.35}
 .card.dealwait{visibility:hidden}
 .flyc{position:fixed;z-index:8000;pointer-events:none;transform-origin:50% 50%;filter:drop-shadow(0 18px 26px rgba(0,0,0,.6))}
 .flyc .card{margin:0;width:100%}
+
+/* Colección · Efectos */
+.fxlayout{display:grid;grid-template-columns:210px minmax(0,1fr);gap:22px;align-items:start}
+.fxnav{display:flex;flex-direction:column;border-left:1px solid rgba(200,170,110,.25)}
+.fxnav button{background:none;border:0;border-left:3px solid transparent;margin-left:-1px;text-align:left;color:#a09b8c;font-family:var(--serif);letter-spacing:.1em;text-transform:uppercase;padding:12px 16px;cursor:pointer}
+.fxnav button:hover{color:#f0e6d2}.fxnav button.on{color:var(--gold);border-left-color:var(--gold);background:linear-gradient(90deg,rgba(224,182,76,.12),transparent)}
+.fxdemo{position:relative;width:140px;margin:6px 0 16px}
+.fxslot{aspect-ratio:5/7;border:2px dashed rgba(200,170,110,.5);background:rgba(10,16,32,.6)}
+.fxcard{position:absolute;inset:0}
+.fxlist{display:grid;gap:10px}
+.fxitem{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 16px;border:1px solid rgba(200,170,110,.3);background:#0e1526;flex-wrap:wrap}
+.fxitem.eq{border-color:var(--gold);box-shadow:0 0 14px rgba(224,182,76,.25)}
+.fxinfo{display:flex;flex-direction:column;gap:3px;min-width:200px;flex:1}.fxinfo b{font-family:var(--serif);letter-spacing:.05em}
+.fxbadge{color:#6ee7a8;font-size:.78rem;font-weight:600;margin-left:6px}
+.fxbtns{display:flex;gap:8px}
+@media(max-width:860px){.fxlayout{grid-template-columns:1fr}.fxnav{flex-direction:row;border-left:0;border-bottom:1px solid rgba(200,170,110,.25)}.fxnav button{border-left:0;border-bottom:3px solid transparent;margin:0 0 -1px}.fxnav button.on{border-bottom-color:var(--gold)}}

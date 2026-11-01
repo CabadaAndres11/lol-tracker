@@ -54,9 +54,11 @@ function drawCard(minRarity) {
   const pool = ALL.filter((c) => c.rarity === rar);
   return pool[crypto.randomInt(0, pool.length)].id;
 }
+// Efectos cosméticos disponibles (por ahora todos son de todos los jugadores)
+const FX_DEPLOY = ['default'];
 function publicUser(u) {
   return {
-    name: u.name, pts: u.pts || 0, coins: u.coins, owned: u.owned, dups: u.dups || {}, skins: u.skins || [], skinSel: u.skinSel || {}, decks: u.decks || null, avatar: u.avatar || '',
+    name: u.name, pts: u.pts || 0, coins: u.coins, owned: u.owned, dups: u.dups || {}, skins: u.skins || [], skinSel: u.skinSel || {}, decks: u.decks || null, avatar: u.avatar || '', fx: { deploy: FX_DEPLOY.includes((u.fx || {}).deploy) ? u.fx.deploy : 'default' },
     dailyAvailable: u.lastDaily !== today(),
     gamesToday: u.rewardDay === today() ? u.rewardCount : 0,
     maxGamesToday: MAX_GAME_REWARDS_PER_DAY,
@@ -628,6 +630,13 @@ module.exports = async function handler(req, res) {
       };
       await saveUser(cfg, u);
       res.status(200).json({ ok: true }); return;
+    }
+    if (act === 'fxEquip') { // equipar un efecto (kind: 'deploy')
+      const kind = String(body.kind || ''), id = String(body.id || '');
+      if (kind !== 'deploy' || !FX_DEPLOY.includes(id)) { res.status(400).json({ error: 'Ese efecto no existe.' }); return; }
+      u.fx = { ...(u.fx || {}), deploy: id };
+      await saveUser(cfg, u);
+      res.status(200).json({ user: publicUser(u) }); return;
     }
     if (act === 'avatarSet') { // foto de perfil: la ilustración de una carta que tengas desbloqueada (o vacía)
       const id = String(body.card || '');

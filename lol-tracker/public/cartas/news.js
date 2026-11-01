@@ -1,6 +1,9 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-01', tag: 'Novedad', title: 'Nuevo apartado de Efectos',
+      items: ['Colección estrena el apartado Efectos, con un menú lateral. Por ahora incluye «Despliegues», el efecto con el que aparecen tus cartas en la mesa. Puedes probarlo ahí mismo y equiparlo.',
+        'Todos los jugadores empiezan con el despliegue «Por defecto» equipado: la carta aparece grande en el centro, da un par de vueltas y vuela a su hueco. Pronto llegarán más.'] },
     { date: '2026-11-01', tag: 'Novedad', title: 'Nueva animación al desplegar cartas',
       items: ['Cada carta que entra en la mesa, tuya o del rival, aparece primero grande en mitad de la pantalla, da un par de vueltas y después vuela hasta aterrizar en su hueco.'] },
     { date: '2026-11-01', tag: 'Novedad', title: 'Nueva Colección: cartas, mazos y skins',

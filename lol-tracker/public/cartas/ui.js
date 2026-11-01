@@ -548,7 +548,7 @@
   function deckTile(sl, i, attrs, cls) {
     return '<button class="dkt' + (cls || '') + '" ' + attrs + '><span class="dkc"' + coverStyle(sl) + '>' + (deckCoverId(sl) ? '' : ic('cartas')) + '</span><b>' + esc(sl.name) + '</b><span class="dks">' + sl.ids.length + ' cartas · ' + E.deckSize(sl.ids) + '/' + CFG.deckBudget + ' espacio</span></button>';
   }
-  var COLTABS = [['cards', 'Cartas'], ['decks', 'Mazos'], ['skins', 'Skins']];
+  var COLTABS = [['cards', 'Cartas'], ['decks', 'Mazos'], ['skins', 'Skins'], ['fx', 'Efectos']];
   function colSummary(n, total, label) {
     return '<div class="colsum"><div class="colring"><b>' + n + '</b><span>/ ' + total + '</span></div><span class="mut">' + label + '</span></div>';
   }
@@ -626,7 +626,7 @@
   function renderDeck() {
     var tab = ui.dedit ? 'decks' : (ui.colTab || 'cards');
     var h = head('deck', '' + ic('cartas') + ' Colección') + '<div class="shtabs">' + COLTABS.map(function (t) { return '<button class="' + (t[0] === tab ? 'on' : '') + '" data-act="coltab" data-t="' + t[0] + '">' + t[1] + '</button>'; }).join('') + '</div>';
-    h += '<div class="shbody">' + (tab === 'decks' ? (ui.dedit ? deckEditor() : decksTab()) : tab === 'skins' ? skinsTab() : cardsTab()) + '</div></div>';
+    h += '<div class="shbody">' + (tab === 'decks' ? (ui.dedit ? deckEditor() : decksTab()) : tab === 'skins' ? skinsTab() : tab === 'fx' ? effectsTab() : cardsTab()) + '</div></div>';
     app.innerHTML = h;
   }
   function pickHtml() {
@@ -942,6 +942,41 @@
 
   // ---------- Despliegue: la carta aparece grande en mitad de la pantalla, da vueltas y aterriza en su hueco ----------
   var FLY_MS = 2000, REDUCED = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  // Efectos de despliegue (cada uno devuelve la animación del contenedor .flyc). Se equipan en Colección → Efectos.
+  var DEPLOY_LIST = [{ id: 'default', name: 'Por defecto', desc: 'La carta aparece grande en mitad de la pantalla, da un par de vueltas y vuela hasta su hueco.' }];
+  var DEPLOY_FX = {
+    'default': function (wrap, r, delay, dur) {
+      var cx = window.innerWidth / 2 - (r.left + r.width / 2), cy = window.innerHeight / 2 - (r.top + r.height / 2) - 10, sc = Math.max(1.4, Math.min(3, Math.min(300, window.innerWidth * .62, window.innerHeight * .5 * 5 / 7) / r.width));
+      var T = function (x, y, z, ry) { return 'perspective(1100px) translate(' + x + 'px,' + y + 'px) scale(' + z + ') rotateY(' + ry + 'deg)'; };
+      return wrap.animate([
+        { transform: T(cx, cy, .15, 0), opacity: 0, offset: 0 },
+        { transform: T(cx, cy, sc, 0), opacity: 1, offset: .14, easing: 'cubic-bezier(.2,.9,.3,1.2)' },
+        { transform: T(cx, cy, sc, 720), opacity: 1, offset: .62, easing: 'cubic-bezier(.45,0,.55,1)' },
+        { transform: T(cx, cy, sc * 1.04, 720), opacity: 1, offset: .70 },
+        { transform: T(0, 0, 1, 720), opacity: 1, offset: 1 }
+      ], { duration: dur - 150, delay: delay, fill: 'both', easing: 'cubic-bezier(.5,0,.3,1)' });
+    }
+  };
+  function deployId() { var id = ui.acct && ui.acct.fx && ui.acct.fx.deploy; return DEPLOY_FX[id] ? id : 'default'; }
+  // Vista previa en Colección → Efectos: la carta de muestra vuela desde el centro hasta su hueco
+  function previewDeploy(id) {
+    var t = app.querySelector('.fxdemo .card'); if (!t || ui.fxBusy) return;
+    var r = t.getBoundingClientRect(); ui.fxBusy = true;
+    var wrap = document.createElement('div'); wrap.className = 'flyc'; wrap.style.cssText = 'left:' + r.left + 'px;top:' + r.top + 'px;width:' + r.width + 'px;height:' + r.height + 'px';
+    wrap.appendChild(t.cloneNode(true)); document.body.appendChild(wrap); t.style.visibility = 'hidden';
+    var an = (DEPLOY_FX[id] || DEPLOY_FX.default)(wrap, r, 0, FLY_MS);
+    an.onfinish = function () { wrap.remove(); t.style.visibility = ''; ui.fxBusy = false; };
+  }
+  function effectsTab() {
+    var a = ui.acct, cur = deployId(), sample = D.cards.filter(function (c) { return owns(c.id) && ARTS[c.id]; })[0] || D.cards[0];
+    var nav = '<nav class="fxnav"><button class="on" data-act="fxsec" data-t="deploy">Despliegues</button></nav>';
+    var list = DEPLOY_LIST.map(function (e) {
+      var eq = e.id === cur;
+      return '<div class="fxitem' + (eq ? ' eq' : '') + '"><div class="fxinfo"><b>' + esc(e.name) + (eq ? ' <span class="fxbadge">' + ic('check') + ' Equipado</span>' : '') + '</b><span class="mut">' + esc(e.desc) + '</span></div><div class="fxbtns"><button class="btn sec sm" data-act="fxprev" data-id="' + e.id + '">' + ic('ojo') + ' Probar</button>' + (eq ? '' : '<button class="btn sm" data-act="fxequip" data-id="' + e.id + '">Equipar</button>') + '</div></div>';
+    }).join('');
+    return '<div class="fxlayout">' + nav + '<div class="fxmain"><h2 class="dedh">Despliegues</h2><p class="mut colhint">Así aparecen tus cartas en la mesa al jugarlas. Los demás jugadores ven el efecto que tengas equipado.</p>' +
+      '<div class="fxdemo"><div class="fxslot"></div><div class="fxcard">' + cardHtml(sample, { lv: 1, skin: '' }) + '</div></div><div class="fxlist">' + list + '</div></div></div>';
+  }
   function runFlights() {
     var L = ui.fl; ui.fl = [];
     if (!L || !L.length) return;
@@ -952,15 +987,7 @@
       var wrap = document.createElement('div'); wrap.className = 'flyc'; wrap.style.cssText = 'left:' + r.left + 'px;top:' + r.top + 'px;width:' + r.width + 'px;height:' + r.height + 'px';
       var cl = t.cloneNode(true); cl.classList.remove('dealwait', 'sel', 'tgtable'); ['data-cuid', 'data-act', 'data-side'].forEach(function (a) { cl.removeAttribute(a); });
       wrap.appendChild(cl); wrap.style.visibility = 'hidden'; document.body.appendChild(wrap);
-      var cx = window.innerWidth / 2 - (r.left + r.width / 2), cy = window.innerHeight / 2 - (r.top + r.height / 2) - 10, sc = Math.max(1.4, Math.min(3, Math.min(300, window.innerWidth * .62, window.innerHeight * .5 * 5 / 7) / r.width));
-      var T = function (x, y, z, ry) { return 'perspective(1100px) translate(' + x + 'px,' + y + 'px) scale(' + z + ') rotateY(' + ry + 'deg)'; };
-      var anim = wrap.animate([
-        { transform: T(cx, cy, .15, 0), opacity: 0, offset: 0 },
-        { transform: T(cx, cy, sc, 0), opacity: 1, offset: .14, easing: 'cubic-bezier(.2,.9,.3,1.2)' },
-        { transform: T(cx, cy, sc, 720), opacity: 1, offset: .62, easing: 'cubic-bezier(.45,0,.55,1)' },
-        { transform: T(cx, cy, sc * 1.04, 720), opacity: 1, offset: .70 },
-        { transform: T(0, 0, 1, 720), opacity: 1, offset: 1 }
-      ], { duration: FLY_MS - 150, delay: f.delay, fill: 'both', easing: 'cubic-bezier(.5,0,.3,1)' });
+      var anim = (DEPLOY_FX[deployId()] || DEPLOY_FX.default)(wrap, r, f.delay, FLY_MS);
       anim.onfinish = function () {
         wrap.remove();
         var real = app.querySelector('.card[data-cuid="' + f.uid + '"][data-side="' + f.side + '"]');
@@ -1341,6 +1368,9 @@
     if (act === 'novtog') { e.stopPropagation(); ui.novView = ui.novView || {}; ui.novView[el.dataset.id] = !ui.novView[el.dataset.id]; var y0 = window.scrollY; renderDeck(); window.scrollTo(0, y0); return; }
     if (act === 'onlydeck') { ui.onlyDeck = el.checked; return render(); }
     if (act === 'coltab') { ui.colTab = el.dataset.t; ui.dedit = null; ui.msg = ''; ui.delAsk = null; window.scrollTo(0, 0); return render(); }
+    if (act === 'fxsec') return;
+    if (act === 'fxprev') return previewDeploy(el.dataset.id);
+    if (act === 'fxequip') { return api('fxEquip', { kind: 'deploy', id: el.dataset.id }).then(function (r) { if (r.ok) setAcct(r.data.user); ui.msg = ''; renderDeck(); }); }
     if (act === 'dkopen') { var oi = +el.dataset.i; ui.deckOpen = ui.deckOpen === oi ? null : oi; ui.delAsk = null; ui.msg = ''; return renderDeck(); }
     if (act === 'dkedit') { var ei = +el.dataset.i, esl = ui.slots[ei]; ui.dedit = { i: ei, name: esl ? esl.name : 'Mazo ' + (ei + 1), ids: esl ? esl.ids.slice() : [], cover: esl ? esl.cover || '' : '', theme: '' }; ui.colTab = 'decks'; ui.msg = ''; window.scrollTo(0, 0); return render(); }
     if (act === 'dkdel') { ui.delAsk = +el.dataset.i; return renderDeck(); }

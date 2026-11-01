@@ -1593,3 +1593,16 @@ body.tutmode .refresh{pointer-events:none;opacity:.35}
 /* En el reverso de los sobres se conserva el brillo de rareza (box-shadow) y cambia el diseño */
 .pcards[class*="slv-"] .pcard .pback::after { background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,.3) 48%, transparent 62%); }
 @media (max-width: 720px) { .slvdemo { gap: .8rem; padding: .8rem; } }
+
+/* ---------- Rareza: gema de color en el centro superior (sustituye al borde de rareza) ---------- */
+.card.r-Común { --gm: #c3cad6; } .card.r-Rara { --gm: #3b9bff; } .card.r-Épica { --gm: #b66cff; } .card.r-Legendaria { --gm: #ffc533; }
+.card { border-color: rgba(8, 12, 24, .9); box-shadow: 0 6px 16px rgba(0,0,0,.45), inset 0 0 0 1px rgba(200,170,110,.55); }
+.card.r-Épica:not([class*="slv-"]), .card.r-Legendaria:not([class*="slv-"]) { box-shadow: 0 6px 16px rgba(0,0,0,.45), inset 0 0 0 1px rgba(200,170,110,.55); }
+.rgem { position: absolute; top: -7.5cqw; left: 50%; width: 11cqw; height: 13.2cqw; margin-left: -5.5cqw; z-index: 7; pointer-events: none; filter: drop-shadow(0 1px 2px rgba(0,0,0,.7)); }
+.rgem svg { display: block; width: 100%; height: 100%; }
+.card.r-Legendaria .rgem { filter: drop-shadow(0 0 2.2cqw rgba(255,197,51,.85)) drop-shadow(0 1px 2px rgba(0,0,0,.7)); }
+.card.r-Épica .rgem { filter: drop-shadow(0 0 1.8cqw rgba(182,108,255,.7)) drop-shadow(0 1px 2px rgba(0,0,0,.7)); }
+/* La funda pinta el borde por completo (aislada para quedar siempre sobre el fondo y bajo los números) */
+.card[class*="slv-"] { isolation: isolate; border-color: transparent; box-shadow: 0 6px 16px rgba(0,0,0,.45); }
+.card.slv-oro { box-shadow: 0 6px 16px rgba(0,0,0,.45), 0 0 10px rgba(224,165,38,.45); }
+.card.slv-neon { box-shadow: 0 6px 16px rgba(0,0,0,.45), 0 0 12px rgba(168,85,247,.55); }

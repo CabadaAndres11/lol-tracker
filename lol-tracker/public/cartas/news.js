@@ -1,6 +1,9 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-02', tag: 'Cambio', title: 'Nueva forma de ver la rareza',
+      items: ['Las cartas ya no cambian el color de su borde según la rareza. Ahora llevan una gema en el centro de la parte superior: gris plata para Común, azul para Rara, violeta para Épica y dorada para Legendaria (las dos últimas con brillo).',
+        'El borde de las cartas es ahora uno neutro, y así el de tu funda se ve completo.'] },
     { date: '2026-11-02', tag: 'Novedad', title: 'Fundas para tus cartas',
       items: ['Colección → Efectos estrena el apartado «Fundas». Una funda cambia el borde de tus cartas en la partida y el reverso al abrir sobres (el brillo del reverso sigue indicando la rareza).',
         'Por defecto vas con «Sin funda». En la tienda (pestaña Efectos) hay dos nuevas: «Oro real» (40 monedas), con borde de pan de oro y reverso azul noche con celosía dorada, y «Neón» (30 monedas), con borde de luz de cian a magenta y reverso con rejilla luminosa.',

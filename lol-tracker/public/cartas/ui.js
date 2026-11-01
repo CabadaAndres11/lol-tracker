@@ -96,18 +96,19 @@
   // ---------- Introducción animada de la sinergia Correa ----------
   var introEl = null, introT = [];
   function introOff() { try { return localStorage.getItem(lk('intro-correa')) === '1'; } catch (e) { return false; } }
-  function closeIntro(never) {
+  function closeIntro() {
     introT.forEach(clearTimeout); introT = [];
     if (introEl) { introEl.remove(); introEl = null; }
-    if (never) { try { localStorage.setItem(lk('intro-correa'), '1'); } catch (e) {} }
+    document.removeEventListener('keydown', introKey);
   }
+  function introKey(e) { if (e.key === 'Escape') closeIntro(); }
   function maybeIntro() {
     if (ui.introSeen || !ui.acct || introOff() || introEl) return;
     ui.introSeen = true;
     setTimeout(function () { if (ui.screen === 'home') openIntro(); }, 700);
   }
   function openIntro() {
-    closeIntro(false);
+    closeIntro();
     var boys = ['lihone-correa', 'dashlight-correa', 'potango', 'chipy-correa'], girls = ['eriko', 'helena', 'lucia', 'ari'];
     var h = '<div class="intropanel"><div class="introst" data-sc="0"><div class="ibg"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>' +
       '<div class="ititle"><small>¡Ya está aquí la versión 1.1!</small><b>CORREA</b></div><span class="iver">v1.1</span>' +
@@ -117,7 +118,7 @@
       '<div class="iq rival">' + cardHtml(CARD['sech-thresh'], { lv: 1 }) + '</div>' +
       '<span class="ifx fe">+2/+2</span><span class="ifx d1">-6</span><span class="ifx d2">-3</span><span class="ifx d3">-5</span><span class="ifx d5">-4</span><span class="ifx d6">-2</span><span class="ifx d4">¡Cae!</span>' +
       '<div class="icap"><span></span></div></div>' +
-      '<div class="ibtns"><button class="btn sec" data-i="close">Cerrar</button><button class="btn" data-i="never">No mostrar más</button></div></div>';
+      '<label class="ibtns inever"><input type="checkbox" data-i="never"' + (introOff() ? ' checked' : '') + '> No mostrar más</label><p class="zhint">Pulsa fuera de la animación para cerrarla</p></div>';
     introEl = document.createElement('div'); introEl.className = 'introov'; introEl.innerHTML = h;
     document.body.appendChild(introEl);
     var st = introEl.querySelector('.introst'), cap = st.querySelector('.icap span');
@@ -131,10 +132,12 @@
       introT.push(setTimeout(run, 16700));
     }
     run();
-    introEl.addEventListener('click', function (e) {
-      var b = e.target.closest('[data-i]');
-      if (b) closeIntro(b.dataset.i === 'never');
+    introEl.addEventListener('change', function (e) {
+      if (e.target.dataset.i !== 'never') return;
+      try { if (e.target.checked) localStorage.setItem(lk('intro-correa'), '1'); else localStorage.removeItem(lk('intro-correa')); } catch (er) {}
     });
+    introEl.addEventListener('click', function (e) { if (e.target === introEl || e.target.classList.contains('intropanel')) closeIntro(); });
+    document.addEventListener('keydown', introKey);
   }
 
   // ---------- Carta ampliada en 3D (pantalla Mazo) ----------
@@ -226,7 +229,7 @@
     var N = window.CARTAS_NEWS || [];
     if (!N.length) return '';
     return '<div class="panel newsbox' + (ui.newsOpen ? ' open' : '') + '"><h2>' + ic('libro') + ' Parches y noticias</h2><div class="newsbody">' + N.slice(0, 30).map(function (n) {
-      return '<div class="newsi"><div class="newsh"><span class="ntag nt-' + esc(n.tag) + '">' + esc(n.tag) + '</span><b>' + esc(n.title) + '</b><span class="mut">' + esc(n.date.split('-').reverse().join('/')) + '</span></div><ul>' + n.items.map(function (i) { return '<li>' + esc(i) + '</li>'; }).join('') + '</ul></div>';
+      return '<div class="newsi"><div class="newsh"><span class="ntag nt-' + esc(n.tag) + '">' + esc(n.tag) + '</span><b>' + esc(n.title) + '</b><span class="mut">' + esc(n.date.split('-').reverse().join('/')) + '</span></div><ul>' + n.items.map(function (i) { return '<li>' + (i.indexOf('{{intro}}') >= 0 ? esc(i.replace('{{intro}}', '')) + '<a href="#" class="newslink" data-act="introplay">▶ Ver la animación</a>' : esc(i)) + '</li>'; }).join('') + '</ul></div>';
     }).join('') + '</div><button class="btn sec sm newstog" data-act="newstog">' + (ui.newsOpen ? 'Ocultar ▴' : 'Ver todas las noticias ▾') + '</button></div>';
   }
   function renderHome() {
@@ -1050,6 +1053,7 @@
     if (act === 'rarfilter') { var rr = el.dataset.r, ri = ui.rar.indexOf(rr); if (ri >= 0) ui.rar.splice(ri, 1); else ui.rar.push(rr); var y1 = window.scrollY; renderDeck(); window.scrollTo(0, y1); return; }
     if (act === 'onlyowned') { ui.onlyOwned = el.checked; return render(); }
     if (act === 'sortlv') { ui.sortLv = el.checked; return render(); }
+    if (act === 'introplay') { e.preventDefault(); openIntro(); return; }
     if (act === 'zoom') { e.stopPropagation(); openZoom(el.dataset.id, el.dataset.skin || ''); return; }
     if (act === 'novtog') { e.stopPropagation(); ui.novView = ui.novView || {}; ui.novView[el.dataset.id] = !ui.novView[el.dataset.id]; var y0 = window.scrollY; renderDeck(); window.scrollTo(0, y0); return; }
     if (act === 'onlydeck') { ui.onlyDeck = el.checked; return render(); }

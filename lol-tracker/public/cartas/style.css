@@ -269,7 +269,7 @@ body.shopbg { background: radial-gradient(ellipse 90% 60% at 50% 0, #7a4a12 0, #
 
 /* ======== v5: efectos de temáticas, números flotantes, arrastrar a la mano ======== */
 .handwrap.dropzone { outline: 3px dashed var(--acc); outline-offset: 4px; background: rgba(167,139,250,.1); border-radius: 16px; }
-.shopmode .row4.side0 .card { touch-action: none; cursor: grab; }
+.shopmode .row4.side0 .card { touch-action: none; cursor: grab; margin-bottom: 1rem; }
 /* Deltas permanentes sobre los círculos */
 .dl { position: absolute; bottom: 17cqw; font-style: normal; font-weight: 900; font-size: 9cqw; padding: 0 2.6cqw; border-radius: 999px; z-index: 3; border: .8cqw solid #1a1030; line-height: 1.35; }
 .dl.a { left: 0; } .dl.h { right: 0; }
@@ -1002,3 +1002,25 @@ img.timg[src$="comebacker.png"] { filter: drop-shadow(0 0 1.5px #fff) drop-shado
 @keyframes holoSweep { 0% { transform: translateX(-45%) rotate(0deg); opacity: .0; } 15% { opacity: .9; } 60% { opacity: .9; } 100% { transform: translateX(45%) rotate(0deg); opacity: 0; } }
 @keyframes holoTwinkle { 0%, 100% { opacity: .35; } 50% { opacity: .9; } }
 @media (prefers-reduced-motion: reduce) { .card .holo::before, .card .holo::after { animation: none; opacity: .5; } }
+
+/* Ojo para ampliar la carta (Mazo) y visor 3D */
+.deckgrid .card .eyeb { position: absolute; top: 17cqw; left: 3.5cqw; width: 13cqw; height: 13cqw; border-radius: 50%; z-index: 8; display: grid; place-items: center; cursor: zoom-in; background: rgba(10,6,24,.72); border: .7cqw solid rgba(255,255,255,.6); box-shadow: 0 2px 6px rgba(0,0,0,.5); opacity: .88; transition: opacity .15s, transform .15s; }
+.deckgrid .card:hover .eyeb, .deckgrid .card:focus-within .eyeb, .deckgrid .card .eyeb:focus { opacity: 1; }
+@media (hover: none) { .deckgrid .card .eyeb { opacity: .9; } }
+.deckgrid .card .eyeb svg { width: 72%; height: 72%; }
+.deckgrid .card .eyeb:hover { transform: scale(1.15); background: rgba(10,6,24,.9); }
+.zoomov { position: fixed; inset: 0; z-index: 400; display: grid; place-items: center; background: rgba(5,3,14,.82); backdrop-filter: blur(5px); padding: 1rem; animation: zin .18s ease-out; }
+@keyframes zin { from { opacity: 0; } }
+.zbox { display: flex; flex-direction: column; align-items: center; gap: .8rem; max-height: 100%; }
+.zstage { width: min(78vw, 360px, calc((100vh - 170px) * 5 / 7)); aspect-ratio: 5 / 7; perspective: 1100px; touch-action: none; cursor: grab; margin-bottom: 1rem; }
+.zstage:active { cursor: grabbing; }
+.zcard { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; will-change: transform; }
+.zfront, .zback { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: 14px; }
+.zfront .card { width: 100%; height: 100%; box-shadow: 0 25px 55px rgba(0,0,0,.7); }
+.zfront .card .eyeb { display: none; }
+.zglare { position: absolute; inset: 0; border-radius: 14px; pointer-events: none; mix-blend-mode: soft-light; z-index: 20; }
+.zback { transform: rotateY(180deg); background: linear-gradient(155deg, #3b1d6e, #120a2a 60%, #3b1d6e); border: 3px solid #fbbf24; display: grid; place-items: center; box-shadow: 0 25px 55px rgba(0,0,0,.7); }
+.zbk { display: flex; flex-direction: column; align-items: center; gap: .6rem; color: #fbbf24; text-align: center; padding: 1rem; }
+.zbk b svg { width: 4.5rem; height: 4.5rem; } .zbk span { font-family: 'Cinzel', serif; letter-spacing: .12em; text-transform: uppercase; font-size: 1rem; }
+.zbtns { display: flex; gap: .5rem; flex-wrap: wrap; justify-content: center; }
+.zhint { margin: 0; font-size: .75rem; color: #b7aedc; text-align: center; }

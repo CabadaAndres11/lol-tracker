@@ -93,6 +93,54 @@
     return h + '</' + tag + '>';
   }
 
+  // ---------- Carta ampliada en 3D (pantalla Mazo) ----------
+  var zoomEl = null;
+  function closeZoom() { if (zoomEl) { zoomEl.remove(); zoomEl = null; } document.removeEventListener('keydown', zoomKey); }
+  function zoomKey(e) { if (e.key === 'Escape') closeZoom(); }
+  function openZoom(id) {
+    var c = CARD[id]; if (!c) return;
+    closeZoom();
+    var own = owns(c.id) || !!c.novia, st = { rx: 0, ry: 0, tx: 0, ty: 0, drag: null, auto: true, t0: performance.now() };
+    var face = cardHtml(c, { lv: own && !c.novia ? lvOf(c.id) : 1, cls: 'zface' });
+    zoomEl = document.createElement('div'); zoomEl.className = 'zoomov';
+    zoomEl.innerHTML = '<div class="zbox"><div class="zstage"><div class="zcard"><div class="zfront">' + face + '<span class="zglare"></span></div><div class="zback"><div class="zbk"><b>' + ic('cartas') + '</b><span>' + esc(c.name) + '</span></div></div></div></div>' +
+      '<div class="zbtns"><button class="btn sec sm" data-z="flip">' + ic('cambio') + ' Voltear</button><button class="btn sec sm" data-z="reset">Restablecer</button><button class="btn sm" data-z="close">Cerrar</button></div>' +
+      '<p class="zhint">Arrastra para girarla · pasa el ratón para inclinarla · Esc para cerrar</p></div>';
+    document.body.appendChild(zoomEl);
+    var card = zoomEl.querySelector('.zcard'), glare = zoomEl.querySelector('.zglare'), stage = zoomEl.querySelector('.zstage');
+    function paint() { card.style.transform = 'rotateX(' + st.rx.toFixed(1) + 'deg) rotateY(' + st.ry.toFixed(1) + 'deg)'; }
+    function glarePos(x, y) { glare.style.background = 'radial-gradient(circle at ' + x + '% ' + y + '%, rgba(255,255,255,.38), rgba(255,255,255,0) 55%)'; }
+    // balanceo suave mientras no la tocas
+    function idle(now) {
+      if (!zoomEl) return;
+      if (st.auto && !st.drag) { var t = (now - st.t0) / 1000; st.ry = Math.sin(t * .9) * 14; st.rx = Math.cos(t * .7) * 5; glarePos(50 + Math.sin(t * .9) * 30, 40 + Math.cos(t * .7) * 20); paint(); }
+      requestAnimationFrame(idle);
+    }
+    requestAnimationFrame(idle);
+    function norm(a) { return ((a % 360) + 540) % 360 - 180; }
+    stage.addEventListener('pointerdown', function (e) { st.drag = { x: e.clientX, y: e.clientY, rx: st.rx, ry: st.ry }; st.auto = false; card.style.transition = 'none'; stage.setPointerCapture(e.pointerId); });
+    stage.addEventListener('pointermove', function (e) {
+      var r = stage.getBoundingClientRect();
+      glarePos(Math.max(0, Math.min(100, (e.clientX - r.left) / r.width * 100)), Math.max(0, Math.min(100, (e.clientY - r.top) / r.height * 100)));
+      if (st.drag) { st.ry = st.drag.ry + (e.clientX - st.drag.x) * .6; st.rx = Math.max(-70, Math.min(70, st.drag.rx - (e.clientY - st.drag.y) * .5)); paint(); }
+      else if (e.pointerType === 'mouse') { st.auto = false; card.style.transition = 'transform .12s ease-out'; st.ry = norm(st.ry) > 90 || norm(st.ry) < -90 ? st.ry : ((e.clientX - r.left) / r.width - .5) * 40; st.rx = -((e.clientY - r.top) / r.height - .5) * 30; paint(); }
+    });
+    function end() { if (!st.drag) return; st.drag = null; card.style.transition = 'transform .45s cubic-bezier(.2,.8,.2,1)'; var n = norm(st.ry); st.ry = Math.abs(n) > 90 ? 180 * (n > 0 ? 1 : -1) : 0; st.rx = 0; paint(); } // se asienta de frente o de espaldas
+    stage.addEventListener('pointerup', end); stage.addEventListener('pointercancel', end);
+    zoomEl.addEventListener('click', function (e) {
+      var z = e.target.closest('[data-z]');
+      if (z) {
+        card.style.transition = 'transform .6s cubic-bezier(.2,.8,.2,1)'; st.auto = false;
+        if (z.dataset.z === 'flip') { st.ry = Math.abs(norm(st.ry)) > 90 ? 0 : 180; st.rx = 0; paint(); }
+        else if (z.dataset.z === 'reset') { st.ry = 0; st.rx = 0; paint(); }
+        else closeZoom();
+        return;
+      }
+      if (e.target === zoomEl) closeZoom();
+    });
+    document.addEventListener('keydown', zoomKey);
+  }
+
   // ---------- Navegación ----------
   var NAV = [['home', 'casa', 'Inicio'], ['play', 'espadas', 'Jugar'], ['deck', 'cartas', 'Mazo'], ['packs', 'tienda', 'Tienda'], ['themes', 'brillo', 'Sinergias'], ['rules', 'libro', 'Normas']];
   function navHtml(cur) {
@@ -338,7 +386,7 @@
       thumb = '<span class="novt" data-act="novtog" data-id="' + c.id + '" title="' + (girlView ? 'Ver a ' + esc(c.name) : 'Ver a ' + esc(CARD[gid].name) + ', su novia') + '"><img src="/cartas/art/' + (girlView ? c.id : gid) + '.webp" alt=""></span>';
       if (girlView) show = CARD[gid];
     }
-    return cardHtml(show, { lv: own ? lvOf(c.id) : 1, size: true, cls: (inn ? 'in' : '') + (own ? '' : ' locked'), extra: thumb + (own ? '' : '<span class="lockb">' + ic('candado') + '</span>'), attrs: 'data-act="toggle" data-id="' + c.id + '"', tag: 'button' });
+    return cardHtml(show, { lv: own ? lvOf(c.id) : 1, size: true, cls: (inn ? 'in' : '') + (own ? '' : ' locked'), extra: '<span class="eyeb" data-act="zoom" data-id="' + show.id + '" title="Ver ampliada en 3D">' + ic('ojo') + '</span>' + thumb + (own ? '' : '<span class="lockb">' + ic('candado') + '</span>'), attrs: 'data-act="toggle" data-id="' + c.id + '"', tag: 'button' });
   }
   function byLv(arr) { if (!ui.sortLv) return arr; return arr.map(function (c, i) { return [c, i]; }).sort(function (a, b) { return (owns(b[0].id) ? lvOf(b[0].id) : 1) - (owns(a[0].id) ? lvOf(a[0].id) : 1) || a[1] - b[1]; }).map(function (x) { return x[0]; }); }
   function filtered() {
@@ -957,6 +1005,7 @@
     if (act === 'rarfilter') { var rr = el.dataset.r, ri = ui.rar.indexOf(rr); if (ri >= 0) ui.rar.splice(ri, 1); else ui.rar.push(rr); var y1 = window.scrollY; renderDeck(); window.scrollTo(0, y1); return; }
     if (act === 'onlyowned') { ui.onlyOwned = el.checked; return render(); }
     if (act === 'sortlv') { ui.sortLv = el.checked; return render(); }
+    if (act === 'zoom') { e.stopPropagation(); openZoom(el.dataset.id); return; }
     if (act === 'novtog') { e.stopPropagation(); ui.novView = ui.novView || {}; ui.novView[el.dataset.id] = !ui.novView[el.dataset.id]; var y0 = window.scrollY; renderDeck(); window.scrollTo(0, y0); return; }
     if (act === 'onlydeck') { ui.onlyDeck = el.checked; return render(); }
     if (act === 'toggle') {

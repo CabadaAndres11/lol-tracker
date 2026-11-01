@@ -189,7 +189,7 @@
   }
 
   // ---------- Navegación ----------
-  var NAV = [['home', 'casa', 'Inicio'], ['play', 'espadas', 'Jugar'], ['deck', 'cartas', 'Mazo'], ['packs', 'tienda', 'Tienda'], ['themes', 'brillo', 'Sinergias'], ['ladder', 'trofeo', 'Clasificación'], ['rules', 'libro', 'Normas']];
+  var NAV = [['home', 'casa', 'Inicio'], ['play', 'espadas', 'Jugar'], ['deck', 'cartas', 'Mazo'], ['packs', 'tienda', 'Tienda'], ['ladder', 'trofeo', 'Clasificación'], ['rules', 'libro', 'Normas']];
   function artOk(id) { return !!id && (!!ARTS[id] || (window.CARTAS_SKINS || []).some(function (k) { return k.id === id; })); }
   function avatarHtml(cls) {
     var id = ui.acct && ui.acct.avatar, ok = artOk(id);
@@ -274,12 +274,10 @@
     var nl = document.querySelector('.rnews .rnl'); if (nl) nl.scrollTop = st;
   }
   function renderHome() {
-    var n = Object.keys(D.themes).length;
     var h = head('home') + '<div class="rhome"><div class="rplay"><button class="rplaybtn" data-act="nav" data-to="play"><span class="rpl">' + ic('espadas') + '</span><span class="rpt">Jugar</span></button></div>' +
       '<div class="ricons">' + [
         ['deck', ic('cartas'), 'Mazo', deckSize() + '/' + CFG.deckBudget],
         ['packs', ic('tienda'), 'Tienda', (ui.acct ? ui.acct.coins : 0) + ' monedas'],
-        ['themes', ic('brillo'), 'Sinergias', n + ' sinergias'],
         ['ladder', ic('trofeo'), 'Clasificación', ui.acct.pts + ' puntos'],
         ['rules', ic('libro'), 'Normas', 'Cómo se juega'],
         ['profile', ic('usuario'), 'Perfil', 'Foto y cuenta'],
@@ -440,19 +438,6 @@
   }
 
   function themeCards(t) { return D.cards.filter(function (c) { return c.themes.indexOf(t) >= 0; }).concat(D.actions.filter(function (a) { return a.theme === t; })); }
-  function renderThemes() {
-    var h = head('themes', '' + ic('brillo') + ' Sinergias') + '<p class="mut">Pulsa «Ver en el mazo» para filtrar las cartas de esa sinergia.</p>';
-    Object.keys(D.themes).forEach(function (t) {
-      var T = D.themes[t], cs = themeCards(t);
-      h += '<div class="panel"><h2>' + tagHtml(t) + ' <span class="mut" style="letter-spacing:0;text-transform:none">· ' + cs.length + ' cartas</span></h2>' +
-        T.tx.map(function (x, k) { return '<p class="lv"><b>Nivel ' + (k + 1) + ' · ' + T.th[k] + ' cartas:</b> ' + esc(x) + '</p>'; }).join('') +
-        '<div class="chips">' + cs.map(function (c) { return '<span class="chip r-' + c.rarity + '">' + esc(c.name) + '</span>'; }).join('') + '</div>' +
-        '<button class="btn sec" data-act="filterset" data-t="' + esc(t) + '">Ver en el mazo →</button></div>';
-    });
-    app.innerHTML = h + '</div>';
-  }
-
-  // ---------- Mazo ----------
   function sameDeck(a, b) { return a.length === b.length && a.every(function (x) { return b.indexOf(x) >= 0; }); }
   function slotsHtml() {
     var h = '<div class="slots">';
@@ -963,9 +948,9 @@
   window.addEventListener('resize', function () { var o = document.querySelector('#board svg.arrows'); if (o) o.remove(); drawArrows(); });
 
   // ---------- Navegación por URL (#/mazo, #/tienda…): al recargar se vuelve a la misma sección ----------
-  var ROUTES = { home: 'inicio', modes: 'jugar', pvp: 'jugar', game: 'jugar', deck: 'mazo', packs: 'tienda', themes: 'sinergias', rules: 'normas', profile: 'perfil', ladder: 'clasificacion' };
-  var ROUTE_SCREEN = { inicio: 'home', jugar: 'modes', mazo: 'deck', tienda: 'packs', sinergias: 'themes', normas: 'rules', perfil: 'profile', clasificacion: 'ladder' };
-  var ROUTE_TITLE = { home: 'Inicio', modes: 'Jugar', pvp: 'Jugar', game: 'Partida', deck: 'Mazo', packs: 'Tienda', themes: 'Sinergias', rules: 'Normas', profile: 'Perfil', ladder: 'Clasificación' };
+  var ROUTES = { home: 'inicio', modes: 'jugar', pvp: 'jugar', game: 'jugar', deck: 'mazo', packs: 'tienda', rules: 'normas', profile: 'perfil', ladder: 'clasificacion' };
+  var ROUTE_SCREEN = { inicio: 'home', jugar: 'modes', mazo: 'deck', tienda: 'packs', normas: 'rules', perfil: 'profile', clasificacion: 'ladder' };
+  var ROUTE_TITLE = { home: 'Inicio', modes: 'Jugar', pvp: 'Jugar', game: 'Partida', deck: 'Mazo', packs: 'Tienda', rules: 'Normas', profile: 'Perfil', ladder: 'Clasificación' };
   function hashScreen() { var m = /^#\/([a-z]+)/.exec(location.hash || ''); return m && ROUTE_SCREEN[m[1]] || null; }
   function landing() { var sc = hashScreen() || 'home'; if (sc === 'modes' && deckError()) sc = 'deck'; return sc; }
   function syncHash() {
@@ -988,7 +973,7 @@
   function render() {
     document.body.classList.remove('shopbg');
     if (PV.wait && ui.screen !== 'pvp') pvpCancelWait();
-    var f = { home: renderHome, deck: renderDeck, rules: renderRules, themes: renderThemes, modes: renderModes, pvp: renderPvp, login: renderLogin, starter: renderStarter, packs: renderPacks, profile: renderProfile, ladder: renderLadder, boot: renderBoot }[ui.screen];
+    var f = { home: renderHome, deck: renderDeck, rules: renderRules, modes: renderModes, pvp: renderPvp, login: renderLogin, starter: renderStarter, packs: renderPacks, profile: renderProfile, ladder: renderLadder, boot: renderBoot }[ui.screen];
     if (f) f(); else renderGame();
     syncHash();
   }

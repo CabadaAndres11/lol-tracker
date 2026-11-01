@@ -18,7 +18,7 @@
     lol: { atk: [1, 1, 2], hp: [0, 1, 2], cap: [4, 6, 8] },
     trabajo: { shop: [0, 0, 2] },
     anime: { cede: [1, 2, 3] },
-    koi: { atk: [1, 2, 3], cap: 8 },
+    koi: { atk: [1, 1, 2], cap: 5, heir: [0.5, 0.75, 1] }, // mejora al caer (tope por tropa) + herencia: % del ataque de la KOI caída pasa a una KOI viva al azar (sin tope)
     voley: { atk: [1, 2, 3], red: [1, 1, 2], cap: 8 },
     novias: { eriko: [2, 3, 4], eCap: [10, 15, 20], helena: [0, 2, 4], lucia: [3, 4, 5], ari: [0.5, 0.6, 0.7] }, // por nivel de Correa // novias del hueco 5 (sinergia Correa)
     tilt: { hit: [1, 1, 2], perm: [1, 2, 2], cap: 8 },
@@ -755,6 +755,15 @@
           mesaTroops(s.p[d.owner]).forEach(function (i) { gainCap(i, 'koi', 'atk', kb, FX.koi.cap); });
           line += ' KOI anima al equipo: +' + kb + ' de ataque.';
           fxk = { type: 'koi', side: d.owner, title: '¡KOI anima al equipo!', sub: '+' + kb + ' ataque permanente', uids: mesaTroops(s.p[d.owner]).map(function (i) { return i.uid; }), neg: false };
+          // Herencia: parte del ataque de la KOI caída pasa, de forma permanente, a una KOI viva al azar
+          var heirs = mesaTroops(s.p[d.owner]).filter(function (i) { return has(i, 'KOI') && i !== d; });
+          if (heirs.length && atk(d) > 0) {
+            var hm = Math.max(1, Math.floor(atk(d) * FX.koi.heir[tt2['KOI'] - 1])), hv = heirs[Math.floor(s.rng() * heirs.length)];
+            grow(hv, 'atk', hm);
+            if (s.mode === 'revive') d.perm.atk -= hm; // en Resurrección la KOI renace: el ataque se traspasa, no se copia
+            line += ' Herencia: ' + card(hv).name + ' recibe +' + hm + ' de ataque permanente.';
+            fxk.sub += ' · herencia +' + hm + ' a ' + card(hv).name; fxk.uids = fxk.uids.concat(heirs.indexOf(hv) >= 0 ? [] : [hv.uid]);
+          }
         }
         if (has(d, 'Dúo Inseparable') && tt2['Dúo Inseparable']) {
           var dd = mesaTroops(s.p[d.owner]).filter(function (i) { return has(i, 'Dúo Inseparable'); });

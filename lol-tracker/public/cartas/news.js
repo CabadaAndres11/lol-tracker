@@ -1,6 +1,9 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-01', tag: 'Cambio', title: 'KOI: herencia de ataque',
+      items: ['Cuando cae una KOI, parte de su ataque pasa de forma permanente a una KOI viva al azar: la mitad en el nivel 1, 3/4 en el nivel 2 y todo en el nivel 3. La herencia no tiene tope, así que la última KOI acumula todo lo cedido. En Resurrección el ataque se traspasa (la KOI caída lo pierde) para que no se multiplique.',
+        'A cambio baja la mejora a todas tus tropas cuando cae una KOI: +1 / +1 / +2 de ataque permanente por nivel (antes +1 / +2 / +3) y tope de +5 por tropa (antes +8).'] },
     { date: '2026-11-01', tag: 'Corrección', title: 'Texto de la sinergia KOI',
       items: ['El texto de KOI ahora indica que el ataque ganado cuando cae una KOI es permanente (tope +8 por tropa), que es como funcionaba en realidad.'] },
     { date: '2026-11-01', tag: 'Novedad', title: 'Versión 1.1: introducción animada de Correa',

@@ -1,6 +1,9 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-02', tag: 'Cambio', title: 'Nuevos efectos al abrir sobres',
+      items: ['La apertura de sobres estrena un estilo más moderno y translúcido: fondo de cristal desenfocado teñido con el color de la mejor carta, sobre que levita, destello de luz, ondas y motas brillantes al rasgarse.',
+        'El reverso de las cartas pasa a ser de cristal esmerilado con un brillo que lo recorre, y su borde sigue indicando la rareza. Las etiquetas «Nueva» y «Repetida» también son de cristal.'] },
     { date: '2026-11-02', tag: 'Novedad', title: 'Nuevo sobre: Set 1',
       items: ['El sobre estándar pasa a llamarse «Set 1» y estrena ilustración propia. La animación de apertura se mantiene: el sobre tiembla, se rasga por arriba y salen las cartas.'] },
     { date: '2026-11-02', tag: 'Cambio', title: 'Mejoras visuales en partida',

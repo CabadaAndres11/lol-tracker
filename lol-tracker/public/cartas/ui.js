@@ -458,14 +458,23 @@
     var fb = app.querySelector('[data-act=flipall]'); if (fb) fb.style.visibility = 'hidden';
   }
   function RIP_MS(pk) { return pk.cards.some(function (c) { return CARD[c.id].rarity === 'Legendaria'; }) ? 2300 : 1750; }
+  // Anillo de luz y motas que salen del sobre al rasgarse (color según la mejor rareza)
+  function pkFx(best) {
+    var n = best === 'Legendaria' ? 34 : best === 'Épica' ? 26 : 18, h = '<div class="pkfx"><span class="ring"></span><span class="ring r2"></span>';
+    for (var i = 0; i < n; i++) {
+      var a = Math.random() * Math.PI * 2, d = 90 + Math.random() * 190;
+      h += '<i style="--x:' + Math.round(Math.cos(a) * d) + 'px;--y:' + Math.round(Math.sin(a) * d - 40) + 'px;--s:' + (3 + Math.random() * 5).toFixed(1) + 'px;--d:' + (0.35 + Math.random() * 0.5).toFixed(2) + 's"></i>';
+    }
+    return h + '</div>';
+  }
   function packOverlay() {
     var pk = ui.pack; if (!pk) return '';
-    if (!pk.cards) return '<div class="packov">' + bpkHtml('shake best-Común') + '</div>';
+    if (!pk.cards) return '<div class="packov best-Común">' + bpkHtml('shake best-Común') + '</div>';
     var best = pk.cards.reduce(function (b, c) { var r = CARD[c.id].rarity; return RANK.indexOf(r) > RANK.indexOf(b) ? r : b; }, 'Común');
-    if (pk.stage === 'rip') return '<div class="packov' + (best === 'Legendaria' ? ' rainbow' : '') + '">' + bpkHtml('rip best-' + best) + '</div>';
+    if (pk.stage === 'rip') return '<div class="packov best-' + best + (best === 'Legendaria' ? ' rainbow' : '') + '">' + bpkHtml('rip best-' + best) + pkFx(best) + '</div>';
     var gain = pk.cards.reduce(function (n, c) { return n + c.dupCoins; }, 0);
     var allRev = pk.rev.every(Boolean);
-    return '<div class="packov' + (best === 'Legendaria' ? ' rainbowpost' : '') + '" data-act="packbg"><div class="pcards">' + pk.cards.map(function (c, i) {
+    return '<div class="packov best-' + best + (best === 'Legendaria' ? ' rainbowpost' : '') + '" data-act="packbg"><div class="pcards">' + pk.cards.map(function (c, i) {
       var cd = CARD[c.id];
       return '<div class="pcard r-' + cd.rarity + (pk.rev[i] ? ' flipped' : '') + '" data-act="flipcard" data-i="' + i + '" style="--d:' + i * 0.12 + 's"><div class="pin"><div class="pback"><span>' + GEM[cd.rarity] + '</span></div><div class="pfront">' + cardHtml(cd, {}) +
         (c.isNew ? '<span class="pnew">¡NUEVA!</span>' : '<span class="pdup">' + (c.lvUp ? '¡Sube a ★' + c.lvl + '!' : 'Repetida · ' + c.copies + ' copias') + '</span>') + '</div></div></div>';

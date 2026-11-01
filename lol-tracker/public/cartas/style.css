@@ -1501,3 +1501,46 @@ body.tutmode .refresh{pointer-events:none;opacity:.35}
 .bpk-lid::after, .bpk-main::after { -webkit-mask: url(img/pack-set1.webp) center / 100% 100% no-repeat; mask: url(img/pack-set1.webp) center / 100% 100% no-repeat; mix-blend-mode: soft-light; opacity: .8; }
 .bpk { filter: drop-shadow(0 16px 22px rgba(0,0,0,.75)) drop-shadow(0 0 18px rgba(140,80,255,.35)); }
 .shtile.pack .bpk { transform: scale(.42); }
+
+/* ---------- Apertura de sobres: cristal translúcido, bloom de luz y motas ---------- */
+.packov { --ac: #8fb4ff; background: radial-gradient(ellipse 60% 55% at 50% 45%, color-mix(in srgb, var(--ac) 26%, transparent), transparent 72%), rgba(5, 10, 24, .5);
+  -webkit-backdrop-filter: blur(20px) saturate(1.5); backdrop-filter: blur(20px) saturate(1.5); animation: pkov .45s ease-out both; }
+@keyframes pkov { from { opacity: 0; -webkit-backdrop-filter: blur(0); backdrop-filter: blur(0); } }
+.packov.best-Común { --ac: #cfd8ea; } .packov.best-Rara { --ac: #4aa3ff; } .packov.best-Épica { --ac: #b873ff; } .packov.best-Legendaria { --ac: #ffc84a; }
+.packov.rainbow::before { filter: blur(40px); animation-name: rbwash2; } @keyframes rbwash2 { 0% { opacity: 0; } 30% { opacity: .38; } 100% { opacity: 0; } }
+/* el sobre levita con un halo suave en vez de temblar a lo bruto */
+.bpk.shake { animation: pkcharge 1.1s ease-in-out infinite; filter: drop-shadow(0 20px 30px rgba(0,0,0,.6)) drop-shadow(0 0 22px rgba(160,120,255,.55)); }
+@keyframes pkcharge { 0%, 100% { transform: translateY(0) rotate(-1deg) scale(1); } 50% { transform: translateY(-10px) rotate(1deg) scale(1.03); } }
+/* bloom + haces finos al rasgarse */
+.bpk-glow { width: 260px; height: 260px; }
+.bpk.rip .bpk-glow { background: radial-gradient(circle, rgba(255,255,255,.95) 0, color-mix(in srgb, var(--ac) 80%, #fff) 22%, color-mix(in srgb, var(--ac) 40%, transparent) 46%, transparent 68%); filter: blur(12px); mix-blend-mode: screen; animation: pkbloom 1.5s .2s ease-out both; }
+.bpk.best-Legendaria.rip .bpk-glow { animation-name: pkbloom; filter: blur(12px) saturate(1.3); }
+@keyframes pkbloom { 0% { transform: translate(-50%, -50%) scale(.1); opacity: 0; } 25% { opacity: 1; } 100% { transform: translate(-50%, -50%) scale(3.2); opacity: 0; } }
+.bpk.rip .bpk-rays { background: repeating-conic-gradient(from 0deg, color-mix(in srgb, var(--ac) 75%, #fff) 0 1.6deg, transparent 1.6deg 12deg); opacity: .6; mix-blend-mode: screen; }
+.bpk.best-Legendaria.rip .bpk-rays { background: repeating-conic-gradient(from 0deg, rgba(255,77,109,.8) 0 2deg, transparent 2deg 6deg, rgba(255,212,94,.8) 6deg 8deg, transparent 8deg 12deg, rgba(79,157,255,.8) 12deg 14deg, transparent 14deg 18deg, rgba(199,125,255,.8) 18deg 20deg, transparent 20deg 24deg); }
+.bpk.rip .bpk-lid { animation: lidoff .95s .15s cubic-bezier(.3,.1,.4,1) both; }
+.bpk.rip .bpk-main { animation-duration: .8s; }
+.bpk.best-Legendaria.rip .bpk-main { animation: mainout .8s .85s ease-in both; }
+.pkfx { position: absolute; left: 50%; top: 50%; width: 0; height: 0; pointer-events: none; z-index: 5; }
+.pkfx .ring { position: absolute; left: 0; top: -60px; width: 220px; height: 220px; border-radius: 50%; border: 1.5px solid color-mix(in srgb, var(--ac) 70%, #fff); box-shadow: 0 0 28px var(--ac), inset 0 0 28px color-mix(in srgb, var(--ac) 40%, transparent); transform: translate(-50%, -50%) scale(.15); opacity: 0; animation: pkring 1.3s .35s cubic-bezier(.2,.7,.3,1) both; }
+.pkfx .ring.r2 { animation-delay: .55s; border-width: 1px; }
+@keyframes pkring { 0% { opacity: 0; transform: translate(-50%, -50%) scale(.15); } 15% { opacity: .9; } 100% { opacity: 0; transform: translate(-50%, -50%) scale(4.2); } }
+.pkfx i { position: absolute; left: 0; top: -40px; width: var(--s); height: var(--s); border-radius: 50%; background: #fff; box-shadow: 0 0 10px 2px var(--ac); opacity: 0; animation: pkmote 1.7s var(--d) cubic-bezier(.15,.7,.3,1) both; }
+@keyframes pkmote { 0% { opacity: 0; transform: translate(0, 0) scale(.3); } 15% { opacity: .95; } 100% { opacity: 0; transform: translate(var(--x), var(--y)) scale(1); } }
+/* reverso de las cartas: cristal esmerilado con borde de color de rareza */
+.pcard .pback { border: 1px solid rgba(255,255,255,.5); border-radius: 12px; overflow: hidden; color: #fff;
+  background: linear-gradient(150deg, rgba(255,255,255,.28), rgba(255,255,255,.07) 42%, color-mix(in srgb, var(--pc) 38%, transparent) 100%), rgba(12,20,40,.55);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--pc) 70%, transparent), 0 14px 30px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.55), inset 0 0 26px color-mix(in srgb, var(--pc) 35%, transparent); text-shadow: 0 0 14px var(--pc); animation: pkaura 2.2s ease-in-out infinite alternate; }
+@keyframes pkaura { from { box-shadow: 0 0 0 1px color-mix(in srgb, var(--pc) 60%, transparent), 0 14px 30px rgba(0,0,0,.5), 0 0 12px color-mix(in srgb, var(--pc) 45%, transparent), inset 0 1px 0 rgba(255,255,255,.55), inset 0 0 26px color-mix(in srgb, var(--pc) 30%, transparent); } to { box-shadow: 0 0 0 1px color-mix(in srgb, var(--pc) 90%, transparent), 0 14px 30px rgba(0,0,0,.5), 0 0 34px 4px color-mix(in srgb, var(--pc) 70%, transparent), inset 0 1px 0 rgba(255,255,255,.7), inset 0 0 34px color-mix(in srgb, var(--pc) 45%, transparent); } }
+.pcard .pback::after { inset: 0; border: 0; border-radius: 0; background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,.4) 48%, transparent 62%) -120% 0 / 250% 100% no-repeat; animation: pksheen 3.2s ease-in-out infinite; }
+@keyframes pksheen { to { background-position: 160% 0; } }
+.pcard .pback span { font-size: 2.6rem; opacity: .9; filter: none; }
+.pcard.r-Legendaria .pback { background: linear-gradient(150deg, rgba(255,255,255,.3), rgba(255,255,255,.08) 42%, rgba(255,184,3,.4) 100%), rgba(30,20,6,.5); }
+.pcard.r-Legendaria .pback::before { inset: -3px; border-radius: 15px; filter: blur(9px); opacity: .85; }
+.pcard.flipped.r-Rara .pfront { filter: drop-shadow(0 0 16px rgba(74,163,255,.8)); } .pcard.flipped.r-Épica .pfront { filter: drop-shadow(0 0 20px rgba(184,115,255,.85)); }
+.pcard .pfront .card { box-shadow: 0 14px 30px rgba(0,0,0,.55); }
+/* etiquetas Nueva/Repetida en cristal */
+.pnew, .pdup { -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,.35); border-radius: 99px; letter-spacing: .08em; }
+.pnew { background: linear-gradient(180deg, rgba(255,214,120,.9), rgba(200,150,58,.85)); color: #2b1c05; box-shadow: 0 4px 14px rgba(255,190,70,.4); }
+.pdup { background: rgba(12,24,41,.6); color: var(--gold); box-shadow: 0 4px 14px rgba(0,0,0,.4); }
+@media (prefers-reduced-motion: reduce) { .pkfx, .packov::before { display: none; } .packov { animation: none; } }

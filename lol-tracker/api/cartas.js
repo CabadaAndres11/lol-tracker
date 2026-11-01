@@ -56,7 +56,7 @@ function drawCard(minRarity) {
 }
 function publicUser(u) {
   return {
-    name: u.name, pts: u.pts || 0, coins: u.coins, owned: u.owned, dups: u.dups || {}, skins: u.skins || [], skinSel: u.skinSel || {},
+    name: u.name, pts: u.pts || 0, coins: u.coins, owned: u.owned, dups: u.dups || {}, skins: u.skins || [], skinSel: u.skinSel || {}, decks: u.decks || null,
     dailyAvailable: u.lastDaily !== today(),
     gamesToday: u.rewardDay === today() ? u.rewardCount : 0,
     maxGamesToday: MAX_GAME_REWARDS_PER_DAY,
@@ -591,6 +591,16 @@ module.exports = async function handler(req, res) {
       u.coins -= cost; u.owned.push(it.id);
       await saveUser(cfg, u);
       res.status(200).json({ user: publicUser(u) }); return;
+    }
+    if (act === 'deckSave') {
+      const own = new Set(u.owned), clean = (l) => (Array.isArray(l) ? l : []).filter((x) => typeof x === 'string' && own.has(x)).slice(0, 80);
+      const sl = Array.isArray(body.slots) ? body.slots.slice(0, 3) : [];
+      u.decks = {
+        deck: clean(body.deck),
+        slots: [0, 1, 2].map((i) => (sl[i] && Array.isArray(sl[i].ids) ? { name: String(sl[i].name || 'Mazo').slice(0, 30), ids: clean(sl[i].ids) } : null)),
+      };
+      await saveUser(cfg, u);
+      res.status(200).json({ ok: true }); return;
     }
     if (act === 'skinBuy' || act === 'skinEquip') {
       const sk = SKIN_BY_ID[String(body.id || body.skin || '')];

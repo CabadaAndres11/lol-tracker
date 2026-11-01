@@ -1,6 +1,8 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-01', tag: 'Corrección', title: 'Tus mazos ahora se guardan en tu cuenta',
+      items: ['El mazo actual y los 3 mazos guardados se almacenan en tu cuenta, así que los tienes al iniciar sesión desde otro dispositivo. Los mazos que ya tenías en este dispositivo se suben solos la próxima vez que entres.'] },
     { date: '2026-11-01', tag: 'Cambio', title: 'Lihone Correa pierde la sinergia Trabajo',
       items: ['Lihone Correa ya no cuenta para la sinergia Trabajo; mantiene la sinergia Novia.'] },
     { date: '2026-11-01', tag: 'Novedad', title: 'Ordenar el mazo por nivel de carta',

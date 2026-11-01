@@ -6,17 +6,27 @@
 
   // El mazo y los huecos guardados son por cuenta (en este navegador); la colección vive en el servidor.
   function lk(n) { return 'cartas_' + n + ':' + (ui.acct ? ui.acct.name.toLowerCase() : ''); }
-  function saveDeck() { try { localStorage.setItem(lk('deck'), JSON.stringify(ui.deck)); } catch (e) {} }
-  function saveSlots() { try { localStorage.setItem(lk('slots'), JSON.stringify(ui.slots)); } catch (e) {} }
+  var syncT = null;
+  function syncDecks() { clearTimeout(syncT); syncT = setTimeout(function () { if (getTok()) api('deckSave', { deck: ui.deck, slots: ui.slots }); }, 400); }
+  function saveDeck() { try { localStorage.setItem(lk('deck'), JSON.stringify(ui.deck)); } catch (e) {} syncDecks(); }
+  function saveSlots() { try { localStorage.setItem(lk('slots'), JSON.stringify(ui.slots)); } catch (e) {} syncDecks(); }
   function owns(id) { return !!(ui.ownedSet && ui.ownedSet[id]); }
   function setAcct(user) {
     ui.acct = user; ui.ownedSet = {}; user.owned.forEach(function (id) { ui.ownedSet[id] = 1; });
   }
   function loadLocal() {
+    var sd = ui.acct && ui.acct.decks;
+    if (sd) { // mazos guardados en la cuenta: se usan en cualquier dispositivo
+      ui.deck = (sd.deck || []).filter(function (id) { return CARD[id] && owns(id); });
+      ui.slots = [0, 1, 2].map(function (i) { var x = sd.slots && sd.slots[i]; return x && x.ids ? { name: String(x.name || 'Mazo'), ids: x.ids.filter(function (id) { return CARD[id] && owns(id); }) } : null; });
+      try { localStorage.setItem(lk('deck'), JSON.stringify(ui.deck)); localStorage.setItem(lk('slots'), JSON.stringify(ui.slots)); } catch (e) {}
+      return;
+    }
     try { var sv = JSON.parse(localStorage.getItem(lk('deck')) || 'null'); ui.deck = sv && sv.length ? sv.filter(function (id) { return CARD[id] && owns(id); }) : []; } catch (e) { ui.deck = []; }
     ui.slots = [null, null, null];
     try { var sl = JSON.parse(localStorage.getItem(lk('slots')) || 'null'); if (sl && sl.length === 3) ui.slots = sl.map(function (x) { return x && x.ids ? { name: String(x.name || 'Mazo'), ids: x.ids.filter(function (id) { return CARD[id] && owns(id); }) } : null; }); } catch (e) {}
     // sin mazo guardado: empieza vacío (el jugador monta el suyo con las cartas que tiene)
+    if (ui.deck.length || ui.slots.some(Boolean)) syncDecks(); // migra a la cuenta los mazos que solo estaban en este dispositivo
   }
   // ---------- Servidor (cuenta, monedas, sobres) ----------
   function getTok() { try { return localStorage.getItem('cartas_tok') || ''; } catch (e) { return ''; } }

@@ -1,6 +1,9 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-01', tag: 'Novedad', title: 'Tutorial guiado',
+      items: ['El apartado «Normas» desaparece y en su lugar llega el Tutorial, que encontrarás en la pantalla Jugar, separado de los modos de juego.',
+        'Es una partida de práctica siempre igual, con pausas en las que tu guía te explica con bocadillos la tienda, las sinergias, la mejora de estadísticas, tu vida y cómo funcionan las rondas. No da monedas ni puntos, y puedes repetirlo cuando quieras.'] },
     { date: '2026-11-01', tag: 'Novedad', title: 'Nueva clasificación con rangos',
       items: ['La clasificación se renueva con un diseño inspirado en la de League of Legends: un top 10 con la foto de perfil de cada jugador, su rango y sus puntos, y a la derecha tu emblema de rango con lo que te falta para subir.',
         'Hay nueve rangos según los puntos: Hierro, Bronce (60), Plata (140), Oro (240), Platino (360), Esmeralda (500), Diamante (680), Maestro (900) y Aspirante (1200).',

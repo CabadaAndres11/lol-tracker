@@ -227,15 +227,39 @@
       }
     }
   }
+  // Rangos por puntos
+  var RANKS = [
+    { n: 'Hierro', min: 0, c: '#8b8f98' }, { n: 'Bronce', min: 60, c: '#c4813f' }, { n: 'Plata', min: 140, c: '#cfd8e3' },
+    { n: 'Oro', min: 240, c: '#e8b93c' }, { n: 'Platino', min: 360, c: '#4fd1c5' }, { n: 'Esmeralda', min: 500, c: '#34d399' },
+    { n: 'Diamante', min: 680, c: '#60a5fa' }, { n: 'Maestro', min: 900, c: '#c084fc' }, { n: 'Aspirante', min: 1200, c: '#f0c35a' }
+  ];
+  function rankOf(pts) { var k = 0; RANKS.forEach(function (r, i) { if (pts >= r.min) k = i; }); return k; }
+  function rkEmblem(k, big) {
+    var r = RANKS[k], c = r.c, wings = k >= 3 ? '<path d="M50 38 C34 30 18 34 6 18 C14 44 28 52 50 60 Z" fill="' + c + '" opacity=".75"/><path d="M50 38 C66 30 82 34 94 18 C86 44 72 52 50 60 Z" fill="' + c + '" opacity=".75"/>' : '',
+      crown = k >= 7 ? '<path d="M38 12 L44 22 L50 8 L56 22 L62 12 L60 28 L40 28 Z" fill="' + c + '"/>' : '';
+    return '<svg class="rkem' + (big ? ' big' : '') + '" viewBox="0 0 100 100" aria-hidden="true"><defs><linearGradient id="rkg' + k + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + c + '"/><stop offset="1" stop-color="#1b1430"/></linearGradient></defs>' + wings + crown +
+      '<path d="M50 24 L74 34 L74 58 C74 74 62 84 50 92 C38 84 26 74 26 58 L26 34 Z" fill="url(#rkg' + k + ')" stroke="' + c + '" stroke-width="3"/><path d="M50 36 L62 54 L50 74 L38 54 Z" fill="' + c + '" opacity=".9"/><path d="M50 36 L62 54 L50 54 Z" fill="#fff" opacity=".35"/></svg>';
+  }
+  function rkAv(id) {
+    var ok = artOk(id);
+    return '<span class="avt rkav' + (ok ? ' has' : '') + '"' + (ok ? ' style="background-image:url(/cartas/art/' + id + '.webp)"' : '') + '>' + (ok ? '' : ic('usuario')) + '</span>';
+  }
   function renderLadder() {
     ensureLadder();
-    var L = ui.ladder, MED = ['#fbbf24', '#cbd5e1', '#d97706'];
+    var L = ui.ladder, me = ui.acct ? ui.acct.name.toLowerCase() : '';
+    var myPts = L ? L.me : (ui.acct ? ui.acct.pts : 0), mk = rankOf(myPts), mr = RANKS[mk], nx = RANKS[mk + 1];
     var rows = L && L.top && L.top.length ? L.top.map(function (r, k) {
-      return '<li class="lrow' + (ui.acct && r.name.toLowerCase() === ui.acct.name.toLowerCase() ? ' me' : '') + '"><span class="lpos"' + (k < 3 ? ' style="color:' + MED[k] + '"' : '') + '>' + (k < 3 ? ic('trofeo') + ' ' : '') + (k + 1) + '</span><b>' + esc(r.name) + '</b><span class="lpts">' + r.pts + ' pts</span></li>';
-    }).join('') : '<li class="mut">' + (L ? 'Aún no hay partidas puntuadas. ¡Juega un 1 vs 1 o un Versus de 4 contra otros jugadores!' : 'Cargando…') + '</li>';
+      var rk = rankOf(r.pts);
+      return '<li class="rkrow' + (r.name.toLowerCase() === me ? ' me' : '') + (k < 3 ? ' top' + (k + 1) : '') + '" style="--rc:' + RANKS[rk].c + '"><span class="rkpos">' + (k + 1) + '</span>' + rkAv(r.avatar) + '<b class="rkname">' + esc(r.name) + '</b><span class="rkrank">' + rkEmblem(rk) + '<i>' + RANKS[rk].n + '</i></span><span class="rkpts">' + r.pts + '</span></li>';
+    }).join('') : '<li class="mut rkempty">' + (L ? 'Aún no hay jugadores.' : 'Cargando…') + '</li>';
+    var tiers = RANKS.slice().reverse().map(function (r) { var i = RANKS.indexOf(r); return '<li class="' + (i === mk ? 'cur' : '') + '" style="--rc:' + r.c + '">' + rkEmblem(i) + '<b>' + r.n + '</b><span>' + r.min + (RANKS[i + 1] ? '–' + (RANKS[i + 1].min - 1) : '+') + '</span></li>'; }).join('');
     app.innerHTML = head('ladder', '' + ic('trofeo') + ' Clasificación') +
-      '<div class="panel ladpanel"><div class="ladme"><span>Tus puntos</span><b>' + (L ? L.me : (ui.acct ? ui.acct.pts : 0)) + '</b>' + (L && L.pos ? '<span class="mut">Puesto ' + L.pos + (L.total ? ' de ' + L.total : '') + '</span>' : '') + '</div>' +
-      '<p class="mut">Solo puntúan las partidas contra otros jugadores: 1 contra 1 (+20 / -20) y Versus de 4 (+40 / +20 / -20 / -40 según tu puesto).</p><ol class="ladder ladfull">' + rows + '</ol></div></div>';
+      '<div class="rkwrap"><div class="rkmain"><div class="rkhead"><div><span class="rkk">Temporada de lanzamiento</span><h2>Mejores jugadores</h2></div><span class="rkcol">Top 10</span></div>' +
+      '<div class="rkcolh"><span>#</span><span>Jugador</span><span>Rango</span><span>Puntos</span></div><ol class="rklist">' + rows + '</ol>' +
+      '<p class="mut rknote">Puntúan las partidas contra otros jugadores: 1 contra 1 (+20 / -20) y Versus de 4 (+40 / +20 / -20 / -40 según tu puesto). Aparecen todas las cuentas, hayan jugado o no.</p></div>' +
+      '<aside class="rkside" style="--rc:' + mr.c + '"><div class="rkbanner">' + rkEmblem(mk, true) + '<span class="rkpl">' + (L && L.pos ? 'Clasificación: ' + L.pos + (L.total ? ' de ' + L.total : '') : 'Sin clasificar') + '</span><b class="rkrn">' + mr.n + '</b><span class="rkpp">' + myPts + ' PL</span>' +
+      (nx ? '<div class="meter rkm"><i class="on" style="width:' + Math.round((myPts - mr.min) / (nx.min - mr.min) * 100) + '%"></i></div><span class="rknx">' + (nx.min - myPts) + ' puntos para ' + nx.n + '</span>' : '<span class="rknx">Rango máximo</span>') + '</div>' +
+      '<ul class="rktiers">' + tiers + '</ul></aside></div></div>';
   }
   // Ilustraciones de una noticia: las indicadas (art) o las cartas que se nombran en el texto; si no hay, el logo.
   function newsArts(n) {

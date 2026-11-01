@@ -1,6 +1,10 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-01', tag: 'Novedad', title: 'Nueva clasificación con rangos',
+      items: ['La clasificación se renueva con un diseño inspirado en la de League of Legends: un top 10 con la foto de perfil de cada jugador, su rango y sus puntos, y a la derecha tu emblema de rango con lo que te falta para subir.',
+        'Hay nueve rangos según los puntos: Hierro, Bronce (60), Plata (140), Oro (240), Platino (360), Esmeralda (500), Diamante (680), Maestro (900) y Aspirante (1200).',
+        'Ahora aparecen todas las cuentas creadas, hayan jugado ya o no (salvo la de administración).'] },
     { date: '2026-11-01', tag: 'Novedad', title: 'Nueva tienda',
       items: ['La tienda estrena diseño inspirado en la de League of Legends, con cuatro apartados navegables: Destacados, Sobres, Skins y Cartas.',
         'Destacados muestra en un gran banner la última skin lanzada y las últimas cartas puestas a la venta (cambia de uno a otro con los puntos), junto a accesos rápidos al sobre y a otras novedades, y la recompensa diaria en una franja inferior.',

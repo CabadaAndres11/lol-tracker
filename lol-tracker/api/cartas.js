@@ -588,13 +588,24 @@ module.exports = async function handler(req, res) {
       if (r.status) { res.status(r.status).json({ error: r.error }); return; }
       res.status(200).json(r); return;
     }
-    if (act === 'ladder') {
-      const flat = (await redis(cfg, ['HGETALL', LADDER_KEY])) || [];
+    if (act === 'ladder') { // top 10 de TODAS las cuentas (hayan jugado o no), sin ADMIN
+      const keys = []; let cur = '0';
+      for (let n = 0; n < 50; n++) {
+        const r = await redis(cfg, ['SCAN', cur, 'MATCH', 'cartas:user:*', 'COUNT', '200']);
+        cur = String(r[0]); (r[1] || []).forEach((k) => keys.push(k));
+        if (cur === '0') break;
+      }
+      const raws = keys.length ? await redis(cfg, ['MGET', ...keys]) : [];
       const rows = [];
-      for (let k = 0; k + 1 < flat.length; k += 2) rows.push({ name: flat[k], pts: +flat[k + 1] || 0 });
+      (raws || []).forEach((raw) => {
+        if (!raw) return;
+        let x; try { x = JSON.parse(raw); } catch (e) { return; }
+        if (!x || !x.name || isAdmin(x)) return;
+        rows.push({ name: x.name, pts: x.pts || 0, avatar: x.avatar || '' });
+      });
       rows.sort((a, b) => b.pts - a.pts || a.name.localeCompare(b.name));
       const pos = rows.findIndex((r) => r.name.toLowerCase() === u.name.toLowerCase());
-      res.status(200).json({ top: rows.slice(0, 25), me: u.pts || 0, pos: pos >= 0 ? pos + 1 : 0, total: rows.length }); return;
+      res.status(200).json({ top: rows.slice(0, 10), me: u.pts || 0, pos: pos >= 0 ? pos + 1 : 0, total: rows.length }); return;
     }
     if (act === 'me') { res.status(200).json({ user: publicUser(u) }); return; }
 

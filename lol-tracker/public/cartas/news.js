@@ -7,7 +7,7 @@
         'Javihi Koisito (3/7) y Sech Koisito (4/6) pasan a Comunes, de 2 de oro, para poder jugar KOI desde el nivel 1. Petea Koisito se queda como está (Rara).',
         'Pampert Koisito pasa a Épica (4 de oro, 5/15) y gana la pasiva «No me tostes»: recibe 2 de daño menos por cada golpe.',
         'AitoRLG Koisito pasa a Legendaria (5 de oro, 6/19), solo con la sinergia KOI, y gana la pasiva Heredero: si está vivo en la mesa, siempre es el objetivo de la herencia de ataque de las KOI que caen. Su skin «Piel azul» sube de 120 a 200 monedas, y al ser de una carta Legendaria ahora tiene efecto holográfico.',
-        'Nueva carta de acción KOI: Campeones de Europa (Épica, 3 de oro). Esta ronda, las KOI que caigan ceden todo su ataque en la herencia, sea cual sea tu nivel (necesitas el nivel 1 de KOI). Ya está a la venta en la tienda, en «Cartas nuevas», por 100 monedas.'] },
+        'Nueva carta de acción KOI: Campeones de Europa (Épica, 3 de oro). Esta ronda, las KOI que caigan ceden todo su ataque en la herencia, sea cual sea tu nivel (necesitas el nivel 1 de KOI). Ya está a la venta en la tienda, en «Cartas nuevas», por 50 monedas.'] },
     { date: '2026-11-01', tag: 'Novedad', title: 'Versión 1.1: introducción animada de Correa',
       items: ['¡Ya está aquí la versión 1.1! Al abrir el menú aparece una pequeña animación que explica la sinergia Correa: las cartas entran en juego, recibes a las 4 novias y una ocupa el hueco 5. Se cierra pulsando fuera de ella, y con la casilla «No mostrar más» eliges si vuelve a salir en tu cuenta.',
         'Puedes volver a verla cuando quieras: {{intro}}'] },

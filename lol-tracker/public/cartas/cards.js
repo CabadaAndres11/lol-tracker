@@ -1090,7 +1090,7 @@ var D={
   },
   {
    "id": "campeones-de-europa",
-   "price": 100
+   "price": 50
   }
  ]
 };

@@ -1048,7 +1048,7 @@
   // ---------- Tutorial: bocadillos del guía ----------
   function tutStage(s) { return s.round * 2 + (s.shopOpen ? 0 : 1); }
   function tutClear() {
-    var o = document.getElementById('tut'); if (o) o.remove();
+    tutHide();
     document.body.classList.remove('tutmode');
     if (ui.tutTm) { clearTimeout(ui.tutTm); ui.tutTm = null; }
   }
@@ -1056,7 +1056,7 @@
     if (done) { try { localStorage.setItem('tcg_tut', '1'); } catch (e) {} }
     clearTimeout(timer); timer = null; ui.playing = false; ui.tut = null; ui.s = null; ui.screen = 'modes'; tutClear(); window.scrollTo(0, 0); render();
   }
-  function tutHide() { var o = document.getElementById('tut'); if (o) o.remove(); }
+  function tutHide() { var o = document.getElementById('tut'); if (o) o.remove(); if (ui.tutAnim) { clearInterval(ui.tutAnim); ui.tutAnim = null; } }
   function tutCheck() {
     var T = ui.tut, CT = window.CARTAS_TUT, s = ui.s;
     if (!T || !s || ui.screen !== 'game') return tutClear();
@@ -1074,7 +1074,7 @@
   function tutShow(st, i, n, over) {
     var o = document.getElementById('tut'), say = st.kind === 'say', pose = st.pose === 'b' ? 'guia-enfadado' : 'guia';
     var txt = over && st.fin ? window.CARTAS_TUT.over : st.text;
-    var html = '<div class="tut-spot"></div><img class="tut-char" src="/cartas/tutor/' + pose + '.webp" alt=""><div class="tut-bub"><span class="tut-prog">' + (i + 1) + ' / ' + n + '</span><p>' + txt + '</p>' +
+    var html = '<div class="tut-spot"></div><div class="tut-char"><img class="tc0' + (pose === 'guia' ? ' on' : '') + '" src="/cartas/tutor/guia.webp" alt=""><img class="tc1' + (pose === 'guia' ? '' : ' on') + '" src="/cartas/tutor/guia-enfadado.webp" alt=""></div><div class="tut-bub"><span class="tut-prog">' + (i + 1) + ' / ' + n + '</span><p>' + txt + '</p>' +
       (say ? '<button class="btn tut-next" data-tut="next">' + (st.btn || 'Siguiente') + ' ▶</button>' : '<span class="tut-wait">' + ic('diana') + ' Haz lo que te pido para continuar</span>') + '</div><button class="tut-exit" data-tut="exit">' + ic('puerta') + ' Salir del tutorial</button>';
     if (!o) { o = document.createElement('div'); o.id = 'tut'; document.body.appendChild(o); }
     var key = i + (over ? 'o' : '');
@@ -1085,6 +1085,7 @@
       if (b.dataset.tut === 'exit') return tutExit();
       if (b.dataset.tut === 'next') { if (st.fin) return tutExit(true); ui.tut.i++; tutCheck(); }
     };
+    if (!ui.tutAnim) ui.tutAnim = setInterval(function () { var c = document.querySelectorAll('#tut .tut-char img'); if (c.length === 2) { c[0].classList.toggle('on'); c[1].classList.toggle('on'); } }, 900);
     tutSpot(st.hl);
     if (st.hl && !o._rs) { o._rs = 1; window.addEventListener('resize', function () { if (ui.tut) tutSpot(ui.tutHl); }); }
   }

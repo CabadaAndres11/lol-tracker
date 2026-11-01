@@ -809,6 +809,18 @@
     }).join('') + '</div></div>';
     return h;
   }
+  // Sinergia Correa: las novias comparten la carta del hueco 5; un icono por novia para cambiar de una a otra
+  function novSwitch(s) {
+    var P = s.p[0];
+    if (ui.playing || s.phase !== 'prep' || (E.tiers(P).Correa || 0) < 1) return '';
+    var cur = P.mesa[4] && P.mesa[4].id, have = {};
+    (P.nvs || []).forEach(function (n) { have[n.id] = 1; }); if (cur) have[cur] = 1;
+    var all = (D.novias || []).filter(function (n) { return have[n.id]; });
+    if (!all.length) return '';
+    return '<div class="novsw" title="Elige qué novia ocupa el hueco 5">' + all.map(function (n) {
+      return '<button class="nsw' + (n.id === cur ? ' on' : '') + '" data-act="novia" data-id="' + n.id + '" title="' + (n.id === cur ? esc(n.name) + ' está en el hueco 5' : 'Poner a ' + esc(n.name) + ' en el hueco 5') + '" style="background-image:url(/cartas/art/' + n.id + '.webp)"><i>' + esc(n.name.charAt(0)) + '</i></button>';
+    }).join('') + '</div>';
+  }
   function mesaRow(side, view, s, mine) {
     var P = s.p[side], prep = s.phase === 'prep' && !ui.playing && !s.shopOpen, shop = s.shopOpen && !ui.playing, sel = ui.sel;
     var aim = {}; Object.keys(s.p[0].target).forEach(function (k) { var t = s.p[0].target[k]; aim[t] = (aim[t] || 0) + 1; });
@@ -817,7 +829,7 @@
     view.mesa[side].forEach(function (v, k) {
       if (k === 4 && !has5) return;
       if (!v) {
-        if (k === 4) { h += '<div class="cw"><div class="slot nov">' + ic('corazon') + ' Hueco 5<br><small>' + (mine ? 'Elige una novia abajo' : 'Novia') + '</small></div></div>'; return; }
+        if (k === 4) { h += '<div class="cw"><div class="slot nov">' + ic('corazon') + ' Hueco 5<br><small>' + (mine ? 'Elige una novia' : 'Novia') + '</small></div>' + (mine ? novSwitch(s) : '') + '</div>'; return; }
         var free = mine && s.phase === 'prep' && !ui.playing && sel && sel.k === 'hand' && E.isTroop(P.hand[sel.i]);
         h += '<div class="cw"><div class="slot' + (free ? ' free' : '') + '"' + (free ? ' data-act="slot" data-i="' + k + '"' : '') + '>' + (free ? 'Colocar aquí' : 'Hueco') + '</div></div>';
         return;
@@ -850,7 +862,7 @@
         if (prep && sel && (sel.k === 'mine' || (sel.k === 'act' && CARD[s.p[0].hand[sel.i].id].target === 'enemy'))) o.cls += ' tgtable';
         if (prep && aim[v.uid]) o.extra = '<span class="aim">' + ic('diana') + '×' + aim[v.uid] + '</span>';
       }
-      o.gl = I ? I.gl : 1; o.lv = lvG(side, v.id); o.skin = skG(side, v.id); h += '<div class="cw">' + cardHtml(c, o) + under + '</div>';
+      o.gl = I ? I.gl : 1; o.lv = lvG(side, v.id); o.skin = skG(side, v.id); if (mine && k === 4) under += novSwitch(s); h += '<div class="cw">' + cardHtml(c, o) + under + '</div>';
     });
     return h + '</div>';
   }
@@ -861,7 +873,7 @@
     var s = ui.s, view = ui.view || E.viewOf(s), P = s.p[0], R = s.p[1];
     var shopMode = s.shopOpen && !ui.playing, shop = shopMode && s.phase === 'prep', prep = s.phase === 'prep' && !ui.playing && !s.shopOpen;
     var pend = prep ? E.pendingTargets(s).length : 0, hasT = Object.keys(P.target).length > 0;
-    var h = '<div class="gwrap' + (shopMode ? ' shopmode' : '') + '"><div class="top"><div><h1>Ronda ' + s.round + ' · ' + (s.shopOpen ? '' + ic('carrito') + ' Tienda' + (s.round === 1 ? ' inicial' : '') : '' + ic('espadas') + ' Combate') + (!s.shopOpen ? ' <span class="mut">· ' + (s.first === 0 ? 'atacas primero' : 'ataca primero el rival') + '</span>' : '') + '</h1></div><div><button class="lnk" data-act="menu" data-to="deck">' + ic('cartas') + ' Colección</button> · <button class="lnk" data-act="menu" data-to="home">' + ic('casa') + ' Menú</button>' + (s.over ? '' : ui.tut ? ' · <button class="lnk surr" data-act="tutexit">' + ic('puerta') + ' Salir del tutorial</button>' : ' · <button class="lnk surr" data-act="surrender">' + ic('puerta') + ' Rendirse</button>') + '</div></div>' + timerHtml(prep || shop) + '';
+    var h = '<div class="gwrap' + (shopMode ? ' shopmode' : '') + '"><div class="top"><div><h1>Ronda ' + s.round + ' · ' + (s.shopOpen ? '' + ic('carrito') + ' Tienda' + (s.round === 1 ? ' inicial' : '') : '' + ic('espadas') + ' Combate') + (!s.shopOpen ? ' <span class="mut">· ' + (s.first === 0 ? 'atacas primero' : 'ataca primero el rival') + '</span>' : '') + '</h1></div><div class="tright"><span class="tlinks"><button class="lnk" data-act="menu" data-to="deck">' + ic('cartas') + ' Colección</button> · <button class="lnk" data-act="menu" data-to="home">' + ic('casa') + ' Menú</button></span>' + (s.over ? '' : ui.tut ? '<button class="surrbtn" data-act="tutexit">' + ic('puerta') + ' Salir del tutorial</button>' : '<button class="surrbtn" data-act="surrender" title="Abandonar la partida y darla por perdida">' + ic('bandera') + ' Rendirse</button>') + '</div></div>' + timerHtml(prep || shop) + '';
     h += '<div class="gmain"><aside class="gl">' + boardHtml(s) + synergyHtml(P) + '</aside><section class="gc"><div class="board" id="board">';
     var ML = s.maxLife || CFG.life;
     if (s.vs4 && s.spec && ui.playing) h += '<div class="v4spec">' + ic('ojo') + ' Descansas: estás viendo el duelo <b>' + esc(s.spec[0]) + '</b> contra <b>' + esc(s.spec[1]) + '</b></div>';
@@ -884,12 +896,6 @@
     if (PV.on && PV.rdy[1] && !PV.rdy[0] && (shop || prep || s.phase === 'post')) acts = '<div class="hint rivrdy">' + ic('aviso') + ' El rival ya está listo.</div>' + acts;
     h += '<div class="hud bottom">' + orb('life', view.life[0], ML, s.spec && ui.playing ? esc(s.spec[0]) : 'Tu vida', 0) + orb('gold', P.gold, 0, 'Tu oro') + '<div class="acts">' + acts + '</div></div></div>';
 
-    // Novias (sinergia Correa): una sola en el hueco 5
-    if (!ui.playing && s.phase === 'prep' && (E.tiers(P).Correa || 0) >= 1 && ((P.nvs && P.nvs.length) || P.mesa[4])) {
-      h += '<div class="novwrap"><div class="hl">' + ic('corazon') + ' Tus novias · pulsa una para ponerla en el hueco 5 (solo una a la vez)</div><div class="novs">' + P.nvs.map(function (n, k) {
-        return '<div class="cw">' + cardHtml(CARD[n.id], { atk: E.atk(n), hp: n.hp, max: E.maxHp(n), cls: 'hcard', attrs: 'data-act="novia" data-i="' + k + '" title="Pulsa para ponerla en el hueco 5"', tag: 'button' }) + '</div>';
-      }).join('') + (P.mesa[4] ? '<div class="novon">En el hueco 5: <b>' + esc(CARD[P.mesa[4].id].name) + '</b></div>' : '') + '</div></div>';
-    }
     // Mano
     h += '<div class="handwrap' + (ui.dragMesa ? ' dropzone' : '') + '"><div class="hl">Tu mano ' + P.hand.length + (s.mode === 'revive' ? '' : '/' + CFG.handMax) + '</div><div class="hand">';
     P.hand.forEach(function (i, k) {
@@ -1529,7 +1535,8 @@
       return render();
     }
     if (act === 'novia') {
-      var nk = +el.dataset.i;
+      var nk = -1; (s.p[0].nvs || []).forEach(function (n, q) { if (n.id === el.dataset.id) nk = q; });
+      if (nk < 0) return; // ya está en el hueco 5
       if (E.place(s, 0, -1 - nk, 4)) { ui.landed = s.p[0].mesa[4].uid; pvs('place', [-1 - nk, 4]); ui.hint = ''; } else ui.hint = 'No se puede colocar ahora.';
       ui.sel = null; if (!s.shopOpen) nextPending(s);
       return render();

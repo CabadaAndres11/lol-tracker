@@ -1,6 +1,10 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-02', tag: 'Cambio', title: 'Mejoras visuales en partida',
+      items: ['Sinergia Correa: las novias ya no ocupan una fila aparte. Ahora comparten la carta del hueco 5 y, debajo de ella, un icono por novia permite cambiar de una a otra al instante.',
+        'El botón de Rendirse es más grande y rojo, con una bandera, y está separado de los enlaces de navegación para que se entienda que es de la partida.',
+        'La tienda de la partida estrena aspecto, a juego con el resto de la página: se acabó el toldo de rayas, ahora es un panel azul marino con filete dorado.'] },
     { date: '2026-11-01', tag: 'Novedad', title: 'Efectos en la tienda: Meteoro dorado',
       items: ['La tienda estrena la pestaña Efectos con un nuevo despliegue, «Meteoro dorado» (30 monedas): la carta cae envuelta en luz dorada, gira en el aire y se estrella en su hueco con una onda de choque y chispas.',
         'Puedes probarlo antes de comprarlo. También aparece en Colección → Efectos, pero hasta que lo compres no se puede equipar.'] },

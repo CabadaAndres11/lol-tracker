@@ -88,7 +88,8 @@
     aviso: '<path d="M32 9 58 54H6z"/><path d="M32 26v15"/><circle cx="32" cy="47" r="1.2"/>',
     estrella: '<path d="M32 8l7.6 15.6 17.2 2.4-12.5 12 3 17L32 46.6 16.7 55l3-17L7.2 26l17.2-2.4z"/>',
     avance: '<path d="M12 14l17 18-17 18M34 14l17 18-17 18"/>',
-    brillo: '<path d="M32 6c2 14 6 20 20 26-14 6-18 12-20 26-2-14-6-20-20-26 14-6 18-12 20-26z"/>'
+    brillo: '<path d="M32 6c2 14 6 20 20 26-14 6-18 12-20 26-2-14-6-20-20-26 14-6 18-12 20-26z"/>',
+    bandera: '<path d="M16 58V8"/><path d="M16 10h34l-8 12 8 12H16"/>'
   };
   Object.keys(LN).forEach(function (k) { I[k] = L(LN[k]); });
   // alias: nombres con varios usos

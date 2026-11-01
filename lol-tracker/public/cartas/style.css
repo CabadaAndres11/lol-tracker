@@ -1004,11 +1004,11 @@ img.timg[src$="comebacker.png"] { filter: drop-shadow(0 0 1.5px #fff) drop-shado
 @media (prefers-reduced-motion: reduce) { .card .holo::before, .card .holo::after { animation: none; opacity: .5; } }
 
 /* Ojo para ampliar la carta (Mazo) y visor 3D */
-.deckgrid .card .eyeb { position: absolute; top: 17cqw; left: 3.5cqw; width: 13cqw; height: 13cqw; border-radius: 50%; z-index: 8; display: grid; place-items: center; cursor: zoom-in; background: rgba(10,6,24,.72); border: .7cqw solid rgba(255,255,255,.6); box-shadow: 0 2px 6px rgba(0,0,0,.5); opacity: .88; transition: opacity .15s, transform .15s; }
-.deckgrid .card:hover .eyeb, .deckgrid .card:focus-within .eyeb, .deckgrid .card .eyeb:focus { opacity: 1; }
-@media (hover: none) { .deckgrid .card .eyeb { opacity: .9; } }
-.deckgrid .card .eyeb svg { width: 72%; height: 72%; }
-.deckgrid .card .eyeb:hover { transform: scale(1.15); background: rgba(10,6,24,.9); }
+.card .eyeb { position: absolute; top: 17cqw; left: 3.5cqw; width: 13cqw; height: 13cqw; border-radius: 50%; z-index: 8; display: grid; place-items: center; cursor: zoom-in; background: rgba(10,6,24,.72); border: .7cqw solid rgba(255,255,255,.6); box-shadow: 0 2px 6px rgba(0,0,0,.5); opacity: .88; transition: opacity .15s, transform .15s; }
+.deckgrid .card:hover .eyeb, .deckgrid .card:focus-within .eyeb, .card .eyeb:focus { opacity: 1; }
+
+.card .eyeb svg { width: 72%; height: 72%; }
+.card .eyeb:hover { transform: scale(1.15); background: rgba(10,6,24,.9); }
 .zoomov { position: fixed; inset: 0; z-index: 400; display: grid; place-items: center; background: rgba(5,3,14,.82); backdrop-filter: blur(5px); padding: 1rem; animation: zin .18s ease-out; }
 @keyframes zin { from { opacity: 0; } }
 .zbox { display: flex; flex-direction: column; align-items: center; gap: .8rem; max-height: 100%; }

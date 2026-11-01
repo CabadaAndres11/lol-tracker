@@ -97,11 +97,11 @@
   var zoomEl = null;
   function closeZoom() { if (zoomEl) { zoomEl.remove(); zoomEl = null; } document.removeEventListener('keydown', zoomKey); }
   function zoomKey(e) { if (e.key === 'Escape') closeZoom(); }
-  function openZoom(id) {
+  function openZoom(id, skin) {
     var c = CARD[id]; if (!c) return;
     closeZoom();
     var own = owns(c.id) || !!c.novia, st = { rx: 0, ry: 0, tx: 0, ty: 0, drag: null, auto: true, t0: performance.now() };
-    var face = cardHtml(c, { lv: own && !c.novia ? lvOf(c.id) : 1, cls: 'zface' });
+    var face = cardHtml(c, { lv: own && !c.novia ? lvOf(c.id) : 1, cls: 'zface', skin: skin || undefined });
     zoomEl = document.createElement('div'); zoomEl.className = 'zoomov';
     zoomEl.innerHTML = '<div class="zbox"><div class="zstage"><div class="zcard"><div class="zfront">' + face + '<span class="zglare"></span></div><div class="zback"><div class="zbk"><b>' + ic('cartas') + '</b><span>' + esc(c.name) + '</span></div></div></div></div>' +
       '<div class="zbtns"><button class="btn sec sm" data-z="flip">' + ic('cambio') + ' Voltear</button><button class="btn sec sm" data-z="reset">Restablecer</button><button class="btn sm" data-z="close">Cerrar</button></div>' +
@@ -237,7 +237,7 @@
       var btn = own ? (eq ? '<button class="btn sec sm" data-act="skinequip" data-skin="" data-card="' + s.card + '">' + ic('check') + ' Equipada · usar clásica</button>' : '<button class="btn sm" data-act="skinequip" data-skin="' + s.id + '" data-card="' + s.card + '">Equipar</button>')
         : !hasCard ? '<button class="btn sm" disabled>Necesitas la carta</button>'
         : '<button class="btn sm" data-act="skinbuy" data-skin="' + s.id + '"' + (a.coins < (a.admin ? 0 : s.price) ? ' disabled' : '') + '>Comprar · ' + (a.admin ? 'gratis' : s.price + ' ' + ic('moneda')) + '</button>';
-      return '<div class="skitem"><div class="skcard">' + cardHtml(c, { skin: s.id, lv: 1 }) + '</div><b>' + esc(c.name) + '</b><span class="mut">' + esc(s.name) + '</span>' + btn + '</div>';
+      return '<div class="skitem"><div class="skcard">' + cardHtml(c, { skin: s.id, lv: 1, extra: '<span class="eyeb" data-act="zoom" data-id="' + s.card + '" data-skin="' + s.id + '" title="Ver ampliada en 3D">' + ic('ojo') + '</span>' }) + '</div><b>' + esc(c.name) + '</b><span class="mut">' + esc(s.name) + '</span>' + btn + '</div>';
     }).join('') + '</div></div>';
   }
   function newCards(a) {
@@ -247,7 +247,7 @@
       var c = CARD[it.id], own = a.owned.indexOf(it.id) >= 0;
       var btn = own ? '<button class="btn sec sm" disabled>' + ic('check') + ' Ya la tienes</button>'
         : '<button class="btn sm" data-act="cardbuy" data-card="' + it.id + '"' + (a.coins < (a.admin ? 0 : it.price) ? ' disabled' : '') + '>Comprar · ' + (a.admin ? 'gratis' : it.price + ' ' + ic('moneda')) + '</button>';
-      return '<div class="skitem"><div class="skcard">' + cardHtml(c, { lv: 1 }) + '</div><b>' + esc(c.name) + '</b>' + btn + '</div>';
+      return '<div class="skitem"><div class="skcard">' + cardHtml(c, { lv: 1, extra: '<span class="eyeb" data-act="zoom" data-id="' + it.id + '" title="Ver ampliada en 3D">' + ic('ojo') + '</span>' }) + '</div><b>' + esc(c.name) + '</b>' + btn + '</div>';
     }).join('') + '</div></div>';
   }
   function renderPacks() {
@@ -1005,7 +1005,7 @@
     if (act === 'rarfilter') { var rr = el.dataset.r, ri = ui.rar.indexOf(rr); if (ri >= 0) ui.rar.splice(ri, 1); else ui.rar.push(rr); var y1 = window.scrollY; renderDeck(); window.scrollTo(0, y1); return; }
     if (act === 'onlyowned') { ui.onlyOwned = el.checked; return render(); }
     if (act === 'sortlv') { ui.sortLv = el.checked; return render(); }
-    if (act === 'zoom') { e.stopPropagation(); openZoom(el.dataset.id); return; }
+    if (act === 'zoom') { e.stopPropagation(); openZoom(el.dataset.id, el.dataset.skin || ''); return; }
     if (act === 'novtog') { e.stopPropagation(); ui.novView = ui.novView || {}; ui.novView[el.dataset.id] = !ui.novView[el.dataset.id]; var y0 = window.scrollY; renderDeck(); window.scrollTo(0, y0); return; }
     if (act === 'onlydeck') { ui.onlyDeck = el.checked; return render(); }
     if (act === 'toggle') {

@@ -1,6 +1,8 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-01', tag: 'Balance', title: 'Lihone Correa pasa a Común',
+      items: ['Lihone Correa: Rara → Común. Stats 3/12 → 2/8 y precio 3 → 2 de oro.'] },
     { date: '2026-11-01', tag: 'Novedad', title: 'Las novias en la pantalla Mazo',
       items: ['Las cartas Correa (Lihone, Dashlight, PotAnGo y Chipy) muestran una miniatura de su novia en la parte inferior. Púlsala para ver la carta de la novia (Eriko, Helena, Lucía o Ari) y púlsala de nuevo para volver. No cambia tu mazo.'] },
     { date: '2026-11-01', tag: 'Cambio', title: 'Correa vuelve a tener 3 niveles y mejora a las novias',

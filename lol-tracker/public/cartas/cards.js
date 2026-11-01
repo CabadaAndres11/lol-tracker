@@ -81,10 +81,10 @@ var D={
    "themes": [
     "Correa"
    ],
-   "cost": 3,
-   "atk": 3,
-   "hp": 12,
-   "rarity": "Rara",
+   "cost": 2,
+   "atk": 2,
+   "hp": 8,
+   "rarity": "Común",
    "type": "tropa",
    "size": 1
   },

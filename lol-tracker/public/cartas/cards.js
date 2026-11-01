@@ -825,6 +825,17 @@ var D={
    "theme": "KOI"
   },
   {
+   "id": "campeones-de-europa",
+   "name": "Campeones de Europa",
+   "cost": 3,
+   "rarity": "Épica",
+   "type": "accion",
+   "size": 1,
+   "target": "none",
+   "text": "Esta ronda, las KOI que caigan ceden todo su ataque en la herencia, sea cual sea tu nivel (necesitas el nivel 1 de KOI).",
+   "theme": "KOI"
+  },
+  {
    "id": "remate-doble",
    "name": "Remate doble",
    "cost": 2,
@@ -1076,6 +1087,10 @@ var D={
   {
    "id": "pedir-refuerzos",
    "price": 50
+  },
+  {
+   "id": "campeones-de-europa",
+   "price": 100
   }
  ]
 };

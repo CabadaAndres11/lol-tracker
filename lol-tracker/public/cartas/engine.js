@@ -423,6 +423,7 @@
     'segunda-temporada': {
       ok: function (s, p) { return graveKoi(s.p[p]) ? '' : 'Todavía no ha caído ninguna tropa KOI.'; },
       run: function (s, p) { var P = s.p[p], i = graveKoi(P); P.grave.splice(P.grave.indexOf(i), 1); i.dead = false; i.tmp = { atk: 0, hp: 0, red: 0 }; i.hp = maxHp(i); P.hand.push(i); return card(i).name + ' vuelve a tu mano'; } },
+    'campeones-de-europa': { ok: function (s, p) { return (tiers(s.p[p])['KOI'] || 0) >= 1 ? '' : 'Necesitas el nivel 1 de KOI (2 cartas distintas).'; }, run: function (s, p) { s.p[p].fl.koi = true; return 'las KOI que caigan esta ronda ceden todo su ataque'; } },
     'remate-doble': { ok: function (s, p) { return (tiers(s.p[p])['Voley'] || 0) >= 1 ? '' : 'Necesitas el nivel 1 de Voley (2 cartas distintas).'; }, run: function (s, p) { s.p[p].fl.vol = true; return 'tus Voley: ataque doble o defensa total'; } },
     'cita-sorpresa': {
       ok: function (s, p) { var n = s.p[p].mesa[4]; return (tiers(s.p[p])['Correa'] || 0) >= 1 && n && !n.dead ? '' : 'Necesitas el nivel 1 de Correa y una novia en el hueco 5.'; },
@@ -758,7 +759,7 @@
           // Herencia: parte del ataque de la KOI caída pasa, de forma permanente, a una KOI viva al azar
           var heirs = mesaTroops(s.p[d.owner]).filter(function (i) { return has(i, 'KOI') && i !== d; });
           if (heirs.length && atk(d) > 0) {
-            var hm = Math.max(1, Math.floor(atk(d) * FX.koi.heir[tt2['KOI'] - 1])), hv = heirs.filter(function (i) { return pas(i) === 'heredero'; })[0] || heirs[Math.floor(s.rng() * heirs.length)];
+            var hm = Math.max(1, Math.floor(atk(d) * FX.koi.heir[s.p[d.owner].fl.koi ? 2 : tt2['KOI'] - 1])), hv = heirs.filter(function (i) { return pas(i) === 'heredero'; })[0] || heirs[Math.floor(s.rng() * heirs.length)];
             grow(hv, 'atk', hm);
             if (s.mode === 'revive') d.perm.atk -= hm; // en Resurrección la KOI renace: el ataque se traspasa, no se copia
             line += ' Herencia: ' + card(hv).name + ' recibe +' + hm + ' de ataque permanente.';

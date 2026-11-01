@@ -1434,15 +1434,7 @@ body.tutmode .refresh{pointer-events:none;opacity:.35}
 .rpl img{width:92%;height:92%;object-fit:contain;filter:drop-shadow(0 2px 6px rgba(0,0,0,.6));transition:transform .25s}
 .rplaybtn:hover .rpl img{transform:scale(1.08)}
 
-/* Despliegue de cartas en mesa: sube hacia la cámara, gira dos veces y aterriza */
-.row4 .cw .card.deal{animation:dealin 1.25s cubic-bezier(.25,.7,.3,1) both;animation-delay:calc(var(--di,0) * .16s - var(--el,0s));transform-origin:50% 60%;will-change:transform}
-@keyframes dealin{
- 0%{opacity:0;transform:perspective(900px) translate3d(0,0,-60px) rotateY(0) scale(.5)}
- 14%{opacity:1}
- 38%{transform:perspective(900px) translate3d(0,-70px,330px) rotateY(270deg) scale(1.05)}
- 68%{transform:perspective(900px) translate3d(0,-90px,380px) rotateY(600deg) scale(1.1);filter:drop-shadow(0 30px 24px rgba(0,0,0,.55))}
- 88%{transform:perspective(900px) translate3d(0,6px,20px) rotateY(715deg) scale(.98)}
- 100%{transform:perspective(900px) translate3d(0,0,0) rotateY(720deg) scale(1);opacity:1}
-}
-.row4 .cw{overflow:visible}
-@media(prefers-reduced-motion:reduce){.row4 .cw .card.deal{animation:none}}
+/* Despliegue de cartas: vuelo desde el centro de la pantalla */
+.card.dealwait{visibility:hidden}
+.flyc{position:fixed;z-index:8000;pointer-events:none;transform-origin:50% 50%;filter:drop-shadow(0 18px 26px rgba(0,0,0,.6))}
+.flyc .card{margin:0;width:100%}

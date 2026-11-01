@@ -823,8 +823,10 @@
       if (v.dead) o.cls += ' dead';
       if (ui.hl && ui.hl.att === v.uid) o.cls += ' atk';
       if (ui.hl && ui.hl.tgt === v.uid) o.cls += ' hit';
-      var skey = side + ':' + v.uid, firstAt = ui.seen[skey] || (ui.seen[skey] = ui.seedSeen ? 1 : Date.now()), elapsed = Date.now() - firstAt, dealing = elapsed < 1700;
-      if (dealing) o.cls += ' deal'; else if (ui.landed === v.uid) o.cls += ' landed';
+      var skey = side + ':' + v.uid;
+      if (!ui.seen[skey]) { ui.seen[skey] = 1; if (!ui.seedSeen && !REDUCED) { var dl = ui.fl.length * 450; ui.fl.push({ side: side, uid: v.uid, delay: dl }); ui.hideUntil[skey] = Date.now() + dl + FLY_MS; } }
+      var dealing = (ui.hideUntil[skey] || 0) > Date.now();
+      if (dealing) o.cls += ' dealwait'; else if (ui.landed === v.uid) o.cls += ' landed';
       if (ui.hl && ui.hl.fx && ui.hl.fx.uids.indexOf(v.uid) >= 0) o.cls += ui.hl.fx.neg ? ' debuffed' : ' buffed';
       o.attrs = 'data-cuid="' + v.uid + '" data-side="' + side + '"';
       if (mine) {
@@ -845,13 +847,14 @@
         if (prep && sel && (sel.k === 'mine' || (sel.k === 'act' && CARD[s.p[0].hand[sel.i].id].target === 'enemy'))) o.cls += ' tgtable';
         if (prep && aim[v.uid]) o.extra = '<span class="aim">' + ic('diana') + '×' + aim[v.uid] + '</span>';
       }
-      o.gl = I ? I.gl : 1; o.lv = lvG(side, v.id); o.skin = skG(side, v.id); h += '<div class="cw"' + (dealing ? ' style="--di:' + k + ';--el:' + (elapsed / 1000).toFixed(2) + 's"' : '') + '>' + cardHtml(c, o) + under + '</div>';
+      o.gl = I ? I.gl : 1; o.lv = lvG(side, v.id); o.skin = skG(side, v.id); h += '<div class="cw">' + cardHtml(c, o) + under + '</div>';
     });
     return h + '</div>';
   }
   var REFRESH_SVG = '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>';
   function renderGame() {
-    var gk0 = (PV.on ? PV.id : '') + ':' + ui.s.rs; ui.seedSeen = ui.seenKey !== gk0; if (ui.seedSeen) { ui.seenKey = gk0; ui.seen = {}; }
+    var gk0 = (PV.on ? PV.id : '') + ':' + ui.s.rs; ui.seedSeen = ui.seenKey !== gk0; if (ui.seedSeen) { ui.seenKey = gk0; ui.seen = {}; ui.hideUntil = {}; }
+    ui.fl = [];
     var s = ui.s, view = ui.view || E.viewOf(s), P = s.p[0], R = s.p[1];
     var shopMode = s.shopOpen && !ui.playing, shop = shopMode && s.phase === 'prep', prep = s.phase === 'prep' && !ui.playing && !s.shopOpen;
     var pend = prep ? E.pendingTargets(s).length : 0, hasT = Object.keys(P.target).length > 0;
@@ -934,8 +937,42 @@
     document.body.classList.toggle('shopbg', !!shopMode);
     ui.landed = null;
     var lg = document.getElementById('log'); if (lg) lg.scrollTop = lg.scrollHeight;
-    strikeVars(); drawArrows(); fxBanner(); applyFloats(); flushActs();
+    strikeVars(); drawArrows(); fxBanner(); applyFloats(); flushActs(); runFlights();
   }
+
+  // ---------- Despliegue: la carta aparece grande en mitad de la pantalla, da vueltas y aterriza en su hueco ----------
+  var FLY_MS = 2000, REDUCED = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  function runFlights() {
+    var L = ui.fl; ui.fl = [];
+    if (!L || !L.length) return;
+    var end = 0;
+    L.forEach(function (f) {
+      var t = app.querySelector('.card[data-cuid="' + f.uid + '"][data-side="' + f.side + '"]'); if (!t) return;
+      var r = t.getBoundingClientRect(); if (!r.width) return;
+      var wrap = document.createElement('div'); wrap.className = 'flyc'; wrap.style.cssText = 'left:' + r.left + 'px;top:' + r.top + 'px;width:' + r.width + 'px;height:' + r.height + 'px';
+      var cl = t.cloneNode(true); cl.classList.remove('dealwait', 'sel', 'tgtable'); ['data-cuid', 'data-act', 'data-side'].forEach(function (a) { cl.removeAttribute(a); });
+      wrap.appendChild(cl); wrap.style.visibility = 'hidden'; document.body.appendChild(wrap);
+      var cx = window.innerWidth / 2 - (r.left + r.width / 2), cy = window.innerHeight / 2 - (r.top + r.height / 2) - 10, sc = Math.max(1.4, Math.min(3, Math.min(300, window.innerWidth * .62, window.innerHeight * .5 * 5 / 7) / r.width));
+      var T = function (x, y, z, ry) { return 'perspective(1100px) translate(' + x + 'px,' + y + 'px) scale(' + z + ') rotateY(' + ry + 'deg)'; };
+      var anim = wrap.animate([
+        { transform: T(cx, cy, .15, 0), opacity: 0, offset: 0 },
+        { transform: T(cx, cy, sc, 0), opacity: 1, offset: .14, easing: 'cubic-bezier(.2,.9,.3,1.2)' },
+        { transform: T(cx, cy, sc, 720), opacity: 1, offset: .62, easing: 'cubic-bezier(.45,0,.55,1)' },
+        { transform: T(cx, cy, sc * 1.04, 720), opacity: 1, offset: .70 },
+        { transform: T(0, 0, 1, 720), opacity: 1, offset: 1 }
+      ], { duration: FLY_MS - 150, delay: f.delay, fill: 'both', easing: 'cubic-bezier(.5,0,.3,1)' });
+      anim.onfinish = function () {
+        wrap.remove();
+        var real = app.querySelector('.card[data-cuid="' + f.uid + '"][data-side="' + f.side + '"]');
+        if (real) { real.classList.remove('dealwait'); real.classList.add('landed'); }
+        delete ui.hideUntil[f.side + ':' + f.uid];
+      };
+      wrap.style.visibility = '';
+      end = Math.max(end, Date.now() + f.delay + FLY_MS);
+    });
+    ui.flyUntil = Math.max(ui.flyUntil || 0, end);
+  }
+  function clearFlights() { document.querySelectorAll('.flyc').forEach(function (n) { n.remove(); }); }
 
   // ---------- Anuncio de acciones jugadas (tuyas y del rival) ----------
   function flushActs() {
@@ -1095,6 +1132,7 @@
     if (PV.wait && ui.screen !== 'pvp') pvpCancelWait();
     var f = { home: renderHome, deck: renderDeck, modes: renderModes, pvp: renderPvp, login: renderLogin, starter: renderStarter, packs: renderPacks, profile: renderProfile, ladder: renderLadder, boot: renderBoot }[ui.screen];
     if (f) f(); else renderGame();
+    if (ui.screen !== 'game') clearFlights();
     if (ui.tut && ui.screen !== 'game') ui.tut = null;
     if (ui.tut) tutCheck(); else tutClear();
     syncHash();
@@ -1117,7 +1155,7 @@
     if (!T || !s || ui.screen !== 'game') return tutClear();
     document.body.classList.add('tutmode');
     if (ui.tutTm) { clearTimeout(ui.tutTm); ui.tutTm = null; }
-    if (ui.playing || ui.busy || Date.now() < Math.max(ui.splashUntil || 0, ui.actNext || 0) + 250) { tutHide(); ui.tutTm = setTimeout(tutCheck, 350); return; }
+    if (ui.playing || ui.busy || Date.now() < Math.max(ui.splashUntil || 0, ui.actNext || 0, ui.flyUntil || 0) + 250) { tutHide(); ui.tutTm = setTimeout(tutCheck, 350); return; }
     var S = CT.steps, last = S.length - 1;
     if (s.over) T.i = last;
     while (T.i < last && S[T.i].st < tutStage(s)) T.i++;

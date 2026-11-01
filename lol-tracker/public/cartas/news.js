@@ -1,6 +1,10 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-02', tag: 'Novedad', title: 'Efectos de victoria y derrota: pack Eclipse',
+      items: ['Colección → Efectos estrena el apartado «Victoria y derrota». Cada pack incluye las dos animaciones, la de victoria y la de derrota, con su banner y efectos propios. Por defecto llevas el de siempre (trofeo y confeti, o corazón roto).',
+        'En la tienda (pestaña Efectos) llega el primero: «Eclipse» (50 monedas). Victoria: banner de oro con rayos de sol que giran, ondas de luz y lluvia dorada. Derrota: banner carmesí que tiembla y se agrieta, con ceniza y brasas flotando.',
+        'Puedes probar las dos animaciones antes de comprarlo. Hasta que no lo compres no se puede equipar.'] },
     { date: '2026-11-02', tag: 'Cambio', title: 'Nueva forma de ver la rareza',
       items: ['Las cartas ya no cambian el color de su borde según la rareza. Ahora llevan una gema en el centro de la parte superior: gris plata para Común, azul para Rara, violeta para Épica y dorada para Legendaria (las dos últimas con brillo).',
         'El borde de las cartas es ahora uno neutro, y así el de tu funda se ve completo.'] },

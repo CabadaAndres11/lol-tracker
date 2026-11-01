@@ -439,7 +439,8 @@
   }
   function shopFx() {
     return '<div class="panel"><h2>' + ic('brillo') + ' Efectos · Despliegues</h2><p class="mut">Cambian cómo aparecen tus cartas en la mesa. Pruébalos antes de comprar; una vez tuyos, los equipas en Colección → Efectos.</p>' + fxDemo() + '<div class="fxlist">' + fxItems('shop', 'deploy') + '</div></div>' +
-      '<div class="panel"><h2>' + ic('cartas') + ' Efectos · Fundas</h2><p class="mut">Cambian el borde de tus cartas en la partida y el reverso al abrir sobres.</p>' + slvDemo() + '<div class="fxlist">' + fxItems('shop', 'sleeve') + '</div></div>';
+      '<div class="panel"><h2>' + ic('cartas') + ' Efectos · Fundas</h2><p class="mut">Cambian el borde de tus cartas en la partida y el reverso al abrir sobres.</p>' + slvDemo() + '<div class="fxlist">' + fxItems('shop', 'sleeve') + '</div></div>' +
+      '<div class="panel"><h2>' + ic('trofeo') + ' Efectos · Victoria y derrota</h2><p class="mut">Cada pack trae la animación de victoria y la de derrota, con banner y efectos propios. Pruébalo antes de comprar.</p><div class="fxlist">' + fxItems('shop', 'finish') + '</div></div>' + finPrevHtml();
   }
   function packsTab(a) {
     var can = a.coins >= a.packCost && !ui.pack;
@@ -947,8 +948,8 @@
       }
       var pt = ui.reward && ui.reward.pts ? '<p class="' + (ui.reward.pts > 0 ? 'reward' : 'mut') + '">' + (ui.reward.pts > 0 ? '+' : '') + ui.reward.pts + ' puntos de clasificación</p>' : '';
       var rw = pt + (ui.reward ? (ui.reward.gained > 0 ? '<p class="reward">+' + ui.reward.gained + ' ' + ic('moneda') + ' monedas</p>' : '<p class="mut">Sin monedas esta vez (partida muy corta o límite diario alcanzado).</p>') : '<p class="mut">Calculando recompensa…</p>');
-      var conf = ''; if (win) for (var q = 0; q < 36; q++) conf += '<i style="left:' + (q * 2.8 + (q % 3)) + '%;--d:' + ((q * 37) % 100) / 100 * 1.2 + 's;--c:' + ['#ffc533', '#ff6b8b', '#4f9dff', '#38d39f', '#a78bfa'][q % 5] + '"></i>';
-      h += '<div class="overlay ' + (win ? 'owin' : 'olose') + '">' + (win ? '<div class="confetti">' + conf + '</div>' : '') + '<div class="panel over"><div class="obig">' + (win ? '' + ic('trofeo') + '' : '' + ic('corazonroto') + '') + '</div><h2>' + (win ? '¡Victoria!' : (s.vs4 ? 'Eliminado · puesto ' + s.place + 'º de 4' : 'Derrota')) + '</h2><p class="mut">' + esc(s.reason) + ' · ronda ' + s.round + '</p>' + rw + '<button class="btn big" data-act="' + (PV.on ? (PV.px === 'vs4' ? (ui.botGame ? (PV.mode === 'revive' ? 'startrevvs4b' : 'startvs4b') : 'openvs4') : 'openpvp') : 'play') + '">' + (PV.on ? 'Otra partida' : 'Jugar otra vez') + '</button> <button class="btn sec" data-act="menu" data-to="deck">Cambiar mazo</button> <button class="btn sec" data-act="menu" data-to="home">Menú</button></div></div>';
+      var btns = '<button class="btn big" data-act="' + (PV.on ? (PV.px === 'vs4' ? (ui.botGame ? (PV.mode === 'revive' ? 'startrevvs4b' : 'startvs4b') : 'openvs4') : 'openpvp') : 'play') + '">' + (PV.on ? 'Otra partida' : 'Jugar otra vez') + '</button> <button class="btn sec" data-act="menu" data-to="deck">Cambiar mazo</button> <button class="btn sec" data-act="menu" data-to="home">Menú</button>';
+      h += finOverlay(finId(), win, win ? '¡Victoria!' : (s.vs4 ? 'Eliminado · puesto ' + s.place + 'º de 4' : 'Derrota'), esc(s.reason) + ' · ronda ' + s.round, rw, btns, '');
     }
     if (ui.confirmSurr && !s.over) h += '<div class="overlay surro"><div class="panel surrp"><h2>' + ic('aviso') + ' ¿Seguro que quieres rendirte?</h2><p class="mut">Darás la partida por perdida' + (s.vs4 ? ' y quedarás eliminado.' : '.') + ' Esta acción no se puede deshacer.</p><div class="btnrow"><button class="btn" data-act="surrender-yes">Sí, rendirme</button><button class="btn sec" data-act="surrender-no">Cancelar</button></div></div></div>';
     if (s.phase === 'post' && !s.over && !ui.playing && !ui.busy && P.anime > 0 && !(PV.on && PV.rdy[0])) h += animeModal(P);
@@ -972,6 +973,30 @@
     { id: 'oro', name: 'Oro real', desc: 'Borde de pan de oro bruñido y reverso azul noche con celosía dorada. Elegante y sobrio.', price: 40 },
     { id: 'neon', name: 'Neón', desc: 'Borde de luz degradado de cian a magenta y reverso oscuro con rejilla luminosa.', price: 30 }
   ];
+  // ---------- Efectos de victoria y derrota (cada pack trae los dos) ----------
+  var FIN_LIST = [
+    { id: 'default', name: 'Por defecto', desc: 'Victoria: trofeo y lluvia de confeti. Derrota: corazón roto y aviso sobrio.', price: 0 },
+    { id: 'eclipse', name: 'Eclipse', desc: 'Victoria: banner de oro con rayos de sol, ondas de luz y lluvia dorada. Derrota: banner carmesí que se agrieta, con ceniza y brasas flotando.', price: 50 }
+  ];
+  function finId() { var id = ui.acct && ui.acct.fx && ui.acct.fx.finish; return id && FIN_LIST.some(function (e) { return e.id === id; }) && fxHas(id) ? id : 'default'; }
+  function finOverlay(id, win, title, sub, rw, btns, extra) {
+    if (id === 'eclipse') {
+      var fx = '<div class="finfx"><div class="finrays"></div><i class="ring"></i><i class="ring r2"></i>', n = win ? 34 : 30;
+      for (var q = 0; q < n; q++) fx += '<i class="fp" style="--x:' + ((q * 29 + (q % 4) * 7) % 100) + '%;--d:' + (((q * 37) % 100) / 100 * 3).toFixed(2) + 's;--t:' + (3.6 + ((q * 13) % 10) / 4).toFixed(2) + 's;--s:' + (5 + (q % 5) * 2) + 'px;--w:' + ((q % 2 ? 1 : -1) * (14 + (q % 4) * 9)) + 'px"></i>';
+      fx += '</div>';
+      var letters = title.replace(/[¡!]/g, '').toUpperCase().split('').map(function (ch, k) { return '<span style="--i:' + k + '">' + (ch === ' ' ? '&nbsp;' : esc(ch)) + '</span>'; }).join('');
+      var crack = win ? '' : '<svg class="fincrack" viewBox="0 0 1000 120" preserveAspectRatio="none"><path d="M0 60 L120 40 L210 78 L330 30 L430 70 L520 22 L610 80 L720 36 L820 74 L920 44 L1000 62" /><path d="M520 22 L540 -10 M430 70 L410 130 M720 36 L750 -10"/></svg>';
+      return '<div class="overlay fin fin-eclipse ' + (win ? 'owin' : 'olose') + (extra ? ' finprev' : '') + '">' + fx + '<div class="finband"><div class="finbandin"><span class="finico">' + ic(win ? 'trofeo' : 'corazonroto') + '</span><div class="fintxt">' + letters + '</div><span class="finico">' + ic(win ? 'trofeo' : 'corazonroto') + '</span></div>' + crack + '</div><p class="finsub">' + sub + '</p><div class="finpanel">' + rw + '<div class="finbtns">' + btns + '</div></div></div>';
+    }
+    var conf = ''; if (win) for (var q2 = 0; q2 < 36; q2++) conf += '<i style="left:' + (q2 * 2.8 + (q2 % 3)) + '%;--d:' + ((q2 * 37) % 100) / 100 * 1.2 + 's;--c:' + ['#ffc533', '#ff6b8b', '#4f9dff', '#38d39f', '#a78bfa'][q2 % 5] + '"></i>';
+    return '<div class="overlay ' + (win ? 'owin' : 'olose') + (extra ? ' finprev' : '') + '">' + (win ? '<div class="confetti">' + conf + '</div>' : '') + '<div class="panel over"><div class="obig">' + ic(win ? 'trofeo' : 'corazonroto') + '</div><h2>' + title + '</h2><p class="mut">' + sub + '</p>' + rw + btns + '</div></div>';
+  }
+  // Vista previa desde Colección y Tienda: alterna victoria y derrota
+  function finPrevHtml() {
+    var fp = ui.finPrev; if (!fp) return '';
+    return finOverlay(fp.id, fp.win, fp.win ? '¡Victoria!' : 'Derrota', fp.win ? 'Has derrotado al rival · ronda 7' : 'Tu rival te ha vencido · ronda 7', '<p class="reward">+30 ' + ic('moneda') + ' monedas</p>',
+      '<button class="btn big" data-act="finclose">Cerrar</button> <button class="btn sec" data-act="finflip">Ver ' + (fp.win ? 'derrota' : 'victoria') + '</button>', 'prev');
+  }
   function sleeveId() { var id = ui.acct && ui.acct.fx && ui.acct.fx.sleeve; return id && id !== 'sin' && fxHas(id) && SLEEVE_LIST.some(function (e) { return e.id === id; }) ? id : 'sin'; }
   function fxHas(id) { return !!(ui.acct && ((ui.acct.fxOwned || ['default']).indexOf(id) >= 0 || ui.acct.admin)); }
   // destello al aterrizar: onda de choque y chispas
@@ -1038,8 +1063,8 @@
   // Lista de efectos. where: 'col' (Colección: equipar) o 'shop' (Tienda: comprar); kind: 'deploy' o 'sleeve'
   function fxItems(where, kind) {
     kind = kind || 'deploy';
-    var a = ui.acct, sl = kind === 'sleeve', cur = sl ? sleeveId() : deployId(), prev = sl ? 'slvprev' : 'fxprev';
-    return (sl ? SLEEVE_LIST : DEPLOY_LIST).filter(function (e) { return where === 'col' || e.price > 0; }).map(function (e) {
+    var a = ui.acct, sl = kind === 'sleeve', fi = kind === 'finish', cur = sl ? sleeveId() : fi ? finId() : deployId(), prev = sl ? 'slvprev' : fi ? 'finprev' : 'fxprev';
+    return (sl ? SLEEVE_LIST : fi ? FIN_LIST : DEPLOY_LIST).filter(function (e) { return where === 'col' || e.price > 0; }).map(function (e) {
       var eq = e.id === cur, has = fxHas(e.id) || e.price === 0, btn;
       if (where === 'shop') btn = has ? '<button class="btn sec sm" disabled>' + ic('check') + ' Ya lo tienes</button>' : '<button class="btn sm" data-act="fxbuy" data-id="' + e.id + '"' + (a.coins < (a.admin ? 0 : e.price) ? ' disabled' : '') + '>Comprar · ' + (a.admin ? 'gratis' : e.price + ' ' + ic('moneda')) + '</button>';
       else btn = eq ? '' : has ? '<button class="btn sm" data-act="fxequip" data-kind="' + kind + '" data-id="' + e.id + '">Equipar</button>' : '<button class="btn sm" disabled title="Cómpralo en la tienda">' + ic('candado') + ' Sin comprar</button><button class="btn sec sm" data-act="fxgoshop">Ir a la tienda</button>';
@@ -1047,8 +1072,9 @@
     }).join('');
   }
   function effectsTab() {
-    var sec = ui.fxSec === 'sleeve' ? 'sleeve' : 'deploy';
-    var nav = '<nav class="fxnav"><button class="' + (sec === 'deploy' ? 'on' : '') + '" data-act="fxsec" data-t="deploy">Despliegues</button><button class="' + (sec === 'sleeve' ? 'on' : '') + '" data-act="fxsec" data-t="sleeve">Fundas</button></nav>';
+    var sec = ui.fxSec === 'sleeve' || ui.fxSec === 'finish' ? ui.fxSec : 'deploy';
+    var nav = '<nav class="fxnav"><button class="' + (sec === 'deploy' ? 'on' : '') + '" data-act="fxsec" data-t="deploy">Despliegues</button><button class="' + (sec === 'sleeve' ? 'on' : '') + '" data-act="fxsec" data-t="sleeve">Fundas</button><button class="' + (sec === 'finish' ? 'on' : '') + '" data-act="fxsec" data-t="finish">Victoria y derrota</button></nav>';
+    if (sec === 'finish') return '<div class="fxlayout">' + nav + '<div class="fxmain"><h2 class="dedh">Victoria y derrota</h2><p class="mut colhint">Cada pack incluye la animación de victoria y la de derrota, con su banner y efectos. Pulsa «Probar» para ver las dos.</p><div class="fxlist">' + fxItems('col', 'finish') + '</div></div></div>' + finPrevHtml();
     if (sec === 'sleeve') return '<div class="fxlayout">' + nav + '<div class="fxmain"><h2 class="dedh">Fundas</h2><p class="mut colhint">Cambian el borde de tus cartas en la partida y el reverso al abrir sobres. Pulsa «Probar» para verlas.</p>' +
       slvDemo() + '<div class="fxlist">' + fxItems('col', 'sleeve') + '</div></div></div>';
     return '<div class="fxlayout">' + nav + '<div class="fxmain"><h2 class="dedh">Despliegues</h2><p class="mut colhint">Así aparecen tus cartas en la mesa al jugarlas. Los demás jugadores ven el efecto que tengas equipado.</p>' +
@@ -1367,6 +1393,7 @@
     if (Date.now() - noClick < 350 || ui.busy) return;
     var el = e.target.closest('[data-act]'); if (!el) return;
     var act = el.dataset.act, s = ui.s, P = s && s.p[0];
+    if (ui.finPrev && act !== 'finprev' && act !== 'finflip' && act !== 'finclose') ui.finPrev = null;
     if (ui.dedit) { var ne = document.getElementById('de-name'); if (ne) ui.dedit.name = ne.value; }
     if (act === 'acctmenu') { var w = el.closest('.acctw'); if (w) w.classList.toggle('open'); return; }
     if (act === 'logout') return logout();
@@ -1446,6 +1473,9 @@
     if (act === 'onlydeck') { ui.onlyDeck = el.checked; return render(); }
     if (act === 'coltab') { ui.colTab = el.dataset.t; ui.dedit = null; ui.msg = ''; ui.delAsk = null; window.scrollTo(0, 0); return render(); }
     if (act === 'fxsec') { ui.fxSec = el.dataset.t; ui.slvPrev = null; return renderDeck(); }
+    if (act === 'finprev') { ui.finPrev = { id: el.dataset.id, win: true }; return ui.screen === 'packs' ? render() : renderDeck(); }
+    if (act === 'finflip') { if (ui.finPrev) ui.finPrev.win = !ui.finPrev.win; return ui.screen === 'packs' ? render() : renderDeck(); }
+    if (act === 'finclose') { ui.finPrev = null; return ui.screen === 'packs' ? render() : renderDeck(); }
     if (act === 'slvprev') { ui.slvPrev = el.dataset.id; return ui.screen === 'packs' ? render() : renderDeck(); }
     if (act === 'fxgoshop') { ui.screen = 'packs'; ui.shopTab = 'fx'; window.scrollTo(0, 0); return render(); }
     if (act === 'fxbuy') { return api('fxBuy', { id: el.dataset.id }).then(function (r) { if (r.data && r.data.user) setAcct(r.data.user); ui.msg = r.ok ? '' : (r.data.error || ''); render(); }); }

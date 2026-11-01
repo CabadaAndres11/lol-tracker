@@ -55,15 +55,15 @@ function drawCard(minRarity) {
   return pool[crypto.randomInt(0, pool.length)].id;
 }
 // Efectos cosméticos disponibles (por ahora todos son de todos los jugadores)
-const FX_KINDS = { deploy: { default: 0, meteoro: 30 }, sleeve: { sin: 0, oro: 40, neon: 30 } }; // precio en monedas de cada efecto, por tipo
-const FX_PRICE = Object.assign({}, FX_KINDS.deploy, FX_KINDS.sleeve);
-const FX_DEFAULT = { deploy: 'default', sleeve: 'sin' };
+const FX_KINDS = { deploy: { default: 0, meteoro: 30 }, sleeve: { sin: 0, oro: 40, neon: 30 }, finish: { default: 0, eclipse: 50 } }; // precio en monedas de cada efecto, por tipo
+const FX_PRICE = Object.assign({}, FX_KINDS.deploy, FX_KINDS.sleeve, FX_KINDS.finish);
+const FX_DEFAULT = { deploy: 'default', sleeve: 'sin', finish: 'default' };
 const FX_DEPLOY = Object.keys(FX_PRICE);
 const fxOwned = (u) => ['default', 'sin', ...((u.fxOwned || []).filter((x) => FX_DEPLOY.includes(x) && FX_PRICE[x] > 0))];
 const fxSel = (u, kind) => { const id = (u.fx || {})[kind]; return id && FX_KINDS[kind][id] !== undefined && fxOwned(u).includes(id) ? id : FX_DEFAULT[kind]; };
 function publicUser(u) {
   return {
-    name: u.name, pts: u.pts || 0, coins: u.coins, owned: u.owned, dups: u.dups || {}, skins: u.skins || [], skinSel: u.skinSel || {}, decks: u.decks || null, avatar: u.avatar || '', fx: { deploy: fxSel(u, 'deploy'), sleeve: fxSel(u, 'sleeve') }, fxOwned: fxOwned(u),
+    name: u.name, pts: u.pts || 0, coins: u.coins, owned: u.owned, dups: u.dups || {}, skins: u.skins || [], skinSel: u.skinSel || {}, decks: u.decks || null, avatar: u.avatar || '', fx: { deploy: fxSel(u, 'deploy'), sleeve: fxSel(u, 'sleeve'), finish: fxSel(u, 'finish') }, fxOwned: fxOwned(u),
     dailyAvailable: u.lastDaily !== today(),
     gamesToday: u.rewardDay === today() ? u.rewardCount : 0,
     maxGamesToday: MAX_GAME_REWARDS_PER_DAY,

@@ -55,12 +55,15 @@ function drawCard(minRarity) {
   return pool[crypto.randomInt(0, pool.length)].id;
 }
 // Efectos cosméticos disponibles (por ahora todos son de todos los jugadores)
-const FX_PRICE = { default: 0, meteoro: 30 }; // precio en monedas de cada despliegue
+const FX_KINDS = { deploy: { default: 0, meteoro: 30 }, sleeve: { sin: 0, oro: 40, neon: 30 } }; // precio en monedas de cada efecto, por tipo
+const FX_PRICE = Object.assign({}, FX_KINDS.deploy, FX_KINDS.sleeve);
+const FX_DEFAULT = { deploy: 'default', sleeve: 'sin' };
 const FX_DEPLOY = Object.keys(FX_PRICE);
-const fxOwned = (u) => ['default', ...((u.fxOwned || []).filter((x) => FX_DEPLOY.includes(x) && x !== 'default'))];
+const fxOwned = (u) => ['default', 'sin', ...((u.fxOwned || []).filter((x) => FX_DEPLOY.includes(x) && FX_PRICE[x] > 0))];
+const fxSel = (u, kind) => { const id = (u.fx || {})[kind]; return id && FX_KINDS[kind][id] !== undefined && fxOwned(u).includes(id) ? id : FX_DEFAULT[kind]; };
 function publicUser(u) {
   return {
-    name: u.name, pts: u.pts || 0, coins: u.coins, owned: u.owned, dups: u.dups || {}, skins: u.skins || [], skinSel: u.skinSel || {}, decks: u.decks || null, avatar: u.avatar || '', fx: { deploy: fxOwned(u).includes((u.fx || {}).deploy) ? u.fx.deploy : 'default' }, fxOwned: fxOwned(u),
+    name: u.name, pts: u.pts || 0, coins: u.coins, owned: u.owned, dups: u.dups || {}, skins: u.skins || [], skinSel: u.skinSel || {}, decks: u.decks || null, avatar: u.avatar || '', fx: { deploy: fxSel(u, 'deploy'), sleeve: fxSel(u, 'sleeve') }, fxOwned: fxOwned(u),
     dailyAvailable: u.lastDaily !== today(),
     gamesToday: u.rewardDay === today() ? u.rewardCount : 0,
     maxGamesToday: MAX_GAME_REWARDS_PER_DAY,
@@ -633,11 +636,11 @@ module.exports = async function handler(req, res) {
       await saveUser(cfg, u);
       res.status(200).json({ ok: true }); return;
     }
-    if (act === 'fxEquip') { // equipar un efecto (kind: 'deploy')
+    if (act === 'fxEquip') { // equipar un efecto (kind: 'deploy' o 'sleeve')
       const kind = String(body.kind || ''), id = String(body.id || '');
-      if (kind !== 'deploy' || !FX_DEPLOY.includes(id)) { res.status(400).json({ error: 'Ese efecto no existe.' }); return; }
+      if (!FX_KINDS[kind] || FX_KINDS[kind][id] === undefined) { res.status(400).json({ error: 'Ese efecto no existe.' }); return; }
       if (!fxOwned(u).includes(id) && !isAdmin(u)) { res.status(403).json({ error: 'Aún no tienes ese efecto: cómpralo en la tienda.' }); return; }
-      u.fx = { ...(u.fx || {}), deploy: id };
+      u.fx = { ...(u.fx || {}), [kind]: id };
       await saveUser(cfg, u);
       res.status(200).json({ user: publicUser(u) }); return;
     }

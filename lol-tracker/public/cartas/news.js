@@ -1,6 +1,10 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-02', tag: 'Novedad', title: 'Fundas para tus cartas',
+      items: ['Colección → Efectos estrena el apartado «Fundas». Una funda cambia el borde de tus cartas en la partida y el reverso al abrir sobres (el brillo del reverso sigue indicando la rareza).',
+        'Por defecto vas con «Sin funda». En la tienda (pestaña Efectos) hay dos nuevas: «Oro real» (40 monedas), con borde de pan de oro y reverso azul noche con celosía dorada, y «Neón» (30 monedas), con borde de luz de cian a magenta y reverso con rejilla luminosa.',
+        'Puedes probarlas antes de comprar. Hasta que no las compres no se pueden equipar.'] },
     { date: '2026-11-02', tag: 'Novedad', title: 'Nuevo sobre: Set 1 y nueva apertura',
       items: ['El sobre estándar pasa a llamarse «Set 1» y estrena ilustración propia.',
         'La apertura de sobres estrena un estilo más moderno y translúcido: fondo de cristal teñido con el color de la mejor carta, sobre que levita, destello de luz, ondas y motas brillantes al rasgarse.',

@@ -71,7 +71,7 @@
     var tag = o.tag || 'div';
     var art = troop && ARTS[c.id];
     if (o.skin === undefined) o.skin = ui.screen === 'game' ? '' : (ui.acct && ui.acct.skinSel && ui.acct.skinSel[c.id] && ui.acct.skins.indexOf(ui.acct.skinSel[c.id]) >= 0 ? ui.acct.skinSel[c.id] : '');
-    var h = '<' + tag + ' class="card r-' + c.rarity + (troop ? '' : ' accion') + (art ? ' art' : '') + (o.cls ? ' ' + o.cls : '') + '" style="--c1:' + c1 + ';--c2:' + c2 + (art ? ';--art:url(/cartas/art/' + (o.skin || c.id) + '.webp)' : '') + '"' + (o.attrs ? ' ' + o.attrs : '') + '>';
+    var h = '<' + tag + ' class="card r-' + c.rarity + (troop ? '' : ' accion') + (art ? ' art' : '') + (o.slv && o.slv !== 'sin' ? ' slv-' + o.slv : '') + (o.cls ? ' ' + o.cls : '') + '" style="--c1:' + c1 + ';--c2:' + c2 + (art ? ';--art:url(/cartas/art/' + (o.skin || c.id) + '.webp)' : '') + '"' + (o.attrs ? ' ' + o.attrs : '') + '>';
     if (o.skin && c.rarity === 'Legendaria') h += '<span class="holo"></span>'; // skin de una legendaria: efecto holográfico
     if (!c.novia) h += '<span class="coin" title="Coste en oro para comprarla">' + c.cost + '</span>';
     if (o.gl > 1) h += '<span class="glb" title="Fusionada en partida: ★' + o.gl + '">' + '★'.repeat(o.gl) + '</span>';
@@ -437,7 +437,8 @@
       '<div class="panel"><h2>Tu colección</h2><div class="coinbig">' + a.owned.length + ' / ' + total + '</div><div class="meter colm"><i class="on" style="width:' + Math.round(a.owned.length / total * 100) + '%"></i></div><p class="mut">Solo puedes usar en tus mazos las cartas que tienes.</p><button class="btn sec" data-act="nav" data-to="deck">' + ic('cartas') + ' Ir a la colección</button></div></div>';
   }
   function shopFx() {
-    return '<div class="panel"><h2>' + ic('brillo') + ' Efectos · Despliegues</h2><p class="mut">Cambian cómo aparecen tus cartas en la mesa. Pruébalos antes de comprar; una vez tuyos, los equipas en Colección → Efectos.</p>' + fxDemo() + '<div class="fxlist">' + fxItems('shop') + '</div></div>';
+    return '<div class="panel"><h2>' + ic('brillo') + ' Efectos · Despliegues</h2><p class="mut">Cambian cómo aparecen tus cartas en la mesa. Pruébalos antes de comprar; una vez tuyos, los equipas en Colección → Efectos.</p>' + fxDemo() + '<div class="fxlist">' + fxItems('shop', 'deploy') + '</div></div>' +
+      '<div class="panel"><h2>' + ic('cartas') + ' Efectos · Fundas</h2><p class="mut">Cambian el borde de tus cartas en la partida y el reverso al abrir sobres.</p>' + slvDemo() + '<div class="fxlist">' + fxItems('shop', 'sleeve') + '</div></div>';
   }
   function packsTab(a) {
     var can = a.coins >= a.packCost && !ui.pack;
@@ -474,7 +475,7 @@
     if (pk.stage === 'rip') return '<div class="packov best-' + best + (best === 'Legendaria' ? ' rainbow' : '') + '">' + bpkHtml('rip best-' + best) + pkFx(best) + '</div>';
     var gain = pk.cards.reduce(function (n, c) { return n + c.dupCoins; }, 0);
     var allRev = pk.rev.every(Boolean);
-    return '<div class="packov best-' + best + (best === 'Legendaria' ? ' rainbowpost' : '') + '" data-act="packbg"><div class="pcards">' + pk.cards.map(function (c, i) {
+    return '<div class="packov best-' + best + (best === 'Legendaria' ? ' rainbowpost' : '') + '" data-act="packbg"><div class="pcards' + (sleeveId() !== 'sin' ? ' slv-' + sleeveId() : '') + '">' + pk.cards.map(function (c, i) {
       var cd = CARD[c.id];
       return '<div class="pcard r-' + cd.rarity + (pk.rev[i] ? ' flipped' : '') + '" data-act="flipcard" data-i="' + i + '" style="--d:' + i * 0.12 + 's"><div class="pin"><div class="pback"><span>' + GEM[cd.rarity] + '</span></div><div class="pfront">' + cardHtml(cd, {}) +
         (c.isNew ? '<span class="pnew">¡NUEVA!</span>' : '<span class="pdup">' + (c.lvUp ? '¡Sube a ★' + c.lvl + '!' : 'Repetida · ' + c.copies + ' copias') + '</span>') + '</div></div></div>';
@@ -871,7 +872,7 @@
         if (prep && sel && (sel.k === 'mine' || (sel.k === 'act' && CARD[s.p[0].hand[sel.i].id].target === 'enemy'))) o.cls += ' tgtable';
         if (prep && aim[v.uid]) o.extra = '<span class="aim">' + ic('diana') + '×' + aim[v.uid] + '</span>';
       }
-      o.gl = I ? I.gl : 1; o.lv = lvG(side, v.id); o.skin = skG(side, v.id); if (mine && k === 4) under += novSwitch(s); h += '<div class="cw">' + cardHtml(c, o) + under + '</div>';
+      o.gl = I ? I.gl : 1; o.lv = lvG(side, v.id); o.skin = skG(side, v.id); if (mine) o.slv = sleeveId(); if (mine && k === 4) under += novSwitch(s); h += '<div class="cw">' + cardHtml(c, o) + under + '</div>';
     });
     return h + '</div>';
   }
@@ -909,7 +910,7 @@
     h += '<div class="handwrap' + (ui.dragMesa ? ' dropzone' : '') + '"><div class="hl">Tu mano ' + P.hand.length + (s.mode === 'revive' ? '' : '/' + CFG.handMax) + '</div><div class="hand">';
     P.hand.forEach(function (i, k) {
       var c = CARD[i.id], sel = ui.sel && (ui.sel.k === 'hand' || ui.sel.k === 'act') && ui.sel.i === k;
-      h += '<div class="cw">' + cardHtml(c, { gl: i.gl, lv: lvG(0, i.id), skin: skG(0, i.id), atk: E.atk(i), hp: i.hp, max: E.maxHp(i), cls: 'hcard' + (sel ? ' sel' : ''), attrs: 'data-act="hand" data-i="' + k + '" title="Pulsa o arrastra a la mesa"', tag: 'button' }) + (shop ? '<div class="mini"><button data-act="sell" data-from="hand" data-i="' + k + '" title="Vender y recuperar su valor">' + ic('moneda') + ' Vender ' + E.sellValue(i) + '</button></div>' : '') + '</div>';
+      h += '<div class="cw">' + cardHtml(c, { slv: sleeveId(), gl: i.gl, lv: lvG(0, i.id), skin: skG(0, i.id), atk: E.atk(i), hp: i.hp, max: E.maxHp(i), cls: 'hcard' + (sel ? ' sel' : ''), attrs: 'data-act="hand" data-i="' + k + '" title="Pulsa o arrastra a la mesa"', tag: 'button' }) + (shop ? '<div class="mini"><button data-act="sell" data-from="hand" data-i="' + k + '" title="Vender y recuperar su valor">' + ic('moneda') + ' Vender ' + E.sellValue(i) + '</button></div>' : '') + '</div>';
     });
     for (var f = P.hand.length; f < CFG.handMax; f++) h += '<div class="cw"><div class="slot">—</div></div>';
     h += '</div></div>';
@@ -965,6 +966,12 @@
     { id: 'default', name: 'Por defecto', desc: 'La carta aparece grande en mitad de la pantalla, da un par de vueltas y vuela hasta su hueco.', price: 0, ms: 2000, gap: 450 },
     { id: 'meteoro', name: 'Meteoro dorado', desc: 'La carta cae como un meteoro envuelta en luz dorada, gira en el aire y se estrella en su hueco con una onda de choque y chispas.', price: 30, ms: 2900, gap: 600 }
   ];
+  var SLEEVE_LIST = [
+    { id: 'sin', name: 'Sin funda', desc: 'Tus cartas se ven tal cual, con el borde de su rareza y el reverso de cristal.', price: 0 },
+    { id: 'oro', name: 'Oro real', desc: 'Borde de pan de oro bruñido y reverso azul noche con celosía dorada. Elegante y sobrio.', price: 40 },
+    { id: 'neon', name: 'Neón', desc: 'Borde de luz degradado de cian a magenta y reverso oscuro con rejilla luminosa.', price: 30 }
+  ];
+  function sleeveId() { var id = ui.acct && ui.acct.fx && ui.acct.fx.sleeve; return id && id !== 'sin' && fxHas(id) && SLEEVE_LIST.some(function (e) { return e.id === id; }) ? id : 'sin'; }
   function fxHas(id) { return !!(ui.acct && ((ui.acct.fxOwned || ['default']).indexOf(id) >= 0 || ui.acct.admin)); }
   // destello al aterrizar: onda de choque y chispas
   function impact(x, y, at) {
@@ -1022,21 +1029,29 @@
     var sample = D.cards.filter(function (c) { return owns(c.id) && ARTS[c.id]; })[0] || D.cards[0];
     return '<div class="fxdemo"><div class="fxslot"></div><div class="fxcard">' + cardHtml(sample, { lv: 1, skin: '' }) + '</div></div>';
   }
-  // Lista de despliegues. where: 'col' (Colección: equipar) o 'shop' (Tienda: comprar)
-  function fxItems(where) {
-    var a = ui.acct, cur = deployId();
-    return DEPLOY_LIST.filter(function (e) { return where === 'col' || e.price > 0; }).map(function (e) {
-      var eq = e.id === cur, has = fxHas(e.id), btn;
+  // Demo de fundas: reverso y frente con la funda que se está probando
+  function slvDemo() {
+    var sample = D.cards.filter(function (c) { return owns(c.id) && ARTS[c.id]; })[0] || D.cards[0], id = ui.slvPrev || sleeveId(), cls = id !== 'sin' ? ' slv-' + id : '';
+    return '<div class="slvdemo' + cls + '"><div class="slvback"><span>' + ic('cartas') + '</span></div><div class="slvfront">' + cardHtml(sample, { lv: 1, skin: '', slv: id }) + '</div></div>';
+  }
+  // Lista de efectos. where: 'col' (Colección: equipar) o 'shop' (Tienda: comprar); kind: 'deploy' o 'sleeve'
+  function fxItems(where, kind) {
+    kind = kind || 'deploy';
+    var a = ui.acct, sl = kind === 'sleeve', cur = sl ? sleeveId() : deployId(), prev = sl ? 'slvprev' : 'fxprev';
+    return (sl ? SLEEVE_LIST : DEPLOY_LIST).filter(function (e) { return where === 'col' || e.price > 0; }).map(function (e) {
+      var eq = e.id === cur, has = fxHas(e.id) || e.price === 0, btn;
       if (where === 'shop') btn = has ? '<button class="btn sec sm" disabled>' + ic('check') + ' Ya lo tienes</button>' : '<button class="btn sm" data-act="fxbuy" data-id="' + e.id + '"' + (a.coins < (a.admin ? 0 : e.price) ? ' disabled' : '') + '>Comprar · ' + (a.admin ? 'gratis' : e.price + ' ' + ic('moneda')) + '</button>';
-      else btn = eq ? '' : has ? '<button class="btn sm" data-act="fxequip" data-id="' + e.id + '">Equipar</button>' : '<button class="btn sm" disabled title="Cómpralo en la tienda">' + ic('candado') + ' Sin comprar</button><button class="btn sec sm" data-act="fxgoshop">Ir a la tienda</button>';
-      return '<div class="fxitem' + (eq && where === 'col' ? ' eq' : '') + (has ? '' : ' nofx') + '"><div class="fxinfo"><b>' + esc(e.name) + (eq && where === 'col' ? ' <span class="fxbadge">' + ic('check') + ' Equipado</span>' : '') + (has || e.price === 0 ? '' : ' <span class="fxprice">' + e.price + ' ' + ic('moneda') + '</span>') + '</b><span class="mut">' + esc(e.desc) + '</span></div><div class="fxbtns"><button class="btn sec sm" data-act="fxprev" data-id="' + e.id + '">' + ic('ojo') + ' Probar</button>' + btn + '</div></div>';
+      else btn = eq ? '' : has ? '<button class="btn sm" data-act="fxequip" data-kind="' + kind + '" data-id="' + e.id + '">Equipar</button>' : '<button class="btn sm" disabled title="Cómpralo en la tienda">' + ic('candado') + ' Sin comprar</button><button class="btn sec sm" data-act="fxgoshop">Ir a la tienda</button>';
+      return '<div class="fxitem' + (eq && where === 'col' ? ' eq' : '') + (has ? '' : ' nofx') + '"><div class="fxinfo"><b>' + esc(e.name) + (eq && where === 'col' ? ' <span class="fxbadge">' + ic('check') + ' Equipado</span>' : '') + (has || e.price === 0 ? '' : ' <span class="fxprice">' + e.price + ' ' + ic('moneda') + '</span>') + '</b><span class="mut">' + esc(e.desc) + '</span></div><div class="fxbtns"><button class="btn sec sm" data-act="' + prev + '" data-id="' + e.id + '">' + ic('ojo') + ' Probar</button>' + btn + '</div></div>';
     }).join('');
   }
   function effectsTab() {
-    var nav = '<nav class="fxnav"><button class="on" data-act="fxsec" data-t="deploy">Despliegues</button></nav>';
-    var list = fxItems('col');
+    var sec = ui.fxSec === 'sleeve' ? 'sleeve' : 'deploy';
+    var nav = '<nav class="fxnav"><button class="' + (sec === 'deploy' ? 'on' : '') + '" data-act="fxsec" data-t="deploy">Despliegues</button><button class="' + (sec === 'sleeve' ? 'on' : '') + '" data-act="fxsec" data-t="sleeve">Fundas</button></nav>';
+    if (sec === 'sleeve') return '<div class="fxlayout">' + nav + '<div class="fxmain"><h2 class="dedh">Fundas</h2><p class="mut colhint">Cambian el borde de tus cartas en la partida y el reverso al abrir sobres. Pulsa «Probar» para verlas.</p>' +
+      slvDemo() + '<div class="fxlist">' + fxItems('col', 'sleeve') + '</div></div></div>';
     return '<div class="fxlayout">' + nav + '<div class="fxmain"><h2 class="dedh">Despliegues</h2><p class="mut colhint">Así aparecen tus cartas en la mesa al jugarlas. Los demás jugadores ven el efecto que tengas equipado.</p>' +
-      fxDemo() + '<div class="fxlist">' + list + '</div></div></div>';
+      fxDemo() + '<div class="fxlist">' + fxItems('col', 'deploy') + '</div></div></div>';
   }
   function runFlights() {
     var L = ui.fl; ui.fl = [];
@@ -1429,11 +1444,12 @@
     if (act === 'novtog') { e.stopPropagation(); ui.novView = ui.novView || {}; ui.novView[el.dataset.id] = !ui.novView[el.dataset.id]; var y0 = window.scrollY; renderDeck(); window.scrollTo(0, y0); return; }
     if (act === 'onlydeck') { ui.onlyDeck = el.checked; return render(); }
     if (act === 'coltab') { ui.colTab = el.dataset.t; ui.dedit = null; ui.msg = ''; ui.delAsk = null; window.scrollTo(0, 0); return render(); }
-    if (act === 'fxsec') return;
+    if (act === 'fxsec') { ui.fxSec = el.dataset.t; ui.slvPrev = null; return renderDeck(); }
+    if (act === 'slvprev') { ui.slvPrev = el.dataset.id; return ui.screen === 'packs' ? render() : renderDeck(); }
     if (act === 'fxgoshop') { ui.screen = 'packs'; ui.shopTab = 'fx'; window.scrollTo(0, 0); return render(); }
     if (act === 'fxbuy') { return api('fxBuy', { id: el.dataset.id }).then(function (r) { if (r.data && r.data.user) setAcct(r.data.user); ui.msg = r.ok ? '' : (r.data.error || ''); render(); }); }
     if (act === 'fxprev') return previewDeploy(el.dataset.id);
-    if (act === 'fxequip') { return api('fxEquip', { kind: 'deploy', id: el.dataset.id }).then(function (r) { if (r.ok) setAcct(r.data.user); ui.msg = ''; renderDeck(); }); }
+    if (act === 'fxequip') { return api('fxEquip', { kind: el.dataset.kind || 'deploy', id: el.dataset.id }).then(function (r) { if (r.ok) setAcct(r.data.user); ui.msg = ''; renderDeck(); }); }
     if (act === 'dkopen') { var oi = +el.dataset.i; ui.deckOpen = ui.deckOpen === oi ? null : oi; ui.delAsk = null; ui.msg = ''; return renderDeck(); }
     if (act === 'dkedit') { var ei = +el.dataset.i, esl = ui.slots[ei]; ui.dedit = { i: ei, name: esl ? esl.name : 'Mazo ' + (ei + 1), ids: esl ? esl.ids.slice() : [], cover: esl ? esl.cover || '' : '', theme: '' }; ui.colTab = 'decks'; ui.msg = ''; window.scrollTo(0, 0); return render(); }
     if (act === 'dkdel') { ui.delAsk = +el.dataset.i; return renderDeck(); }

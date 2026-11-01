@@ -1,15 +1,12 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
-    { date: '2026-11-01', tag: 'Balance', title: 'KOI: nuevas rarezas y pasivas',
-      items: ['Javihi Koisito (3/7) y Sech Koisito (4/6) pasan a Comunes, de 2 de oro, para poder jugar KOI desde el nivel 1. Petea Koisito se queda como está (Rara).',
+    { date: '2026-11-01', tag: 'Cambio', title: 'Rework de la sinergia KOI',
+      items: ['Herencia: cuando cae una KOI, parte de su ataque pasa de forma permanente a una KOI viva al azar: la mitad en el nivel 1, 3/4 en el nivel 2 y todo en el nivel 3. La herencia no tiene tope, así que la última KOI acumula todo lo cedido. En Resurrección el ataque se traspasa (la KOI caída lo pierde) para que no se multiplique.',
+        'A cambio baja la mejora a todas tus tropas cuando cae una KOI: +1 / +1 / +2 de ataque permanente por nivel (antes +1 / +2 / +3) y tope de +5 por tropa (antes +8). El texto de la sinergia ahora indica que el ataque ganado es permanente.',
+        'Javihi Koisito (3/7) y Sech Koisito (4/6) pasan a Comunes, de 2 de oro, para poder jugar KOI desde el nivel 1. Petea Koisito se queda como está (Rara).',
         'Pampert Koisito pasa a Épica (4 de oro, 5/15) y gana la pasiva «No me tostes»: recibe 2 de daño menos por cada golpe.',
         'AitoRLG Koisito pasa a Legendaria (5 de oro, 6/19), solo con la sinergia KOI, y gana la pasiva Heredero: si está vivo en la mesa, siempre es el objetivo de la herencia de ataque de las KOI que caen.'] },
-    { date: '2026-11-01', tag: 'Cambio', title: 'KOI: herencia de ataque',
-      items: ['Cuando cae una KOI, parte de su ataque pasa de forma permanente a una KOI viva al azar: la mitad en el nivel 1, 3/4 en el nivel 2 y todo en el nivel 3. La herencia no tiene tope, así que la última KOI acumula todo lo cedido. En Resurrección el ataque se traspasa (la KOI caída lo pierde) para que no se multiplique.',
-        'A cambio baja la mejora a todas tus tropas cuando cae una KOI: +1 / +1 / +2 de ataque permanente por nivel (antes +1 / +2 / +3) y tope de +5 por tropa (antes +8).'] },
-    { date: '2026-11-01', tag: 'Corrección', title: 'Texto de la sinergia KOI',
-      items: ['El texto de KOI ahora indica que el ataque ganado cuando cae una KOI es permanente (tope +8 por tropa), que es como funcionaba en realidad.'] },
     { date: '2026-11-01', tag: 'Novedad', title: 'Versión 1.1: introducción animada de Correa',
       items: ['¡Ya está aquí la versión 1.1! Al abrir el menú aparece una pequeña animación que explica la sinergia Correa: las cartas entran en juego, recibes a las 4 novias y una ocupa el hueco 5. Se cierra pulsando fuera de ella, y con la casilla «No mostrar más» eliges si vuelve a salir en tu cuenta.',
         'Puedes volver a verla cuando quieras: {{intro}}'] },

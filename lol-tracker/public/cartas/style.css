@@ -1493,3 +1493,11 @@ body.tutmode .refresh{pointer-events:none;opacity:.35}
 .shopwrap .refresh { border: 2px solid var(--gold); color: var(--gold); background: radial-gradient(circle at 35% 30%, #25406e, #0c172b 75%); box-shadow: 0 0 0 3px rgba(251,191,36,.12), 0 6px 14px rgba(0,0,0,.55); }
 .shopwrap .refresh svg { stroke: var(--gold); }
 .shopwrap .rlabel { color: #cfd8ee; }
+
+/* ---------- Sobre «Set 1»: ilustración propia (la tira superior se rasga al abrir) ---------- */
+.bpk { width: 164px; height: 306px; }
+.bpk-lid, .bpk-main { background: url(img/pack-set1.webp) center / 100% 100% no-repeat; }
+.bpk-main > * { display: none; }
+.bpk-lid::after, .bpk-main::after { -webkit-mask: url(img/pack-set1.webp) center / 100% 100% no-repeat; mask: url(img/pack-set1.webp) center / 100% 100% no-repeat; mix-blend-mode: soft-light; opacity: .8; }
+.bpk { filter: drop-shadow(0 16px 22px rgba(0,0,0,.75)) drop-shadow(0 0 18px rgba(140,80,255,.35)); }
+.shtile.pack .bpk { transform: scale(.42); }

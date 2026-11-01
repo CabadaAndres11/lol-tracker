@@ -1,6 +1,8 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-02', tag: 'Novedad', title: 'Nuevo sobre: Set 1',
+      items: ['El sobre estándar pasa a llamarse «Set 1» y estrena ilustración propia. La animación de apertura se mantiene: el sobre tiembla, se rasga por arriba y salen las cartas.'] },
     { date: '2026-11-02', tag: 'Cambio', title: 'Mejoras visuales en partida',
       items: ['Sinergia Correa: las novias ya no ocupan una fila aparte. Ahora comparten la carta del hueco 5 y, debajo de ella, un icono por novia permite cambiar de una a otra al instante.',
         'El botón de Rendirse es más grande y rojo, con una bandera, y está separado de los enlaces de navegación para que se entienda que es de la partida.',

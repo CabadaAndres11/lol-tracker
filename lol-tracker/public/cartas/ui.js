@@ -334,32 +334,31 @@
         (c.isNew ? '<span class="pnew">¡NUEVA!</span>' : '<span class="pdup">' + (c.lvUp ? '¡Sube a ★' + c.lvl + '!' : 'Repetida · ' + c.copies + ' copias') + '</span>') + '</div></div></div>';
     }).join('') + '</div><div class="pactions"><button class="btn sec" data-act="flipall"' + (allRev ? ' style="visibility:hidden"' : '') + '>Girar todas</button></div>' + (gain ? '<p class="pgain">+' + gain + ' ' + ic('moneda') + ' por cartas repetidas</p>' : '') + '<p class="pmsg' + (allRev ? ' pulse' : '') + '">' + (allRev ? 'Haz clic en un espacio vacío para continuar' : 'Pulsa cada carta para girarla · el color del reverso te dice su rareza') + '</p></div>';
   }
+  var QMODES = [
+    { id: 'classic', name: 'Clásico', icon: 'escudo', sub: 'Las tropas que caen se pierden', art: 'dashlight-akali', desc: 'Las tropas que caen se pierden. Gana quien se queda con tropas en pie y deja sin vida al rival.' },
+    { id: 'revive', name: 'Resurrección', icon: 'cambio', sub: 'Las tropas reviven cada ronda', art: 'chipy-lloron', desc: 'Las tropas reviven cada ronda y al atacar también recibes el ataque de la carta atacada.' },
+  ];
+  var QOPTS = {
+    ia: [
+      { id: '1v1', icon: 'espadas', name: '1 contra 1', sub: 'Duelo contra una IA con tu mazo.', act: { classic: 'startai', revive: 'startrev' } },
+      { id: 'vs4', icon: 'grupo', name: 'Versus de 4', sub: 'Tú contra 3 IAs, cada una con un mazo distinto. Duelos rotando hasta que quede uno.', act: { classic: 'startvs4b', revive: 'startrevvs4b' } },
+    ],
+    pl: [
+      { id: '1v1', icon: 'espadas', name: '1 contra 1', sub: 'Reta a otro jugador. Sala con código o búsqueda automática.', act: { classic: 'openpvp', revive: 'openrevpvp' } },
+      { id: 'vs4', icon: 'grupo', name: 'Versus de 4', sub: 'Cuatro jugadores, duelos rotando hasta que quede uno. Sala con código o búsqueda.', act: { classic: 'openvs4', revive: 'openrevvs4' } },
+    ],
+  };
   function renderModes() {
-    // id, icono, título, descripción, activo, contra bots
-    var modes = [
-      ['ai', ic('robot'), '1 contra 1', 'Duelo contra una IA con tu mazo.', true, true],
-      ['vs4b', ic('grupo'), 'Versus de 4', 'Tú contra 3 IAs, cada una con un mazo distinto. Duelos rotando hasta que quede uno.', true, true],
-      ['pvp', ic('espadas'), '1 contra 1', 'Reta a otro jugador. Sala con código o búsqueda automática.', true, false],
-      ['vs4', ic('grupo'), 'Versus de 4', 'Cuatro jugadores, duelos rotando hasta que quede uno. Sala con código o búsqueda.', true, false],
-      ['rev', ic('robot'), '1 contra 1', 'Duelo contra una IA en modo Resurrección.', true, true],
-      ['revvs4b', ic('grupo'), 'Versus de 4', 'Tú contra 3 IAs, cada una con un mazo distinto, en modo Resurrección.', true, true],
-      ['revpvp', ic('espadas'), '1 contra 1', 'Duelo contra otro jugador en modo Resurrección. Sala con código o búsqueda.', true, false],
-      ['revvs4', ic('grupo'), 'Versus de 4', 'Cuatro jugadores en modo Resurrección. Sala con código o búsqueda.', true, false],
-    ];
-    var ACT = { pvp: 'openpvp', revpvp: 'openrevpvp', rev: 'startrev', vs4: 'openvs4', revvs4: 'openrevvs4', vs4b: 'startvs4b', revvs4b: 'startrevvs4b', ai: 'startai' };
-    var tile = function (m) {
-      return '<button class="mode m-' + m[0] + (m[5] ? ' bot' : '') + (m[4] ? '' : ' off') + '"' + (m[4] ? ' data-act="' + ACT[m[0]] + '"' : ' disabled aria-disabled="true"') + '>' + (m[5] ? '<span class="botbadge">' + ic('robot') + ' Bots</span>' : '') + '<span class="mi">' + m[1] + '</span><b>' + m[2] + '</b><span class="mut">' + m[3] + '</span>' +
-        (m[4] ? '<span class="go">¡Jugar!</span>' : '<span class="soon">' + ic('candado') + ' Próximamente</span>') + '</button>';
-    };
-    var sub = function (bot, ids) {
-      return '<div class="msub ' + (bot ? 'bots' : 'humans') + '"><span>' + ic(bot ? 'robot' : 'grupo') + ' ' + (bot ? 'Contra bots' : 'Contra jugadores') + '</span><i></i>' + (bot ? '<em>Menos monedas · sin puntos de clasificación</em>' : '<em>Puntúan en la clasificación</em>') + '</div><div class="modes two">' + modes.filter(function (m) { return ids.indexOf(m[0]) >= 0; }).map(tile).join('') + '</div>';
-    };
-    var group = function (title, subt, bots, humans) {
-      return '<h2 class="mgtitle">' + title + '</h2><p class="mut mgsub">' + subt + '</p>' + sub(true, bots) + sub(false, humans);
-    };
-    app.innerHTML = head('play', '' + ic('espadas') + ' Elige modo de juego') + '<p class="mut">Tu mazo actual (' + deckSize() + '/' + CFG.deckBudget + ') se usará en cualquier modo.</p>' + (ui.msg ? '<p class="err">' + esc(ui.msg) + '</p>' : '') +
-      group('Modo clásico', 'Las tropas que caen se pierden. Gana quien se queda con tropas en pie y deja sin vida al rival.', ['ai', 'vs4b'], ['pvp', 'vs4']) +
-      group('Modo Resurrección', 'Las tropas reviven cada ronda y al atacar también recibes el ataque de la carta atacada.', ['rev', 'revvs4b'], ['revpvp', 'revvs4']) + '</div>';
+    var qt = ui.qt === 'pl' ? 'pl' : 'ia', qm = QMODES.filter(function (m) { return m.id === ui.qm; })[0] || QMODES[0], qo = ui.qo === 'vs4' ? 'vs4' : '1v1';
+    var opts = QOPTS[qt], cur = opts.filter(function (o) { return o.id === qo; })[0];
+    app.innerHTML = head('play', '' + ic('espadas') + ' Elige modo de juego') + (ui.msg ? '<p class="err">' + esc(ui.msg) + '</p>' : '') +
+      '<div class="qsel">' +
+      '<div class="qtypes"><button class="' + (qt === 'ia' ? 'on' : '') + '" data-act="qtype" data-v="ia">' + ic('robot') + ' Contra IA</button><button class="' + (qt === 'pl' ? 'on' : '') + '" data-act="qtype" data-v="pl">' + ic('grupo') + ' Contra jugadores</button></div>' +
+      '<div class="qmodes">' + QMODES.map(function (m) { return '<button class="qmode' + (m === qm ? ' on' : '') + '" data-act="qmode" data-v="' + m.id + '"><span class="qframe">' + ic(m.icon) + '</span><b>' + m.name + '</b><span class="qsub">' + m.sub + '</span></button>'; }).join('') + '</div>' +
+      '<div class="qbody" style="--qart:url(/cartas/art/' + qm.art + '.webp)"><div class="qleft"><p class="qdesc">' + qm.desc + '</p><p class="qdeck">Tu mazo actual (' + deckSize() + '/' + CFG.deckBudget + ') se usará en cualquier modo.</p>' +
+      '<div class="qopts">' + opts.map(function (o) { return '<button class="qopt' + (o === cur ? ' on' : '') + '" data-act="qopt" data-v="' + o.id + '"><i class="qdia"></i><span class="qot"><b>' + ic(o.icon) + ' ' + o.name + '</b><span>' + o.sub + '</span></span></button>'; }).join('') + '</div>' +
+      '<p class="qnote ' + (qt === 'ia' ? 'ia' : 'pl') + '">' + (qt === 'ia' ? 'Contra IA: menos monedas y sin puntos de clasificación.' : 'Contra jugadores: puntúan en la clasificación.') + '</p></div><div class="qart" aria-hidden="true"></div></div>' +
+      '<div class="qconfirm"><button class="qgo" data-act="' + cur.act[qm.id] + '"><span class="qx">' + ic('avance') + '</span><span class="qgot">Confirmar</span></button></div></div>';
   }
   function renderRules() {
     var sec = function (t, items) { return '<div class="panel"><h2>' + t + '</h2><ul class="rules">' + items.map(function (i) { return '<li>' + i + '</li>'; }).join('') + '</ul></div>'; };
@@ -1034,6 +1033,9 @@
         ui.msg = ''; ui.lgPin = ''; setAcct(r.data.user); loadLocal(); ui.screen = landing(); render();
       });
     }
+    if (act === 'qtype') { ui.qt = el.dataset.v; return renderModes(); }
+    if (act === 'qmode') { ui.qm = el.dataset.v; return renderModes(); }
+    if (act === 'qopt') { ui.qo = el.dataset.v; return renderModes(); }
     if (act === 'newstog') { ui.newsOpen = !ui.newsOpen; return render(); }
     if (act === 'cardbuy') return api('cardBuy', { id: el.dataset.card }).then(function (r) { if (r.data && r.data.user) setAcct(r.data.user); ui.msg = r.ok ? '' : (r.data.error || ''); render(); });
     if (act === 'skinbuy') return api('skinBuy', { id: el.dataset.skin }).then(function (r) { if (r.data && r.data.user) setAcct(r.data.user); ui.msg = r.ok ? '' : (r.data.error || ''); render(); });

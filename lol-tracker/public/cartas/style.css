@@ -1163,3 +1163,8 @@ img.timg[src$="comebacker.png"] { filter: drop-shadow(0 0 1.5px #fff) drop-shado
 .fx-opt .qtypes button.on { animation: qtp .35s ease-out both; }
 @keyframes qtp { from { box-shadow: 0 0 0 0 rgba(240,201,106,.7); } to { box-shadow: 0 0 14px rgba(240,201,106,.18); } }
 @media (prefers-reduced-motion: reduce) { .qart, .qsel * { animation: none !important; } }
+
+/* Brillo que recorre el fondo del selector */
+.qart { position: relative; overflow: hidden; }
+.qart::after { content: ''; position: absolute; inset: -10% -40%; background: linear-gradient(105deg, transparent 36%, rgba(255,240,200,.16) 44%, rgba(255,250,235,.5) 50%, rgba(255,240,200,.16) 56%, transparent 64%); mix-blend-mode: screen; transform: translateX(-100%); animation: qshine 6s ease-in-out 1s infinite; pointer-events: none; }
+@keyframes qshine { 0% { transform: translateX(-100%); } 45%, 100% { transform: translateX(100%); } }

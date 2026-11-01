@@ -1025,3 +1025,58 @@ img.timg[src$="comebacker.png"] { filter: drop-shadow(0 0 1.5px #fff) drop-shado
 .zbtns { display: flex; gap: .5rem; flex-wrap: wrap; justify-content: center; }
 .zhint { margin: 0; font-size: .75rem; color: #b7aedc; text-align: center; }
 .zfront .card .tags, .zfront .card .pasn { display: none; } /* visor ampliado: solo el arte, sin sinergias ni pasiva */
+
+/* Introducción animada de la sinergia Correa */
+.introov { position: fixed; inset: 0; z-index: 450; display: grid; place-items: center; background: rgba(5,3,14,.86); backdrop-filter: blur(5px); padding: .8rem; animation: zin .25s ease-out; }
+.intropanel { display: flex; flex-direction: column; align-items: center; gap: .8rem; width: min(94vw, 780px); }
+.introst { position: relative; width: 100%; aspect-ratio: 16 / 10; overflow: hidden; border-radius: 18px; border: 2px solid rgba(251,113,133,.6); background: radial-gradient(120% 90% at 50% 0%, #4a1a5e 0%, #1a0b2e 55%, #0b0716 100%); box-shadow: 0 20px 60px rgba(0,0,0,.7), 0 0 40px rgba(251,113,133,.25); }
+.introst .ibg i { position: absolute; bottom: -10%; width: 3.2%; aspect-ratio: 1; background: #fb7185; opacity: .0; clip-path: path('M12 21s-7-4.6-9.5-9C.8 8.6 2.7 5 6 5c2 0 3.3 1.1 4 2.3C10.7 6.1 12 5 14 5c3.3 0 5.2 3.6 3.5 7-2.5 4.4-9.5 9-9.5 9z'); animation: iheart 7s linear infinite; }
+.introst .ibg i:nth-child(1) { left: 6%; animation-delay: 0s; } .introst .ibg i:nth-child(2) { left: 18%; animation-delay: 1.6s; } .introst .ibg i:nth-child(3) { left: 30%; animation-delay: 3.1s; } .introst .ibg i:nth-child(4) { left: 44%; animation-delay: .8s; } .introst .ibg i:nth-child(5) { left: 58%; animation-delay: 2.4s; } .introst .ibg i:nth-child(6) { left: 70%; animation-delay: 4.2s; } .introst .ibg i:nth-child(7) { left: 82%; animation-delay: 1.1s; } .introst .ibg i:nth-child(8) { left: 92%; animation-delay: 3.6s; }
+@keyframes iheart { 0% { transform: translateY(0) scale(.6); opacity: 0; } 15% { opacity: .55; } 100% { transform: translateY(-1200%) scale(1.5); opacity: 0; } }
+.ititle { position: absolute; left: 0; right: 0; top: 5%; text-align: center; z-index: 3; pointer-events: none; transition: opacity .6s, transform .6s; }
+.ititle small { display: block; font: 600 clamp(.6rem, 1.8vw, .95rem)/1 Inter, sans-serif; letter-spacing: .4em; text-transform: uppercase; color: #fda4af; }
+.ititle b { display: block; font: 800 clamp(1.8rem, 7vw, 3.6rem)/1.05 Cinzel, serif; letter-spacing: .18em; color: #fff; text-shadow: 0 0 22px #fb7185, 0 0 4px #fb7185; }
+.introst:not([data-sc="0"]):not([data-sc="1"]) .ititle { opacity: 0; transform: translateY(-30%); }
+.islot { position: absolute; bottom: 5%; width: 15.5%; aspect-ratio: 5 / 7; border: 2px dashed rgba(255,255,255,.18); border-radius: 10px; }
+.islot.p1 { left: 5%; } .islot.p2 { left: 22%; } .islot.p3 { left: 39%; } .islot.p4 { left: 56%; } .islot.p5 { left: 77%; border-color: #fb7185; display: grid; place-items: center; opacity: 0; transition: opacity .6s; }
+.islot.p5 span { font: 700 clamp(.5rem, 1.6vw, .8rem)/1.2 Inter, sans-serif; color: #fda4af; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.introst[data-sc="2"] .islot.p5, .introst[data-sc="3"] .islot.p5, .introst[data-sc="4"] .islot.p5, .introst[data-sc="5"] .islot.p5 { opacity: 1; animation: islotglow 1.6s ease-in-out infinite; }
+@keyframes islotglow { 50% { box-shadow: 0 0 18px #fb7185, inset 0 0 14px rgba(251,113,133,.35); } }
+.iq { position: absolute; width: 15.5%; z-index: 4; transition: transform .9s cubic-bezier(.2,.9,.25,1.1), opacity .6s, left .9s cubic-bezier(.4,0,.2,1), bottom .9s cubic-bezier(.4,0,.2,1); }
+.iq { aspect-ratio: 5 / 7; }
+.iq .card { width: 100%; height: 100%; box-shadow: 0 8px 18px rgba(0,0,0,.6); }
+.iq .card .tags, .iq .card .pasn, .iq .card .pips { display: none; }
+.introst.reset .iq, .introst.reset .ifx, .introst.reset .icap { transition: none !important; animation: none !important; }
+/* novios: entran volando */
+.iq.b1 { left: 5%; bottom: 5%; } .iq.b2 { left: 22%; bottom: 5%; } .iq.b3 { left: 39%; bottom: 5%; } .iq.b4 { left: 56%; bottom: 5%; }
+.introst[data-sc="0"] .iq.b1 { transform: translate(-260%, -120%) rotate(-50deg) scale(1.3); opacity: 0; }
+.introst[data-sc="0"] .iq.b2 { transform: translate(-120%, -260%) rotate(35deg) scale(1.3); opacity: 0; }
+.introst[data-sc="0"] .iq.b3 { transform: translate(120%, -260%) rotate(-35deg) scale(1.3); opacity: 0; }
+.introst[data-sc="0"] .iq.b4 { transform: translate(260%, -120%) rotate(50deg) scale(1.3); opacity: 0; }
+.introst:not([data-sc="0"]) .iq.b2 { transition-delay: .15s; } .introst:not([data-sc="0"]) .iq.b3 { transition-delay: .3s; } .introst:not([data-sc="0"]) .iq.b4 { transition-delay: .45s; }
+/* novias: aparecen arriba y Eriko baja al hueco 5 */
+.iq.g1, .iq.g2, .iq.g3, .iq.g4 { bottom: 52%; width: 13%; opacity: 0; transform: scale(.2) rotate(-12deg); }
+.iq.g1 { left: 14%; } .iq.g2 { left: 33%; } .iq.g3 { left: 52%; } .iq.g4 { left: 71%; }
+.introst[data-sc="2"] .iq.g1, .introst[data-sc="2"] .iq.g2, .introst[data-sc="2"] .iq.g3, .introst[data-sc="2"] .iq.g4 { opacity: 1; transform: scale(1) rotate(0); }
+.introst[data-sc="2"] .iq.g2 { transition-delay: .2s; } .introst[data-sc="2"] .iq.g3 { transition-delay: .4s; } .introst[data-sc="2"] .iq.g4 { transition-delay: .6s; }
+.introst[data-sc="3"] .iq.g2, .introst[data-sc="3"] .iq.g3, .introst[data-sc="3"] .iq.g4, .introst[data-sc="4"] .iq.g2, .introst[data-sc="4"] .iq.g3, .introst[data-sc="4"] .iq.g4, .introst[data-sc="5"] .iq.g2, .introst[data-sc="5"] .iq.g3, .introst[data-sc="5"] .iq.g4 { opacity: 0; transform: scale(.6) translateY(-40%); }
+.introst[data-sc="3"] .iq.g1, .introst[data-sc="4"] .iq.g1, .introst[data-sc="5"] .iq.g1 { left: 77%; bottom: 5%; width: 15.5%; opacity: 1; transform: none; }
+/* rival y combate */
+.iq.rival { left: 41%; bottom: 52%; width: 13%; opacity: 0; transform: translateY(-300%) rotate(8deg); }
+.introst[data-sc="4"] .iq.rival { opacity: 1; transform: none; animation: ishake 1.4s ease-in-out 1.2s 2; }
+.introst[data-sc="5"] .iq.rival { opacity: 0; transform: translateY(40%) rotate(-14deg) scale(.7); filter: grayscale(1); }
+@keyframes ishake { 0%, 100% { translate: 0 0; } 20% { translate: -4% 0; } 40% { translate: 4% 0; } 60% { translate: -3% 0; } 80% { translate: 3% 0; } }
+.introst[data-sc="4"] .iq.b1 { animation: ilunge 1s ease-in-out .9s 1; } .introst[data-sc="4"] .iq.b2 { animation: ilunge 1s ease-in-out 1.5s 1; } .introst[data-sc="4"] .iq.b3 { animation: ilunge 1s ease-in-out 2.1s 1; } .introst[data-sc="4"] .iq.g1 { animation: ilunge 1s ease-in-out 2.7s 1; }
+@keyframes ilunge { 0%, 100% { translate: 0 0; } 45% { translate: 14% -75%; } 60% { translate: 14% -75%; } }
+.ifx { position: absolute; z-index: 6; font: 800 clamp(.9rem, 3vw, 1.6rem)/1 Inter, sans-serif; color: #ff5d6c; text-shadow: 0 2px 0 #3b0a14, 0 0 10px rgba(255,93,108,.8); opacity: 0; pointer-events: none; }
+.ifx.fe { left: 62%; bottom: 20%; color: #4ade80; text-shadow: 0 2px 0 #052e16, 0 0 10px rgba(74,222,128,.9); }
+.ifx.d1 { left: 44%; bottom: 62%; } .ifx.d2 { left: 48%; bottom: 66%; } .ifx.d3 { left: 43%; bottom: 68%; } .ifx.d4 { left: 44%; bottom: 52%; color: #fbbf24; }
+.introst[data-sc="3"] .ifx.fe { animation: ipop 1.6s ease-out .9s 1; }
+.introst[data-sc="4"] .ifx.d1 { animation: ipop 1s ease-out 1.5s 1; } .introst[data-sc="4"] .ifx.d2 { animation: ipop 1s ease-out 2.1s 1; } .introst[data-sc="4"] .ifx.d3 { animation: ipop 1s ease-out 2.7s 1; }
+.introst[data-sc="5"] .ifx.d4 { animation: ipop 1.4s ease-out .1s 1; }
+@keyframes ipop { 0% { opacity: 0; transform: translateY(0) scale(.5); } 20% { opacity: 1; transform: translateY(-20%) scale(1.3); } 100% { opacity: 0; transform: translateY(-160%) scale(1); } }
+.icap { position: absolute; left: 0; right: 0; top: 4%; z-index: 7; text-align: center; opacity: 0; transition: opacity .4s; pointer-events: none; }
+.icap.on { opacity: 1; }
+.icap span { display: inline-block; padding: .35rem .9rem; border-radius: 999px; background: rgba(10,6,24,.78); border: 1px solid rgba(251,113,133,.6); color: #fff; font: 600 clamp(.65rem, 2.1vw, 1rem)/1.2 Inter, sans-serif; }
+.ibtns { display: flex; gap: .6rem; flex-wrap: wrap; justify-content: center; }
+@media (prefers-reduced-motion: reduce) { .introst .ibg i { animation: none; } }

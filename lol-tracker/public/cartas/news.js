@@ -1,6 +1,8 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-01', tag: 'Novedad', title: 'Introducción animada de Correa',
+      items: ['Al abrir el menú aparece una pequeña animación que explica la sinergia Correa: las cartas entran en juego, recibes a las 4 novias y una ocupa el hueco 5. Puedes cerrarla o pulsar «No mostrar más» para que no vuelva a salir en tu cuenta.'] },
     { date: '2026-11-01', tag: 'Novedad', title: 'Nueva skin: PotAnGo · Real PotAnGo',
       items: ['Ya está en la tienda la skin «Real PotAnGo» para PotAnGo (200 monedas). Necesitas tener la carta para comprarla.'] },
     { date: '2026-11-01', tag: 'Cambio', title: 'Novia pasa a llamarse Correa: hueco 5 y las 4 novias',

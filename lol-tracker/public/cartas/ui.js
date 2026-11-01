@@ -93,6 +93,50 @@
     return h + '</' + tag + '>';
   }
 
+  // ---------- Introducción animada de la sinergia Correa ----------
+  var introEl = null, introT = [];
+  function introOff() { try { return localStorage.getItem(lk('intro-correa')) === '1'; } catch (e) { return false; } }
+  function closeIntro(never) {
+    introT.forEach(clearTimeout); introT = [];
+    if (introEl) { introEl.remove(); introEl = null; }
+    if (never) { try { localStorage.setItem(lk('intro-correa'), '1'); } catch (e) {} }
+  }
+  function maybeIntro() {
+    if (ui.introSeen || !ui.acct || introOff() || introEl) return;
+    ui.introSeen = true;
+    setTimeout(function () { if (ui.screen === 'home') openIntro(); }, 700);
+  }
+  function openIntro() {
+    closeIntro(false);
+    var boys = ['lihone-correa', 'dashlight-correa', 'potango', 'chipy-correa'], girls = ['eriko', 'helena', 'lucia', 'ari'];
+    var h = '<div class="intropanel"><div class="introst" data-sc="0"><div class="ibg"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>' +
+      '<div class="ititle"><small>Nueva sinergia</small><b>CORREA</b></div>' +
+      '<div class="islot p1"></div><div class="islot p2"></div><div class="islot p3"></div><div class="islot p4"></div><div class="islot p5"><span>' + ic('corazon') + ' Hueco 5</span></div>' +
+      boys.map(function (id, k) { return '<div class="iq b' + (k + 1) + '">' + cardHtml(CARD[id], { lv: 1 }) + '</div>'; }).join('') +
+      girls.map(function (id, k) { return '<div class="iq g' + (k + 1) + '">' + cardHtml(CARD[id], { lv: 1 }) + '</div>'; }).join('') +
+      '<div class="iq rival">' + cardHtml(CARD['sech-thresh'], { lv: 1 }) + '</div>' +
+      '<span class="ifx fe">+2/+2</span><span class="ifx d1">-6</span><span class="ifx d2">-3</span><span class="ifx d3">-5</span><span class="ifx d4">¡Cae!</span>' +
+      '<div class="icap"><span></span></div></div>' +
+      '<div class="ibtns"><button class="btn sec" data-i="close">Cerrar</button><button class="btn" data-i="never">No mostrar más</button></div></div>';
+    introEl = document.createElement('div'); introEl.className = 'introov'; introEl.innerHTML = h;
+    document.body.appendChild(introEl);
+    var st = introEl.querySelector('.introst'), cap = st.querySelector('.icap span');
+    var CAPS = ['', 'Cuatro cartas Correa entran en juego', 'Con la sinergia recibes a las 4 novias', 'Una por ronda en el hueco 5: Eriko mima a toda la mesa', 'Lucía, Helena y Ari cambian el combate', '¡Elige a tu novia y arrasa!'];
+    function go(n) { st.dataset.sc = n; cap.textContent = CAPS[n] || ''; cap.parentNode.classList.toggle('on', !!CAPS[n]); }
+    function run() {
+      introT.forEach(clearTimeout); introT = [];
+      st.classList.add('reset'); go(0);
+      introT.push(setTimeout(function () { st.classList.remove('reset'); go(1); }, 80));
+      [[3300, 2], [6300, 3], [9000, 4], [12200, 5]].forEach(function (x) { introT.push(setTimeout(function () { go(x[1]); }, x[0])); });
+      introT.push(setTimeout(run, 15500));
+    }
+    run();
+    introEl.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-i]');
+      if (b) closeIntro(b.dataset.i === 'never');
+    });
+  }
+
   // ---------- Carta ampliada en 3D (pantalla Mazo) ----------
   var zoomEl = null;
   function closeZoom() { if (zoomEl) { zoomEl.remove(); zoomEl = null; } document.removeEventListener('keydown', zoomKey); }
@@ -199,6 +243,7 @@
     h += ladderHtml();
     h += '<p class="mut" style="text-align:center">' + D.cards.length + ' tropas · ' + D.actions.length + ' acciones</p></div>';
     app.innerHTML = h;
+    maybeIntro();
   }
 
   function renderBoot() { app.innerHTML = '<div class="wrap"><p class="mut" style="text-align:center;margin-top:30vh">Cargando…</p></div>'; }

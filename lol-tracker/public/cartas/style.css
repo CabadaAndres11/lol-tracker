@@ -1024,3 +1024,4 @@ img.timg[src$="comebacker.png"] { filter: drop-shadow(0 0 1.5px #fff) drop-shado
 .zbk b svg { width: 4.5rem; height: 4.5rem; } .zbk span { font-family: 'Cinzel', serif; letter-spacing: .12em; text-transform: uppercase; font-size: 1rem; }
 .zbtns { display: flex; gap: .5rem; flex-wrap: wrap; justify-content: center; }
 .zhint { margin: 0; font-size: .75rem; color: #b7aedc; text-align: center; }
+.zfront .card .tags, .zfront .card .pasn { display: none; } /* visor ampliado: solo el arte, sin sinergias ni pasiva */

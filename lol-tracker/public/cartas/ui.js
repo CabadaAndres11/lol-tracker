@@ -1332,6 +1332,7 @@
       ui.deck = psl.ids.slice(); saveDeck(); var pa = ui.pick.act; ui.pick = null; ui.picked = true;
       var fb = document.createElement('button'); fb.dataset.act = pa; app.appendChild(fb); fb.click(); fb.remove(); ui.picked = false; return;
     }
+    if (act === 'menu') { if (PV.on) { if (s && !s.over && !window.confirm('Si sales ahora pierdes la partida. ¿Salir?')) return; pvpLeaveGame(); } clearTimeout(timer); ui.playing = false; ui.screen = el.dataset.to || 'home'; return render(); }
     if (act === 'openpvp' || act === 'openrevpvp') {
       ui.botGame = false;
       if (deckError()) { ui.screen = 'deck'; return render(); }

@@ -231,13 +231,6 @@
     }).join('') : '<li class="mut">' + (L ? 'Aún no hay partidas puntuadas. ¡Juega un 1 vs 1 o un Versus de 4!' : 'Cargando…') + '</li>';
     return '<div class="panel ladderbox"><h2>' + ic('trofeo') + ' Clasificación</h2><ol class="ladder">' + rows + '</ol><p class="mut lme">' + (L ? 'Tus puntos: <b>' + L.me + '</b>' : '') + '</p></div>';
   }
-  function newsHtml() {
-    var N = window.CARTAS_NEWS || [];
-    if (!N.length) return '';
-    return '<div class="panel newsbox' + (ui.newsOpen ? ' open' : '') + '"><h2>' + ic('libro') + ' Parches y noticias</h2><div class="newsbody">' + N.slice(0, 30).map(function (n) {
-      return '<div class="newsi"><div class="newsh"><span class="ntag nt-' + esc(n.tag) + '">' + esc(n.tag) + '</span><b>' + esc(n.title) + '</b><span class="mut">' + esc(n.date.split('-').reverse().join('/')) + '</span></div><ul>' + n.items.map(function (i) { return '<li>' + (i.indexOf('{{intro}}') >= 0 ? esc(i.replace('{{intro}}', '')) + '<a href="#" class="newslink" data-act="introplay">▶ Ver la animación</a>' : esc(i)) + '</li>'; }).join('') + '</ul></div>';
-    }).join('') + '</div><button class="btn sec sm newstog" data-act="newstog">' + (ui.newsOpen ? 'Ocultar ▴' : 'Ver todas las noticias ▾') + '</button></div>';
-  }
   // Ilustraciones de una noticia: las indicadas (art) o las cartas que se nombran en el texto; si no hay, el logo.
   function newsArts(n) {
     if (n.art && n.art.length) return n.art.slice(0, 3);
@@ -253,15 +246,15 @@
     return n.items.slice(0, 2).map(function (t) { t = t.replace('{{intro}}', '').trim(); return t.length > 230 ? t.slice(0, 227).replace(/\s+\S*$/, '') + '…' : t; });
   }
   function homeNews() {
-    var N = (window.CARTAS_NEWS || []).slice(0, 5);
+    var N = window.CARTAS_NEWS || [];
     if (!N.length) return '';
     var sel = Math.min(ui.newsSel || 0, N.length - 1), n = N[sel], arts = newsArts(n);
     return '<div class="rnews"><ul class="rnl">' + N.map(function (x, k) {
       return '<li><button class="' + (k === sel ? 'on' : '') + '" data-act="newssel" data-i="' + k + '"><span class="ntag nt-' + esc(x.tag) + '">' + esc(x.tag) + '</span><b>' + esc(x.title) + '</b><i>' + esc(x.date.split('-').reverse().join('/')) + '</i></button></li>';
-    }).join('') + '</ul><div class="rnmain' + (arts.length ? '' : ' nologo') + '" style="' + (arts.length ? '--rart:url(/cartas/art/' + arts[0] + '.webp)' : '') + '">' +
+    }).join('') + '</ul><div class="rnmain' + (arts.length ? '' : ' nologo') + (ui.newsFull ? ' full' : '') + '" style="' + (arts.length ? '--rart:url(/cartas/art/' + arts[0] + '.webp)' : '') + '">' +
       (arts.length ? '' : '<img class="rnlogo" src="/cartas/logo.webp" alt="">') +
-      '<div class="rnbody"><span class="ntag nt-' + esc(n.tag) + '">' + esc(n.tag) + '</span><h2>' + esc(n.title) + '</h2><ul>' + newsSummary(n).map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>' +
-      '<button class="btn sec sm" data-act="newsmore">Leer la noticia completa ▾</button>' +
+      '<div class="rnbody"><span class="ntag nt-' + esc(n.tag) + '">' + esc(n.tag) + '</span><h2>' + esc(n.title) + '</h2><ul>' + (ui.newsFull ? n.items.map(function (t) { return '<li>' + (t.indexOf('{{intro}}') >= 0 ? esc(t.replace('{{intro}}', '')) + '<a href="#" class="newslink" data-act="introplay">▶ Ver la animación</a>' : esc(t)) + '</li>'; }) : newsSummary(n).map(function (t) { return '<li>' + esc(t) + '</li>'; })).join('') + '</ul>' +
+      '<button class="btn sec sm" data-act="newsmore">' + (ui.newsFull ? 'Mostrar menos ▴' : 'Leer la noticia completa ▾') + '</button>' +
       (arts.length > 1 ? '<div class="rnthumbs">' + arts.map(function (id) { return '<span style="background-image:url(/cartas/art/' + id + '.webp)" title="' + esc(CARD[id].name) + '"></span>'; }).join('') + '</div>' : '') + '</div></div></div>';
   }
   function renderHome() {
@@ -274,7 +267,6 @@
         ['rules', ic('libro'), 'Normas', 'Cómo se juega'],
         ['profile', ic('usuario'), 'Perfil', 'Foto y cuenta'],
       ].map(function (m) { return '<button class="ricon" data-act="nav" data-to="' + m[0] + '"><span class="rii">' + m[1] + '</span><b>' + m[2] + '</b><span class="mut">' + m[3] + '</span></button>'; }).join('') + '</div>' + homeNews() + '</div>';
-    h += newsHtml();
     h += ladderHtml();
     h += '<p class="mut" style="text-align:center">' + D.cards.length + ' tropas · ' + D.actions.length + ' acciones</p></div>';
     app.innerHTML = h;
@@ -1082,7 +1074,6 @@
     if (act === 'qtype') { if (ui.qt === el.dataset.v) return; ui.qt = el.dataset.v; ui.qfx = 'opt'; return renderModes(); }
     if (act === 'qmode') { if (ui.qm === el.dataset.v) return; ui.qm = el.dataset.v; ui.qfx = 'mode'; return renderModes(); }
     if (act === 'qopt') { if (ui.qo === el.dataset.v) return; ui.qo = el.dataset.v; ui.qfx = 'opt'; return renderModes(); }
-    if (act === 'newstog') { ui.newsOpen = !ui.newsOpen; return render(); }
     if (act === 'cardbuy') return api('cardBuy', { id: el.dataset.card }).then(function (r) { if (r.data && r.data.user) setAcct(r.data.user); ui.msg = r.ok ? '' : (r.data.error || ''); render(); });
     if (act === 'skinbuy') return api('skinBuy', { id: el.dataset.skin }).then(function (r) { if (r.data && r.data.user) setAcct(r.data.user); ui.msg = r.ok ? '' : (r.data.error || ''); render(); });
     if (act === 'skinequip') return api('skinEquip', { id: el.dataset.skin, card: el.dataset.card }).then(function (r) { if (r.data && r.data.user) setAcct(r.data.user); render(); });
@@ -1103,8 +1094,8 @@
     if (act === 'flipcard') { var fi = +el.dataset.i; if (ui.pack && ui.pack.cards) { ui.pack.rev[fi] = true; el.classList.add('flipped'); packHint(); } return; }
     if (act === 'flipall') { if (ui.pack && ui.pack.cards) { ui.pack.rev = ui.pack.rev.map(function () { return true; }); app.querySelectorAll('.pcard').forEach(function (n, k) { setTimeout(function () { n.classList.add('flipped'); }, k * 140); }); packHint(); } return; }
     if (act === 'packbg') { if (ui.pack && ui.pack.cards && ui.pack.stage === 'reveal' && ui.pack.rev.every(Boolean)) { ui.pack = null; render(); } return; }
-    if (act === 'newssel') { ui.newsSel = +el.dataset.i; return renderHome(); }
-    if (act === 'newsmore') { ui.newsOpen = true; renderHome(); var nb = document.querySelector('.newsbox'); if (nb) nb.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+    if (act === 'newssel') { ui.newsSel = +el.dataset.i; ui.newsFull = false; return renderHome(); }
+    if (act === 'newsmore') { ui.newsFull = !ui.newsFull; return renderHome(); }
     if (act === 'setavatar') { return api('avatarSet', { card: el.dataset.card }).then(function (r) { if (r.ok) { setAcct(r.data.user); ui.msg = ''; } else ui.msg = (r.data && r.data.error) || 'No se pudo cambiar la foto.'; render(); }); }
     if (act === 'nav') {
       clearTimeout(timer); ui.playing = false;

@@ -1231,3 +1231,14 @@ img.timg[src$="comebacker.png"] { filter: drop-shadow(0 0 1.5px #fff) drop-shado
   .rnmain.nologo { flex-direction: column; align-items: stretch; } .rnlogo { position: static; transform: none; width: 170px; max-width: 60%; margin: 0 auto 1.2rem; order: 2; }
 }
 @media (prefers-reduced-motion: reduce) { .rpt::after, .rnmain::before { animation: none !important; } }
+
+/* Noticiero completo dentro del menú de inicio */
+.rnews { height: 440px; min-height: 0; }
+.rnl { overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(200,170,110,.5) transparent; }
+.rnl button { flex: none; }
+.rnmain { align-items: flex-end; min-height: 0; overflow: hidden; }
+.rnmain .rnbody { max-height: 100%; overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(200,170,110,.5) transparent; box-sizing: border-box; }
+.rnmain.full .rnbody { max-width: 680px; }
+.rnmain.nologo { align-items: center; }
+@media (max-width: 800px) { .rnews { height: auto; } .rnmain { min-height: 340px; } .rnmain .rnbody { max-height: none; } .rnl { max-height: none; } }
+.rnmain.nologo.full .rnbody { max-width: 470px; }

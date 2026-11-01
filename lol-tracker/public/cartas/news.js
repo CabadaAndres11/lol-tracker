@@ -2,7 +2,7 @@
 (function (root) {
   var NEWS = [
     { date: '2026-11-01', tag: 'Novedad', title: 'Nuevo menú de inicio y perfil de usuario',
-      items: ['El menú de inicio se renueva con un aspecto inspirado en el cliente de League of Legends: un gran botón «Jugar» centrado arriba, un icono por cada apartado (Mazo, Tienda, Sinergias, Normas y Perfil) y, debajo, las 5 últimas noticias con su ilustración, que es la de las cartas que aparecen en la noticia o, si no hay ninguna, el logo del juego. El historial completo sigue más abajo.',
+      items: ['El menú de inicio se renueva con un aspecto inspirado en el cliente de League of Legends: un gran botón «Jugar» centrado arriba, un icono por cada apartado (Mazo, Tienda, Sinergias, Normas y Perfil) y, debajo, las 5 últimas noticias con su ilustración, que es la de las cartas que aparecen en la noticia o, si no hay ninguna, el logo del juego. Todo el historial de noticias está en la lista de la izquierda, con scroll, y cada noticia se puede abrir completa con «Leer la noticia completa».',
         'Junto a tu nombre aparece ahora una foto de perfil, vacía por defecto. Al pulsarla entras en tu perfil, donde puedes cambiarla por la ilustración de cualquiera de tus tropas desbloqueadas y cerrar sesión.'] },
     { date: '2026-11-01', tag: 'Novedad', title: 'Versus de 4 contra 3 IAs',
       items: ['Ya puedes jugar el Versus de 4 tú solo contra 3 IAs, en modo clásico y en modo Resurrección. Funciona igual que el Versus de 4 contra jugadores (mesa de 4, duelos rotando, el que descansa mira un duelo), pero cada IA juega con un mazo de una temática distinta, y la partida empieza al instante.',

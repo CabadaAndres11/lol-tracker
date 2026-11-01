@@ -1,6 +1,14 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-01', tag: 'Novedad', title: 'Novia pasa a llamarse Correa: hueco 5 y las 4 novias',
+      items: ['La sinergia Novia ahora se llama Correa y se activa con 2 cartas distintas (un único nivel). Ya no tira el dado de «te apoya / te regaña» cada ronda (la acción Cita sorpresa sí lo conserva).',
+        'Al activarla se desbloquea un hueco 5 en la mesa, reservado a las novias, y recibes a las 4 en una reserva. Solo una puede estar en el hueco 5 a la vez; puedes cambiarla en cualquier momento de la preparación. Si pierdes la sinergia, la novia vuelve a la reserva. Si una novia cae en combate, vuelve a la reserva con su vida.',
+        'Eriko (2/12): al empezar cada combate da +2/+2 permanente a todas tus cartas en mesa (tope +10/+10 por carta).',
+        'Helena (6/8): no puede recibir ataques ni ser objetivo, y no cuenta para proteger tu vida: si solo queda ella, los golpes del rival van a tu vida.',
+        'Lucía (3/10): al empezar cada combate hace 3 de daño a todas las tropas rivales.',
+        'Ari (2/12): cada golpe que va a recibir una de tus tropas tiene un 50% de ser evitado.',
+        'Las novias no van en el mazo ni ocupan espacio en él.'] },
     { date: '2026-11-01', tag: 'Corrección', title: 'Tus mazos ahora se guardan en tu cuenta',
       items: ['El mazo actual y los 3 mazos guardados se almacenan en tu cuenta, así que los tienes al iniciar sesión desde otro dispositivo. Los mazos que ya tenías en este dispositivo se suben solos la próxima vez que entres.'] },
     { date: '2026-11-01', tag: 'Cambio', title: 'Lihone Correa pierde la sinergia Trabajo',

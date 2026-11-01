@@ -56,7 +56,7 @@
   function pips(n) { var h = ''; for (var k = 0; k < 3; k++) h += '<i' + (k < n ? ' class="on"' : '') + '></i>'; return h; }
   var AICON = { entrenamiento: 'espadas', arenga: 'megafono', armadura: 'escudo', banquete: 'carne', intimidacion: 'enfado', 'mal-de-ojo': 'ojo', 'golpe-certero': 'diana', lluvia: 'arco',
     'bola-extra': 'beisbol', 'segundo-aliento': 'viento', 'cambio-de-linea': 'cambio', parche: 'disquete', 'horas-extra': 'maletin', 'capitulo-especial': 'tele', 'segunda-temporada': 'trofeo', 'remate-doble': 'voley', 'cita-sorpresa': 'corazon', 'rabia-contenida': 'enfado', 'fiesta-del-pueblo': 'fiesta', 'hermano-del-alma': 'duo', 'sofa-compartido': 'sofa', madrugon: 'reloj' };
-  var ARTS = {"aitorlg-friki":1,"aitorlg-koisito":1,"aitorlg-regla":1,"aitorlg-renata":1,"chipy-correa":1,"chipy-lloron":1,"computer-chipy":1,"computer-dashlight":1,"computer-hellbramn":1,"computer-lihone":1,"computer-petea":1,"dashlight-akali":1,"dashlight-correa":1,"haikyuu-lihone":1,"hellbramn":1,"javihi":1,"javihi-duo":1,"javihi-friki":1,"javihi-koisito":1,"javihi-prime":1,"lihone":1,"lihone-correa":1,"lihone-viego":1,"mertens":1,"mertens-prime":1,"pampert":1,"pampert-friki":1,"pampert-koisito":1,"petea-koisito":1,"petea-pokemaniaco":1,"potango":1,"sech":1,"sech-duo":1,"sech-koisito":1,"sech-thresh":1};
+  var ARTS = {"eriko":1,"helena":1,"lucia":1,"ari":1,"aitorlg-friki":1,"aitorlg-koisito":1,"aitorlg-regla":1,"aitorlg-renata":1,"chipy-correa":1,"chipy-lloron":1,"computer-chipy":1,"computer-dashlight":1,"computer-hellbramn":1,"computer-lihone":1,"computer-petea":1,"dashlight-akali":1,"dashlight-correa":1,"haikyuu-lihone":1,"hellbramn":1,"javihi":1,"javihi-duo":1,"javihi-friki":1,"javihi-koisito":1,"javihi-prime":1,"lihone":1,"lihone-correa":1,"lihone-viego":1,"mertens":1,"mertens-prime":1,"pampert":1,"pampert-friki":1,"pampert-koisito":1,"petea-koisito":1,"petea-pokemaniaco":1,"potango":1,"sech":1,"sech-duo":1,"sech-koisito":1,"sech-thresh":1};
   // Nivel de carta por repetidas: 2 copias = ★2, 4 copias = ★3
   function lvOf(id) { var n = 1 + ((ui.acct && ui.acct.dups && ui.acct.dups[id]) || 0); return n >= 4 ? 3 : n >= 2 ? 2 : 1; }
   function skG(side, id) { var s = ui.s; return (s && s.sk && s.sk[side] && s.sk[side][id]) || ''; }
@@ -64,13 +64,14 @@
   function cardHtml(c, o) {
     o = o || {};
     var troop = c.type === 'tropa', c1, c2;
-    if (troop) { c1 = D.themes[c.themes[0]].color; c2 = c.themes[1] ? D.themes[c.themes[1]].color : hexMix(c1, '#0b0716', .62); }
+    if (c.novia) { c1 = D.themes.Correa.color; c2 = hexMix(c1, '#0b0716', .55); }
+    else if (troop) { c1 = D.themes[c.themes[0]].color; c2 = c.themes[1] ? D.themes[c.themes[1]].color : hexMix(c1, '#0b0716', .62); }
     else if (c.theme) { c1 = D.themes[c.theme].color; c2 = hexMix(c1, '#0b0716', .62); } else { c1 = '#2dd4bf'; c2 = '#0f3f3a'; }
     var tag = o.tag || 'div';
     var art = troop && ARTS[c.id];
     if (o.skin === undefined) o.skin = ui.screen === 'game' ? '' : (ui.acct && ui.acct.skinSel && ui.acct.skinSel[c.id] && ui.acct.skins.indexOf(ui.acct.skinSel[c.id]) >= 0 ? ui.acct.skinSel[c.id] : '');
     var h = '<' + tag + ' class="card r-' + c.rarity + (troop ? '' : ' accion') + (art ? ' art' : '') + (o.cls ? ' ' + o.cls : '') + '" style="--c1:' + c1 + ';--c2:' + c2 + (art ? ';--art:url(/cartas/art/' + (o.skin || c.id) + '.webp)' : '') + '"' + (o.attrs ? ' ' + o.attrs : '') + '>';
-    h += '<span class="coin" title="Coste en oro para comprarla">' + c.cost + '</span>';
+    if (!c.novia) h += '<span class="coin" title="Coste en oro para comprarla">' + c.cost + '</span>';
     if (o.gl > 1) h += '<span class="glb" title="Fusionada en partida: ★' + o.gl + '">' + '★'.repeat(o.gl) + '</span>';
     if (o.lv > 1 && troop) h += '<span class="lvb" title="Nivel ' + o.lv + ' por cartas repetidas">★' + o.lv + '</span>';
     if (o.size) h += '<span class="pips" title="Espacio que ocupa en el mazo: ' + c.size + '">' + pips(c.size) + '</span>';
@@ -533,9 +534,12 @@
   function mesaRow(side, view, s, mine) {
     var P = s.p[side], prep = s.phase === 'prep' && !ui.playing && !s.shopOpen, shop = s.shopOpen && !ui.playing, sel = ui.sel;
     var aim = {}; Object.keys(s.p[0].target).forEach(function (k) { var t = s.p[0].target[k]; aim[t] = (aim[t] || 0) + 1; });
-    var h = '<div class="row4 side' + side + '">';
+    var has5 = (E.tiers(P).Correa || 0) >= 1 || !!view.mesa[side][4];
+    var h = '<div class="row4 side' + side + (has5 ? ' has5' : '') + '">';
     view.mesa[side].forEach(function (v, k) {
+      if (k === 4 && !has5) return;
       if (!v) {
+        if (k === 4) { h += '<div class="cw"><div class="slot nov">' + ic('corazon') + ' Hueco 5<br><small>' + (mine ? 'Elige una novia abajo' : 'Novia') + '</small></div></div>'; return; }
         var free = mine && s.phase === 'prep' && !ui.playing && sel && sel.k === 'hand' && E.isTroop(P.hand[sel.i]);
         h += '<div class="cw"><div class="slot' + (free ? ' free' : '') + '"' + (free ? ' data-act="slot" data-i="' + k + '"' : '') + '>' + (free ? 'Colocar aquí' : 'Hueco') + '</div></div>';
         return;
@@ -557,8 +561,9 @@
           var m = P0.voley[v.uid] || 'atk';
           under += '<div class="mini"><button data-act="voley" data-uid="' + v.uid + '" data-m="atk" class="' + (m === 'atk' ? 'on' : '') + '">' + ic('espadas') + ' Ataque</button><button data-act="voley" data-uid="' + v.uid + '" data-m="def" class="' + (m === 'def' ? 'on' : '') + '">' + ic('escudo') + ' Defensa</button></div>';
         }
-        if (shop && I && E.has(I, 'Lol')) under += '<div class="mini"><button data-act="sell" data-from="mesa" data-i="' + k + '" title="Vender y recuperar su valor">' + ic('moneda') + ' Vender ' + E.sellValue(I) + '</button></div>';
-        if (shop && I && !E.has(I, 'Lol')) under += '<div class="mini"><button data-act="retire" data-slot="' + k + '">' + ic('deshacer') + ' Retirar</button><button data-act="sell" data-from="mesa" data-i="' + k + '" title="Vender y recuperar su valor">' + ic('moneda') + ' Vender ' + E.sellValue(I) + '</button></div>';
+        if (shop && I && E.isNov(I)) under += '<div class="mini"><button data-act="retire" data-slot="' + k + '">' + ic('deshacer') + ' Retirar</button></div>';
+        else if (shop && I && E.has(I, 'Lol')) under += '<div class="mini"><button data-act="sell" data-from="mesa" data-i="' + k + '" title="Vender y recuperar su valor">' + ic('moneda') + ' Vender ' + E.sellValue(I) + '</button></div>';
+        else if (shop && I && !E.has(I, 'Lol')) under += '<div class="mini"><button data-act="retire" data-slot="' + k + '">' + ic('deshacer') + ' Retirar</button><button data-act="sell" data-from="mesa" data-i="' + k + '" title="Vender y recuperar su valor">' + ic('moneda') + ' Vender ' + E.sellValue(I) + '</button></div>';
       } else {
         o.attrs += ' data-act="foe"';
         if (prep && sel && (sel.k === 'mine' || (sel.k === 'act' && CARD[s.p[0].hand[sel.i].id].target === 'enemy'))) o.cls += ' tgtable';
@@ -596,6 +601,12 @@
     if (PV.on && PV.rdy[1] && !PV.rdy[0] && (shop || prep || s.phase === 'post')) acts = '<div class="hint rivrdy">' + ic('aviso') + ' El rival ya está listo.</div>' + acts;
     h += '<div class="hud bottom">' + orb('life', view.life[0], ML, s.spec && ui.playing ? esc(s.spec[0]) : 'Tu vida', 0) + orb('gold', P.gold, 0, 'Tu oro') + '<div class="acts">' + acts + '</div></div></div>';
 
+    // Novias (sinergia Correa): una sola en el hueco 5
+    if (!ui.playing && s.phase === 'prep' && (E.tiers(P).Correa || 0) >= 1 && ((P.nvs && P.nvs.length) || P.mesa[4])) {
+      h += '<div class="novwrap"><div class="hl">' + ic('corazon') + ' Tus novias · pulsa una para ponerla en el hueco 5 (solo una a la vez)</div><div class="novs">' + P.nvs.map(function (n, k) {
+        return '<div class="cw">' + cardHtml(CARD[n.id], { atk: E.atk(n), hp: n.hp, max: E.maxHp(n), cls: 'hcard', attrs: 'data-act="novia" data-i="' + k + '" title="Pulsa para ponerla en el hueco 5"', tag: 'button' }) + '</div>';
+      }).join('') + (P.mesa[4] ? '<div class="novon">En el hueco 5: <b>' + esc(CARD[P.mesa[4].id].name) + '</b></div>' : '') + '</div></div>';
+    }
     // Mano
     h += '<div class="handwrap' + (ui.dragMesa ? ' dropzone' : '') + '"><div class="hl">Tu mano ' + P.hand.length + (s.mode === 'revive' ? '' : '/' + CFG.handMax) + '</div><div class="hand">';
     P.hand.forEach(function (i, k) {
@@ -705,7 +716,7 @@
   }
 
     // ---------- Efectos de sinergia: cartel, bola, números flotantes ----------
-  var FXICON = { pereza: 'sofa', duo: 'duo', novia: 'corazon', pueblo: 'pueblo', nini: 'sofa', voley: 'voley', comeback: 'fuego', tilt: 'enfado', koi: 'trofeo', trabajo: 'maletin' };
+  var FXICON = { pereza: 'sofa', duo: 'duo', novia: 'corazon', eriko: 'corazon', lucia: 'ojo', pueblo: 'pueblo', nini: 'sofa', voley: 'voley', comeback: 'fuego', tilt: 'enfado', koi: 'trofeo', trabajo: 'maletin' };
   function fxBanner() {
     var fx = ui.playing && ui.hl && ui.hl.fx; if (!fx) return;
     var b = document.getElementById('board'), row = b && b.querySelector('.row4.side' + fx.side); if (!row) return;
@@ -1021,11 +1032,17 @@
       var i = +el.dataset.i, c = CARD[P.hand[i].id];
       if (ui.sel && ui.sel.i === i && (ui.sel.k === 'hand' || ui.sel.k === 'act')) { ui.sel = null; ui.hint = ''; return render(); }
       if (c.type === 'tropa') {
-        if (!P.mesa.some(function (x) { return !x; })) { ui.hint = 'La mesa está llena: solo puedes retirar tropas en la tienda.'; ui.sel = null; }
+        if (!P.mesa.slice(0, 4).some(function (x) { return !x; })) { ui.hint = 'La mesa está llena: solo puedes retirar tropas en la tienda.'; ui.sel = null; }
         else { ui.sel = { k: 'hand', i: i }; ui.hint = 'Pulsa un hueco libre para colocarla.'; }
       } else if (s.shopOpen) { ui.hint = 'Las acciones se juegan en las rondas de combate.'; ui.sel = null; }
       else if (c.target === 'none') { ui.hint = E.playAction(s, 0, i, null) ? (pvs('action', [i, null]), '') : s.err; ui.sel = null; }
       else { ui.sel = { k: 'act', i: i }; ui.hint = c.target === 'ally' ? 'Elige una tropa tuya en la mesa.' : 'Elige una tropa rival.'; }
+      return render();
+    }
+    if (act === 'novia') {
+      var nk = +el.dataset.i;
+      if (E.place(s, 0, -1 - nk, 4)) { ui.landed = s.p[0].mesa[4].uid; pvs('place', [-1 - nk, 4]); ui.hint = ''; } else ui.hint = 'No se puede colocar ahora.';
+      ui.sel = null; if (!s.shopOpen) nextPending(s);
       return render();
     }
     if (act === 'slot') {
@@ -1083,7 +1100,7 @@
     }
     var inst0 = P.hand[drag.i]; if (!inst0) return false;
     var c = CARD[inst0.id];
-    if (c.type === 'tropa') { if (!P.mesa.some(function (x) { return !x; })) return false; ui.sel = { k: 'hand', i: drag.i }; ui.hint = 'Suéltala sobre un hueco libre.'; }
+    if (c.type === 'tropa') { if (!P.mesa.slice(0, 4).some(function (x) { return !x; })) return false; ui.sel = { k: 'hand', i: drag.i }; ui.hint = 'Suéltala sobre un hueco libre.'; }
     else { if (s.shopOpen) return false; ui.sel = { k: c.target === 'none' ? 'hand0' : 'act', i: drag.i }; ui.hint = c.target === 'none' ? 'Suéltala sobre el tablero.' : (c.target === 'ally' ? 'Suéltala sobre una tropa tuya.' : 'Suéltala sobre una tropa rival.'); }
     render();
     var src = app.querySelector('.hand [data-i="' + drag.i + '"]'); if (!src) return false;
@@ -1105,7 +1122,7 @@
     }
     if (t && inst0) {
       if (c.type === 'tropa') {
-        var slotEl = t.closest('.slot.free'), onBoard = t.closest('#board'), idx = slotEl ? +slotEl.dataset.i : (onBoard ? P.mesa.indexOf(null) : -1);
+        var slotEl = t.closest('.slot.free'), onBoard = t.closest('#board'), idx = slotEl ? +slotEl.dataset.i : (onBoard ? P.mesa.slice(0, 4).indexOf(null) : -1);
         if (idx >= 0 && E.place(s, 0, drag.i, idx)) { ok = true; ui.landed = P.mesa[idx].uid; pvs('place', [drag.i, idx]); }
       } else if (c.target === 'none') { if (t.closest('#board')) { ok = E.playAction(s, 0, drag.i, null); if (ok) pvs('action', [drag.i, null]); } }
       else { var cd = t.closest('[data-cuid]'); if (cd && cd.dataset.side === (c.target === 'ally' ? '0' : '1')) { ok = E.playAction(s, 0, drag.i, +cd.dataset.cuid); if (ok) pvs('action', [drag.i, +cd.dataset.cuid]); } }

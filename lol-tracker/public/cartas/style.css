@@ -978,3 +978,14 @@ img.timg[src$="comebacker.png"] { filter: drop-shadow(0 0 1.5px #fff) drop-shado
 .odds .od.r-Común { --oc: #cbd5e1; } .odds .od.r-Rara { --oc: #60a5fa; } .odds .od.r-Épica { --oc: #c084fc; } .odds .od.r-Legendaria { --oc: #fbbf24; }
 
 .mode.m-revvs4{--mc:#cdd9ff}
+
+/* Novias (sinergia Correa): hueco 5 */
+.row4.has5 { grid-template-columns: repeat(5, minmax(0, calc(var(--ch) * 5 / 7))); }
+.slot.nov { border-color: #fb7185; color: #fda4af; text-align: center; font-size: .8rem; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; background: rgba(251,113,133,.08); }
+.slot.nov small { opacity: .8; font-size: .65rem; }
+.novwrap { margin: .6rem 0; padding: .55rem .7rem; border-radius: 16px; border: 1px solid rgba(251,113,133,.35); background: linear-gradient(180deg, rgba(251,113,133,.12), rgba(251,113,133,.03)); }
+.novs { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
+.novs .cw { width: calc(var(--ch) * 5 / 7 * .8); }
+.novon { flex: 1; min-width: 8rem; font-size: .85rem; color: #fda4af; }
+@media (max-width: 720px) { .row4.has5 { grid-template-columns: repeat(5, 1fr); } .novs .cw { width: 22%; } }
+.fxb.t-eriko, .fxb.t-lucia { --fc: #fb7185; }

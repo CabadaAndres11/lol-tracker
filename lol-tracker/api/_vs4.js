@@ -30,7 +30,7 @@ function noteAll(T, text, except) { for (let p = 0; p < 4; p++) if (p !== except
 // ---------- Duelo de 2 sobre la mesa ----------
 function duelState(T, a, b) {
   const Pa = T.p[a], Pb = b >= 0 ? T.p[b] : E.newPlayer([]);
-  [Pa, Pb].forEach((P, k) => ['mesa', 'hand', 'grave'].forEach((z) => P[z].forEach((i) => { if (i) i.owner = k; })));
+  [Pa, Pb].forEach((P, k) => ['mesa', 'hand', 'grave', 'nvs'].forEach((z) => (P[z] || []).forEach((i) => { if (i) i.owner = k; })));
   const S = {
     pvp: true, uidm: 4, uidk: [a, b >= 0 ? b : a], inc: T.inc, rs: T.rs, uidn: [T.uidn[a], b >= 0 ? T.uidn[b] : 1],
     refreshN: [T.refreshN[a], b >= 0 ? T.refreshN[b] : 0], lastBall: [T.lastBall[a], b >= 0 ? T.lastBall[b] : null],

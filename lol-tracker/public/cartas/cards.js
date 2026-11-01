@@ -79,7 +79,7 @@ var D={
    "name": "Lihone Correa",
    "person": "Lihone",
    "themes": [
-    "Novia"
+    "Correa"
    ],
    "cost": 3,
    "atk": 3,
@@ -171,7 +171,7 @@ var D={
    "name": "Dashlight Correa",
    "person": "Dashlight",
    "themes": [
-    "Novia"
+    "Correa"
    ],
    "cost": 3,
    "atk": 3,
@@ -425,7 +425,7 @@ var D={
    "name": "PotAnGo",
    "person": "Hellbramn",
    "themes": [
-    "Novia",
+    "Correa",
     "Pueblo"
    ],
    "cost": 5,
@@ -494,7 +494,7 @@ var D={
    "person": "Chipy",
    "themes": [
     "Anime",
-    "Novia"
+    "Correa"
    ],
    "cost": 4,
    "atk": 4,
@@ -570,6 +570,76 @@ var D={
    "rarity": "Rara",
    "type": "tropa",
    "size": 2
+  }
+ ],
+ "novias": [
+  {
+   "id": "eriko",
+   "name": "Eriko",
+   "person": "Eriko",
+   "themes": [],
+   "cost": 0,
+   "atk": 2,
+   "hp": 12,
+   "rarity": "Legendaria",
+   "type": "tropa",
+   "size": 0,
+   "novia": true,
+   "pas": {
+    "n": "Mimos",
+    "t": "Al empezar cada combate da +2/+2 permanente a todas tus cartas en mesa (tope +10/+10 por carta)."
+   }
+  },
+  {
+   "id": "helena",
+   "name": "Helena",
+   "person": "Helena",
+   "themes": [],
+   "cost": 0,
+   "atk": 6,
+   "hp": 8,
+   "rarity": "Legendaria",
+   "type": "tropa",
+   "size": 0,
+   "novia": true,
+   "pas": {
+    "n": "Intocable",
+    "t": "No puede recibir ataques ni ser objetivo, y no cuenta para proteger tu vida: si solo queda ella, los golpes rivales van a tu vida."
+   }
+  },
+  {
+   "id": "lucia",
+   "name": "Lucía",
+   "person": "Lucía",
+   "themes": [],
+   "cost": 0,
+   "atk": 3,
+   "hp": 10,
+   "rarity": "Legendaria",
+   "type": "tropa",
+   "size": 0,
+   "novia": true,
+   "pas": {
+    "n": "Mirada letal",
+    "t": "Al empezar cada combate hace 3 de daño a todas las tropas rivales."
+   }
+  },
+  {
+   "id": "ari",
+   "name": "Ari",
+   "person": "Ari",
+   "themes": [],
+   "cost": 0,
+   "atk": 2,
+   "hp": 12,
+   "rarity": "Legendaria",
+   "type": "tropa",
+   "size": 0,
+   "novia": true,
+   "pas": {
+    "n": "Sueño de dragón",
+    "t": "Cada golpe que va a recibir una de tus tropas tiene un 50% de ser evitado."
+   }
   }
  ],
  "actions": [
@@ -765,8 +835,8 @@ var D={
    "type": "accion",
    "size": 1,
    "target": "none",
-   "text": "Tu novia aparece ahora: su apoyo (o su regaño) cae sobre todas tus tropas en mesa (necesitas el nivel 1 de Novia).",
-   "theme": "Novia"
+   "text": "Tu novia aparece ahora: su apoyo (o su regaño) cae sobre todas tus tropas en mesa (necesitas el nivel 1 de Correa).",
+   "theme": "Correa"
   },
   {
    "id": "rabia-contenida",
@@ -929,20 +999,16 @@ var D={
     "Atacar +3, defender -2."
    ]
   },
-  "Novia": {
+  "Correa": {
    "th": [
-    2,
-    3,
-    4
+    2
    ],
    "color": "#fb7185",
    "tx": [
-    "Al empezar el combate: 60% te apoya (+1/+1 a todas) y 40% te regaña (-1/-1).",
-    "75% apoya +2/+2, regaña -1/-1.",
-    "90% apoya +3/+3, regaña -1/-1."
+    "Desbloquea el hueco 5 y recibes a las 4 novias (una sola puede estar en el hueco 5): Eriko +2/+2 a la mesa cada ronda, Helena no recibe ataques, Lucía hace 3 de daño a las tropas rivales al empezar y Ari evita golpes al azar."
    ]
   },
-  "Tilt": {
+ "Tilt": {
    "th": [
     2,
     3,

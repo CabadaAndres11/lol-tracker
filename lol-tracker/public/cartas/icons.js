@@ -61,7 +61,7 @@
     sobre: '<rect x="12" y="4" width="40" height="56" rx="6" ' + f('purple') + ' ' + S + '/><path d="M16 8v48" stroke="#fff" stroke-width="4" opacity=".3"/><path d="M32 22l3 6.5 7 .8-5.2 4.8 1.4 7-6.2-3.6-6.2 3.6 1.4-7L22 29.3l7-.8z" ' + f('gold') + ' stroke="' + K + '" stroke-width="2.2" stroke-linejoin="round"/>'
   };
   I['t-Pokémon'] = I.huevo; I['t-Informático'] = I.chip; I['t-Trabajo'] = I.maletin; I['t-Lol'] = I.emblema; I['t-Comebacker'] = I.fuego; I['t-Voley'] = I.voley;
-  I['t-Anime'] = I.shuriken; I['t-Novia'] = I.corazon; I['t-Tilt'] = I.humo; I['t-Pueblo'] = I.pueblo; I['t-KOI'] = I.pez; I['t-Dúo Inseparable'] = I.duo; I['t-NINI'] = I.sofa; I['t-Pelayos'] = I.escudo;
+  I['t-Anime'] = I.shuriken; I['t-Correa'] = I.corazon; I['t-Tilt'] = I.humo; I['t-Pueblo'] = I.pueblo; I['t-KOI'] = I.pez; I['t-Dúo Inseparable'] = I.duo; I['t-NINI'] = I.sofa; I['t-Pelayos'] = I.escudo;
   // alias: nombres con varios usos
   I.ataque = I.espadas; I.pvp = I.espadas; I.mazo = I.cartas; I.sinergias = I.brillo; I.normas = I.libro; I.tienda = I.carrito; I.bloqueo = I.candado;
   I.derrota = I.corazonroto; I.victoria = I.trofeo; I.ia = I.robot; I.vs4 = I.grupo; I.inicio = I.casa; I.cuenta = I.usuario; I.salir = I.puerta;

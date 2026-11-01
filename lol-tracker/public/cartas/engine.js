@@ -20,7 +20,8 @@
     anime: { cede: [1, 2, 3] },
     koi: { atk: [1, 2, 3], cap: 8 },
     voley: { atk: [1, 2, 3], red: [1, 1, 2], cap: 8 },
-    novia: { p: [0.6, 0.75, 0.9], up: [1, 2, 3], down: 1, cap: 10 },
+    novia: { p: [0.6, 0.75, 0.9], up: [1, 2, 3], down: 1, cap: 10 }, // solo la acción «Cita sorpresa»
+    novias: { eriko: 2, eCap: 10, lucia: 3, ari: 0.5 }, // novias del hueco 5 (sinergia Correa)
     tilt: { hit: [1, 1, 2], perm: [1, 2, 2], cap: 8 },
     pueblo: { per: [1, 2], cap: [4, 8] },
     duo: { stat: 2, death: 2, cap: 12 },
@@ -29,7 +30,7 @@
   };
 
   var CARD = {};
-  DATA.cards.concat(DATA.actions).forEach(function (c) { CARD[c.id] = c; });
+  DATA.cards.concat(DATA.actions, DATA.novias || []).forEach(function (c) { CARD[c.id] = c; });
 
   function mulberry32(a) {
     return function () {
@@ -67,6 +68,21 @@
   function atk(i) { if (i.tmp.loan != null) return Math.max(0, i.tmp.loan); return Math.max(0, card(i).atk + i.perm.atk + i.tmp.atk); }
   function has(i, theme) { return card(i).themes.indexOf(theme) >= 0; }
   function alive(i) { return i && !i.dead; }
+  // Novias (sinergia Correa): viven en una reserva (P.nvs) y solo una ocupa el hueco 5 (mesa[4]). Helena no puede ser atacada.
+  function isNov(i) { return !!(i && CARD[i.id] && CARD[i.id].novia); }
+  function immune(i) { return !!(i && i.id === 'helena'); }
+  function targetable(P) { return P.mesa.filter(function (i) { return i && !i.dead && !immune(i); }); }
+  function novSync(s, p) {
+    var P = s.p[p], c = tiers(P)['Correa'] || 0;
+    if (!P.nvs) P.nvs = [];
+    if (c >= 1 && !P.novGiven) {
+      P.novGiven = true;
+      (DATA.novias || []).forEach(function (n) { if (!P.nvs.some(function (x) { return x.id === n.id; }) && !(P.mesa[4] && P.mesa[4].id === n.id)) P.nvs.push(mk(s, n.id, p)); });
+      say(s, pv(s, p, '¡Sinergia Correa! Se desbloquea el hueco 5 y recibes a las 4 novias.', 'El rival desbloquea el hueco 5 y sus novias.'));
+    }
+    if (c < 1 && P.mesa[4]) { P.nvs.push(P.mesa[4]); delete P.target[P.mesa[4].uid]; P.mesa[4] = null; } // sin la sinergia, la novia vuelve a la reserva
+  }
+  function novBack(P, i) { i.dead = false; i.tmp = { atk: 0, hp: 0, red: 0 }; i.hp = Math.max(1, card(i).hp + i.perm.hp); P.nvs.push(i); delete P.target[i.uid]; }
 
   // ---------- Temáticas ----------
   function tierOf(theme, n) {
@@ -116,7 +132,7 @@
   }
 
   function newPlayer(deck) {
-    return { life: CFG.life, gold: CFG.gold, deck: deck.slice(), hand: [], mesa: [null, null, null, null], grave: [], target: {}, voley: {}, fl: {}, offers: [], refreshes: 0, pickUsed: false, anime: 0, lost: false };
+    return { life: CFG.life, gold: CFG.gold, deck: deck.slice(), hand: [], mesa: [null, null, null, null, null], nvs: [], novGiven: false, grave: [], target: {}, voley: {}, fl: {}, offers: [], refreshes: 0, pickUsed: false, anime: 0, lost: false };
   }
 
   function newGame(deckA, deckB, seed, opts) {
@@ -289,9 +305,10 @@
     var P = s.p[p];
     if (!s.shopOpen || s.phase !== 'prep' || s.over) return false;
     var i = where === 'mesa' ? P.mesa[idx] : P.hand[idx];
-    if (!i || i.dead) return false;
+    if (!i || i.dead || isNov(i)) return false;
     if (where === 'mesa') { P.mesa[idx] = null; delete P.target[i.uid]; } else P.hand.splice(idx, 1);
     P.gold += sellValue(i);
+    novSync(s, p);
     checkShop(s);
     return true;
   }
@@ -303,6 +320,7 @@
     P.gold -= c.cost; P.offers.splice(idx, 1);
     P.hand.push(mk(s, id, p));
     mergeCheck(s, p);
+    novSync(s, p);
     checkShop(s);
     return true;
   }
@@ -338,30 +356,43 @@
   }
   function retire(s, p, slot) {
     var P = s.p[p], i = P.mesa[slot];
+    if (slot === 4 && i && s.phase === 'prep') { P.mesa[4] = null; P.nvs.push(i); delete P.target[i.uid]; return true; } // la novia vuelve a la reserva
     if (!s.shopOpen || s.phase !== 'prep' || !i || i.dead) return false;
     if (has(i, 'Lol')) return false;
     if (P.hand.length >= handCap(s)) return false;
     P.mesa[slot] = null; P.hand.push(i); // conserva la vida actual
     delete P.target[i.uid];
+    novSync(s, p);
     return true;
   }
 
   // ---------- Preparación ----------
   function place(s, p, handIdx, slot) {
-    var P = s.p[p], i = P.hand[handIdx];
+    var P = s.p[p];
+    if (handIdx < 0 || slot === 4) { // novias: handIdx negativo = posición -1-k en la reserva; solo van al hueco 5
+      var k = -1 - handIdx, n = (P.nvs || [])[k];
+      if (s.phase !== 'prep' || slot !== 4 || !n || (tiers(P)['Correa'] || 0) < 1) return false;
+      P.nvs.splice(k, 1);
+      if (P.mesa[4]) { P.nvs.push(P.mesa[4]); delete P.target[P.mesa[4].uid]; }
+      P.mesa[4] = n;
+      return true;
+    }
+    var i = P.hand[handIdx];
     if (s.phase !== 'prep' || !i || !isTroop(i) || P.mesa[slot] || dupBlock(s, p, handIdx)) return false;
     P.hand.splice(handIdx, 1); P.mesa[slot] = i;
+    novSync(s, p);
     return true;
   }
   // Muere una tropa fuera del combate (daño de acciones): sale de la mesa al momento.
   function dropDead(s, p, i) {
     var P = s.p[p], k = P.mesa.indexOf(i);
     if (s.mode === 'revive') { i.hp = Math.max(1, i.hp); return; } // Resurrección: las acciones no matan, la dejan a 1
+    if (isNov(i)) { if (k >= 0) P.mesa[k] = null; novBack(P, i); return; } // las novias vuelven a la reserva
     i.dead = true; i.hp = 0;
     if (k >= 0) P.mesa[k] = null;
     P.grave.push(i); delete P.target[i.uid];
   }
-  function validTarget(c, i) { return !c.only || has(i, c.only); }
+  function validTarget(c, i) { if (immune(i) && c.target === 'enemy') return false; return !c.only || has(i, c.only); }
   // Cada acción: ok(s,p,tgt) devuelve '' si se puede jugar o el motivo; run(s,p,tgt) la aplica y devuelve el texto del registro.
   // Nivel de la acción (por repetidas): +50% por nivel sobre su cifra base
   function sc(s, n) { return n; } // las acciones no mejoran con el nivel de carta
@@ -371,9 +402,9 @@
     arenga: { run: function (s, p) { var n = sc(s, 1); mesaTroops(s.p[p]).forEach(function (i) { grow(i, 'atk', n); }); return '+' + n + ' ataque permanente a todas'; } },
     banquete: { run: function (s, p) { var n = sc(s, 2); mesaTroops(s.p[p]).forEach(function (i) { grow(i, 'hp', n); }); return '+' + n + ' vida máxima permanente a todas'; } },
     intimidacion: { run: function (s, p, t) { var n = sc(s, 3); t.perm.atk -= n; return '-' + n + ' ataque permanente'; } },
-    'mal-de-ojo': { ok: function (s, p) { return mesaTroops(s.p[1 - p]).length ? '' : 'El rival no tiene tropas.'; }, run: function (s, p) { var n = sc(s, 1); mesaTroops(s.p[1 - p]).forEach(function (i) { i.perm.atk -= n; }); return '-' + n + ' ataque permanente a todas las rivales'; } },
+    'mal-de-ojo': { ok: function (s, p) { return targetable(s.p[1 - p]).length ? '' : 'El rival no tiene tropas.'; }, run: function (s, p) { var n = sc(s, 1); targetable(s.p[1 - p]).forEach(function (i) { i.perm.atk -= n; }); return '-' + n + ' ataque permanente a todas las rivales'; } },
     'golpe-certero': { run: function (s, p, t) { var n = sc(s, 6); t.hp -= n; if (t.hp <= 0) dropDead(s, 1 - p, t); return n + ' de daño'; } },
-    lluvia: { ok: function (s, p) { return mesaTroops(s.p[1 - p]).length ? '' : 'El rival no tiene tropas.'; }, run: function (s, p) { var n = sc(s, 2); mesaTroops(s.p[1 - p]).forEach(function (i) { i.hp -= n; if (i.hp <= 0) dropDead(s, 1 - p, i); }); return n + ' de daño a todas las rivales'; } },
+    lluvia: { ok: function (s, p) { return targetable(s.p[1 - p]).length ? '' : 'El rival no tiene tropas.'; }, run: function (s, p) { var n = sc(s, 2); targetable(s.p[1 - p]).forEach(function (i) { i.hp -= n; if (i.hp <= 0) dropDead(s, 1 - p, i); }); return n + ' de daño a todas las rivales'; } },
     'bola-extra': { ok: function (s, p) { return (tiers(s.p[p])['Pokémon'] || 0) >= 1 ? '' : 'Necesitas el nivel 1 de Pokémon (2 cartas distintas).'; }, run: function (s, p) { s.p[p].fl.pk = (s.p[p].fl.pk || 0) + 1; return 'bola extra esta ronda'; } },
     'segundo-aliento': {
       ok: function (s, p) { return mesaTroops(s.p[p]).some(function (i) { return has(i, 'Comebacker') && i.hp < maxHp(i); }) ? '' : 'Ninguna Comebacker en mesa está herida.'; },
@@ -395,8 +426,8 @@
       run: function (s, p) { var P = s.p[p], i = graveKoi(P); P.grave.splice(P.grave.indexOf(i), 1); i.dead = false; i.tmp = { atk: 0, hp: 0, red: 0 }; i.hp = maxHp(i); P.hand.push(i); return card(i).name + ' vuelve a tu mano'; } },
     'remate-doble': { ok: function (s, p) { return (tiers(s.p[p])['Voley'] || 0) >= 1 ? '' : 'Necesitas el nivel 1 de Voley (2 cartas distintas).'; }, run: function (s, p) { s.p[p].fl.vol = true; return 'tus Voley: ataque doble o defensa total'; } },
     'cita-sorpresa': {
-      ok: function (s, p) { return (tiers(s.p[p])['Novia'] || 0) >= 1 && mesaTroops(s.p[p]).length ? '' : 'Necesitas el nivel 1 de Novia (2 cartas distintas) y tropas en mesa.'; },
-      run: function (s, p) { var P = s.p[p], t = tiers(P), r = noviaRoll(P, t, mesaTroops(P), s); return r.up ? '¡tu novia te apoya! +' + FX.novia.up[t['Novia'] - 1] + '/+' + FX.novia.up[t['Novia'] - 1] + ' permanente' : '¡tu novia te regaña! -1/-1 esta ronda'; } },
+      ok: function (s, p) { return (tiers(s.p[p])['Correa'] || 0) >= 1 && mesaTroops(s.p[p]).length ? '' : 'Necesitas el nivel 1 de Correa (2 cartas distintas) y tropas en mesa.'; },
+      run: function (s, p) { var P = s.p[p], t = tiers(P), r = noviaRoll(P, t, mesaTroops(P), s); return r.up ? '¡tu novia te apoya! +' + FX.novia.up[t['Correa'] - 1] + '/+' + FX.novia.up[t['Correa'] - 1] + ' permanente' : '¡tu novia te regaña! -1/-1 esta ronda'; } },
     'rabia-contenida': { run: function (s, p) { var n = sc(s, 1); s.p[p].fl.tilt = n; return 'si ganas esta ronda: +' + n + ' ataque a las Tilt'; } },
     'fiesta-del-pueblo': { ok: function (s, p) { return (tiers(s.p[p])['Pueblo'] || 0) >= 1 ? '' : 'Necesitas el nivel 1 de Pueblo (2 cartas distintas).'; }, run: function (s, p) { s.p[p].fl.pueblo = true; return 'el crecimiento del pueblo se duplica'; } },
     'hermano-del-alma': {
@@ -433,7 +464,7 @@
     if (!i || isTroop(i)) return false;
     var c = card(i), tgt = null;
     if (c.target === 'ally') tgt = P.mesa.filter(alive).filter(function (x) { return x.uid === targetUid; })[0];
-    else if (c.target === 'enemy') tgt = s.p[1 - p].mesa.filter(alive).filter(function (x) { return x.uid === targetUid; })[0];
+    else if (c.target === 'enemy') tgt = targetable(s.p[1 - p]).filter(function (x) { return x.uid === targetUid; })[0];
     var why = actionBlock(s, p, c, tgt);
     if (why) { s.err = why; return false; }
     P.hand.splice(handIdx, 1); P.grave.push(i);
@@ -442,6 +473,7 @@
     s.lvl = 1;
     say(s, pv(s, p, 'Juegas ', 'El rival juega ') + c.name + (tgt ? ' sobre ' + card(tgt).name : '') + ': ' + res + '.');
     s.acts.push({ n: (s.actN = (s.actN || 0) + 1), p: p, id: c.id, res: res, tgt: tgt ? tgt.uid : null });
+    novSync(s, p);
     return true;
   }
   function setTarget(s, p, uid, targetUid) {
@@ -479,7 +511,7 @@
     var P = s.p[p], me = P;
     var guard = 0;
     while (guard++ < 6) {
-      var slot = P.mesa.indexOf(null);
+      var slot = P.mesa.slice(0, 4).indexOf(null);
       if (slot < 0) break;
       var best = -1, bs = -1;
       P.hand.forEach(function (i, k) { if (isTroop(i) && !dupBlock(s, p, k)) { var sc = atk(i) + maxHp(i) * 0.6 + s.rng(); if (sc > bs) { bs = sc; best = k; } } });
@@ -488,8 +520,8 @@
     }
     for (var k = P.hand.length - 1; k >= 0; k--) {
       var i = P.hand[k];
-      if (isTroop(i)) continue;
-      var c = card(i), allies = mesaTroops(P), foes = mesaTroops(s.p[1 - p]);
+      if (!i || isTroop(i)) continue; // (una acción anterior pudo fusionar cartas y acortar la mano)
+      var c = card(i), allies = mesaTroops(P), foes = targetable(s.p[1 - p]);
       if (c.id === 'cambio-de-linea' || c.id === 'capitulo-especial') continue; // la IA no las usa
       var tgt = null;
       if (c.target === 'ally') { allies.sort(function (a, b) { return atk(b) - atk(a); }); tgt = allies[0]; if (c.id === 'armadura') tgt = allies.slice().sort(function (a, b) { return maxHp(b) - maxHp(a); })[0]; }
@@ -500,12 +532,14 @@
       if (c.target !== 'none' && !tgt) continue;
       playAction(s, p, k, tgt ? tgt.uid : null);
     }
+    // Novias: si tiene la sinergia, la IA elige una al azar para el hueco 5
+    if (!P.mesa[4] && P.nvs && P.nvs.length && (tiers(P)['Correa'] || 0) >= 1) place(s, p, -1 - Math.floor(s.rng() * P.nvs.length), 4);
     // Voley: ataca salvo que esté en desventaja numérica
     mesaTroops(P).forEach(function (i) { if (has(i, 'Voley')) P.voley[i.uid] = s.rng() < 0.7 ? 'atk' : 'def'; });
   }
   // Reparto coordinado: concentra el daño para rematar tropas (primero las más peligrosas).
   function aiTargets(s, p) {
-    var P = s.p[p], foes = mesaTroops(s.p[1 - p]).map(function (f) { return { f: f, rem: f.hp }; });
+    var P = s.p[p], foes = targetable(s.p[1 - p]).map(function (f) { return { f: f, rem: f.hp }; });
     if (!foes.length) return;
     mesaTroops(P).sort(function (a, b) { return atk(b) - atk(a); }).forEach(function (i) {
       var a = atk(i);
@@ -559,7 +593,7 @@
   }
 
   function noviaRoll(P, t, troops, s) {
-    var nt = t['Novia'] - 1, up = s.rng() < FX.novia.p[nt];
+    var nt = t['Correa'] - 1, up = s.rng() < FX.novia.p[nt];
     troops.forEach(function (i) {
       if (up) gainCap(i, 'nov', 'both', FX.novia.up[nt], FX.novia.cap);
       else {
@@ -612,10 +646,19 @@
           if (pk.length) { fxFrame(s, p, 'pokemon', FX.pokemon.names[ball] + (bn ? ' (extra)' : ''), '+' + b + '/+' + b + ' permanente a las Pokémon', pk.map(function (i) { return i.uid; })); s.frames[s.frames.length - 1].hl.fx.ball = ball; }
         }
       }
-      // Novia
-      if (t['Novia'] && troops.length) {
-        var nr = noviaRoll(P, t, troops, s);
-        fxFrame(s, p, 'novia', nr.up ? '¡Tu novia te apoya!' : '¡Tu novia te regaña!', nr.up ? '+' + FX.novia.up[t['Novia'] - 1] + '/+' + FX.novia.up[t['Novia'] - 1] + ' permanente a todas' : '-1/-1 esta ronda a todas', troops.map(function (i) { return i.uid; }), !nr.up);
+      // Novias del hueco 5 (sinergia Correa)
+      var nv = P.mesa[4];
+      if (nv && !nv.dead && (t['Correa'] || 0) >= 1) {
+        if (nv.id === 'eriko') {
+          var er = troops.filter(function (i) { return gainCap(i, 'eri', 'both', FX.novias.eriko, FX.novias.eCap) > 0; });
+          if (er.length) fxFrame(s, p, 'eriko', 'Eriko te mima', '+' + FX.novias.eriko + '/+' + FX.novias.eriko + ' permanente a toda la mesa', er.map(function (i) { return i.uid; }));
+        } else if (nv.id === 'lucia') {
+          var lf2 = targetable(s.p[1 - p]);
+          if (lf2.length) {
+            var lt = ' Lucía:'; lf2.forEach(function (f) { lt += passiveHit(s, f, FX.novias.lucia, 0); });
+            frame(s, lt.trim(), { fx: { type: 'lucia', side: p, title: 'Mirada de Lucía', sub: FX.novias.lucia + ' de daño a las tropas rivales', uids: lf2.map(function (f) { return f.uid; }), neg: false } });
+          }
+        }
       }
       // Pueblo
       if (t['Pueblo']) {
@@ -684,7 +727,7 @@
 
   function pendingTargets(s, p) {
     p = p || 0;
-    var foes = mesaTroops(s.p[1 - p]);
+    var foes = targetable(s.p[1 - p]);
     if (!foes.length) return [];
     var T = s.p[p].target;
     return mesaTroops(s.p[p]).filter(function (i) { return !(T[i.uid] && foes.some(function (f) { return f.uid === T[i.uid]; })); });
@@ -705,7 +748,7 @@
   }
   // Daño de pasiva a una tropa (sin contraataque). Devuelve texto de registro.
   function passiveHit(s, v, n, depth) {
-    if (!v || v.dead || n <= 0) return '';
+    if (!v || v.dead || n <= 0 || immune(v)) return '';
     v.hp -= n;
     var tv = s.tiers[v.owner];
     if (has(v, 'Tilt') && tv && tv['Tilt']) gainCap(v, 'tilt', 'atk', FX.tilt.hit[tv['Tilt'] - 1], FX.tilt.cap);
@@ -743,6 +786,7 @@
     s.fightN = (s.fightN || 0) + 1;
     if (!s.pvp) aiTargets(s, 1);
     frame(s, 'Empieza el combate. ' + pv(s, s.first, 'Atacas primero.', 'Ataca primero el rival.'), null);
+    novSync(s, 0); novSync(s, 1);
     startEffects(s);
     var seq = order(s);
     // Madrugón: las Pelayos de quien lo jugó atacan las primeras
@@ -771,7 +815,7 @@
       var a = seq[n];
       if ((a.dead && !a.tmp.dying) || a.tmp.noAtk) continue;
       a.tmp.acted = true;
-      var P = s.p[a.owner], E = s.p[1 - a.owner], foes = mesaTroops(E);
+      var P = s.p[a.owner], E = s.p[1 - a.owner], foes = targetable(E);
       var tgt = null, retarget = false;
       if (P.target[a.uid]) tgt = foes.filter(function (f) { return f.uid === P.target[a.uid]; })[0] || null;
       if (!tgt && foes.length) { tgt = foes[Math.floor(s.rng() * foes.length)]; retarget = !!P.target[a.uid]; }
@@ -787,8 +831,10 @@
       }
       var fxk = null, real = Math.max(0, dmg - tgt.tmp.red);
       if (tgt.tmp.cap1) real = Math.min(real, 1);
+      var ariSave = false;
+      if (real > 0 && mesaTroops(s.p[tgt.owner]).some(function (x) { return x.id === 'ari'; }) && s.rng() < FX.novias.ari) { real = 0; ariSave = true; }
       tgt.hp -= real;
-      var line = card(a).name + (retarget ? ' (su objetivo ya cayó) ataca a ' : ' ataca a ') + card(tgt).name + ': ' + real + ' de daño' + (tgt.tmp.red && real < dmg ? ' (reducido)' : '') + '.';
+      var line = card(a).name + (retarget ? ' (su objetivo ya cayó) ataca a ' : ' ataca a ') + card(tgt).name + ': ' + real + ' de daño' + (tgt.tmp.red && real < dmg ? ' (reducido)' : '') + (ariSave ? ' (¡Ari lo evita!)' : '') + '.';
       if (real > 0) {
         var ta = s.tiers[a.owner], tt = s.tiers[tgt.owner];
         if (has(a, 'Lol') && ta['Lol']) {
@@ -830,7 +876,7 @@
       }
       // Racha de bajas (Lihone Viego): al derrotar a una tropa toma su ataque y vuelve a atacar
       if (pas(a) === 'racha') {
-        if (tgt.dead && !a.dead && mesaTroops(E).length) { a.tmp.loan = atk(tgt); line += ' Racha de bajas: toma ' + a.tmp.loan + ' de ataque y vuelve a atacar.'; seq.splice(n + 1, 0, a); }
+        if (tgt.dead && !a.dead && targetable(E).length) { a.tmp.loan = atk(tgt); line += ' Racha de bajas: toma ' + a.tmp.loan + ' de ataque y vuelve a atacar.'; seq.splice(n + 1, 0, a); }
         else if (tgt.dead && !a.dead) { // mató a la última tropa rival: su ataque golpea al jugador rival
           var rd = atk(tgt);
           if (rd > 0) { E.life -= rd; plife = tgt.owner; pdmg = rd; line += ' Racha de bajas: toma ' + rd + ' de ataque y golpea ' + pv(s, a.owner, 'la vida del rival', 'tu vida') + '.'; }
@@ -856,7 +902,7 @@
         [sk - 1, sk + 1].forEach(function (q) { var v = q >= 0 ? E.mesa[q] : null; if (v && !v.dead) { line += ' Saque:'; line += passiveHit(s, v, 1, 0); } });
       }
       if (pas(a) === 'remate') { // Javihi Prime: el balón rebota a otra tropa rival
-        var rb = mesaTroops(E).filter(function (x) { return x !== tgt; });
+        var rb = targetable(E).filter(function (x) { return x !== tgt; });
         if (rb.length) { var rv = rb[Math.floor(s.rng() * rb.length)], rn = Math.ceil(atk(a) / 2); line += ' Remate: rebota ' + rn + ' en ' + card(rv).name + '.'; line += passiveHit(s, rv, rn, 0); }
       }
       frame(s, line, { att: a.uid, tgt: tgt.uid, dmg: real, rec: rec, retarget: retarget, fx: fxk, plife: plife, pdmg: pdmg });
@@ -911,6 +957,7 @@
     s.p.forEach(function (P) {
       P.mesa.forEach(function (i, k) {
         if (!i) return;
+        if (isNov(i) && s.mode !== 'revive' && (i.dead || i.hp <= 0)) { P.mesa[k] = null; novBack(P, i); return; } // la novia caída vuelve a la reserva con su vida
         if (s.mode === 'revive') { i.dead = false; i.tmp = { atk: 0, hp: 0, red: 0 }; i.hp = maxHp(i); return; } // Resurrección: todas vuelven con la vida completa
         if (i.dead || i.hp <= 0) { P.grave.push(i); P.mesa[k] = null; delete P.target[i.uid]; return; }
         i.tmp = { atk: 0, hp: 0, red: 0 }; i.hp = Math.min(i.hp, maxHp(i)); // sin curación entre rondas
@@ -986,7 +1033,7 @@
       c.first = 1 - c.first;
       if (c.winner >= 0) c.winner = 1 - c.winner;
       c.p.forEach(function (P) {
-        ['mesa', 'hand', 'grave'].forEach(function (z) { P[z].forEach(function (i) { if (i) { i.uid = fu(i.uid); i.owner = 1 - i.owner; } }); });
+        ['mesa', 'hand', 'grave', 'nvs'].forEach(function (z) { (P[z] || []).forEach(function (i) { if (i) { i.uid = fu(i.uid); i.owner = 1 - i.owner; } }); });
         var tg = {}; Object.keys(P.target).forEach(function (k) { tg[fu(+k)] = fu(P.target[k]); }); P.target = tg;
         P.voley = fobj(P.voley);
       });
@@ -1003,7 +1050,7 @@
       (c.acts || []).forEach(function (a) { a.p = 1 - a.p; if (a.tgt != null) a.tgt = fu(a.tgt); });
     }
     // lo que el rival no debe ver
-    c.p[1].deck = []; c.p[1].offers = []; c.p[1].target = {}; c.p[1].voley = {};
+    c.p[1].deck = []; c.p[1].offers = []; /* las novias del rival no se ocultan */ c.p[1].target = {}; c.p[1].voley = {};
     c.me = seat;
     return bindRng(c);
   }
@@ -1016,7 +1063,7 @@
     place: place, playAction: playAction, setTarget: setTarget, clearTargets: clearTargets, forfeit: forfeit, setVoley: setVoley, actionBlock: actionBlock, validTarget: validTarget,
     sell: sell, sellValue: sellValue, handCap: handCap, dupBlock: dupBlock, buy: buy, mergeCheck: mergeCheck, willMerge: willMerge, shopOdds: shopOdds, refresh: refresh, refreshCost: refreshCost, pickFromDeck: pickFromDeck, retire: retire,
     aiDeck: aiDeck, aiShop: aiShop, aiPrep: aiPrep, aiTargets: aiTargets, fight: fight, endShop: endShop, pendingTargets: pendingTargets, cede: cede, nextRound: nextRound,
-    themeCounts: themeCounts, tiers: tiers, tierOf: tierOf, atk: atk, maxHp: maxHp, card: card, isTroop: isTroop, has: has, mesaTroops: mesaTroops, viewOf: viewOf,
+    isNov: isNov, immune: immune, targetable: targetable, novSync: novSync, themeCounts: themeCounts, tiers: tiers, tierOf: tierOf, atk: atk, maxHp: maxHp, card: card, isTroop: isTroop, has: has, mesaTroops: mesaTroops, viewOf: viewOf,
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.CartasEngine = API;
 })(typeof window !== 'undefined' ? window : globalThis);

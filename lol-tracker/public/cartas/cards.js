@@ -79,8 +79,7 @@ var D={
    "name": "Lihone Correa",
    "person": "Lihone",
    "themes": [
-    "Novia",
-    "Trabajo"
+    "Novia"
    ],
    "cost": 3,
    "atk": 3,

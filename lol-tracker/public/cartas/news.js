@@ -1,6 +1,8 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-01', tag: 'Cambio', title: 'Lihone Correa pierde la sinergia Trabajo',
+      items: ['Lihone Correa ya no cuenta para la sinergia Trabajo; mantiene la sinergia Novia.'] },
     { date: '2026-11-01', tag: 'Novedad', title: 'Ordenar el mazo por nivel de carta',
       items: ['En «Tu mazo» hay una casilla nueva «Ordenar por nivel de carta»: muestra primero las cartas de mayor nivel (★3, ★2, ★1). Funciona junto a los filtros y las agrupaciones.'] },
     { date: '2026-10-31', tag: 'Novedad', title: 'Versus de 4 en modo Resurrección',

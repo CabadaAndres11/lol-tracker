@@ -1430,3 +1430,6 @@ body.tutmode .refresh{pointer-events:none;opacity:.35}
 .rpl{color:#f0e6d2}
 .navb .ic{color:#c9b98a}.navb.on .ic,.navb:hover .ic{color:var(--gold)}
 .ic{stroke-linecap:round}
+.rpl{width:5.6rem;height:5.6rem;overflow:hidden}
+.rpl img{width:92%;height:92%;object-fit:contain;filter:drop-shadow(0 2px 6px rgba(0,0,0,.6));transition:transform .25s}
+.rplaybtn:hover .rpl img{transform:scale(1.08)}

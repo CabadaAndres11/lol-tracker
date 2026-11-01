@@ -307,7 +307,7 @@
     var nl = document.querySelector('.rnews .rnl'); if (nl) nl.scrollTop = st;
   }
   function renderHome() {
-    var h = head('home') + '<div class="rhome"><div class="rplay"><button class="rplaybtn" data-act="nav" data-to="play"><span class="rpl">' + ic('espadas') + '</span><span class="rpt">Jugar</span></button></div>' +
+    var h = head('home') + '<div class="rhome"><div class="rplay"><button class="rplaybtn" data-act="nav" data-to="play"><span class="rpl"><img src="/cartas/logo-icon.png" alt=""></span><span class="rpt">Jugar</span></button></div>' +
       '<div class="ricons">' + [
         ['deck', ic('cartas'), 'Colección', ui.acct.owned.length + ' cartas'],
         ['packs', ic('tienda'), 'Tienda', (ui.acct ? ui.acct.coins : 0) + ' monedas'],

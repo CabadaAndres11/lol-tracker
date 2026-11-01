@@ -1544,3 +1544,28 @@ body.tutmode .refresh{pointer-events:none;opacity:.35}
 .pnew { background: linear-gradient(180deg, rgba(255,214,120,.9), rgba(200,150,58,.85)); color: #2b1c05; box-shadow: 0 4px 14px rgba(255,190,70,.4); }
 .pdup { background: rgba(12,24,41,.6); color: var(--gold); box-shadow: 0 4px 14px rgba(0,0,0,.4); }
 @media (prefers-reduced-motion: reduce) { .pkfx, .packov::before { display: none; } .packov { animation: none; } }
+
+/* ---------- Apertura de sobres: optimización de rendimiento (solo transform/opacity, sin blur en vivo) ---------- */
+.packov { -webkit-backdrop-filter: none; backdrop-filter: none; animation: pkov .3s ease-out both;
+  background: radial-gradient(ellipse 60% 55% at 50% 45%, color-mix(in srgb, var(--ac) 24%, transparent), transparent 72%), linear-gradient(rgba(6,12,28,.84), rgba(3,7,18,.9)); }
+@keyframes pkov { from { opacity: 0; } }
+.packov.rainbow::before { filter: none; mix-blend-mode: normal; will-change: opacity; }
+.bpk, .bpk.shake, .bpk.rip { filter: none; will-change: transform; }
+.packbox .bpk { filter: drop-shadow(0 14px 18px rgba(0,0,0,.6)); }
+.bpk-lid, .bpk-main { will-change: transform, opacity; }
+.bpk-lid::after, .bpk-main::after { display: none; }
+.bpk.rip .bpk-glow, .bpk.best-Legendaria.rip .bpk-glow { filter: none; mix-blend-mode: normal; will-change: transform, opacity; }
+.bpk.rip .bpk-rays { mix-blend-mode: normal; will-change: transform, opacity; }
+.pkfx .ring { box-shadow: none; will-change: transform, opacity; }
+.pkfx i { box-shadow: none; will-change: transform, opacity; background: radial-gradient(circle, #fff 0 35%, var(--ac) 70%, transparent 100%); width: calc(var(--s) * 2.4); height: calc(var(--s) * 2.4); margin: calc(var(--s) * -1.2) 0 0 calc(var(--s) * -1.2); }
+.pcard .pback { animation: none; box-shadow: 0 0 0 1px color-mix(in srgb, var(--pc) 75%, transparent), 0 12px 24px rgba(0,0,0,.5), 0 0 22px color-mix(in srgb, var(--pc) 55%, transparent), inset 0 1px 0 rgba(255,255,255,.55), inset 0 0 26px color-mix(in srgb, var(--pc) 38%, transparent); }
+.pcard .pback::after { display: block; left: 0; top: 0; width: 100%; height: 100%; background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,.4) 48%, transparent 62%); transform: translateX(-130%); animation: pksheen 3.4s ease-in-out infinite; will-change: transform; }
+@keyframes pksheen { 0% { transform: translateX(-130%); } 55%, 100% { transform: translateX(130%); } }
+.pcard.r-Legendaria .pback::before { inset: -60%; border-radius: 0; filter: none; opacity: .55; z-index: 0; background: conic-gradient(#ff4d6d, #ffd45e, #5be0a2, #4f9dff, #c77dff, #ff4d6d); animation: pkspin 4s linear infinite; will-change: transform; }
+@keyframes pkspin { to { transform: rotate(360deg); } }
+.pcard .pback span { position: relative; z-index: 1; }
+.pcard.flipped.r-Legendaria .pfront { animation: none; filter: drop-shadow(0 0 20px rgba(255,200,60,.85)); }
+.pcard .pin { will-change: transform; }
+.pnew, .pdup { -webkit-backdrop-filter: none; backdrop-filter: none; }
+.bpk.best-Legendaria.rip .bpk-glow { -webkit-mask: radial-gradient(circle, #000 0, rgba(0,0,0,.55) 35%, transparent 68%); mask: radial-gradient(circle, #000 0, rgba(0,0,0,.55) 35%, transparent 68%); }
+.pcard.r-Legendaria .pback::before { opacity: .4; }

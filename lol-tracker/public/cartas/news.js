@@ -1,6 +1,8 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-02', tag: 'Corrección', title: 'Apertura de sobres más fluida',
+      items: ['Optimizada la animación de apertura de sobres: ahora va mucho más suave, sobre todo en móviles y equipos modestos. El estilo es el mismo, pero el fondo ya no desenfoca la pantalla en vivo.'] },
     { date: '2026-11-02', tag: 'Cambio', title: 'Nuevos efectos al abrir sobres',
       items: ['La apertura de sobres estrena un estilo más moderno y translúcido: fondo de cristal desenfocado teñido con el color de la mejor carta, sobre que levita, destello de luz, ondas y motas brillantes al rasgarse.',
         'El reverso de las cartas pasa a ser de cristal esmerilado con un brillo que lo recorre, y su borde sigue indicando la rareza. Las etiquetas «Nueva» y «Repetida» también son de cristal.'] },

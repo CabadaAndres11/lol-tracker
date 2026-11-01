@@ -1168,3 +1168,66 @@ img.timg[src$="comebacker.png"] { filter: drop-shadow(0 0 1.5px #fff) drop-shado
 .qart { position: relative; overflow: hidden; }
 .qart::after { content: ''; position: absolute; inset: -10% -40%; background: linear-gradient(105deg, transparent 36%, rgba(255,240,200,.16) 44%, rgba(255,250,235,.5) 50%, rgba(255,240,200,.16) 56%, transparent 64%); mix-blend-mode: screen; transform: translateX(-100%); animation: qshine 3.2s ease-in-out .6s infinite; pointer-events: none; }
 @keyframes qshine { 0% { transform: translateX(-100%); } 60%, 100% { transform: translateX(100%); } }
+
+/* ---------- Menú inicial estilo cliente de Riot ---------- */
+.navlogo { display: inline-flex; align-items: center; gap: .55rem; padding: 0 .4rem; font-family: var(--serif); font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); }
+.navlogo img { width: 2rem; height: 2rem; object-fit: contain; filter: drop-shadow(0 2px 6px rgba(0,0,0,.6)); }
+.avt { display: inline-grid; place-items: center; flex: none; width: 2.4rem; height: 2.4rem; border-radius: 50%; border: 2px solid rgba(200,170,110,.7); background: #0b1b2e center 12% / cover no-repeat; color: var(--mut); font-size: 1.2rem; overflow: hidden; }
+.avt .ic { width: 1em; height: 1em; margin: 0; }
+.avt.has { border-color: var(--gold); box-shadow: 0 0 10px rgba(240,201,106,.35); }
+.avt.sm { width: 1.9rem; height: 1.9rem; font-size: 1rem; }
+.avt.xl { width: 7.5rem; height: 7.5rem; font-size: 3rem; border-width: 3px; }
+.navb.avtb { padding: .2rem .35rem; }
+.navb.avtb:hover .avt, .navb.avtb.on .avt { border-color: var(--gold); box-shadow: 0 0 12px rgba(240,201,106,.5); }
+.acctmenu .am-prof { background: rgba(255,255,255,.06); color: var(--ink); }
+
+.rhome { display: flex; flex-direction: column; align-items: center; gap: 1.2rem; padding-top: .6rem; }
+.rplay { display: flex; justify-content: center; width: 100%; }
+.rplaybtn { position: relative; display: inline-flex; align-items: center; gap: 0; border: 0; padding: 0; background: transparent; cursor: pointer; font: inherit; transition: transform .2s, filter .2s; }
+.rplaybtn:hover { transform: translateY(-2px) scale(1.03); filter: brightness(1.15); }
+.rpl { display: grid; place-items: center; width: 4.6rem; height: 4.6rem; border-radius: 50%; border: 3px solid var(--gold); background: radial-gradient(circle, #123049, #07121f); font-size: 2.2rem; position: relative; z-index: 1; box-shadow: 0 0 22px rgba(240,201,106,.45); }
+.rpl .ic { width: 1em; height: 1em; margin: 0; }
+.rpt { margin-left: -2rem; padding: 0 4rem 0 3.2rem; height: 3.8rem; display: grid; place-items: center; min-width: 16rem; clip-path: polygon(0 0, calc(100% - 26px) 0, 100% 50%, calc(100% - 26px) 100%, 0 100%); background: linear-gradient(180deg, #1f7a9d, #0d4260); border-top: 3px solid #3ec1e0; border-bottom: 3px solid #3ec1e0; color: #eaf8ff; font-family: var(--serif); font-weight: 800; font-size: 1.7rem; letter-spacing: .3em; text-transform: uppercase; text-shadow: 0 2px 8px rgba(0,0,0,.6); position: relative; overflow: hidden; }
+.rpt::after { content: ''; position: absolute; inset: 0; background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,.35) 50%, transparent 60%); transform: translateX(-120%); animation: qshine 4s ease-in-out 1s infinite; }
+.ricons { display: flex; flex-wrap: wrap; justify-content: center; gap: .4rem; width: 100%; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: .5rem 0; }
+.ricon { display: flex; flex-direction: column; align-items: center; gap: .15rem; min-width: 7.5rem; padding: .6rem .9rem; background: transparent; border: 0; border-radius: 4px; color: var(--mut); font: inherit; cursor: pointer; transition: background .2s, color .2s, transform .2s; }
+.ricon .rii { font-size: 2.1rem; line-height: 1; filter: grayscale(.4) brightness(.9); transition: filter .2s, transform .2s; }
+.ricon .rii .ic { width: 1em; height: 1em; margin: 0; }
+.ricon b { font-family: var(--serif); letter-spacing: .12em; text-transform: uppercase; font-size: .85rem; color: var(--ink); }
+.ricon .mut { font-size: .72rem; }
+.ricon:hover { background: rgba(240,201,106,.08); } .ricon:hover .rii { filter: none; transform: translateY(-2px) scale(1.08); } .ricon:hover b { color: var(--gold); }
+
+.rnews { display: grid; grid-template-columns: 280px 1fr; width: 100%; min-height: 360px; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: #07101c; }
+.rnl { list-style: none; margin: 0; padding: .4rem 0; border-right: 1px solid var(--line); background: rgba(0,0,0,.25); display: flex; flex-direction: column; }
+.rnl button { display: flex; flex-direction: column; align-items: flex-start; gap: .2rem; width: 100%; text-align: left; padding: .75rem 1rem .75rem 1.2rem; background: transparent; border: 0; border-left: 3px solid transparent; color: var(--mut); font: inherit; cursor: pointer; transition: background .2s, color .2s, border-color .2s; }
+.rnl button b { font-family: var(--serif); letter-spacing: .06em; text-transform: uppercase; font-size: .88rem; line-height: 1.25; }
+.rnl button i { font-style: normal; font-size: .72rem; opacity: .7; }
+.rnl button:hover { background: rgba(255,255,255,.04); color: var(--ink); }
+.rnl button.on { color: var(--gold); border-left-color: var(--gold); background: linear-gradient(90deg, rgba(240,201,106,.14), transparent); }
+.rnmain { position: relative; display: flex; align-items: flex-end; min-height: 360px; isolation: isolate; }
+.rnmain::before { content: ''; position: absolute; inset: 0; z-index: -1; background: var(--rart) 78% 18% / cover no-repeat; animation: qartin .5s ease-out both; }
+.rnmain::after { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, rgba(5,10,18,.96) 5%, rgba(5,10,18,.72) 45%, rgba(5,10,18,.1) 85%), linear-gradient(0deg, rgba(5,10,18,.85), transparent 50%); }
+.rnmain.nologo { align-items: center; justify-content: flex-start; } .rnmain.nologo .rnbody { max-width: 470px; }
+.rnlogo { position: absolute; right: 4%; top: 50%; transform: translateY(-50%); width: 230px; max-width: 30%; opacity: .9; z-index: -1; filter: drop-shadow(0 10px 30px rgba(0,0,0,.6)); }
+.rnbody { padding: 1.4rem 1.6rem; max-width: 560px; display: flex; flex-direction: column; align-items: flex-start; gap: .55rem; }
+.rnbody h2 { margin: 0; font-size: 1.7rem; letter-spacing: .05em; text-transform: uppercase; }
+.rnbody ul { margin: 0; padding-left: 1.1rem; display: flex; flex-direction: column; gap: .4rem; font-size: .9rem; line-height: 1.5; color: rgba(236,228,208,.9); }
+.rnthumbs { display: flex; gap: .4rem; margin-top: .3rem; }
+.rnthumbs span { width: 2.6rem; height: 2.6rem; border-radius: 50%; border: 2px solid var(--gold); background: center 12% / cover no-repeat; box-shadow: 0 0 10px rgba(0,0,0,.6); }
+
+.profhead { display: flex; align-items: center; gap: 1.4rem; }
+.profhead h2 { margin: 0 0 .2rem; font-size: 1.6rem; }
+.avgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: .7rem; margin-top: .8rem; }
+.avopt { display: flex; flex-direction: column; align-items: center; gap: .4rem; padding: .7rem .4rem; background: rgba(255,255,255,.03); border: 1px solid var(--line); border-radius: 6px; color: var(--mut); font: inherit; cursor: pointer; transition: transform .2s, border-color .2s, background .2s; }
+.avopt .avt { width: 4.4rem; height: 4.4rem; }
+.avopt b { font-size: .74rem; font-weight: 600; text-align: center; line-height: 1.2; }
+.avopt:hover { transform: translateY(-3px); border-color: var(--gold); color: var(--ink); }
+.avopt.on { border-color: var(--gold); background: rgba(240,201,106,.1); color: var(--gold); box-shadow: 0 0 14px rgba(240,201,106,.3); }
+@media (max-width: 800px) {
+  .rnews { grid-template-columns: 1fr; } .rnl { flex-direction: row; overflow-x: auto; border-right: 0; border-bottom: 1px solid var(--line); }
+  .rnl button { min-width: 11rem; border-left: 0; border-bottom: 3px solid transparent; } .rnl button.on { border-bottom-color: var(--gold); }
+  .rpt { min-width: 11rem; font-size: 1.3rem; padding: 0 3rem 0 2.6rem; } .ricon { min-width: 5.6rem; padding: .5rem; } .ricon .mut { display: none; }
+  .profhead { flex-direction: column; text-align: center; } .navlogo { display: none; }
+  .rnmain.nologo { flex-direction: column; align-items: stretch; } .rnlogo { position: static; transform: none; width: 170px; max-width: 60%; margin: 0 auto 1.2rem; order: 2; }
+}
+@media (prefers-reduced-motion: reduce) { .rpt::after, .rnmain::before { animation: none !important; } }

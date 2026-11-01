@@ -190,9 +190,15 @@
 
   // ---------- Navegación ----------
   var NAV = [['home', 'casa', 'Inicio'], ['play', 'espadas', 'Jugar'], ['deck', 'cartas', 'Mazo'], ['packs', 'tienda', 'Tienda'], ['themes', 'brillo', 'Sinergias'], ['rules', 'libro', 'Normas']];
+  function avatarHtml(cls) {
+    var id = ui.acct && ui.acct.avatar;
+    return '<span class="avt ' + (cls || '') + (id && ARTS[id] ? ' has' : '') + '"' + (id && ARTS[id] ? ' style="background-image:url(/cartas/art/' + id + '.webp)"' : '') + '>' + (id && ARTS[id] ? '' : ic('usuario')) + '</span>';
+  }
   function navHtml(cur) {
-    return '<nav class="nav">' + NAV.map(function (n) { return '<button class="navb' + (n[0] === cur ? ' on' : '') + '" data-act="nav" data-to="' + n[0] + '">' + ic(n[1]) + ' ' + n[2] + '</button>'; }).join('') +
-      '<span class="navsp"></span>' + (ui.acct ? '<button class="navb coinpill" data-act="nav" data-to="packs" title="Tus monedas">' + ic('moneda') + ' ' + ui.acct.coins + '</button><span class="acctw"><button class="navb who" data-act="acctmenu" title="Tu cuenta">' + ic('usuario') + ' ' + esc(ui.acct.name) + ' ▾</button><div class="acctmenu"><div class="am-name">Sesión de <b>' + esc(ui.acct.name) + '</b></div><button data-act="logout">' + ic('puerta') + ' Cerrar sesión</button></div></span>' : '') + '<a class="navb" href="/">← Hub</a></nav>';
+    var home = cur === 'home';
+    var acct = ui.acct ? '<button class="navb coinpill" data-act="nav" data-to="packs" title="Tus monedas">' + ic('moneda') + ' ' + ui.acct.coins + '</button><button class="navb avtb' + (cur === 'profile' ? ' on' : '') + '" data-act="nav" data-to="profile" title="Tu perfil">' + avatarHtml('sm') + '</button><span class="acctw"><button class="navb who" data-act="acctmenu" title="Tu cuenta">' + esc(ui.acct.name) + ' ▾</button><div class="acctmenu"><div class="am-name">Sesión de <b>' + esc(ui.acct.name) + '</b></div><button class="am-prof" data-act="nav" data-to="profile">' + ic('usuario') + ' Mi perfil</button><button data-act="logout">' + ic('puerta') + ' Cerrar sesión</button></div></span>' : '';
+    return '<nav class="nav' + (home ? ' navhome' : '') + '">' + (home ? '<span class="navlogo"><img src="/cartas/logo-icon.png" alt="">TCG Arena</span>' : NAV.map(function (n) { return '<button class="navb' + (n[0] === cur ? ' on' : '') + '" data-act="nav" data-to="' + n[0] + '">' + ic(n[1]) + ' ' + n[2] + '</button>'; }).join('')) +
+      '<span class="navsp"></span>' + acct + '<a class="navb" href="/">← Hub</a></nav>';
   }
   function oddsHtml(s) {
     var o = E.shopOdds(s, 0), keys = Object.keys(o);
@@ -232,21 +238,56 @@
       return '<div class="newsi"><div class="newsh"><span class="ntag nt-' + esc(n.tag) + '">' + esc(n.tag) + '</span><b>' + esc(n.title) + '</b><span class="mut">' + esc(n.date.split('-').reverse().join('/')) + '</span></div><ul>' + n.items.map(function (i) { return '<li>' + (i.indexOf('{{intro}}') >= 0 ? esc(i.replace('{{intro}}', '')) + '<a href="#" class="newslink" data-act="introplay">▶ Ver la animación</a>' : esc(i)) + '</li>'; }).join('') + '</ul></div>';
     }).join('') + '</div><button class="btn sec sm newstog" data-act="newstog">' + (ui.newsOpen ? 'Ocultar ▴' : 'Ver todas las noticias ▾') + '</button></div>';
   }
+  // Ilustraciones de una noticia: las indicadas (art) o las cartas que se nombran en el texto; si no hay, el logo.
+  function newsArts(n) {
+    if (n.art && n.art.length) return n.art.slice(0, 3);
+    if (n._arts) return n._arts;
+    var txt = (n.title + ' ' + n.items.join(' ')).toLowerCase(), found = [];
+    D.cards.filter(function (c) { return ARTS[c.id]; }).sort(function (a, b) { return b.name.length - a.name.length; }).forEach(function (c) {
+      var k = txt.indexOf(c.name.toLowerCase());
+      if (k >= 0) { found.push({ k: k, id: c.id }); txt = txt.split(c.name.toLowerCase()).join(new Array(c.name.length + 1).join(' ')); }
+    });
+    return (n._arts = found.sort(function (a, b) { return a.k - b.k; }).slice(0, 3).map(function (f) { return f.id; }));
+  }
+  function newsSummary(n) {
+    return n.items.slice(0, 2).map(function (t) { t = t.replace('{{intro}}', '').trim(); return t.length > 230 ? t.slice(0, 227).replace(/\s+\S*$/, '') + '…' : t; });
+  }
+  function homeNews() {
+    var N = (window.CARTAS_NEWS || []).slice(0, 5);
+    if (!N.length) return '';
+    var sel = Math.min(ui.newsSel || 0, N.length - 1), n = N[sel], arts = newsArts(n);
+    return '<div class="rnews"><ul class="rnl">' + N.map(function (x, k) {
+      return '<li><button class="' + (k === sel ? 'on' : '') + '" data-act="newssel" data-i="' + k + '"><span class="ntag nt-' + esc(x.tag) + '">' + esc(x.tag) + '</span><b>' + esc(x.title) + '</b><i>' + esc(x.date.split('-').reverse().join('/')) + '</i></button></li>';
+    }).join('') + '</ul><div class="rnmain' + (arts.length ? '' : ' nologo') + '" style="' + (arts.length ? '--rart:url(/cartas/art/' + arts[0] + '.webp)' : '') + '">' +
+      (arts.length ? '' : '<img class="rnlogo" src="/cartas/logo.webp" alt="">') +
+      '<div class="rnbody"><span class="ntag nt-' + esc(n.tag) + '">' + esc(n.tag) + '</span><h2>' + esc(n.title) + '</h2><ul>' + newsSummary(n).map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>' +
+      '<button class="btn sec sm" data-act="newsmore">Leer la noticia completa ▾</button>' +
+      (arts.length > 1 ? '<div class="rnthumbs">' + arts.map(function (id) { return '<span style="background-image:url(/cartas/art/' + id + '.webp)" title="' + esc(CARD[id].name) + '"></span>'; }).join('') + '</div>' : '') + '</div></div></div>';
+  }
   function renderHome() {
     var n = Object.keys(D.themes).length;
-    var h = head('home') + '<div class="hero">' + heroCards() + '<img src="/cartas/logo.webp" alt="" class="hero-logo"><h1>TCG Arena</h1><p class="mut">Mazos con sinergias combinables, combates por rondas y memes de la pandilla.</p><button class="btn big cta" data-act="nav" data-to="play">' + ic('espadas') + ' ¡Jugar ahora!</button></div>';
-    h += '<div class="menu">' + [
-      ['play', ic('espadas'), 'Jugar', 'Elige modo: contra la IA, jugador contra jugador o versus de 4.'],
-      ['deck', ic('cartas'), 'Mazo', 'Elige tus cartas (' + deckSize() + '/' + CFG.deckBudget + ') y guarda hasta 3 mazos.'],
-      ['packs', ic('tienda'), 'Tienda', 'Gasta tus monedas (' + (ui.acct ? ui.acct.coins : 0) + ' ' + ic('moneda') + ') en sobres y skins.'],
-      ['themes', ic('brillo'), 'Sinergias', n + ' sinergias con sus niveles y cartas.'],
-      ['rules', ic('libro'), 'Normas', 'Cómo funcionan las rondas, la tienda y el combate.'],
-    ].map(function (m) { return '<button class="menu-i m-' + m[0] + '" data-act="nav" data-to="' + m[0] + '"><span class="mi">' + m[1] + '</span><b>' + m[2] + '</b><span class="mut">' + m[3] + '</span></button>'; }).join('') + '</div>';
+    var h = head('home') + '<div class="rhome"><div class="rplay"><button class="rplaybtn" data-act="nav" data-to="play"><span class="rpl">' + ic('espadas') + '</span><span class="rpt">Jugar</span></button></div>' +
+      '<div class="ricons">' + [
+        ['deck', ic('cartas'), 'Mazo', deckSize() + '/' + CFG.deckBudget],
+        ['packs', ic('tienda'), 'Tienda', (ui.acct ? ui.acct.coins : 0) + ' monedas'],
+        ['themes', ic('brillo'), 'Sinergias', n + ' sinergias'],
+        ['rules', ic('libro'), 'Normas', 'Cómo se juega'],
+        ['profile', ic('usuario'), 'Perfil', 'Foto y cuenta'],
+      ].map(function (m) { return '<button class="ricon" data-act="nav" data-to="' + m[0] + '"><span class="rii">' + m[1] + '</span><b>' + m[2] + '</b><span class="mut">' + m[3] + '</span></button>'; }).join('') + '</div>' + homeNews() + '</div>';
     h += newsHtml();
     h += ladderHtml();
     h += '<p class="mut" style="text-align:center">' + D.cards.length + ' tropas · ' + D.actions.length + ' acciones</p></div>';
     app.innerHTML = h;
     maybeIntro();
+  }
+  function renderProfile() {
+    var a = ui.acct, cur = a.avatar || '', own = D.cards.filter(function (c) { return ARTS[c.id] && ui.ownedSet && ui.ownedSet[c.id]; }).sort(function (x, y) { return RARS.indexOf(y.rarity) - RARS.indexOf(x.rarity) || x.name.localeCompare(y.name); });
+    app.innerHTML = head('profile', '' + ic('usuario') + ' Mi perfil') + (ui.msg ? '<p class="err">' + esc(ui.msg) + '</p>' : '') +
+      '<div class="panel profhead">' + avatarHtml('xl') + '<div><h2>' + esc(a.name) + '</h2><p class="mut">' + a.pts + ' puntos de clasificación · ' + a.coins + ' ' + ic('moneda') + ' · ' + a.owned.length + ' cartas desbloqueadas</p><div class="btnrow"><button class="btn sec" data-act="logout">' + ic('puerta') + ' Cerrar sesión</button></div></div></div>' +
+      '<div class="panel"><h2>Foto de perfil</h2><p class="mut">Elige la ilustración de una de tus cartas desbloqueadas. Cuantas más cartas consigas, más opciones tendrás.</p>' +
+      '<div class="avgrid"><button class="avopt none' + (cur ? '' : ' on') + '" data-act="setavatar" data-card="" title="Sin foto"><span class="avt">' + ic('usuario') + '</span><b>Ninguna</b></button>' + own.map(function (c) {
+        return '<button class="avopt' + (cur === c.id ? ' on' : '') + '" data-act="setavatar" data-card="' + c.id + '" title="' + esc(c.name) + '"><span class="avt has" style="background-image:url(/cartas/art/' + c.id + '.webp)"></span><b>' + esc(c.name) + '</b></button>';
+      }).join('') + '</div></div></div>';
   }
 
   function renderBoot() { app.innerHTML = '<div class="wrap"><p class="mut" style="text-align:center;margin-top:30vh">Cargando…</p></div>'; }
@@ -912,9 +953,9 @@
   window.addEventListener('resize', function () { var o = document.querySelector('#board svg.arrows'); if (o) o.remove(); drawArrows(); });
 
   // ---------- Navegación por URL (#/mazo, #/tienda…): al recargar se vuelve a la misma sección ----------
-  var ROUTES = { home: 'inicio', modes: 'jugar', pvp: 'jugar', game: 'jugar', deck: 'mazo', packs: 'tienda', themes: 'sinergias', rules: 'normas' };
-  var ROUTE_SCREEN = { inicio: 'home', jugar: 'modes', mazo: 'deck', tienda: 'packs', sinergias: 'themes', normas: 'rules' };
-  var ROUTE_TITLE = { home: 'Inicio', modes: 'Jugar', pvp: 'Jugar', game: 'Partida', deck: 'Mazo', packs: 'Tienda', themes: 'Sinergias', rules: 'Normas' };
+  var ROUTES = { home: 'inicio', modes: 'jugar', pvp: 'jugar', game: 'jugar', deck: 'mazo', packs: 'tienda', themes: 'sinergias', rules: 'normas', profile: 'perfil' };
+  var ROUTE_SCREEN = { inicio: 'home', jugar: 'modes', mazo: 'deck', tienda: 'packs', sinergias: 'themes', normas: 'rules', perfil: 'profile' };
+  var ROUTE_TITLE = { home: 'Inicio', modes: 'Jugar', pvp: 'Jugar', game: 'Partida', deck: 'Mazo', packs: 'Tienda', themes: 'Sinergias', rules: 'Normas', profile: 'Perfil' };
   function hashScreen() { var m = /^#\/([a-z]+)/.exec(location.hash || ''); return m && ROUTE_SCREEN[m[1]] || null; }
   function landing() { var sc = hashScreen() || 'home'; if (sc === 'modes' && deckError()) sc = 'deck'; return sc; }
   function syncHash() {
@@ -937,7 +978,7 @@
   function render() {
     document.body.classList.remove('shopbg');
     if (PV.wait && ui.screen !== 'pvp') pvpCancelWait();
-    var f = { home: renderHome, deck: renderDeck, rules: renderRules, themes: renderThemes, modes: renderModes, pvp: renderPvp, login: renderLogin, starter: renderStarter, packs: renderPacks, boot: renderBoot }[ui.screen];
+    var f = { home: renderHome, deck: renderDeck, rules: renderRules, themes: renderThemes, modes: renderModes, pvp: renderPvp, login: renderLogin, starter: renderStarter, packs: renderPacks, profile: renderProfile, boot: renderBoot }[ui.screen];
     if (f) f(); else renderGame();
     syncHash();
   }
@@ -1062,6 +1103,9 @@
     if (act === 'flipcard') { var fi = +el.dataset.i; if (ui.pack && ui.pack.cards) { ui.pack.rev[fi] = true; el.classList.add('flipped'); packHint(); } return; }
     if (act === 'flipall') { if (ui.pack && ui.pack.cards) { ui.pack.rev = ui.pack.rev.map(function () { return true; }); app.querySelectorAll('.pcard').forEach(function (n, k) { setTimeout(function () { n.classList.add('flipped'); }, k * 140); }); packHint(); } return; }
     if (act === 'packbg') { if (ui.pack && ui.pack.cards && ui.pack.stage === 'reveal' && ui.pack.rev.every(Boolean)) { ui.pack = null; render(); } return; }
+    if (act === 'newssel') { ui.newsSel = +el.dataset.i; return renderHome(); }
+    if (act === 'newsmore') { ui.newsOpen = true; renderHome(); var nb = document.querySelector('.newsbox'); if (nb) nb.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+    if (act === 'setavatar') { return api('avatarSet', { card: el.dataset.card }).then(function (r) { if (r.ok) { setAcct(r.data.user); ui.msg = ''; } else ui.msg = (r.data && r.data.error) || 'No se pudo cambiar la foto.'; render(); }); }
     if (act === 'nav') {
       clearTimeout(timer); ui.playing = false;
       if (el.dataset.to === 'play') { if (deckError()) { ui.screen = 'deck'; return render(); } saveDeck(); ui.screen = 'modes'; window.scrollTo(0, 0); return render(); }

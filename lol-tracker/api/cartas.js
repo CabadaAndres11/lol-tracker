@@ -56,7 +56,7 @@ function drawCard(minRarity) {
 }
 function publicUser(u) {
   return {
-    name: u.name, pts: u.pts || 0, coins: u.coins, owned: u.owned, dups: u.dups || {}, skins: u.skins || [], skinSel: u.skinSel || {}, decks: u.decks || null,
+    name: u.name, pts: u.pts || 0, coins: u.coins, owned: u.owned, dups: u.dups || {}, skins: u.skins || [], skinSel: u.skinSel || {}, decks: u.decks || null, avatar: u.avatar || '',
     dailyAvailable: u.lastDaily !== today(),
     gamesToday: u.rewardDay === today() ? u.rewardCount : 0,
     maxGamesToday: MAX_GAME_REWARDS_PER_DAY,
@@ -616,6 +616,13 @@ module.exports = async function handler(req, res) {
       };
       await saveUser(cfg, u);
       res.status(200).json({ ok: true }); return;
+    }
+    if (act === 'avatarSet') { // foto de perfil: la ilustración de una carta que tengas desbloqueada (o vacía)
+      const id = String(body.card || '');
+      if (id && !(u.owned.indexOf(id) >= 0 && ALL.some((c) => c.id === id && c.type === 'tropa'))) { res.status(400).json({ error: 'Esa carta no está desbloqueada.' }); return; }
+      u.avatar = id;
+      await saveUser(cfg, u);
+      res.status(200).json({ user: publicUser(u) }); return;
     }
     if (act === 'skinBuy' || act === 'skinEquip') {
       const sk = SKIN_BY_ID[String(body.id || body.skin || '')];

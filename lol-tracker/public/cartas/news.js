@@ -1,6 +1,8 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-01', tag: 'Novedad', title: 'Nueva skin: PotAnGo · Real PotAnGo',
+      items: ['Ya está en la tienda la skin «Real PotAnGo» para PotAnGo (120 monedas). Necesitas tener la carta para comprarla.'] },
     { date: '2026-11-01', tag: 'Cambio', title: 'Novia pasa a llamarse Correa: hueco 5 y las 4 novias',
       items: ['La sinergia Novia ahora se llama Correa y tiene 3 niveles (2 / 3 / 4 cartas distintas). Ya no tira el dado de «te apoya / te regaña» cada ronda.',
         'Al llegar al nivel 1 se desbloquea un hueco 5 en la mesa, reservado a las novias, y recibes a las 4 en una reserva. Solo una puede estar en el hueco 5 a la vez y puedes cambiarla en cualquier momento de la preparación. Si pierdes la sinergia, la novia vuelve a la reserva; si cae en combate, vuelve a la reserva con su vida. Las novias no van en el mazo ni ocupan espacio en él.',

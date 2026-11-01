@@ -114,12 +114,16 @@ var D={
    "themes": [
     "KOI"
    ],
-   "cost": 3,
-   "atk": 4,
-   "hp": 11,
-   "rarity": "Rara",
+   "cost": 5,
+   "atk": 6,
+   "hp": 19,
+   "rarity": "Legendaria",
    "type": "tropa",
-   "size": 2
+   "size": 2,
+   "pas": {
+    "n": "Heredero",
+    "t": "Si está vivo en la mesa, él es siempre el objetivo de la herencia de ataque de las KOI que caen."
+   }
   },
   {
    "id": "aitorlg-friki",
@@ -252,12 +256,12 @@ var D={
     "Comebacker",
     "KOI"
    ],
-   "cost": 3,
-   "atk": 4,
-   "hp": 11,
-   "rarity": "Rara",
+   "cost": 2,
+   "atk": 3,
+   "hp": 7,
+   "rarity": "Común",
    "type": "tropa",
-   "size": 2
+   "size": 1
   },
   {
    "id": "javihi-prime",
@@ -339,12 +343,12 @@ var D={
     "Pokémon",
     "KOI"
    ],
-   "cost": 3,
+   "cost": 2,
    "atk": 4,
-   "hp": 11,
-   "rarity": "Rara",
+   "hp": 6,
+   "rarity": "Común",
    "type": "tropa",
-   "size": 2
+   "size": 1
   },
   {
    "id": "petea-koisito",
@@ -564,10 +568,10 @@ var D={
     "KOI",
     "Comebacker"
    ],
-   "cost": 3,
-   "atk": 4,
-   "hp": 11,
-   "rarity": "Rara",
+   "cost": 4,
+   "atk": 5,
+   "hp": 15,
+   "rarity": "Épica",
    "type": "tropa",
    "size": 2
   }
@@ -578,16 +582,16 @@ var D={
    "name": "Eriko",
    "person": "Eriko",
    "themes": [],
-   "cost": 0,
-   "atk": 2,
-   "hp": 12,
-   "rarity": "Legendaria",
+   "cost": 4,
+   "atk": 5,
+   "hp": 15,
+   "rarity": "Épica",
    "type": "tropa",
-   "size": 0,
+   "size": 2,
    "novia": true,
    "pas": {
-    "n": "Mimos",
-    "t": "Al empezar cada combate da +2/+2 permanente a todas tus cartas en mesa (nivel 2: +3/+3, nivel 3: +4/+4; tope 10/15/20 por carta)."
+    "n": "Cabezón",
+    "t": "Recibe 2 de daño menos por cada golpe (mínimo 0)."
    }
   },
   {

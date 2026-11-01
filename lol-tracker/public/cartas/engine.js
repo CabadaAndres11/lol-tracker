@@ -724,7 +724,7 @@
 
   // Efectos al caer una tropa (KOI, Dúo Inseparable). Devuelve texto de registro y animación.
   // ---------- Pasivas de legendarias ----------
-  var PAS = { 'javihi-duo': 'duo', 'sech-duo': 'duo', 'javihi-prime': 'remate', 'sech': 'embargo', 'potango': 'aliento', 'mertens-prime': 'pereza', 'chipy-lloron': 'llanto', 'lihone-viego': 'racha', 'aitorlg-renata': 'prorroga', 'haikyuu-lihone': 'saque', 'lihone': 'captura', 'chipy-correa': 'consuelo' };
+  var PAS = { 'javihi-duo': 'duo', 'sech-duo': 'duo', 'javihi-prime': 'remate', 'sech': 'embargo', 'potango': 'aliento', 'mertens-prime': 'pereza', 'chipy-lloron': 'llanto', 'lihone-viego': 'racha', 'aitorlg-renata': 'prorroga', 'haikyuu-lihone': 'saque', 'lihone': 'captura', 'chipy-correa': 'consuelo', 'pampert-koisito': 'cabezon', 'aitorlg-koisito': 'heredero' };
   function pas(i) { return PAS[i.id] || ''; }
   function duoLinked(s, i) { var o = i.id === 'javihi-duo' ? 'sech-duo' : 'javihi-duo'; return mesaTroops(s.p[i.owner]).some(function (x) { return x.id === o; }); }
   // Prórroga (AitoRLG Renata): la tropa a su derecha no cae a 0 de vida hasta que haya atacado
@@ -758,7 +758,7 @@
           // Herencia: parte del ataque de la KOI caída pasa, de forma permanente, a una KOI viva al azar
           var heirs = mesaTroops(s.p[d.owner]).filter(function (i) { return has(i, 'KOI') && i !== d; });
           if (heirs.length && atk(d) > 0) {
-            var hm = Math.max(1, Math.floor(atk(d) * FX.koi.heir[tt2['KOI'] - 1])), hv = heirs[Math.floor(s.rng() * heirs.length)];
+            var hm = Math.max(1, Math.floor(atk(d) * FX.koi.heir[tt2['KOI'] - 1])), hv = heirs.filter(function (i) { return pas(i) === 'heredero'; })[0] || heirs[Math.floor(s.rng() * heirs.length)];
             grow(hv, 'atk', hm);
             if (s.mode === 'revive') d.perm.atk -= hm; // en Resurrección la KOI renace: el ataque se traspasa, no se copia
             line += ' Herencia: ' + card(hv).name + ' recibe +' + hm + ' de ataque permanente.';
@@ -786,6 +786,8 @@
     frame(s, 'Empieza el combate. ' + pv(s, s.first, 'Atacas primero.', 'Ataca primero el rival.'), null);
     novSync(s, 0); novSync(s, 1);
     startEffects(s);
+    // Cabezón (Pampert Koisito): recibe 2 de daño menos por golpe
+    [0, 1].forEach(function (p) { mesaTroops(s.p[p]).forEach(function (i) { if (pas(i) === 'cabezon') i.tmp.red += 2; }); });
     var seq = order(s);
     // Madrugón: las Pelayos de quien lo jugó atacan las primeras
     var firstPel = [];

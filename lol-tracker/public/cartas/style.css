@@ -1098,3 +1098,4 @@ img.timg[src$="comebacker.png"] { filter: drop-shadow(0 0 1.5px #fff) drop-shado
 .pineye:hover { opacity: 1; color: var(--ink); }
 .pineye.on { opacity: 1; color: var(--gold, #c8aa6e); }
 .pineye .ic { margin: 0; width: 1em; height: 1em; }
+.lg-logo { width: 190px; max-width: 60%; margin: 0 auto; filter: drop-shadow(0 8px 20px rgba(0,0,0,.6)); }

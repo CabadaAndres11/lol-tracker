@@ -234,7 +234,7 @@
   }
   function renderHome() {
     var n = Object.keys(D.themes).length;
-    var h = head('home') + '<div class="hero">' + heroCards() + '<img src="/cartas/logo.svg" alt="" class="hero-logo"><h1>Juego de Cartas</h1><p class="mut">Mazos con sinergias combinables, combates por rondas y memes de la pandilla.</p><button class="btn big cta" data-act="nav" data-to="play">' + ic('espadas') + ' ¡Jugar ahora!</button></div>';
+    var h = head('home') + '<div class="hero">' + heroCards() + '<img src="/cartas/logo.webp" alt="" class="hero-logo"><h1>TCG Arena</h1><p class="mut">Mazos con sinergias combinables, combates por rondas y memes de la pandilla.</p><button class="btn big cta" data-act="nav" data-to="play">' + ic('espadas') + ' ¡Jugar ahora!</button></div>';
     h += '<div class="menu">' + [
       ['play', ic('espadas'), 'Jugar', 'Elige modo: contra la IA, jugador contra jugador o versus de 4.'],
       ['deck', ic('cartas'), 'Mazo', 'Elige tus cartas (' + deckSize() + '/' + CFG.deckBudget + ') y guarda hasta 3 mazos.'],
@@ -253,7 +253,7 @@
   function renderLogin() {
     var reg = ui.lgTab === 'reg';
     var pt = ui.showPin ? 'text' : 'password', eye = '<button type="button" class="pineye' + (ui.showPin ? ' on' : '') + '" data-act="pinshow" title="' + (ui.showPin ? 'Ocultar PIN' : 'Ver PIN') + '" aria-label="Ver u ocultar el PIN">' + ic('ojo') + '</button>';
-    app.innerHTML = '<div class="wrap"><div class="loginbox panel"><div class="lg-ico">' + ic('cartas') + '</div><h1>Juego de Cartas</h1>' +
+    app.innerHTML = '<div class="wrap"><div class="loginbox panel"><img class="lg-logo" src="/cartas/logo.webp" alt="TCG Arena"><h1>TCG Arena</h1>' +
       '<div class="lgtabs"><button class="' + (reg ? '' : 'on') + '" data-act="lgtab" data-t="login">Iniciar sesión</button><button class="' + (reg ? 'on' : '') + '" data-act="lgtab" data-t="reg">Registrarse</button></div>' +
       '<p class="mut">' + (reg ? 'Elige un nombre y un PIN de 4 dígitos para guardar tus monedas y tu colección. Apunta el PIN: no se puede recuperar.' : 'Entra con tu nombre y tu PIN para recuperar tus monedas, tu colección y tus mazos.') + '</p>' +
       '<label>Nombre<input id="lg-name" maxlength="16" autocomplete="username" placeholder="Tu nombre" value="' + esc(ui.lgName || '') + '"></label>' +
@@ -907,8 +907,8 @@
   function hashScreen() { var m = /^#\/([a-z]+)/.exec(location.hash || ''); return m && ROUTE_SCREEN[m[1]] || null; }
   function landing() { var sc = hashScreen() || 'home'; if (sc === 'modes' && deckError()) sc = 'deck'; return sc; }
   function syncHash() {
-    if (!ui.acct || !ROUTES[ui.screen]) { if (!ui.acct) document.title = 'Juego de Cartas'; return; }
-    document.title = ROUTE_TITLE[ui.screen] + ' · Juego de Cartas';
+    if (!ui.acct || !ROUTES[ui.screen]) { if (!ui.acct) document.title = 'TCG Arena'; return; }
+    document.title = ROUTE_TITLE[ui.screen] + ' · TCG Arena';
     var want = '#/' + ROUTES[ui.screen];
     if (location.hash !== want) { try { history.pushState(null, '', want); } catch (e) { location.hash = want; } }
   }

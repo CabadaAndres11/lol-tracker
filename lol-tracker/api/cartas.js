@@ -593,7 +593,8 @@ module.exports = async function handler(req, res) {
       const rows = [];
       for (let k = 0; k + 1 < flat.length; k += 2) rows.push({ name: flat[k], pts: +flat[k + 1] || 0 });
       rows.sort((a, b) => b.pts - a.pts || a.name.localeCompare(b.name));
-      res.status(200).json({ top: rows.slice(0, 5), me: u.pts || 0 }); return;
+      const pos = rows.findIndex((r) => r.name.toLowerCase() === u.name.toLowerCase());
+      res.status(200).json({ top: rows.slice(0, 25), me: u.pts || 0, pos: pos >= 0 ? pos + 1 : 0, total: rows.length }); return;
     }
     if (act === 'me') { res.status(200).json({ user: publicUser(u) }); return; }
 
@@ -619,7 +620,8 @@ module.exports = async function handler(req, res) {
     }
     if (act === 'avatarSet') { // foto de perfil: la ilustración de una carta que tengas desbloqueada (o vacía)
       const id = String(body.card || '');
-      if (id && !(u.owned.indexOf(id) >= 0 && ALL.some((c) => c.id === id && c.type === 'tropa'))) { res.status(400).json({ error: 'Esa carta no está desbloqueada.' }); return; }
+      const okCard = u.owned.indexOf(id) >= 0 && ALL.some((c) => c.id === id && c.type === 'tropa'), okSkin = (u.skins || []).indexOf(id) >= 0 && !!SKIN_BY_ID[id];
+      if (id && !okCard && !okSkin) { res.status(400).json({ error: 'Esa ilustración no está desbloqueada.' }); return; }
       u.avatar = id;
       await saveUser(cfg, u);
       res.status(200).json({ user: publicUser(u) }); return;

@@ -189,10 +189,11 @@
   }
 
   // ---------- Navegación ----------
-  var NAV = [['home', 'casa', 'Inicio'], ['play', 'espadas', 'Jugar'], ['deck', 'cartas', 'Mazo'], ['packs', 'tienda', 'Tienda'], ['themes', 'brillo', 'Sinergias'], ['rules', 'libro', 'Normas']];
+  var NAV = [['home', 'casa', 'Inicio'], ['play', 'espadas', 'Jugar'], ['deck', 'cartas', 'Mazo'], ['packs', 'tienda', 'Tienda'], ['themes', 'brillo', 'Sinergias'], ['ladder', 'trofeo', 'Clasificación'], ['rules', 'libro', 'Normas']];
+  function artOk(id) { return !!id && (!!ARTS[id] || (window.CARTAS_SKINS || []).some(function (k) { return k.id === id; })); }
   function avatarHtml(cls) {
-    var id = ui.acct && ui.acct.avatar;
-    return '<span class="avt ' + (cls || '') + (id && ARTS[id] ? ' has' : '') + '"' + (id && ARTS[id] ? ' style="background-image:url(/cartas/art/' + id + '.webp)"' : '') + '>' + (id && ARTS[id] ? '' : ic('usuario')) + '</span>';
+    var id = ui.acct && ui.acct.avatar, ok = artOk(id);
+    return '<span class="avt ' + (cls || '') + (ok ? ' has' : '') + '"' + (ok ? ' style="background-image:url(/cartas/art/' + id + '.webp)"' : '') + '>' + (ok ? '' : ic('usuario')) + '</span>';
   }
   function navHtml(cur) {
     var home = cur === 'home';
@@ -218,18 +219,23 @@
     var pick = ['Rara', 'Legendaria', 'Épica'].map(function (r) { return D.cards.filter(function (c) { return r === 'Legendaria' ? c.id === 'chipy-lloron' : c.rarity === r && (r !== 'Rara' || c.person === 'AitoRLG'); })[0] || D.cards.filter(function (c) { return c.rarity === r; })[0]; }).filter(Boolean);
     return '<div class="fan">' + pick.map(function (c, k) { return '<div class="fc f' + k + '">' + cardHtml(c, { atk: c.atk, hp: c.hp, max: c.hp, cls: '' }) + '</div>'; }).join('') + '</div>';
   }
-  function ladderHtml() {
+  function ensureLadder() {
     if (!ui.ladder || Date.now() - (ui.ladderAt || 0) > 20000) {
       if (!ui.ladderBusy) {
         ui.ladderBusy = true;
-        api('ladder').then(function (r) { ui.ladderBusy = false; ui.ladderAt = Date.now(); if (r.ok) { ui.ladder = r.data; if (ui.screen === 'home') render(); } });
+        api('ladder').then(function (r) { ui.ladderBusy = false; ui.ladderAt = Date.now(); if (r.ok) { ui.ladder = r.data; if (ui.screen === 'ladder') render(); } });
       }
     }
-    var L = ui.ladder;
+  }
+  function renderLadder() {
+    ensureLadder();
+    var L = ui.ladder, MED = ['#fbbf24', '#cbd5e1', '#d97706'];
     var rows = L && L.top && L.top.length ? L.top.map(function (r, k) {
-      return '<li class="lrow' + (ui.acct && r.name === ui.acct.name ? ' me' : '') + '"><span class="lpos">' + (k + 1) + '</span><b>' + esc(r.name) + '</b><span class="lpts">' + r.pts + ' pts</span></li>';
-    }).join('') : '<li class="mut">' + (L ? 'Aún no hay partidas puntuadas. ¡Juega un 1 vs 1 o un Versus de 4!' : 'Cargando…') + '</li>';
-    return '<div class="panel ladderbox"><h2>' + ic('trofeo') + ' Clasificación</h2><ol class="ladder">' + rows + '</ol><p class="mut lme">' + (L ? 'Tus puntos: <b>' + L.me + '</b>' : '') + '</p></div>';
+      return '<li class="lrow' + (ui.acct && r.name.toLowerCase() === ui.acct.name.toLowerCase() ? ' me' : '') + '"><span class="lpos"' + (k < 3 ? ' style="color:' + MED[k] + '"' : '') + '>' + (k < 3 ? ic('trofeo') + ' ' : '') + (k + 1) + '</span><b>' + esc(r.name) + '</b><span class="lpts">' + r.pts + ' pts</span></li>';
+    }).join('') : '<li class="mut">' + (L ? 'Aún no hay partidas puntuadas. ¡Juega un 1 vs 1 o un Versus de 4 contra otros jugadores!' : 'Cargando…') + '</li>';
+    app.innerHTML = head('ladder', '' + ic('trofeo') + ' Clasificación') +
+      '<div class="panel ladpanel"><div class="ladme"><span>Tus puntos</span><b>' + (L ? L.me : (ui.acct ? ui.acct.pts : 0)) + '</b>' + (L && L.pos ? '<span class="mut">Puesto ' + L.pos + (L.total ? ' de ' + L.total : '') + '</span>' : '') + '</div>' +
+      '<p class="mut">Solo puntúan las partidas contra otros jugadores: 1 contra 1 (+20 / -20) y Versus de 4 (+40 / +20 / -20 / -40 según tu puesto).</p><ol class="ladder ladfull">' + rows + '</ol></div></div>';
   }
   // Ilustraciones de una noticia: las indicadas (art) o las cartas que se nombran en el texto; si no hay, el logo.
   function newsArts(n) {
@@ -242,6 +248,9 @@
     });
     return (n._arts = found.sort(function (a, b) { return a.k - b.k; }).slice(0, 3).map(function (f) { return f.id; }));
   }
+  function newsNeedsFull(n) {
+    return n.items.length > 2 || n.items.some(function (t) { return t.indexOf('{{intro}}') >= 0 || t.length > 230; });
+  }
   function newsSummary(n) {
     return n.items.slice(0, 2).map(function (t) { t = t.replace('{{intro}}', '').trim(); return t.length > 230 ? t.slice(0, 227).replace(/\s+\S*$/, '') + '…' : t; });
   }
@@ -251,10 +260,10 @@
     var sel = Math.min(ui.newsSel || 0, N.length - 1), n = N[sel], arts = newsArts(n);
     return '<div class="rnews"><ul class="rnl">' + N.map(function (x, k) {
       return '<li><button class="' + (k === sel ? 'on' : '') + '" data-act="newssel" data-i="' + k + '"><span class="ntag nt-' + esc(x.tag) + '">' + esc(x.tag) + '</span><b>' + esc(x.title) + '</b><i>' + esc(x.date.split('-').reverse().join('/')) + '</i></button></li>';
-    }).join('') + '</ul><div class="rnmain' + (arts.length ? '' : ' nologo') + (ui.newsFull ? ' full' : '') + '" style="' + (arts.length ? '--rart:url(/cartas/art/' + arts[0] + '.webp)' : '') + '">' +
+    }).join('') + '</ul><div class="rnmain' + (arts.length ? '' : ' nologo') + (ui.newsFull && newsNeedsFull(n) ? ' full' : '') + '" style="' + (arts.length ? '--rart:url(/cartas/art/' + arts[0] + '.webp)' : '') + '">' +
       (arts.length ? '' : '<img class="rnlogo" src="/cartas/logo.webp" alt="">') +
-      '<div class="rnbody"><span class="ntag nt-' + esc(n.tag) + '">' + esc(n.tag) + '</span><h2>' + esc(n.title) + '</h2><ul>' + (ui.newsFull ? n.items.map(function (t) { return '<li>' + (t.indexOf('{{intro}}') >= 0 ? esc(t.replace('{{intro}}', '')) + '<a href="#" class="newslink" data-act="introplay">▶ Ver la animación</a>' : esc(t)) + '</li>'; }) : newsSummary(n).map(function (t) { return '<li>' + esc(t) + '</li>'; })).join('') + '</ul>' +
-      '<button class="btn sec sm" data-act="newsmore">' + (ui.newsFull ? 'Mostrar menos ▴' : 'Leer la noticia completa ▾') + '</button>' +
+      '<div class="rnbody"><span class="ntag nt-' + esc(n.tag) + '">' + esc(n.tag) + '</span><h2>' + esc(n.title) + '</h2><ul>' + (ui.newsFull && newsNeedsFull(n) ? n.items.map(function (t) { return '<li>' + (t.indexOf('{{intro}}') >= 0 ? esc(t.replace('{{intro}}', '')) + '<a href="#" class="newslink" data-act="introplay">▶ Ver la animación</a>' : esc(t)) + '</li>'; }) : newsSummary(n).map(function (t) { return '<li>' + esc(t) + '</li>'; })).join('') + '</ul>' +
+      (newsNeedsFull(n) ? '<button class="btn sec sm" data-act="newsmore">' + (ui.newsFull ? 'Mostrar menos ▴' : 'Leer la noticia completa ▾') + '</button>' : '') +
       (arts.length > 1 ? '<div class="rnthumbs">' + arts.map(function (id) { return '<span style="background-image:url(/cartas/art/' + id + '.webp)" title="' + esc(CARD[id].name) + '"></span>'; }).join('') + '</div>' : '') + '</div></div></div>';
   }
   // Cambia solo el panel de noticias (así la lista conserva su scroll)
@@ -271,22 +280,24 @@
         ['deck', ic('cartas'), 'Mazo', deckSize() + '/' + CFG.deckBudget],
         ['packs', ic('tienda'), 'Tienda', (ui.acct ? ui.acct.coins : 0) + ' monedas'],
         ['themes', ic('brillo'), 'Sinergias', n + ' sinergias'],
+        ['ladder', ic('trofeo'), 'Clasificación', ui.acct.pts + ' puntos'],
         ['rules', ic('libro'), 'Normas', 'Cómo se juega'],
         ['profile', ic('usuario'), 'Perfil', 'Foto y cuenta'],
       ].map(function (m) { return '<button class="ricon" data-act="nav" data-to="' + m[0] + '"><span class="rii">' + m[1] + '</span><b>' + m[2] + '</b><span class="mut">' + m[3] + '</span></button>'; }).join('') + '</div>' + homeNews() + '</div>';
-    h += ladderHtml();
     h += '<p class="mut" style="text-align:center">' + D.cards.length + ' tropas · ' + D.actions.length + ' acciones</p></div>';
     app.innerHTML = h;
     maybeIntro();
   }
   function renderProfile() {
-    var a = ui.acct, cur = a.avatar || '', own = D.cards.filter(function (c) { return ARTS[c.id] && ui.ownedSet && ui.ownedSet[c.id]; }).sort(function (x, y) { return RARS.indexOf(y.rarity) - RARS.indexOf(x.rarity) || x.name.localeCompare(y.name); });
+    var a = ui.acct, mySkins = (window.CARTAS_SKINS || []).filter(function (k) { return (a.skins || []).indexOf(k.id) >= 0; }), cur = a.avatar || '', own = D.cards.filter(function (c) { return ARTS[c.id] && ui.ownedSet && ui.ownedSet[c.id]; }).sort(function (x, y) { return RARS.indexOf(y.rarity) - RARS.indexOf(x.rarity) || x.name.localeCompare(y.name); });
     app.innerHTML = head('profile', '' + ic('usuario') + ' Mi perfil') + (ui.msg ? '<p class="err">' + esc(ui.msg) + '</p>' : '') +
       '<div class="panel profhead">' + avatarHtml('xl') + '<div><h2>' + esc(a.name) + '</h2><p class="mut">' + a.pts + ' puntos de clasificación · ' + a.coins + ' ' + ic('moneda') + ' · ' + a.owned.length + ' cartas desbloqueadas</p><div class="btnrow"><button class="btn sec" data-act="logout">' + ic('puerta') + ' Cerrar sesión</button></div></div></div>' +
-      '<div class="panel"><h2>Foto de perfil</h2><p class="mut">Elige la ilustración de una de tus cartas desbloqueadas. Cuantas más cartas consigas, más opciones tendrás.</p>' +
+      '<div class="panel"><h2>Foto de perfil</h2><p class="mut">Elige la ilustración de una de tus cartas desbloqueadas o de una de tus skins. Cuantas más consigas, más opciones tendrás.</p>' +
       '<div class="avgrid"><button class="avopt none' + (cur ? '' : ' on') + '" data-act="setavatar" data-card="" title="Sin foto"><span class="avt">' + ic('usuario') + '</span><b>Ninguna</b></button>' + own.map(function (c) {
         return '<button class="avopt' + (cur === c.id ? ' on' : '') + '" data-act="setavatar" data-card="' + c.id + '" title="' + esc(c.name) + '"><span class="avt has" style="background-image:url(/cartas/art/' + c.id + '.webp)"></span><b>' + esc(c.name) + '</b></button>';
-      }).join('') + '</div></div></div>';
+      }).join('') + '</div>' + (mySkins.length ? '<h3 class="avsub">Skins</h3><div class="avgrid">' + mySkins.map(function (k) {
+        return '<button class="avopt skin' + (cur === k.id ? ' on' : '') + '" data-act="setavatar" data-card="' + k.id + '" title="' + esc(CARD[k.card].name + ' · ' + k.name) + '"><span class="avt has" style="background-image:url(/cartas/art/' + k.id + '.webp)"></span><b>' + esc(k.name) + '</b></button>';
+      }).join('') + '</div>' : '') + '</div></div>';
   }
 
   function renderBoot() { app.innerHTML = '<div class="wrap"><p class="mut" style="text-align:center;margin-top:30vh">Cargando…</p></div>'; }
@@ -952,9 +963,9 @@
   window.addEventListener('resize', function () { var o = document.querySelector('#board svg.arrows'); if (o) o.remove(); drawArrows(); });
 
   // ---------- Navegación por URL (#/mazo, #/tienda…): al recargar se vuelve a la misma sección ----------
-  var ROUTES = { home: 'inicio', modes: 'jugar', pvp: 'jugar', game: 'jugar', deck: 'mazo', packs: 'tienda', themes: 'sinergias', rules: 'normas', profile: 'perfil' };
-  var ROUTE_SCREEN = { inicio: 'home', jugar: 'modes', mazo: 'deck', tienda: 'packs', sinergias: 'themes', normas: 'rules', perfil: 'profile' };
-  var ROUTE_TITLE = { home: 'Inicio', modes: 'Jugar', pvp: 'Jugar', game: 'Partida', deck: 'Mazo', packs: 'Tienda', themes: 'Sinergias', rules: 'Normas', profile: 'Perfil' };
+  var ROUTES = { home: 'inicio', modes: 'jugar', pvp: 'jugar', game: 'jugar', deck: 'mazo', packs: 'tienda', themes: 'sinergias', rules: 'normas', profile: 'perfil', ladder: 'clasificacion' };
+  var ROUTE_SCREEN = { inicio: 'home', jugar: 'modes', mazo: 'deck', tienda: 'packs', sinergias: 'themes', normas: 'rules', perfil: 'profile', clasificacion: 'ladder' };
+  var ROUTE_TITLE = { home: 'Inicio', modes: 'Jugar', pvp: 'Jugar', game: 'Partida', deck: 'Mazo', packs: 'Tienda', themes: 'Sinergias', rules: 'Normas', profile: 'Perfil', ladder: 'Clasificación' };
   function hashScreen() { var m = /^#\/([a-z]+)/.exec(location.hash || ''); return m && ROUTE_SCREEN[m[1]] || null; }
   function landing() { var sc = hashScreen() || 'home'; if (sc === 'modes' && deckError()) sc = 'deck'; return sc; }
   function syncHash() {
@@ -977,7 +988,7 @@
   function render() {
     document.body.classList.remove('shopbg');
     if (PV.wait && ui.screen !== 'pvp') pvpCancelWait();
-    var f = { home: renderHome, deck: renderDeck, rules: renderRules, themes: renderThemes, modes: renderModes, pvp: renderPvp, login: renderLogin, starter: renderStarter, packs: renderPacks, profile: renderProfile, boot: renderBoot }[ui.screen];
+    var f = { home: renderHome, deck: renderDeck, rules: renderRules, themes: renderThemes, modes: renderModes, pvp: renderPvp, login: renderLogin, starter: renderStarter, packs: renderPacks, profile: renderProfile, ladder: renderLadder, boot: renderBoot }[ui.screen];
     if (f) f(); else renderGame();
     syncHash();
   }

@@ -112,10 +112,10 @@
     var h = '<div class="intropanel"><div class="introst" data-sc="0"><div class="ibg"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>' +
       '<div class="ititle"><small>¡Ya está aquí la versión 1.1!</small><b>CORREA</b></div><span class="iver">v1.1</span>' +
       '<div class="islot p1"></div><div class="islot p2"></div><div class="islot p3"></div><div class="islot p4"></div><div class="islot p5"><span>' + ic('corazon') + ' Hueco 5</span></div>' +
-      boys.map(function (id, k) { return '<div class="iq b' + (k + 1) + '">' + cardHtml(CARD[id], { lv: 1 }) + '</div>'; }).join('') +
-      girls.map(function (id, k) { return '<div class="iq g' + (k + 1) + '">' + cardHtml(CARD[id], { lv: 1 }) + '</div>'; }).join('') +
+      boys.map(function (id, k) { return '<div class="iq nb' + (k + 1) + '">' + cardHtml(CARD[id], { lv: 1 }) + '</div>'; }).join('') +
+      girls.map(function (id, k) { return '<div class="iq ng' + (k + 1) + '">' + cardHtml(CARD[id], { lv: 1 }) + '</div>'; }).join('') +
       '<div class="iq rival">' + cardHtml(CARD['sech-thresh'], { lv: 1 }) + '</div>' +
-      '<span class="ifx fe">+2/+2</span><span class="ifx d1">-6</span><span class="ifx d2">-3</span><span class="ifx d3">-5</span><span class="ifx d4">¡Cae!</span>' +
+      '<span class="ifx fe">+2/+2</span><span class="ifx d1">-6</span><span class="ifx d2">-3</span><span class="ifx d3">-5</span><span class="ifx d5">-4</span><span class="ifx d6">-2</span><span class="ifx d4">¡Cae!</span>' +
       '<div class="icap"><span></span></div></div>' +
       '<div class="ibtns"><button class="btn sec" data-i="close">Cerrar</button><button class="btn" data-i="never">No mostrar más</button></div></div>';
     introEl = document.createElement('div'); introEl.className = 'introov'; introEl.innerHTML = h;
@@ -127,8 +127,8 @@
       introT.forEach(clearTimeout); introT = [];
       st.classList.add('reset'); go(0);
       introT.push(setTimeout(function () { st.classList.remove('reset'); go(1); }, 80));
-      [[3300, 2], [6300, 3], [9000, 4], [12200, 5]].forEach(function (x) { introT.push(setTimeout(function () { go(x[1]); }, x[0])); });
-      introT.push(setTimeout(run, 15500));
+      [[3300, 2], [6300, 3], [9000, 4], [13200, 5]].forEach(function (x) { introT.push(setTimeout(function () { go(x[1]); }, x[0])); });
+      introT.push(setTimeout(run, 16700));
     }
     run();
     introEl.addEventListener('click', function (e) {

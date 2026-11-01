@@ -1048,31 +1048,31 @@ img.timg[src$="comebacker.png"] { filter: drop-shadow(0 0 1.5px #fff) drop-shado
 .iq .card .tags, .iq .card .pasn, .iq .card .pips { display: none; }
 .introst.reset .iq, .introst.reset .ifx, .introst.reset .icap { transition: none !important; animation: none !important; }
 /* novios: entran volando */
-.iq.b1 { left: 5%; bottom: 5%; } .iq.b2 { left: 22%; bottom: 5%; } .iq.b3 { left: 39%; bottom: 5%; } .iq.b4 { left: 56%; bottom: 5%; }
-.introst[data-sc="0"] .iq.b1 { transform: translate(-260%, -120%) rotate(-50deg) scale(1.3); opacity: 0; }
-.introst[data-sc="0"] .iq.b2 { transform: translate(-120%, -260%) rotate(35deg) scale(1.3); opacity: 0; }
-.introst[data-sc="0"] .iq.b3 { transform: translate(120%, -260%) rotate(-35deg) scale(1.3); opacity: 0; }
-.introst[data-sc="0"] .iq.b4 { transform: translate(260%, -120%) rotate(50deg) scale(1.3); opacity: 0; }
-.introst:not([data-sc="0"]) .iq.b2 { transition-delay: .15s; } .introst:not([data-sc="0"]) .iq.b3 { transition-delay: .3s; } .introst:not([data-sc="0"]) .iq.b4 { transition-delay: .45s; }
+.iq.nb1 { left: 5%; bottom: 5%; } .iq.nb2 { left: 22%; bottom: 5%; } .iq.nb3 { left: 39%; bottom: 5%; } .iq.nb4 { left: 56%; bottom: 5%; }
+.introst[data-sc="0"] .iq.nb1 { transform: translate(-260%, -120%) rotate(-50deg) scale(1.3); opacity: 0; }
+.introst[data-sc="0"] .iq.nb2 { transform: translate(-120%, -260%) rotate(35deg) scale(1.3); opacity: 0; }
+.introst[data-sc="0"] .iq.nb3 { transform: translate(120%, -260%) rotate(-35deg) scale(1.3); opacity: 0; }
+.introst[data-sc="0"] .iq.nb4 { transform: translate(260%, -120%) rotate(50deg) scale(1.3); opacity: 0; }
+.introst:not([data-sc="0"]) .iq.nb2 { transition-delay: .15s; } .introst:not([data-sc="0"]) .iq.nb3 { transition-delay: .3s; } .introst:not([data-sc="0"]) .iq.nb4 { transition-delay: .45s; }
 /* novias: aparecen arriba y Eriko baja al hueco 5 */
-.iq.g1, .iq.g2, .iq.g3, .iq.g4 { bottom: 52%; width: 13%; opacity: 0; transform: scale(.2) rotate(-12deg); }
-.iq.g1 { left: 14%; } .iq.g2 { left: 33%; } .iq.g3 { left: 52%; } .iq.g4 { left: 71%; }
-.introst[data-sc="2"] .iq.g1, .introst[data-sc="2"] .iq.g2, .introst[data-sc="2"] .iq.g3, .introst[data-sc="2"] .iq.g4 { opacity: 1; transform: scale(1) rotate(0); }
-.introst[data-sc="2"] .iq.g2 { transition-delay: .2s; } .introst[data-sc="2"] .iq.g3 { transition-delay: .4s; } .introst[data-sc="2"] .iq.g4 { transition-delay: .6s; }
-.introst[data-sc="3"] .iq.g2, .introst[data-sc="3"] .iq.g3, .introst[data-sc="3"] .iq.g4, .introst[data-sc="4"] .iq.g2, .introst[data-sc="4"] .iq.g3, .introst[data-sc="4"] .iq.g4, .introst[data-sc="5"] .iq.g2, .introst[data-sc="5"] .iq.g3, .introst[data-sc="5"] .iq.g4 { opacity: 0; transform: scale(.6) translateY(-40%); }
-.introst[data-sc="3"] .iq.g1, .introst[data-sc="4"] .iq.g1, .introst[data-sc="5"] .iq.g1 { left: 77%; bottom: 5%; width: 15.5%; opacity: 1; transform: none; }
+.iq.ng1, .iq.ng2, .iq.ng3, .iq.ng4 { bottom: 52%; width: 13%; opacity: 0; transform: scale(.2) rotate(-12deg); }
+.iq.ng1 { left: 14%; } .iq.ng2 { left: 33%; } .iq.ng3 { left: 52%; } .iq.ng4 { left: 71%; }
+.introst[data-sc="2"] .iq.ng1, .introst[data-sc="2"] .iq.ng2, .introst[data-sc="2"] .iq.ng3, .introst[data-sc="2"] .iq.ng4 { opacity: 1; transform: scale(1) rotate(0); }
+.introst[data-sc="2"] .iq.ng2 { transition-delay: .2s; } .introst[data-sc="2"] .iq.ng3 { transition-delay: .4s; } .introst[data-sc="2"] .iq.ng4 { transition-delay: .6s; }
+.introst[data-sc="3"] .iq.ng2, .introst[data-sc="3"] .iq.ng3, .introst[data-sc="3"] .iq.ng4, .introst[data-sc="4"] .iq.ng2, .introst[data-sc="4"] .iq.ng3, .introst[data-sc="4"] .iq.ng4, .introst[data-sc="5"] .iq.ng2, .introst[data-sc="5"] .iq.ng3, .introst[data-sc="5"] .iq.ng4 { opacity: 0; transform: scale(.6) translateY(-40%); }
+.introst[data-sc="3"] .iq.ng1, .introst[data-sc="4"] .iq.ng1, .introst[data-sc="5"] .iq.ng1 { left: 77%; bottom: 5%; width: 15.5%; opacity: 1; transform: none; }
 /* rival y combate */
 .iq.rival { left: 41%; bottom: 52%; width: 13%; opacity: 0; transform: translateY(-300%) rotate(8deg); }
 .introst[data-sc="4"] .iq.rival { opacity: 1; transform: none; animation: ishake 1.4s ease-in-out 1.2s 2; }
 .introst[data-sc="5"] .iq.rival { opacity: 0; transform: translateY(40%) rotate(-14deg) scale(.7); filter: grayscale(1); }
 @keyframes ishake { 0%, 100% { translate: 0 0; } 20% { translate: -4% 0; } 40% { translate: 4% 0; } 60% { translate: -3% 0; } 80% { translate: 3% 0; } }
-.introst[data-sc="4"] .iq.b1 { animation: ilunge 1s ease-in-out .9s 1; } .introst[data-sc="4"] .iq.b2 { animation: ilunge 1s ease-in-out 1.5s 1; } .introst[data-sc="4"] .iq.b3 { animation: ilunge 1s ease-in-out 2.1s 1; } .introst[data-sc="4"] .iq.g1 { animation: ilunge 1s ease-in-out 2.7s 1; }
+.introst[data-sc="4"] .iq.nb1 { animation: ilunge 1s ease-in-out .6s 1; } .introst[data-sc="4"] .iq.nb2 { animation: ilunge 1s ease-in-out 1.2s 1; } .introst[data-sc="4"] .iq.nb3 { animation: ilunge 1s ease-in-out 1.8s 1; } .introst[data-sc="4"] .iq.nb4 { animation: ilunge 1s ease-in-out 2.4s 1; } .introst[data-sc="4"] .iq.ng1 { animation: ilunge 1s ease-in-out 3s 1; }
 @keyframes ilunge { 0%, 100% { translate: 0 0; } 45% { translate: 14% -75%; } 60% { translate: 14% -75%; } }
 .ifx { position: absolute; z-index: 6; font: 800 clamp(.9rem, 3vw, 1.6rem)/1 Inter, sans-serif; color: #ff5d6c; text-shadow: 0 2px 0 #3b0a14, 0 0 10px rgba(255,93,108,.8); opacity: 0; pointer-events: none; }
 .ifx.fe { left: 62%; bottom: 20%; color: #4ade80; text-shadow: 0 2px 0 #052e16, 0 0 10px rgba(74,222,128,.9); }
-.ifx.d1 { left: 44%; bottom: 62%; } .ifx.d2 { left: 48%; bottom: 66%; } .ifx.d3 { left: 43%; bottom: 68%; } .ifx.d4 { left: 44%; bottom: 52%; color: #fbbf24; }
+.ifx.d1 { left: 44%; bottom: 62%; } .ifx.d2 { left: 48%; bottom: 66%; } .ifx.d3 { left: 43%; bottom: 68%; } .ifx.d4 { left: 44%; bottom: 52%; color: #fbbf24; } .ifx.d5 { left: 49%; bottom: 64%; } .ifx.d6 { left: 45%; bottom: 66%; }
 .introst[data-sc="3"] .ifx.fe { animation: ipop 1.6s ease-out .9s 1; }
-.introst[data-sc="4"] .ifx.d1 { animation: ipop 1s ease-out 1.5s 1; } .introst[data-sc="4"] .ifx.d2 { animation: ipop 1s ease-out 2.1s 1; } .introst[data-sc="4"] .ifx.d3 { animation: ipop 1s ease-out 2.7s 1; }
+.introst[data-sc="4"] .ifx.d1 { animation: ipop 1s ease-out 1.05s 1; } .introst[data-sc="4"] .ifx.d2 { animation: ipop 1s ease-out 1.65s 1; } .introst[data-sc="4"] .ifx.d3 { animation: ipop 1s ease-out 2.25s 1; } .introst[data-sc="4"] .ifx.d5 { animation: ipop 1s ease-out 2.85s 1; } .introst[data-sc="4"] .ifx.d6 { animation: ipop 1s ease-out 3.45s 1; }
 .introst[data-sc="5"] .ifx.d4 { animation: ipop 1.4s ease-out .1s 1; }
 @keyframes ipop { 0% { opacity: 0; transform: translateY(0) scale(.5); } 20% { opacity: 1; transform: translateY(-20%) scale(1.3); } 100% { opacity: 0; transform: translateY(-160%) scale(1); } }
 .icap { position: absolute; left: 0; right: 0; top: 4%; z-index: 7; text-align: center; opacity: 0; transition: opacity .4s; pointer-events: none; }

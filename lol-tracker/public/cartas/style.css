@@ -1576,7 +1576,7 @@ body.tutmode .refresh{pointer-events:none;opacity:.35}
 .slvback { border-radius: 12px; border: 3px solid rgba(255,255,255,.45); display: grid; place-items: center; color: rgba(255,255,255,.85); background: linear-gradient(150deg, rgba(255,255,255,.2), rgba(255,255,255,.05) 45%, rgba(120,150,220,.3)), rgba(12,20,40,.6); box-shadow: 0 12px 24px rgba(0,0,0,.5); }
 .slvback span { font-size: 2.2rem; } .slvback span .ic { width: 1.2em; height: 1.2em; }
 .card[class*="slv-"]::after, .slvback::after, .slvdemo[class*="slv-"] .slvback::after { content: none; }
-.card[class*="slv-"]::after { content: ''; position: absolute; inset: -3px; border-radius: 14px; padding: 3.5px; background: var(--slv); pointer-events: none; z-index: 6;
+.card[class*="slv-"]::after { content: ''; position: absolute; inset: -3px; border-radius: 14px; padding: 3.5px; background: var(--slv); pointer-events: none; z-index: -1;
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); }
 /* Oro real */
 .slv-oro { --slv: linear-gradient(135deg, #fff3b8, #e0a526 28%, #7a4d05 52%, #f5cf5a 78%, #fff3b8); --sb: #0a1530; }

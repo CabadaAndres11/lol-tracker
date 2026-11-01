@@ -1387,3 +1387,40 @@ body.tutmode .refresh{pointer-events:none;opacity:.35}
 @media(max-width:700px){.tut-char{height:150px}.tut.side-r .tut-char{right:4px}.tut.side-l .tut-char{left:4px}
  .tut-bub{bottom:162px;left:16px!important;right:16px!important;max-width:none}.tut.side-r .tut-bub::after{right:70px}.tut.side-l .tut-bub::after{left:70px}.tut-bub p{font-size:.88rem;margin-bottom:8px}.tut-exit{top:auto;bottom:6px;left:6px;right:auto;font-size:.7rem}}
 @media(prefers-reduced-motion:reduce){.tut.pop .tut-bub,.tut-char,.tut.k-task .tut-spot{animation:none}}
+
+/* ---------- Colección ---------- */
+.colsum{display:flex;align-items:center;gap:14px;margin:4px 0 14px}
+.colring{width:84px;height:84px;border-radius:50%;border:2px solid var(--gold);display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(circle,#101a33,#070b17);box-shadow:0 0 14px rgba(200,170,110,.25)}
+.colring b{font-family:var(--serif);font-size:1.5rem;color:var(--gold);line-height:1}.colring span{font-size:.7rem;color:#a09b8c}
+.colhint{margin:.2rem 0 .8rem}
+.dktiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:14px}
+.dkt{display:flex;flex-direction:column;gap:4px;text-align:left;padding:0 0 10px;border:1px solid rgba(200,170,110,.35);background:#0e1526;color:#f0e6d2;cursor:pointer;overflow:hidden;position:relative}
+.dkt:hover:not(:disabled){border-color:var(--gold);transform:translateY(-2px)}.dkt{transition:transform .15s,border-color .15s}
+.dkt.open{border-color:var(--gold);box-shadow:0 0 18px rgba(224,182,76,.35)}
+.dkt .dkc{display:flex;align-items:center;justify-content:center;aspect-ratio:16/10;background:center 18%/cover no-repeat linear-gradient(135deg,#1c2a4a,#0b1020);font-size:2.4rem;color:var(--gold)}
+.dkt .dkc .ic{width:48px;height:48px}
+.dkt b{padding:0 12px;font-family:var(--serif);letter-spacing:.04em}.dkt .dks{padding:0 12px;font-size:.8rem;color:#a09b8c}
+.dkt.empty{border-style:dashed;opacity:.85}.dkt.off{opacity:.45;cursor:not-allowed}
+.dkopen{margin-top:4px}.dkhead{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.dkhead h2{margin:0 auto 0 0}
+.dkcards{margin:12px 0}
+.dedlayout{display:grid;grid-template-columns:320px minmax(0,1fr);gap:18px;align-items:start}
+.dedleft{position:sticky;top:12px}
+.dlbl{display:block;color:var(--gold);font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;margin:.7rem 0 .3rem}
+.dedleft input#de-name{display:block;width:100%;margin-top:.3rem;padding:8px 10px;background:#0a1020;border:1px solid rgba(200,170,110,.4);color:#f0e6d2;font-size:1rem}
+.decovers{display:grid;grid-template-columns:repeat(auto-fill,minmax(52px,1fr));gap:6px;max-height:150px;overflow:auto;padding:2px}
+.decovers button{aspect-ratio:1;border:2px solid transparent;background:center 20%/cover no-repeat #0a1020;cursor:pointer;padding:0}
+.decovers button.on{border-color:var(--gold);box-shadow:0 0 8px var(--gold)}
+.delist{list-style:none;margin:0 0 .6rem;padding:0;max-height:240px;overflow:auto;display:grid;gap:3px}
+.delist li{display:flex;align-items:center;gap:8px;padding:3px 8px;background:rgba(255,255,255,.04);font-size:.85rem}
+.delist li span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.delist .pips{color:var(--gold);font-style:normal;letter-spacing:1px;font-size:.6rem}
+.delist button{background:none;border:0;color:#a09b8c;cursor:pointer}.delist button:hover{color:#f87171}
+.dedh{font-family:var(--serif);letter-spacing:.06em;margin:0 0 .6rem}
+.pickp{max-width:760px;width:calc(100vw - 32px)}
+.zskins{display:flex;align-items:flex-end;justify-content:center;gap:10px;margin:10px 0 2px;flex-wrap:wrap}
+.zsl{color:var(--gold);font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;align-self:center}
+.zs{display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:0;cursor:pointer;color:#cfc8b6;font-size:.68rem;max-width:84px}
+.zs i{width:64px;height:64px;border:2px solid rgba(200,170,110,.4);background:center 20%/cover no-repeat #0a1020;display:block}
+.zs.on i{border-color:var(--gold);box-shadow:0 0 10px var(--gold)}.zs:hover i{border-color:#fff}
+.zs.locked i{filter:grayscale(.85) brightness(.7)}.zs em{font-style:normal;line-height:1.1;text-align:center}
+@media(max-width:860px){.dktiles{grid-template-columns:1fr 1fr 1fr;gap:8px}.dkt b{font-size:.8rem;padding:0 6px}.dkt .dks{display:none}.dedlayout{grid-template-columns:1fr}.dedleft{position:static}.zs i{width:52px;height:52px}}

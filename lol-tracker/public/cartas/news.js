@@ -1,6 +1,12 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-01', tag: 'Novedad', title: 'Nueva Colección: cartas, mazos y skins',
+      items: ['«Mazo» pasa a llamarse Colección y se divide en tres apartados: Cartas, Mazos y Skins.',
+        'Cartas muestra todas las del juego con su aspecto clásico (las que aún no tienes aparecen apagadas). Al pulsar una se abre en 3D y debajo salen cuadros para ver cada una de sus skins, la tengas o no.',
+        'Skins muestra todos los aspectos del juego, también diferenciando los que tienes de los que no.',
+        'Mazos guarda hasta 3 mazos, cada uno con su portada: al abrirlo ves sus cartas y puedes editarlo o eliminarlo. Al editar eliges nombre y portada, y para añadir cartas eliges una sinergia y ves las que tienes de ella.',
+        'A partir de ahora, antes de cada partida eliges uno de tus mazos guardados. Si todavía no tienes ninguno, te llevamos a Colección para crearlo. Tu mazo anterior se ha guardado como «Mi mazo».'] },
     { date: '2026-11-01', tag: 'Novedad', title: 'Tutorial guiado',
       items: ['El apartado «Normas» desaparece y en su lugar llega el Tutorial, que encontrarás en la pantalla Jugar, separado de los modos de juego.',
         'Es una partida de práctica siempre igual, con pausas en las que tu guía te explica con bocadillos la tienda, las sinergias, la mejora de estadísticas, tu vida y cómo funcionan las rondas. No da monedas ni puntos, y puedes repetirlo cuando quieras.'] },

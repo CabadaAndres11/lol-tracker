@@ -14,17 +14,18 @@
   function setAcct(user) {
     ui.acct = user; ui.ownedSet = {}; user.owned.forEach(function (id) { ui.ownedSet[id] = 1; });
   }
-  function loadLocal() {
+  function loadLocal() { loadLocal0(); if (!ui.slots.some(Boolean) && ui.deck.length >= 3) { ui.slots[0] = { name: 'Mi mazo', ids: ui.deck.slice(), cover: '' }; saveSlots(); } }
+  function loadLocal0() {
     var sd = ui.acct && ui.acct.decks;
     if (sd) { // mazos guardados en la cuenta: se usan en cualquier dispositivo
       ui.deck = (sd.deck || []).filter(function (id) { return CARD[id] && owns(id); });
-      ui.slots = [0, 1, 2].map(function (i) { var x = sd.slots && sd.slots[i]; return x && x.ids ? { name: String(x.name || 'Mazo'), ids: x.ids.filter(function (id) { return CARD[id] && owns(id); }) } : null; });
+      ui.slots = [0, 1, 2].map(function (i) { var x = sd.slots && sd.slots[i]; return x && x.ids ? { name: String(x.name || 'Mazo'), ids: x.ids.filter(function (id) { return CARD[id] && owns(id); }), cover: String(x.cover || '') } : null; });
       try { localStorage.setItem(lk('deck'), JSON.stringify(ui.deck)); localStorage.setItem(lk('slots'), JSON.stringify(ui.slots)); } catch (e) {}
       return;
     }
     try { var sv = JSON.parse(localStorage.getItem(lk('deck')) || 'null'); ui.deck = sv && sv.length ? sv.filter(function (id) { return CARD[id] && owns(id); }) : []; } catch (e) { ui.deck = []; }
     ui.slots = [null, null, null];
-    try { var sl = JSON.parse(localStorage.getItem(lk('slots')) || 'null'); if (sl && sl.length === 3) ui.slots = sl.map(function (x) { return x && x.ids ? { name: String(x.name || 'Mazo'), ids: x.ids.filter(function (id) { return CARD[id] && owns(id); }) } : null; }); } catch (e) {}
+    try { var sl = JSON.parse(localStorage.getItem(lk('slots')) || 'null'); if (sl && sl.length === 3) ui.slots = sl.map(function (x) { return x && x.ids ? { name: String(x.name || 'Mazo'), ids: x.ids.filter(function (id) { return CARD[id] && owns(id); }), cover: String(x.cover || '') } : null; }); } catch (e) {}
     // sin mazo guardado: empieza vacío (el jugador monta el suyo con las cartas que tiene)
     if (ui.deck.length || ui.slots.some(Boolean)) syncDecks(); // migra a la cuenta los mazos que solo estaban en este dispositivo
   }
@@ -144,6 +145,13 @@
   var zoomEl = null;
   function closeZoom() { if (zoomEl) { zoomEl.remove(); zoomEl = null; } document.removeEventListener('keydown', zoomKey); }
   function zoomKey(e) { if (e.key === 'Escape') closeZoom(); }
+  function skinStrip(c, cur) {
+    var SK = (window.CARTAS_SKINS || []).filter(function (k) { return k.card === c.id; });
+    if (!SK.length) return '';
+    var own = function (k) { return ui.acct && (ui.acct.skins || []).indexOf(k.id) >= 0; };
+    return '<div class="zskins"><span class="zsl">Aspectos</span><button class="zs' + (!cur ? ' on' : '') + '" data-zs="" title="Aspecto clásico"><i style="background-image:url(/cartas/art/' + (ARTS[c.id] ? c.id : '') + '.webp)"></i><em>Clásico</em></button>' +
+      SK.map(function (k) { return '<button class="zs' + (cur === k.id ? ' on' : '') + (own(k) ? '' : ' locked') + '" data-zs="' + k.id + '" title="' + esc(k.name) + (own(k) ? '' : ' (no la tienes)') + '"><i style="background-image:url(/cartas/art/' + k.id + '.webp)"></i><em>' + esc(k.name) + '</em></button>'; }).join('') + '</div>';
+  }
   function openZoom(id, skin) {
     var c = CARD[id]; if (!c) return;
     closeZoom();
@@ -152,7 +160,7 @@
     zoomEl = document.createElement('div'); zoomEl.className = 'zoomov';
     zoomEl.innerHTML = '<div class="zbox"><div class="zstage"><div class="zcard"><div class="zfront">' + face + '<span class="zglare"></span></div><div class="zback"><div class="zbk"><b>' + ic('cartas') + '</b><span>' + esc(c.name) + '</span></div></div></div></div>' +
       '<div class="zbtns"><button class="btn sec sm" data-z="flip">' + ic('cambio') + ' Voltear</button><button class="btn sec sm" data-z="reset">Restablecer</button><button class="btn sm" data-z="close">Cerrar</button></div>' +
-      '<p class="zhint">Arrastra para girarla · pasa el ratón para inclinarla · Esc para cerrar</p></div>';
+      skinStrip(c, skin) + '<p class="zhint">Arrastra para girarla · pasa el ratón para inclinarla · Esc para cerrar</p></div>';
     document.body.appendChild(zoomEl);
     var card = zoomEl.querySelector('.zcard'), glare = zoomEl.querySelector('.zglare'), stage = zoomEl.querySelector('.zstage');
     function paint() { card.style.transform = 'rotateX(' + st.rx.toFixed(1) + 'deg) rotateY(' + st.ry.toFixed(1) + 'deg)'; }
@@ -175,6 +183,7 @@
     function end() { if (!st.drag) return; st.drag = null; card.style.transition = 'transform .45s cubic-bezier(.2,.8,.2,1)'; var n = norm(st.ry); st.ry = Math.abs(n) > 90 ? 180 * (n > 0 ? 1 : -1) : 0; st.rx = 0; paint(); } // se asienta de frente o de espaldas
     stage.addEventListener('pointerup', end); stage.addEventListener('pointercancel', end);
     zoomEl.addEventListener('click', function (e) {
+      var zs = e.target.closest('[data-zs]'); if (zs) { openZoom(id, zs.dataset.zs); return; }
       var z = e.target.closest('[data-z]');
       if (z) {
         card.style.transition = 'transform .6s cubic-bezier(.2,.8,.2,1)'; st.auto = false;
@@ -189,7 +198,7 @@
   }
 
   // ---------- Navegación ----------
-  var NAV = [['home', 'casa', 'Inicio'], ['play', 'espadas', 'Jugar'], ['deck', 'cartas', 'Mazo'], ['packs', 'tienda', 'Tienda'], ['ladder', 'trofeo', 'Clasificación']];
+  var NAV = [['home', 'casa', 'Inicio'], ['play', 'espadas', 'Jugar'], ['deck', 'cartas', 'Colección'], ['packs', 'tienda', 'Tienda'], ['ladder', 'trofeo', 'Clasificación']];
   function artOk(id) { return !!id && (!!ARTS[id] || (window.CARTAS_SKINS || []).some(function (k) { return k.id === id; })); }
   function avatarHtml(cls) {
     var id = ui.acct && ui.acct.avatar, ok = artOk(id);
@@ -300,7 +309,7 @@
   function renderHome() {
     var h = head('home') + '<div class="rhome"><div class="rplay"><button class="rplaybtn" data-act="nav" data-to="play"><span class="rpl">' + ic('espadas') + '</span><span class="rpt">Jugar</span></button></div>' +
       '<div class="ricons">' + [
-        ['deck', ic('cartas'), 'Mazo', deckSize() + '/' + CFG.deckBudget],
+        ['deck', ic('cartas'), 'Colección', ui.acct.owned.length + ' cartas'],
         ['packs', ic('tienda'), 'Tienda', (ui.acct ? ui.acct.coins : 0) + ' monedas'],
         ['ladder', ic('trofeo'), 'Clasificación', ui.acct.pts + ' puntos'],
         ['profile', ic('usuario'), 'Perfil', 'Foto y cuenta'],
@@ -425,7 +434,7 @@
     var total = D.cards.length + D.actions.length;
     return '<div class="shinfo">' + (a.admin ? adminStarters() : '') +
       '<div class="panel"><h2>Cómo conseguir monedas</h2><ul class="rules"><li><b>Recompensa diaria:</b> +' + a.dailyCoins + ' ' + ic('moneda') + ' cada día.</li><li><b>Partidas contra la IA:</b> +10 ' + ic('moneda') + ' por partida y +20 ' + ic('moneda') + ' más si ganas (hoy llevas ' + a.gamesToday + '/' + a.maxGamesToday + ' partidas con premio). Las partidas muy cortas no dan monedas.</li><li><b>Cartas repetidas:</b> no dan monedas, pero suben la carta de nivel.</li></ul></div>' +
-      '<div class="panel"><h2>Tu colección</h2><div class="coinbig">' + a.owned.length + ' / ' + total + '</div><div class="meter colm"><i class="on" style="width:' + Math.round(a.owned.length / total * 100) + '%"></i></div><p class="mut">Solo puedes usar en tu mazo las cartas que tienes.</p><button class="btn sec" data-act="nav" data-to="deck">' + ic('cartas') + ' Ir al mazo</button></div></div>';
+      '<div class="panel"><h2>Tu colección</h2><div class="coinbig">' + a.owned.length + ' / ' + total + '</div><div class="meter colm"><i class="on" style="width:' + Math.round(a.owned.length / total * 100) + '%"></i></div><p class="mut">Solo puedes usar en tus mazos las cartas que tienes.</p><button class="btn sec" data-act="nav" data-to="deck">' + ic('cartas') + ' Ir a la colección</button></div></div>';
   }
   function packsTab(a) {
     var can = a.coins >= a.packCost && !ui.pack;
@@ -489,65 +498,27 @@
       tutStrip() + '<div class="qsel' + (fx ? ' fx-' + fx : '') + '">' +
       '<div class="qtypes"><button class="' + (qt === 'ia' ? 'on' : '') + '" data-act="qtype" data-v="ia">' + ic('robot') + ' Contra IA</button><button class="' + (qt === 'pl' ? 'on' : '') + '" data-act="qtype" data-v="pl">' + ic('grupo') + ' Contra jugadores</button></div>' +
       '<div class="qmodes">' + QMODES.map(function (m) { return '<button class="qmode' + (m === qm ? ' on' : '') + '" data-act="qmode" data-v="' + m.id + '"><span class="qframe">' + ic(m.icon) + '</span><b>' + m.name + '</b><span class="qsub">' + m.sub + '</span></button>'; }).join('') + '</div>' +
-      '<div class="qbody" style="--qart:url(/cartas/art/' + QART[qt][qm.id][qo] + '.webp)"><div class="qleft"><p class="qdesc">' + qm.desc + '</p><p class="qdeck">Tu mazo actual (' + deckSize() + '/' + CFG.deckBudget + ') se usará en cualquier modo.</p>' +
+      '<div class="qbody" style="--qart:url(/cartas/art/' + QART[qt][qm.id][qo] + '.webp)"><div class="qleft"><p class="qdesc">' + qm.desc + '</p><p class="qdeck">Antes de jugar elegirás uno de tus mazos guardados.</p>' +
       '<div class="qopts">' + opts.map(function (o) { return '<button class="qopt' + (o === cur ? ' on' : '') + '" data-act="qopt" data-v="' + o.id + '"><i class="qdia"></i><span class="qot"><b>' + ic(o.icon) + ' ' + o.name + '</b><span>' + o.sub + '</span></span></button>'; }).join('') + '</div>' +
       '<p class="qnote ' + (qt === 'ia' ? 'ia' : 'pl') + '">' + (qt === 'ia' ? 'Contra IA: menos monedas y sin puntos de clasificación.' : 'Contra jugadores: puntúan en la clasificación.') + '</p></div><div class="qart" aria-hidden="true"></div></div>' +
-      '<div class="qconfirm"><button class="qgo" data-act="' + cur.act[qm.id] + '"><span class="qx">' + ic('avance') + '</span><span class="qgot">Confirmar</span></button></div></div>';
+      '<div class="qconfirm"><button class="qgo" data-act="' + cur.act[qm.id] + '"><span class="qx">' + ic('avance') + '</span><span class="qgot">Confirmar</span></button></div></div>' + (ui.pick ? pickHtml() : '');
   }
   function themeCards(t) { return D.cards.filter(function (c) { return c.themes.indexOf(t) >= 0; }).concat(D.actions.filter(function (a) { return a.theme === t; })); }
-  function sameDeck(a, b) { return a.length === b.length && a.every(function (x) { return b.indexOf(x) >= 0; }); }
-  function slotsHtml() {
-    var h = '<div class="slots">';
-    for (var i = 0; i < 3; i++) {
-      var sl = ui.slots[i], cur = sl && sameDeck(sl.ids, ui.deck);
-      h += '<div class="sl' + (sl ? '' : ' empty') + (cur ? ' cur' : '') + '">';
-      if (sl) h += '<b>' + esc(sl.name) + (cur ? ' ' + ic('check') : '') + '</b><span class="mut">' + E.deckSize(sl.ids) + '/' + CFG.deckBudget + ' espacio · ' + sl.ids.length + ' cartas</span><div class="bar" style="margin:.3rem 0 0"><button class="btn sec sm" data-act="slot-load" data-i="' + i + '">Cargar</button><button class="btn sec sm" data-act="slot-del" data-i="' + i + '" title="Borrar">' + ic('papelera') + '</button></div>';
-      else h += '<b>Hueco ' + (i + 1) + '</b><span class="mut">Vacío</span>';
-      h += '</div>';
-    }
-    h += '</div><div class="bar"><input id="slot-name" maxlength="20" placeholder="Nombre del mazo" value="' + esc(ui.slotName) + '"><select id="slot-to">' +
-      [0, 1, 2].map(function (i) { return '<option value="' + i + '"' + (ui.slotTo === i ? ' selected' : '') + '>Hueco ' + (i + 1) + (ui.slots[i] ? ' (' + esc(ui.slots[i].name) + ')' : ' (vacío)') + '</option>'; }).join('') +
-      '</select><button class="btn sec" data-act="slot-save"' + (ui.deck.length ? '' : ' disabled') + '>' + ic('disquete') + ' Guardar mazo actual</button></div>';
-    if (ui.msg) h += '<div class="hint">' + esc(ui.msg) + '</div>';
-    return h;
-  }
   var RARS = ['Común', 'Rara', 'Épica', 'Legendaria'], RCOL = { 'Común': '#9ca3af', 'Rara': '#60a5fa', 'Épica': '#c084fc', 'Legendaria': '#fbbf24' };
-  // Panel izquierdo: cuántas cartas de cada sinergia llevas en el mazo (solo iconos y números)
-  function deckLeft() {
-    var inDeck = {};
-    ui.deck.forEach(function (id) { (CARD[id].themes || []).forEach(function (t) { inDeck[t] = (inDeck[t] || 0) + 1; }); });
-    var rows = Object.keys(D.themes).filter(function (t) { return inDeck[t]; }).sort(function (a, b) { return inDeck[b] - inDeck[a]; }).map(function (t) {
-      var T = D.themes[t], n = inDeck[t], lvl = 0; T.th.forEach(function (x, k) { if (n >= x) lvl = k + 1; });
-      var dots = T.th.map(function (x, k) { return '<i' + (k < lvl ? ' class="on"' : '') + ' title="Nivel ' + (k + 1) + ': ' + x + ' cartas"></i>'; }).join('');
-      return '<div class="dl-row' + (ui.filters.indexOf(t) >= 0 ? ' on' : '') + '" style="--tc:' + T.color + '" data-act="filter" data-t="' + esc(t) + '" title="' + esc(t) + ' · ' + n + ' en el mazo"><span class="dl-ic">' + tic(t) + '</span><span class="dl-n">' + n + '</span><span class="dl-dots">' + dots + '</span></div>';
-    }).join('');
-    return '<aside class="deck-left panel"><h2>En tu mazo</h2>' + (rows || '<p class="mut">Sin sinergias todavía.</p>') + '</aside>';
-  }
-  function themeSide() {
-    var inDeck = {};
-    ui.deck.forEach(function (id) { var c = CARD[id]; (c.themes || []).forEach(function (t) { inDeck[t] = (inDeck[t] || 0) + 1; }); });
-    return '<aside class="side-themes panel"><h2>Sinergias</h2><p class="mut" style="margin:0 0 .4rem">Pasa el cursor para ver el detalle. Pulsa para añadirla o quitarla del filtro.</p>' +
-      Object.keys(D.themes).map(function (t) {
-        var T = D.themes[t], on = ui.filters.indexOf(t) >= 0;
-        var tip = '<div class="tip"><b>' + esc(t) + '</b>' + T.tx.map(function (x, k) { return '<p><b>' + T.th[k] + ' cartas:</b> ' + esc(x) + '</p>'; }).join('') + '</div>';
-        var short = T.tx[0].split(/[.:]/)[0];
-        return '<div class="thm' + (on ? ' on' : '') + '" tabindex="0" data-act="filter" data-t="' + esc(t) + '">' + tagHtml(t) + ' <span class="cnt">niveles ' + T.th.join('/') + '</span><div class="sm">' + esc(short.length > 70 ? short.slice(0, 68) + '…' : short) + '</div>' + tip + '</div>';
-      }).join('') + '</aside>';
-  }
   // Cada Correa tiene su novia: una miniatura en la carta permite alternar entre los dos
   var GIRL = { 'lihone-correa': 'eriko', 'dashlight-correa': 'helena', 'potango': 'lucia', 'chipy-correa': 'ari' };
-  function deckCard(c) {
-    var inn = ui.deck.indexOf(c.id) >= 0, own = owns(c.id), gid = GIRL[c.id], show = c, thumb = '';
+  function colCard(c) {
+    var own = owns(c.id), gid = GIRL[c.id], show = c, thumb = '';
     if (gid) {
       var girlView = !!(ui.novView && ui.novView[c.id]);
       thumb = '<span class="novt" data-act="novtog" data-id="' + c.id + '" title="' + (girlView ? 'Ver a ' + esc(c.name) : 'Ver a ' + esc(CARD[gid].name) + ', su novia') + '"><img src="/cartas/art/' + (girlView ? c.id : gid) + '.webp" alt=""></span>';
       if (girlView) show = CARD[gid];
     }
-    return cardHtml(show, { lv: own ? lvOf(c.id) : 1, size: true, cls: (inn ? 'in' : '') + (own ? '' : ' locked'), extra: '<span class="eyeb" data-act="zoom" data-id="' + show.id + '" title="Ver ampliada en 3D">' + ic('ojo') + '</span>' + thumb + (own ? '' : '<span class="lockb">' + ic('candado') + '</span>'), attrs: 'data-act="toggle" data-id="' + c.id + '"', tag: 'button' });
+    return cardHtml(show, { lv: own ? lvOf(c.id) : 1, size: true, cls: own ? '' : 'locked', extra: thumb + (own ? '' : '<span class="lockb">' + ic('candado') + '</span>'), attrs: 'data-act="zoom" data-id="' + show.id + '" title="Ver en 3D"', tag: 'button' });
   }
   function byLv(arr) { if (!ui.sortLv) return arr; return arr.map(function (c, i) { return [c, i]; }).sort(function (a, b) { return (owns(b[0].id) ? lvOf(b[0].id) : 1) - (owns(a[0].id) ? lvOf(a[0].id) : 1) || a[1] - b[1]; }).map(function (x) { return x[0]; }); }
   function filtered() {
-    var f = ui.filters, all = byLv(D.cards.concat(D.actions)).filter(function (c) { return (!ui.onlyOwned || owns(c.id)) && (!ui.onlyDeck || ui.deck.indexOf(c.id) >= 0) && (!ui.rar.length || ui.rar.indexOf(c.rarity) >= 0); });
+    var f = ui.filters, all = byLv(D.cards.concat(D.actions)).filter(function (c) { return (!ui.onlyOwned || owns(c.id)) && (!ui.rar.length || ui.rar.indexOf(c.rarity) >= 0); });
     if (!f.length) return all;
     var th = f.filter(function (x) { return x !== '__act'; }), act = f.indexOf('__act') >= 0;
     return all.filter(function (c) {
@@ -556,38 +527,121 @@
       return th.some(function (t) { return c.themes.indexOf(t) >= 0; });
     });
   }
-  function renderDeck() {
-    var used = deckSize(), troops = ui.deck.filter(function (id) { return CARD[id].type === 'tropa'; }).length, err = deckError();
-    var segs = ''; for (var k = 0; k < CFG.deckBudget; k++) segs += '<i' + (k < used ? ' class="on"' : '') + '></i>';
-    var h = head('deck', '' + ic('cartas') + ' Tu mazo') + '<div class="panel"><h2>Mazos guardados (máx. 3)</h2>' + slotsHtml() + '</div>';
-    h += '<div class="panel"><div class="bar" style="margin:0"><span class="pill">Espacio <b>' + used + '/' + CFG.deckBudget + '</b></span><span class="pill">' + troops + ' tropas</span>' +
-      '<button class="btn sec" data-act="randdeck">' + ic('dado') + ' Aleatorio</button><button class="btn sec" data-act="cleardeck">Vaciar</button>' +
-      '<button class="btn" data-act="nav" data-to="play"' + (err ? ' disabled' : '') + '>' + ic('espadas') + ' Jugar</button></div><div class="meter">' + segs + '</div>' +
-      (err ? '<div class="hint" style="color:var(--bad)">' + esc(err) + '</div>' : '') +
-      '<p class="legend"><span class="coin inl">3</span> coste en oro para comprarla · <span class="pips inl"><i class="on"></i><i class="on"></i><i></i></span> espacio que ocupa en el mazo · <span class="sc a inl"><b>4</b></span> ataque · <span class="sc h inl"><b>6</b></span> vida</p></div>';
-    h += '<div class="deck-layout">' + deckLeft() + '<div class="deck-main">';
+
+  // ---------- Colección: Cartas · Mazos · Skins ----------
+  function deckErrFor(ids) {
+    ids = ids || [];
+    if (ids.length < 3) return 'Un mazo necesita al menos 3 cartas.';
+    if (E.deckSize(ids) > CFG.deckBudget) return 'El mazo se pasa del presupuesto de espacio.';
+    var troops = ids.filter(function (id) { return CARD[id].type === 'tropa'; });
+    if (!troops.length) return 'El mazo necesita al menos una tropa.';
+    if (!troops.some(function (id) { return CARD[id].rarity === 'Común'; })) return 'Necesitas al menos una tropa Común: la tienda inicial solo ofrece Comunes.';
+    return '';
+  }
+  var RORD = { 'Legendaria': 0, 'Épica': 1, 'Rara': 2, 'Común': 3 };
+  function deckCoverId(sl) {
+    if (sl.cover && artOk(sl.cover)) return sl.cover;
+    var t = sl.ids.filter(function (id) { return ARTS[id] && CARD[id].type === 'tropa'; }).sort(function (a, b) { return RORD[CARD[a].rarity] - RORD[CARD[b].rarity]; })[0];
+    return t || '';
+  }
+  function coverStyle(sl) { var id = deckCoverId(sl); return id ? ' style="background-image:url(/cartas/art/' + id + '.webp)"' : ''; }
+  function deckTile(sl, i, attrs, cls) {
+    return '<button class="dkt' + (cls || '') + '" ' + attrs + '><span class="dkc"' + coverStyle(sl) + '>' + (deckCoverId(sl) ? '' : ic('cartas')) + '</span><b>' + esc(sl.name) + '</b><span class="dks">' + sl.ids.length + ' cartas · ' + E.deckSize(sl.ids) + '/' + CFG.deckBudget + ' espacio</span></button>';
+  }
+  var COLTABS = [['cards', 'Cartas'], ['decks', 'Mazos'], ['skins', 'Skins']];
+  function colSummary(n, total, label) {
+    return '<div class="colsum"><div class="colring"><b>' + n + '</b><span>/ ' + total + '</span></div><span class="mut">' + label + '</span></div>';
+  }
+  function cardsTab() {
+    var all = D.cards.concat(D.actions), h = colSummary(ui.acct.owned.length, all.length, 'cartas en propiedad');
     var cnt = function (t) { return themeCards(t).length; };
     h += '<div class="chips filt"><button class="chip' + (!ui.filters.length ? ' on' : '') + '" data-act="filterset" data-t="">Todas</button>' +
       Object.keys(D.themes).map(function (t) { return '<button class="chip' + (ui.filters.indexOf(t) >= 0 ? ' on' : '') + '" style="--tc:' + D.themes[t].color + '" data-act="filter" data-t="' + esc(t) + '">' + tic(t) + esc(t) + ' ' + cnt(t) + '</button>'; }).join('') +
       '<button class="chip' + (ui.filters.indexOf('__act') >= 0 ? ' on' : '') + '" data-act="filter" data-t="__act">Acciones</button></div>';
-    h += '<div class="chips filt rarf">' + RARS.map(function (r) { var n = D.cards.concat(D.actions).filter(function (c) { return c.rarity === r; }).length; return '<button class="chip' + (ui.rar.indexOf(r) >= 0 ? ' on' : '') + '" style="--tc:' + RCOL[r] + '" data-act="rarfilter" data-r="' + r + '"><i class="rdot"></i>' + r + ' ' + n + '</button>'; }).join('') + '</div>';
-    h += '<div class="bar" style="margin:.2rem 0 .6rem"><label class="grp"><input type="checkbox" data-act="groupr"' + (ui.groupRar ? ' checked' : '') + '> Agrupar por rareza</label><label class="grp"><input type="checkbox" data-act="group"' + (ui.group ? ' checked' : '') + '> Agrupar por sinergia</label><label class="grp"><input type="checkbox" data-act="onlyowned"' + (ui.onlyOwned ? ' checked' : '') + '> Solo mis cartas (' + ui.acct.owned.length + '/' + (D.cards.length + D.actions.length) + ')</label>' + '<label class="grp"><input type="checkbox" data-act="onlydeck"' + (ui.onlyDeck ? ' checked' : '') + '> Solo cartas del mazo (' + ui.deck.length + ')</label>' + '<label class="grp"><input type="checkbox" data-act="sortlv"' + (ui.sortLv ? ' checked' : '') + '> Ordenar por nivel de carta</label>';
+    h += '<div class="chips filt rarf">' + RARS.map(function (r) { var n = all.filter(function (c) { return c.rarity === r; }).length; return '<button class="chip' + (ui.rar.indexOf(r) >= 0 ? ' on' : '') + '" style="--tc:' + RCOL[r] + '" data-act="rarfilter" data-r="' + r + '"><i class="rdot"></i>' + r + ' ' + n + '</button>'; }).join('') + '</div>';
+    h += '<div class="bar" style="margin:.2rem 0 .6rem"><label class="grp"><input type="checkbox" data-act="groupr"' + (ui.groupRar ? ' checked' : '') + '> Agrupar por rareza</label><label class="grp"><input type="checkbox" data-act="group"' + (ui.group ? ' checked' : '') + '> Agrupar por sinergia</label><label class="grp"><input type="checkbox" data-act="onlyowned"' + (ui.onlyOwned ? ' checked' : '') + '> Solo las que tengo</label><label class="grp"><input type="checkbox" data-act="sortlv"' + (ui.sortLv ? ' checked' : '') + '> Ordenar por nivel de carta</label>';
     if (ui.filters.length > 1) h += '<span class="seg"><button class="' + (ui.fmode === 'any' ? 'on' : '') + '" data-act="fmode" data-m="any">Cualquiera de las elegidas</button><button class="' + (ui.fmode === 'all' ? 'on' : '') + '" data-act="fmode" data-m="all">Todas a la vez</button></span>';
-    h += '</div>';
+    h += '</div><p class="mut colhint">Pulsa una carta para verla en 3D y ver sus skins. Las que aún no tienes aparecen apagadas.</p>';
     var rf = function (c) { return !ui.rar.length || ui.rar.indexOf(c.rarity) >= 0; };
     if (ui.groupRar) {
       var lst = filtered();
-      RARS.forEach(function (r) { var g = lst.filter(function (c) { return c.rarity === r; }); if (g.length) h += '<h3 class="gh"><span class="rtag" style="--tc:' + RCOL[r] + '">' + r + '</span> <span class="mut">' + g.length + '</span></h3><div class="deckgrid">' + g.map(deckCard).join('') + '</div>'; });
+      RARS.forEach(function (r) { var g = lst.filter(function (c) { return c.rarity === r; }); if (g.length) h += '<h3 class="gh"><span class="rtag" style="--tc:' + RCOL[r] + '">' + r + '</span> <span class="mut">' + g.length + '</span></h3><div class="deckgrid">' + g.map(colCard).join('') + '</div>'; });
       if (!lst.length) h += '<p class="mut">Ninguna carta cumple los filtros.</p>';
     } else if (ui.group && !ui.filters.length) {
-      Object.keys(D.themes).forEach(function (t) { var g = byLv(themeCards(t).filter(rf)); if (g.length) h += '<h3 class="gh">' + tagHtml(t) + '</h3><div class="deckgrid">' + g.map(deckCard).join('') + '</div>'; });
-      var ga = byLv(D.actions.filter(function (a) { return !a.theme; }).filter(rf)); if (ga.length) h += '<h3 class="gh">Acciones</h3><div class="deckgrid">' + ga.map(deckCard).join('') + '</div>';
+      Object.keys(D.themes).forEach(function (t) { var g = byLv(themeCards(t).filter(rf).filter(function (c) { return !ui.onlyOwned || owns(c.id); })); if (g.length) h += '<h3 class="gh">' + tagHtml(t) + '</h3><div class="deckgrid">' + g.map(colCard).join('') + '</div>'; });
+      var ga = byLv(D.actions.filter(function (a) { return !a.theme; }).filter(rf).filter(function (c) { return !ui.onlyOwned || owns(c.id); })); if (ga.length) h += '<h3 class="gh">Acciones</h3><div class="deckgrid">' + ga.map(colCard).join('') + '</div>';
     } else {
       var list = filtered();
-      h += list.length ? '<div class="deckgrid">' + list.map(deckCard).join('') + '</div>' : '<p class="mut">Ninguna carta cumple todas las sinergias elegidas.</p>';
+      h += list.length ? '<div class="deckgrid">' + list.map(colCard).join('') + '</div>' : '<p class="mut">Ninguna carta cumple todas las sinergias elegidas.</p>';
     }
-    h += '</div>' + themeSide() + '</div></div>';
+    return h;
+  }
+  function skinsTab() {
+    var a = ui.acct, SK = window.CARTAS_SKINS || [], have = SK.filter(function (s) { return (a.skins || []).indexOf(s.id) >= 0; }).length;
+    var h = colSummary(have, SK.length, 'skins en propiedad') + '<p class="mut colhint">Pulsa una skin para verla en 3D. Se compran en la Tienda; las que aún no tienes aparecen apagadas.</p>';
+    if (!SK.length) return h + '<p class="mut">Aún no hay skins.</p>';
+    return h + '<div class="skgrid">' + SK.slice().reverse().map(function (s) {
+      var c = CARD[s.card], own = (a.skins || []).indexOf(s.id) >= 0;
+      return '<div class="skitem"><div class="skcard">' + cardHtml(c, { skin: s.id, lv: 1, cls: own ? '' : 'locked', extra: own ? '' : '<span class="lockb">' + ic('candado') + '</span>', attrs: 'data-act="zoom" data-id="' + s.card + '" data-skin="' + s.id + '" title="Ver en 3D"', tag: 'button' }) + '</div><b>' + esc(c.name) + '</b><span class="mut">' + esc(s.name) + (own ? ' · ' + ic('check') + ' tuya' : ' · ' + s.price + ' monedas') + '</span>' + skinBtn(a, s) + '</div>';
+    }).join('') + '</div>';
+  }
+  function decksTab() {
+    var h = '<p class="mut colhint">Tienes hasta 3 mazos. Para jugar tendrás que elegir uno de ellos.</p>' + (ui.msg ? '<div class="hint">' + esc(ui.msg) + '</div>' : '') + '<div class="dktiles">';
+    [0, 1, 2].forEach(function (i) {
+      var sl = ui.slots[i];
+      h += sl ? deckTile(sl, i, 'data-act="dkopen" data-i="' + i + '"', ui.deckOpen === i ? ' open' : '') : '<button class="dkt empty" data-act="dkedit" data-i="' + i + '"><span class="dkc">+</span><b>Crear mazo</b><span class="dks">Hueco ' + (i + 1) + ' libre</span></button>';
+    });
+    h += '</div>';
+    var o = ui.deckOpen, sl = o != null ? ui.slots[o] : null;
+    if (sl) {
+      var err = deckErrFor(sl.ids);
+      h += '<div class="panel dkopen"><div class="dkhead"><h2>' + esc(sl.name) + '</h2><span class="pill">' + sl.ids.length + ' cartas</span><span class="pill">Espacio <b>' + E.deckSize(sl.ids) + '/' + CFG.deckBudget + '</b></span></div>' +
+        (err ? '<div class="hint" style="color:var(--bad)">' + esc(err) + '</div>' : '') +
+        '<div class="deckgrid dkcards">' + sl.ids.filter(function (id) { return CARD[id]; }).sort(function (a, b) { return RORD[CARD[a].rarity] - RORD[CARD[b].rarity]; }).map(function (id) {
+          var c = CARD[id]; return cardHtml(c, { lv: lvOf(id), size: true, attrs: 'data-act="zoom" data-id="' + id + '" title="Ver en 3D"', tag: 'button' });
+        }).join('') + '</div><div class="bar">' +
+        (ui.delAsk === o ? '<span class="hint">¿Eliminar «' + esc(sl.name) + '»?</span><button class="btn sm" data-act="dkdelyes" data-i="' + o + '">Sí, eliminar</button><button class="btn sec sm" data-act="dkdelno">No</button>'
+          : '<button class="btn" data-act="dkedit" data-i="' + o + '">' + ic('libro') + ' Editar</button><button class="btn sec" data-act="dkdel" data-i="' + o + '">' + ic('papelera') + ' Eliminar</button>') + '</div></div>';
+    }
+    return h;
+  }
+  function deckEditor() {
+    var d = ui.dedit, used = E.deckSize(d.ids), err = deckErrFor(d.ids), troops = d.ids.filter(function (id) { return CARD[id].type === 'tropa'; }).length;
+    var segs = ''; for (var k = 0; k < CFG.deckBudget; k++) segs += '<i' + (k < used ? ' class="on"' : '') + '></i>';
+    var covers = D.cards.filter(function (c) { return owns(c.id) && ARTS[c.id]; }).map(function (c) { return c.id; }).concat((ui.acct.skins || []).filter(artOk)), cur = d.cover || deckCoverId({ cover: '', ids: d.ids });
+    var left = '<div class="panel dedleft"><label class="dlbl">Nombre del mazo<input id="de-name" maxlength="20" value="' + esc(d.name) + '" placeholder="Nombre"></label>' +
+      '<div class="dlbl">Portada del mazo</div><div class="decovers">' + (covers.length ? covers.map(function (id) { return '<button class="' + (id === cur ? 'on' : '') + '" data-act="decover" data-id="' + id + '" title="' + esc((CARD[id] || {}).name || id) + '" style="background-image:url(/cartas/art/' + id + '.webp)"></button>'; }).join('') : '<span class="mut">Aún no tienes ilustraciones.</span>') + '</div>' +
+      '<div class="bar" style="margin:.6rem 0 0"><span class="pill">Espacio <b>' + used + '/' + CFG.deckBudget + '</b></span><span class="pill">' + troops + ' tropas</span><span class="pill">' + d.ids.length + ' cartas</span></div><div class="meter">' + segs + '</div>' +
+      (ui.msg ? '<div class="hint" style="color:var(--bad)">' + esc(ui.msg) + '</div>' : (err && d.ids.length ? '<div class="hint" style="color:var(--bad)">' + esc(err) + '</div>' : '')) +
+      '<div class="dlbl">En el mazo</div><ul class="delist">' + (d.ids.length ? d.ids.map(function (id) { var c = CARD[id]; return '<li><span>' + esc(c.name) + '</span><i class="pips">' + new Array(c.size + 1).join('●') + '</i><button data-act="detoggle" data-id="' + id + '" title="Quitar">✕</button></li>'; }).join('') : '<li class="mut">Vacío: elige una sinergia y añade cartas.</li>') + '</ul>' +
+      '<div class="bar"><button class="btn sec sm" data-act="derand">' + ic('dado') + ' Aleatorio</button><button class="btn sec sm" data-act="declear">Vaciar</button></div>' +
+      '<div class="bar"><button class="btn cta" data-act="desave"' + (err ? ' disabled' : '') + '>' + ic('disquete') + ' Guardar mazo</button><button class="btn sec" data-act="decancel">Cancelar</button></div></div>';
+    var th = d.theme, chips = '<div class="chips filt">' + Object.keys(D.themes).map(function (t) { var n = themeCards(t).filter(function (c) { return owns(c.id); }).length; return '<button class="chip' + (th === t ? ' on' : '') + '" style="--tc:' + D.themes[t].color + '" data-act="dethm" data-t="' + esc(t) + '">' + tic(t) + esc(t) + ' ' + n + '</button>'; }).join('') +
+      '<button class="chip' + (th === '__gen' ? ' on' : '') + '" data-act="dethm" data-t="__gen">Acciones generales</button></div>';
+    var list = !th ? null : (th === '__gen' ? D.actions.filter(function (a) { return !a.theme; }) : themeCards(th)).filter(function (c) { return owns(c.id); });
+    var grid = !th ? '<p class="mut">Elige una sinergia para ver tus cartas de esa sinergia y añadirlas al mazo.</p>' : !list.length ? '<p class="mut">No tienes ninguna carta de esta sinergia todavía.</p>' :
+      '<div class="deckgrid">' + byLv(list).map(function (c) { return cardHtml(c, { lv: lvOf(c.id), size: true, cls: d.ids.indexOf(c.id) >= 0 ? 'in' : '', attrs: 'data-act="detoggle" data-id="' + c.id + '"', tag: 'button', extra: '<span class="eyeb" data-act="zoom" data-id="' + c.id + '" title="Ver ampliada en 3D">' + ic('ojo') + '</span>' }); }).join('') + '</div>';
+    return '<div class="dedlayout">' + left + '<div class="dedright"><h2 class="dedh">' + (ui.slots[d.i] ? 'Editando' : 'Nuevo mazo') + ' · hueco ' + (d.i + 1) + '</h2>' + chips + grid + '</div></div>';
+  }
+  function renderDeck() {
+    var tab = ui.dedit ? 'decks' : (ui.colTab || 'cards');
+    var h = head('deck', '' + ic('cartas') + ' Colección') + '<div class="shtabs">' + COLTABS.map(function (t) { return '<button class="' + (t[0] === tab ? 'on' : '') + '" data-act="coltab" data-t="' + t[0] + '">' + t[1] + '</button>'; }).join('') + '</div>';
+    h += '<div class="shbody">' + (tab === 'decks' ? (ui.dedit ? deckEditor() : decksTab()) : tab === 'skins' ? skinsTab() : cardsTab()) + '</div></div>';
     app.innerHTML = h;
+  }
+  function pickHtml() {
+    var tiles = [0, 1, 2].map(function (i) {
+      var sl = ui.slots[i]; if (!sl) return '';
+      var err = deckErrFor(sl.ids);
+      return deckTile(sl, i, err ? 'disabled title="' + esc(err) + '"' : 'data-act="pickdeck" data-i="' + i + '"', err ? ' off' : '');
+    }).join('');
+    return '<div class="overlay pickov"><div class="panel pickp"><h2>' + ic('cartas') + ' ¿Con qué mazo quieres jugar?</h2><div class="dktiles">' + tiles + '</div><div class="bar" style="justify-content:center"><button class="btn sec" data-act="pickcancel">Cancelar</button></div></div></div>';
+  }
+  var PLAYACTS = { startai: 1, startrev: 1, startvs4b: 1, startrevvs4b: 1, openpvp: 1, openrevpvp: 1, openvs4: 1, openrevvs4: 1 };
+  function askDeck(act) {
+    var ok = ui.slots.some(function (sl) { return sl && !deckErrFor(sl.ids); });
+    if (!ok) { ui.colTab = 'decks'; ui.screen = 'deck'; ui.msg = 'Aún no tienes ningún mazo guardado válido: crea uno para poder jugar.'; window.scrollTo(0, 0); return render(); }
+    ui.pick = { act: act }; render();
   }
 
   // ---------- 1 vs 1 online ----------
@@ -799,7 +853,7 @@
     var s = ui.s, view = ui.view || E.viewOf(s), P = s.p[0], R = s.p[1];
     var shopMode = s.shopOpen && !ui.playing, shop = shopMode && s.phase === 'prep', prep = s.phase === 'prep' && !ui.playing && !s.shopOpen;
     var pend = prep ? E.pendingTargets(s).length : 0, hasT = Object.keys(P.target).length > 0;
-    var h = '<div class="gwrap' + (shopMode ? ' shopmode' : '') + '"><div class="top"><div><h1>Ronda ' + s.round + ' · ' + (s.shopOpen ? '' + ic('carrito') + ' Tienda' + (s.round === 1 ? ' inicial' : '') : '' + ic('espadas') + ' Combate') + (!s.shopOpen ? ' <span class="mut">· ' + (s.first === 0 ? 'atacas primero' : 'ataca primero el rival') + '</span>' : '') + '</h1></div><div><button class="lnk" data-act="menu" data-to="deck">' + ic('cartas') + ' Mazo</button> · <button class="lnk" data-act="menu" data-to="home">' + ic('casa') + ' Menú</button>' + (s.over ? '' : ui.tut ? ' · <button class="lnk surr" data-act="tutexit">' + ic('puerta') + ' Salir del tutorial</button>' : ' · <button class="lnk surr" data-act="surrender">' + ic('puerta') + ' Rendirse</button>') + '</div></div>' + timerHtml(prep || shop) + '';
+    var h = '<div class="gwrap' + (shopMode ? ' shopmode' : '') + '"><div class="top"><div><h1>Ronda ' + s.round + ' · ' + (s.shopOpen ? '' + ic('carrito') + ' Tienda' + (s.round === 1 ? ' inicial' : '') : '' + ic('espadas') + ' Combate') + (!s.shopOpen ? ' <span class="mut">· ' + (s.first === 0 ? 'atacas primero' : 'ataca primero el rival') + '</span>' : '') + '</h1></div><div><button class="lnk" data-act="menu" data-to="deck">' + ic('cartas') + ' Colección</button> · <button class="lnk" data-act="menu" data-to="home">' + ic('casa') + ' Menú</button>' + (s.over ? '' : ui.tut ? ' · <button class="lnk surr" data-act="tutexit">' + ic('puerta') + ' Salir del tutorial</button>' : ' · <button class="lnk surr" data-act="surrender">' + ic('puerta') + ' Rendirse</button>') + '</div></div>' + timerHtml(prep || shop) + '';
     h += '<div class="gmain"><aside class="gl">' + boardHtml(s) + synergyHtml(P) + '</aside><section class="gc"><div class="board" id="board">';
     var ML = s.maxLife || CFG.life;
     if (s.vs4 && s.spec && ui.playing) h += '<div class="v4spec">' + ic('ojo') + ' Descansas: estás viendo el duelo <b>' + esc(s.spec[0]) + '</b> contra <b>' + esc(s.spec[1]) + '</b></div>';
@@ -1013,11 +1067,11 @@
   window.addEventListener('resize', function () { var o = document.querySelector('#board svg.arrows'); if (o) o.remove(); drawArrows(); });
 
   // ---------- Navegación por URL (#/mazo, #/tienda…): al recargar se vuelve a la misma sección ----------
-  var ROUTES = { home: 'inicio', modes: 'jugar', pvp: 'jugar', game: 'jugar', deck: 'mazo', packs: 'tienda', profile: 'perfil', ladder: 'clasificacion' };
-  var ROUTE_SCREEN = { inicio: 'home', jugar: 'modes', mazo: 'deck', tienda: 'packs', perfil: 'profile', clasificacion: 'ladder' };
-  var ROUTE_TITLE = { home: 'Inicio', modes: 'Jugar', pvp: 'Jugar', game: 'Partida', deck: 'Mazo', packs: 'Tienda', profile: 'Perfil', ladder: 'Clasificación' };
+  var ROUTES = { home: 'inicio', modes: 'jugar', pvp: 'jugar', game: 'jugar', deck: 'coleccion', packs: 'tienda', profile: 'perfil', ladder: 'clasificacion' };
+  var ROUTE_SCREEN = { inicio: 'home', jugar: 'modes', coleccion: 'deck', mazo: 'deck', tienda: 'packs', perfil: 'profile', clasificacion: 'ladder' };
+  var ROUTE_TITLE = { home: 'Inicio', modes: 'Jugar', pvp: 'Jugar', game: 'Partida', deck: 'Colección', packs: 'Tienda', profile: 'Perfil', ladder: 'Clasificación' };
   function hashScreen() { var m = /^#\/([a-z]+)/.exec(location.hash || ''); return m && ROUTE_SCREEN[m[1]] || null; }
-  function landing() { var sc = hashScreen() || 'home'; if (sc === 'modes' && deckError()) sc = 'deck'; return sc; }
+  function landing() { var sc = hashScreen() || 'home'; return sc; }
   function syncHash() {
     if (!ui.acct || !ROUTES[ui.screen]) { if (!ui.acct) document.title = 'TCG Arena'; return; }
     document.title = ROUTE_TITLE[ui.screen] + ' · TCG Arena';
@@ -1032,7 +1086,6 @@
     if (!sc || ROUTES[ui.screen] === ROUTES[sc]) return;
     if (ui.screen === 'game' && ui.s && !ui.s.over) { syncHash(); return; } // en plena partida no se sale con el botón atrás
     clearTimeout(timer); ui.playing = false;
-    if (sc === 'modes' && deckError()) sc = 'deck';
     ui.screen = sc; ui.msg = ''; window.scrollTo(0, 0); render();
   }
   function render() {
@@ -1170,6 +1223,7 @@
     if (Date.now() - noClick < 350 || ui.busy) return;
     var el = e.target.closest('[data-act]'); if (!el) return;
     var act = el.dataset.act, s = ui.s, P = s && s.p[0];
+    if (ui.dedit) { var ne = document.getElementById('de-name'); if (ne) ui.dedit.name = ne.value; }
     if (act === 'acctmenu') { var w = el.closest('.acctw'); if (w) w.classList.toggle('open'); return; }
     if (act === 'logout') return logout();
     if (act === 'pinshow') { ui.showPin = !ui.showPin; app.querySelectorAll('#lg-pin,#lg-pin2').forEach(function (i) { i.type = ui.showPin ? 'text' : 'password'; }); app.querySelectorAll('.pineye').forEach(function (b) { b.classList.toggle('on', ui.showPin); b.title = ui.showPin ? 'Ocultar PIN' : 'Ver PIN'; }); return; }
@@ -1225,12 +1279,13 @@
     if (act === 'newssel') { ui.newsSel = +el.dataset.i; ui.newsFull = false; return refreshNews(); }
     if (act === 'newsmore') { ui.newsFull = !ui.newsFull; return refreshNews(); }
     if (act === 'setavatar') { return api('avatarSet', { card: el.dataset.card }).then(function (r) { if (r.ok) { setAcct(r.data.user); ui.msg = ''; } else ui.msg = (r.data && r.data.error) || 'No se pudo cambiar la foto.'; render(); }); }
+    if (PLAYACTS[act]) { if (!ui.picked) return askDeck(act); ui.picked = false; }
     if (act === 'tutstart') return startTutorial();
     if (act === 'tutexit') { tutExit(); return; }
     if (ui.tut && act === 'refresh') return;
     if (act === 'nav') {
       clearTimeout(timer); ui.playing = false;
-      if (el.dataset.to === 'play') { if (deckError()) { ui.screen = 'deck'; return render(); } saveDeck(); ui.screen = 'modes'; window.scrollTo(0, 0); return render(); }
+      if (el.dataset.to === 'play') { ui.screen = 'modes'; window.scrollTo(0, 0); return render(); }
       ui.screen = el.dataset.to; ui.msg = ''; window.scrollTo(0, 0); return render();
     }
     if (act === 'filter') { var t = el.dataset.t, k0 = ui.filters.indexOf(t); if (k0 >= 0) ui.filters.splice(k0, 1); else ui.filters.push(t); ui.screen = 'deck'; var y0 = window.scrollY; renderDeck(); window.scrollTo(0, y0); return; }
@@ -1245,24 +1300,38 @@
     if (act === 'zoom') { e.stopPropagation(); openZoom(el.dataset.id, el.dataset.skin || ''); return; }
     if (act === 'novtog') { e.stopPropagation(); ui.novView = ui.novView || {}; ui.novView[el.dataset.id] = !ui.novView[el.dataset.id]; var y0 = window.scrollY; renderDeck(); window.scrollTo(0, y0); return; }
     if (act === 'onlydeck') { ui.onlyDeck = el.checked; return render(); }
-    if (act === 'toggle') {
-      var id = el.dataset.id, k = ui.deck.indexOf(id);
+    if (act === 'coltab') { ui.colTab = el.dataset.t; ui.dedit = null; ui.msg = ''; ui.delAsk = null; window.scrollTo(0, 0); return render(); }
+    if (act === 'dkopen') { var oi = +el.dataset.i; ui.deckOpen = ui.deckOpen === oi ? null : oi; ui.delAsk = null; ui.msg = ''; return renderDeck(); }
+    if (act === 'dkedit') { var ei = +el.dataset.i, esl = ui.slots[ei]; ui.dedit = { i: ei, name: esl ? esl.name : 'Mazo ' + (ei + 1), ids: esl ? esl.ids.slice() : [], cover: esl ? esl.cover || '' : '', theme: '' }; ui.colTab = 'decks'; ui.msg = ''; window.scrollTo(0, 0); return render(); }
+    if (act === 'dkdel') { ui.delAsk = +el.dataset.i; return renderDeck(); }
+    if (act === 'dkdelno') { ui.delAsk = null; return renderDeck(); }
+    if (act === 'dkdelyes') { var di = +el.dataset.i; ui.slots[di] = null; saveSlots(); ui.delAsk = null; ui.deckOpen = null; ui.msg = 'Mazo eliminado.'; return renderDeck(); }
+    if (act === 'dethm') { ui.dedit.theme = ui.dedit.theme === el.dataset.t ? '' : el.dataset.t; var yt = window.scrollY; renderDeck(); window.scrollTo(0, yt); return; }
+    if (act === 'detoggle') {
+      var d0 = ui.dedit, id = el.dataset.id, k = d0.ids.indexOf(id); ui.msg = '';
       if (!owns(id)) ui.msg = 'Aún no tienes esta carta: consíguela en la tienda.';
-      else if (k >= 0) ui.deck.splice(k, 1);
-      else if (deckSize() + CARD[id].size <= CFG.deckBudget) ui.deck.push(id);
+      else if (k >= 0) d0.ids.splice(k, 1);
+      else if (E.deckSize(d0.ids) + CARD[id].size <= CFG.deckBudget) d0.ids.push(id);
       else ui.msg = 'No cabe: el mazo ya está lleno de espacio.';
-      saveDeck(); var y = window.scrollY; renderDeck(); window.scrollTo(0, y); return;
+      var y = window.scrollY; renderDeck(); window.scrollTo(0, y); return;
     }
-    if (act === 'randdeck') { ui.deck = E.randomDeck(Math.random, ui.acct.owned); saveDeck(); ui.msg = ''; return renderDeck(); }
-    if (act === 'cleardeck') { ui.deck = []; saveDeck(); ui.msg = ''; return renderDeck(); }
-    if (act === 'slot-save') {
-      if (!ui.deck.length) return;
-      var nm = (ui.slotName || '').trim() || 'Mazo ' + (ui.slotTo + 1);
-      ui.slots[ui.slotTo] = { name: nm, ids: ui.deck.slice() }; saveSlots(); ui.msg = '«' + nm + '» guardado en el hueco ' + (ui.slotTo + 1) + '.'; ui.slotName = ''; return renderDeck();
+    if (act === 'decover') { ui.dedit.cover = el.dataset.id; var yc = window.scrollY; renderDeck(); window.scrollTo(0, yc); return; }
+    if (act === 'derand') { ui.dedit.ids = E.randomDeck(Math.random, ui.acct.owned); ui.msg = ''; return renderDeck(); }
+    if (act === 'declear') { ui.dedit.ids = []; ui.msg = ''; return renderDeck(); }
+    if (act === 'decancel') { ui.dedit = null; ui.msg = ''; window.scrollTo(0, 0); return render(); }
+    if (act === 'desave') {
+      var dd = ui.dedit, derr = deckErrFor(dd.ids);
+      if (derr) { ui.msg = derr; return renderDeck(); }
+      var nm = (dd.name || '').trim().slice(0, 20) || 'Mazo ' + (dd.i + 1);
+      ui.slots[dd.i] = { name: nm, ids: dd.ids.slice(), cover: dd.cover || '' }; saveSlots();
+      ui.deckOpen = dd.i; ui.dedit = null; ui.msg = '«' + nm + '» guardado.'; window.scrollTo(0, 0); return render();
     }
-    if (act === 'slot-load') { var sl = ui.slots[+el.dataset.i]; if (sl) { ui.deck = sl.ids.filter(owns); saveDeck(); ui.slotTo = +el.dataset.i; ui.msg = 'Cargado «' + sl.name + '».'; } return renderDeck(); }
-    if (act === 'slot-del') { var di = +el.dataset.i; if (ui.slots[di]) { ui.msg = 'Borrado «' + ui.slots[di].name + '».'; ui.slots[di] = null; saveSlots(); } return renderDeck(); }
-    if (act === 'menu') { if (PV.on) { if (s && !s.over && !window.confirm('Si sales ahora pierdes la partida. ¿Salir?')) return; pvpLeaveGame(); } clearTimeout(timer); ui.playing = false; ui.screen = el.dataset.to || 'home'; return render(); }
+    if (act === 'pickcancel') { ui.pick = null; return render(); }
+    if (act === 'pickdeck') {
+      var psl = ui.slots[+el.dataset.i]; if (!psl || !ui.pick) return;
+      ui.deck = psl.ids.slice(); saveDeck(); var pa = ui.pick.act; ui.pick = null; ui.picked = true;
+      var fb = document.createElement('button'); fb.dataset.act = pa; app.appendChild(fb); fb.click(); fb.remove(); ui.picked = false; return;
+    }
     if (act === 'openpvp' || act === 'openrevpvp') {
       ui.botGame = false;
       if (deckError()) { ui.screen = 'deck'; return render(); }

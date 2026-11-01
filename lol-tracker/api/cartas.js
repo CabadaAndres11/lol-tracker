@@ -624,7 +624,7 @@ module.exports = async function handler(req, res) {
       const sl = Array.isArray(body.slots) ? body.slots.slice(0, 3) : [];
       u.decks = {
         deck: clean(body.deck),
-        slots: [0, 1, 2].map((i) => (sl[i] && Array.isArray(sl[i].ids) ? { name: String(sl[i].name || 'Mazo').slice(0, 30), ids: clean(sl[i].ids) } : null)),
+        slots: [0, 1, 2].map((i) => (sl[i] && Array.isArray(sl[i].ids) ? { name: String(sl[i].name || 'Mazo').slice(0, 30), ids: clean(sl[i].ids), cover: String(sl[i].cover || '').slice(0, 60) } : null)),
       };
       await saveUser(cfg, u);
       res.status(200).json({ ok: true }); return;

@@ -1,6 +1,8 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-01', tag: 'Corrección', title: 'Texto de la sinergia KOI',
+      items: ['El texto de KOI ahora indica que el ataque ganado cuando cae una KOI es permanente (tope +8 por tropa), que es como funcionaba en realidad.'] },
     { date: '2026-11-01', tag: 'Novedad', title: 'Versión 1.1: introducción animada de Correa',
       items: ['¡Ya está aquí la versión 1.1! Al abrir el menú aparece una pequeña animación que explica la sinergia Correa: las cartas entran en juego, recibes a las 4 novias y una ocupa el hueco 5. Se cierra pulsando fuera de ella, y con la casilla «No mostrar más» eliges si vuelve a salir en tu cuenta.',
         'Puedes volver a verla cuando quieras: {{intro}}'] },

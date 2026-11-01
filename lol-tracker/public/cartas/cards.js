@@ -981,9 +981,9 @@ var D={
    ],
    "color": "#fb923c",
    "tx": [
-    "Cuando muere una KOI, tus tropas vivas ganan +1 ataque en ese combate.",
-    "+2 ataque.",
-    "+3 ataque."
+    "Cuando muere una KOI, tus tropas vivas ganan +1 ataque permanente (tope +8 por tropa).",
+    "+2 ataque permanente.",
+    "+3 ataque permanente."
    ]
   },
   "Voley": {

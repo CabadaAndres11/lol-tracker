@@ -1080,3 +1080,6 @@ img.timg[src$="comebacker.png"] { filter: drop-shadow(0 0 1.5px #fff) drop-shado
 .icap span { display: inline-block; padding: .35rem .9rem; border-radius: 999px; background: rgba(10,6,24,.78); border: 1px solid rgba(251,113,133,.6); color: #fff; font: 600 clamp(.65rem, 2.1vw, 1rem)/1.2 Inter, sans-serif; }
 .ibtns { display: flex; gap: .6rem; flex-wrap: wrap; justify-content: center; }
 @media (prefers-reduced-motion: reduce) { .introst .ibg i { animation: none; } }
+
+.iver { position: absolute; right: 3%; bottom: 3%; z-index: 8; padding: .15rem .6rem; border-radius: 999px; font: 800 clamp(.6rem, 1.8vw, .85rem)/1.3 Inter, sans-serif; letter-spacing: .08em; color: #2a1a00; background: linear-gradient(180deg, #ffe28a, #fbbf24); box-shadow: 0 2px 8px rgba(0,0,0,.5); }
+.ititle small { text-shadow: 0 0 10px rgba(251,113,133,.7); }

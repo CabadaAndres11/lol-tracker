@@ -110,7 +110,7 @@
     closeIntro(false);
     var boys = ['lihone-correa', 'dashlight-correa', 'potango', 'chipy-correa'], girls = ['eriko', 'helena', 'lucia', 'ari'];
     var h = '<div class="intropanel"><div class="introst" data-sc="0"><div class="ibg"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>' +
-      '<div class="ititle"><small>Nueva sinergia</small><b>CORREA</b></div>' +
+      '<div class="ititle"><small>¡Ya está aquí la versión 1.1!</small><b>CORREA</b></div><span class="iver">v1.1</span>' +
       '<div class="islot p1"></div><div class="islot p2"></div><div class="islot p3"></div><div class="islot p4"></div><div class="islot p5"><span>' + ic('corazon') + ' Hueco 5</span></div>' +
       boys.map(function (id, k) { return '<div class="iq b' + (k + 1) + '">' + cardHtml(CARD[id], { lv: 1 }) + '</div>'; }).join('') +
       girls.map(function (id, k) { return '<div class="iq g' + (k + 1) + '">' + cardHtml(CARD[id], { lv: 1 }) + '</div>'; }).join('') +
@@ -121,7 +121,7 @@
     introEl = document.createElement('div'); introEl.className = 'introov'; introEl.innerHTML = h;
     document.body.appendChild(introEl);
     var st = introEl.querySelector('.introst'), cap = st.querySelector('.icap span');
-    var CAPS = ['', 'Cuatro cartas Correa entran en juego', 'Con la sinergia recibes a las 4 novias', 'Una por ronda en el hueco 5: Eriko mima a toda la mesa', 'Lucía, Helena y Ari cambian el combate', '¡Elige a tu novia y arrasa!'];
+    var CAPS = ['', '', 'Con la sinergia recibes a las 4 novias', 'Una por ronda en el hueco 5: Eriko mima a toda la mesa', 'Lucía, Helena y Ari cambian el combate', '¡Elige a tu novia y arrasa!'];
     function go(n) { st.dataset.sc = n; cap.textContent = CAPS[n] || ''; cap.parentNode.classList.toggle('on', !!CAPS[n]); }
     function run() {
       introT.forEach(clearTimeout); introT = [];

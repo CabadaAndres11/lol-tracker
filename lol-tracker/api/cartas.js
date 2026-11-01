@@ -55,10 +55,12 @@ function drawCard(minRarity) {
   return pool[crypto.randomInt(0, pool.length)].id;
 }
 // Efectos cosméticos disponibles (por ahora todos son de todos los jugadores)
-const FX_DEPLOY = ['default'];
+const FX_PRICE = { default: 0, meteoro: 150 }; // precio en monedas de cada despliegue
+const FX_DEPLOY = Object.keys(FX_PRICE);
+const fxOwned = (u) => ['default', ...((u.fxOwned || []).filter((x) => FX_DEPLOY.includes(x) && x !== 'default'))];
 function publicUser(u) {
   return {
-    name: u.name, pts: u.pts || 0, coins: u.coins, owned: u.owned, dups: u.dups || {}, skins: u.skins || [], skinSel: u.skinSel || {}, decks: u.decks || null, avatar: u.avatar || '', fx: { deploy: FX_DEPLOY.includes((u.fx || {}).deploy) ? u.fx.deploy : 'default' },
+    name: u.name, pts: u.pts || 0, coins: u.coins, owned: u.owned, dups: u.dups || {}, skins: u.skins || [], skinSel: u.skinSel || {}, decks: u.decks || null, avatar: u.avatar || '', fx: { deploy: fxOwned(u).includes((u.fx || {}).deploy) ? u.fx.deploy : 'default' }, fxOwned: fxOwned(u),
     dailyAvailable: u.lastDaily !== today(),
     gamesToday: u.rewardDay === today() ? u.rewardCount : 0,
     maxGamesToday: MAX_GAME_REWARDS_PER_DAY,
@@ -634,7 +636,18 @@ module.exports = async function handler(req, res) {
     if (act === 'fxEquip') { // equipar un efecto (kind: 'deploy')
       const kind = String(body.kind || ''), id = String(body.id || '');
       if (kind !== 'deploy' || !FX_DEPLOY.includes(id)) { res.status(400).json({ error: 'Ese efecto no existe.' }); return; }
+      if (!fxOwned(u).includes(id) && !isAdmin(u)) { res.status(403).json({ error: 'Aún no tienes ese efecto: cómpralo en la tienda.' }); return; }
       u.fx = { ...(u.fx || {}), deploy: id };
+      await saveUser(cfg, u);
+      res.status(200).json({ user: publicUser(u) }); return;
+    }
+    if (act === 'fxBuy') { // comprar un efecto en la tienda
+      const id = String(body.id || '');
+      if (!FX_DEPLOY.includes(id)) { res.status(400).json({ error: 'Ese efecto no existe.' }); return; }
+      if (fxOwned(u).includes(id)) { res.status(409).json({ error: 'Ya tienes ese efecto.', user: publicUser(u) }); return; }
+      const cost = isAdmin(u) ? 0 : FX_PRICE[id];
+      if (u.coins < cost) { res.status(402).json({ error: `Necesitas ${FX_PRICE[id]} monedas.`, user: publicUser(u) }); return; }
+      u.coins -= cost; u.fxOwned = [...(u.fxOwned || []), id];
       await saveUser(cfg, u);
       res.status(200).json({ user: publicUser(u) }); return;
     }

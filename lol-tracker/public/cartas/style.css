@@ -1454,3 +1454,8 @@ body.tutmode .refresh{pointer-events:none;opacity:.35}
 .fxbadge{color:#6ee7a8;font-size:.78rem;font-weight:600;margin-left:6px}
 .fxbtns{display:flex;gap:8px}
 @media(max-width:860px){.fxlayout{grid-template-columns:1fr}.fxnav{flex-direction:row;border-left:0;border-bottom:1px solid rgba(200,170,110,.25)}.fxnav button{border-left:0;border-bottom:3px solid transparent;margin:0 0 -1px}.fxnav button.on{border-bottom-color:var(--gold)}}
+.fxhalo{position:fixed;z-index:7990;width:620px;height:620px;border-radius:50%;pointer-events:none;background:radial-gradient(circle,rgba(255,214,120,.55),rgba(255,160,40,.22) 40%,transparent 70%);mix-blend-mode:screen}
+.fxring{position:fixed;z-index:8100;width:200px;height:200px;border-radius:50%;pointer-events:none;border:5px solid rgba(255,214,120,.95);box-shadow:0 0 30px rgba(255,190,70,.9),inset 0 0 24px rgba(255,190,70,.7)}
+.fxspark{position:fixed;z-index:8100;width:9px;height:9px;border-radius:50%;pointer-events:none;background:radial-gradient(circle,#fff,#ffd36a 55%,rgba(255,170,40,0));box-shadow:0 0 10px #ffc447}
+.fxitem.nofx .fxinfo b{color:#cfc8b6}.fxprice{color:var(--gold);font-weight:600;font-size:.85rem;margin-left:8px}
+.fxlist .fxbtns{flex-wrap:wrap}

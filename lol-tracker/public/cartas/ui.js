@@ -436,15 +436,18 @@
       '<div class="panel"><h2>Cómo conseguir monedas</h2><ul class="rules"><li><b>Recompensa diaria:</b> +' + a.dailyCoins + ' ' + ic('moneda') + ' cada día.</li><li><b>Partidas contra la IA:</b> +10 ' + ic('moneda') + ' por partida y +20 ' + ic('moneda') + ' más si ganas (hoy llevas ' + a.gamesToday + '/' + a.maxGamesToday + ' partidas con premio). Las partidas muy cortas no dan monedas.</li><li><b>Cartas repetidas:</b> no dan monedas, pero suben la carta de nivel.</li></ul></div>' +
       '<div class="panel"><h2>Tu colección</h2><div class="coinbig">' + a.owned.length + ' / ' + total + '</div><div class="meter colm"><i class="on" style="width:' + Math.round(a.owned.length / total * 100) + '%"></i></div><p class="mut">Solo puedes usar en tus mazos las cartas que tienes.</p><button class="btn sec" data-act="nav" data-to="deck">' + ic('cartas') + ' Ir a la colección</button></div></div>';
   }
+  function shopFx() {
+    return '<div class="panel"><h2>' + ic('brillo') + ' Efectos · Despliegues</h2><p class="mut">Cambian cómo aparecen tus cartas en la mesa. Pruébalos antes de comprar; una vez tuyos, los equipas en Colección → Efectos.</p>' + fxDemo() + '<div class="fxlist">' + fxItems('shop') + '</div></div>';
+  }
   function packsTab(a) {
     var can = a.coins >= a.packCost && !ui.pack;
     return '<div class="packs-grid one"><div class="panel packbox">' + bpkHtml('') + '<h2>Sobre estándar</h2><p class="mut">' + a.packSize + ' cartas al azar de todo el juego (tropas y acciones). La última siempre es Rara o mejor. Las cartas que ya tengas se cambian por monedas.</p>' +
       '<button class="btn cta big" data-act="openpack"' + (can ? '' : ' disabled') + '>' + (a.packCost ? 'Abrir sobre · ' + a.packCost + ' ' + ic('moneda') + '' : 'Abrir sobre · gratis') + '</button>' + (a.coins < a.packCost ? '<p class="mut">Te faltan ' + (a.packCost - a.coins) + ' monedas.</p>' : '') + (ui.msg ? '<div class="hint" style="color:var(--bad)">' + esc(ui.msg) + '</div>' : '') + '</div></div>';
   }
-  var SHTABS = [['feat', 'Destacados'], ['packs', 'Sobres'], ['skins', 'Skins'], ['cards', 'Cartas']];
+  var SHTABS = [['feat', 'Destacados'], ['packs', 'Sobres'], ['skins', 'Skins'], ['cards', 'Cartas'], ['fx', 'Efectos']];
   function renderPacks() {
     var a = ui.acct, tab = ui.shopTab || 'feat';
-    var body = tab === 'packs' ? packsTab(a) : tab === 'skins' ? (skinShop(a) || '<p class="mut">Aún no hay skins a la venta.</p>') : tab === 'cards' ? (newCards(a) || '<p class="mut">Aún no hay cartas nuevas a la venta.</p>') : shopFeaturedHtml(a);
+    var body = tab === 'packs' ? packsTab(a) : tab === 'skins' ? (skinShop(a) || '<p class="mut">Aún no hay skins a la venta.</p>') : tab === 'cards' ? (newCards(a) || '<p class="mut">Aún no hay cartas nuevas a la venta.</p>') : tab === 'fx' ? shopFx() : shopFeaturedHtml(a);
     var h = head('packs', ic('tienda') + ' Tienda') + '<div class="shtabs">' + SHTABS.map(function (t) { return '<button class="' + (t[0] === tab ? 'on' : '') + '" data-act="shoptab" data-t="' + t[0] + '">' + t[1] + '</button>'; }).join('') + '<span class="navsp"></span><span class="shcoin">' + ic('moneda') + ' ' + a.coins + '</span></div>' +
       (ui.msg && tab !== 'packs' ? '<p class="err">' + esc(ui.msg) + '</p>' : '') + '<div class="shbody">' + body + '</div>';
     app.innerHTML = h + packOverlay() + '</div>';
@@ -824,7 +827,7 @@
       if (ui.hl && ui.hl.att === v.uid) o.cls += ' atk';
       if (ui.hl && ui.hl.tgt === v.uid) o.cls += ' hit';
       var skey = side + ':' + v.uid;
-      if (!ui.seen[skey]) { ui.seen[skey] = 1; if (!ui.seedSeen && !REDUCED) { var dl = ui.fl.length * 450; ui.fl.push({ side: side, uid: v.uid, delay: dl }); ui.hideUntil[skey] = Date.now() + dl + FLY_MS; } }
+      if (!ui.seen[skey]) { ui.seen[skey] = 1; if (!ui.seedSeen && !REDUCED) { var dl = ui.fl.length * deployMeta().gap; ui.fl.push({ side: side, uid: v.uid, delay: dl }); ui.hideUntil[skey] = Date.now() + dl + deployMeta().ms; } }
       var dealing = (ui.hideUntil[skey] || 0) > Date.now();
       if (dealing) o.cls += ' dealwait'; else if (ui.landed === v.uid) o.cls += ' landed';
       if (ui.hl && ui.hl.fx && ui.hl.fx.uids.indexOf(v.uid) >= 0) o.cls += ui.hl.fx.neg ? ' debuffed' : ' buffed';
@@ -941,10 +944,43 @@
   }
 
   // ---------- Despliegue: la carta aparece grande en mitad de la pantalla, da vueltas y aterriza en su hueco ----------
-  var FLY_MS = 2000, REDUCED = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  var REDUCED = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   // Efectos de despliegue (cada uno devuelve la animación del contenedor .flyc). Se equipan en Colección → Efectos.
-  var DEPLOY_LIST = [{ id: 'default', name: 'Por defecto', desc: 'La carta aparece grande en mitad de la pantalla, da un par de vueltas y vuela hasta su hueco.' }];
+  var DEPLOY_LIST = [
+    { id: 'default', name: 'Por defecto', desc: 'La carta aparece grande en mitad de la pantalla, da un par de vueltas y vuela hasta su hueco.', price: 0, ms: 2000, gap: 450 },
+    { id: 'meteoro', name: 'Meteoro dorado', desc: 'La carta cae como un meteoro envuelta en luz dorada, gira en el aire y se estrella en su hueco con una onda de choque y chispas.', price: 150, ms: 2900, gap: 600 }
+  ];
+  function fxHas(id) { return !!(ui.acct && ((ui.acct.fxOwned || ['default']).indexOf(id) >= 0 || ui.acct.admin)); }
+  // destello al aterrizar: onda de choque y chispas
+  function impact(x, y, at) {
+    var ring = document.createElement('div'); ring.className = 'fxring'; ring.style.cssText = 'left:' + x + 'px;top:' + y + 'px'; document.body.appendChild(ring);
+    ring.animate([{ transform: 'translate(-50%,-50%) scale(.1)', opacity: 0, offset: 0 }, { transform: 'translate(-50%,-50%) scale(.4)', opacity: .95, offset: .12 }, { transform: 'translate(-50%,-50%) scale(3.4)', opacity: 0, offset: 1 }], { duration: 850, delay: at, fill: 'both', easing: 'ease-out' }).onfinish = function () { ring.remove(); };
+    for (var i = 0; i < 16; i++) {
+      var d = document.createElement('i'), a = (i / 16) * Math.PI * 2 + Math.random() * .3, dist = 70 + Math.random() * 90;
+      d.className = 'fxspark'; d.style.cssText = 'left:' + x + 'px;top:' + y + 'px'; document.body.appendChild(d);
+      d.animate([{ transform: 'translate(-50%,-50%) scale(1)', opacity: 0, offset: 0 }, { transform: 'translate(-50%,-50%) scale(1)', opacity: 1, offset: .08 }, { transform: 'translate(' + (Math.cos(a) * dist - 3) + 'px,' + (Math.sin(a) * dist - 3) + 'px) scale(.1)', opacity: 0, offset: 1 }], { duration: 650 + Math.random() * 300, delay: at, fill: 'both', easing: 'cubic-bezier(.1,.7,.3,1)' }).onfinish = (function (n) { return function () { n.remove(); }; })(d);
+    }
+  }
+  function deployMeta(id) { id = id || deployId(); return DEPLOY_LIST.filter(function (e) { return e.id === id; })[0] || DEPLOY_LIST[0]; }
   var DEPLOY_FX = {
+    'meteoro': function (wrap, r, delay, dur) {
+      var W = window.innerWidth, H = window.innerHeight, cx = W / 2 - (r.left + r.width / 2), cy = H / 2 - (r.top + r.height / 2) - 10;
+      var sc = Math.max(1.4, Math.min(3, Math.min(300, W * .62, H * .5 * 5 / 7) / r.width)) * 1.08;
+      var T = function (x, y, z, ry, rz) { return 'perspective(1100px) translate(' + x + 'px,' + y + 'px) scale(' + z + ') rotateY(' + ry + 'deg) rotateZ(' + (rz || 0) + 'deg)'; };
+      var G = function (a) { return 'drop-shadow(0 0 ' + Math.round(8 + a * 34) + 'px rgba(255,200,80,' + (.25 + a * .75).toFixed(2) + ')) drop-shadow(0 20px 26px rgba(0,0,0,.55))'; };
+      var halo = document.createElement('div'); halo.className = 'fxhalo'; halo.style.cssText = 'left:' + (r.left + r.width / 2 + cx) + 'px;top:' + (r.top + r.height / 2 + cy) + 'px'; document.body.appendChild(halo);
+      halo.animate([{ transform: 'translate(-50%,-50%) scale(.2)', opacity: 0, offset: 0 }, { transform: 'translate(-50%,-50%) scale(1)', opacity: .9, offset: .32 }, { transform: 'translate(-50%,-50%) scale(1.25)', opacity: .8, offset: .72 }, { transform: 'translate(-50%,-50%) scale(.4)', opacity: 0, offset: 1 }], { duration: dur, delay: delay, fill: 'both' }).onfinish = function () { halo.remove(); };
+      impact(r.left + r.width / 2, r.top + r.height / 2, delay + dur * .9);
+      return wrap.animate([
+        { transform: T(cx - W * .75, cy - H * .95, 3, 0, -40), filter: G(1), opacity: 0, offset: 0 },
+        { transform: T(cx - W * .38, cy - H * .45, 2.5, 360, -22), filter: G(1), opacity: 1, offset: .08, easing: 'cubic-bezier(.15,.8,.25,1)' },
+        { transform: T(cx, cy, sc, 720, 0), filter: G(1), opacity: 1, offset: .30, easing: 'cubic-bezier(.4,0,.6,1)' },
+        { transform: T(cx, cy - 12, sc * 1.03, 1440, 0), filter: G(.55), opacity: 1, offset: .66 },
+        { transform: T(cx, cy - 34, sc * 1.14, 1500, 0), filter: G(1), opacity: 1, offset: .78, easing: 'cubic-bezier(.6,0,.9,.4)' },
+        { transform: T(0, 6, .9, 1800, 0), filter: G(.9), opacity: 1, offset: .9, easing: 'cubic-bezier(.2,.9,.3,1)' },
+        { transform: T(0, 0, 1, 1800, 0), filter: G(0), opacity: 1, offset: 1 }
+      ], { duration: dur, delay: delay, fill: 'both' });
+    },
     'default': function (wrap, r, delay, dur) {
       var cx = window.innerWidth / 2 - (r.left + r.width / 2), cy = window.innerHeight / 2 - (r.top + r.height / 2) - 10, sc = Math.max(1.4, Math.min(3, Math.min(300, window.innerWidth * .62, window.innerHeight * .5 * 5 / 7) / r.width));
       var T = function (x, y, z, ry) { return 'perspective(1100px) translate(' + x + 'px,' + y + 'px) scale(' + z + ') rotateY(' + ry + 'deg)'; };
@@ -957,25 +993,35 @@
       ], { duration: dur - 150, delay: delay, fill: 'both', easing: 'cubic-bezier(.5,0,.3,1)' });
     }
   };
-  function deployId() { var id = ui.acct && ui.acct.fx && ui.acct.fx.deploy; return DEPLOY_FX[id] ? id : 'default'; }
+  function deployId() { var id = ui.acct && ui.acct.fx && ui.acct.fx.deploy; return DEPLOY_FX[id] && fxHas(id) ? id : 'default'; }
   // Vista previa en Colección → Efectos: la carta de muestra vuela desde el centro hasta su hueco
   function previewDeploy(id) {
     var t = app.querySelector('.fxdemo .card'); if (!t || ui.fxBusy) return;
     var r = t.getBoundingClientRect(); ui.fxBusy = true;
     var wrap = document.createElement('div'); wrap.className = 'flyc'; wrap.style.cssText = 'left:' + r.left + 'px;top:' + r.top + 'px;width:' + r.width + 'px;height:' + r.height + 'px';
     wrap.appendChild(t.cloneNode(true)); document.body.appendChild(wrap); t.style.visibility = 'hidden';
-    var an = (DEPLOY_FX[id] || DEPLOY_FX.default)(wrap, r, 0, FLY_MS);
+    var an = (DEPLOY_FX[id] || DEPLOY_FX.default)(wrap, r, 0, deployMeta(id).ms);
     an.onfinish = function () { wrap.remove(); t.style.visibility = ''; ui.fxBusy = false; };
   }
-  function effectsTab() {
-    var a = ui.acct, cur = deployId(), sample = D.cards.filter(function (c) { return owns(c.id) && ARTS[c.id]; })[0] || D.cards[0];
-    var nav = '<nav class="fxnav"><button class="on" data-act="fxsec" data-t="deploy">Despliegues</button></nav>';
-    var list = DEPLOY_LIST.map(function (e) {
-      var eq = e.id === cur;
-      return '<div class="fxitem' + (eq ? ' eq' : '') + '"><div class="fxinfo"><b>' + esc(e.name) + (eq ? ' <span class="fxbadge">' + ic('check') + ' Equipado</span>' : '') + '</b><span class="mut">' + esc(e.desc) + '</span></div><div class="fxbtns"><button class="btn sec sm" data-act="fxprev" data-id="' + e.id + '">' + ic('ojo') + ' Probar</button>' + (eq ? '' : '<button class="btn sm" data-act="fxequip" data-id="' + e.id + '">Equipar</button>') + '</div></div>';
+  function fxDemo() {
+    var sample = D.cards.filter(function (c) { return owns(c.id) && ARTS[c.id]; })[0] || D.cards[0];
+    return '<div class="fxdemo"><div class="fxslot"></div><div class="fxcard">' + cardHtml(sample, { lv: 1, skin: '' }) + '</div></div>';
+  }
+  // Lista de despliegues. where: 'col' (Colección: equipar) o 'shop' (Tienda: comprar)
+  function fxItems(where) {
+    var a = ui.acct, cur = deployId();
+    return DEPLOY_LIST.filter(function (e) { return where === 'col' || e.price > 0; }).map(function (e) {
+      var eq = e.id === cur, has = fxHas(e.id), btn;
+      if (where === 'shop') btn = has ? '<button class="btn sec sm" disabled>' + ic('check') + ' Ya lo tienes</button>' : '<button class="btn sm" data-act="fxbuy" data-id="' + e.id + '"' + (a.coins < (a.admin ? 0 : e.price) ? ' disabled' : '') + '>Comprar · ' + (a.admin ? 'gratis' : e.price + ' ' + ic('moneda')) + '</button>';
+      else btn = eq ? '' : has ? '<button class="btn sm" data-act="fxequip" data-id="' + e.id + '">Equipar</button>' : '<button class="btn sm" disabled title="Cómpralo en la tienda">' + ic('candado') + ' Sin comprar</button><button class="btn sec sm" data-act="fxgoshop">Ir a la tienda</button>';
+      return '<div class="fxitem' + (eq && where === 'col' ? ' eq' : '') + (has ? '' : ' nofx') + '"><div class="fxinfo"><b>' + esc(e.name) + (eq && where === 'col' ? ' <span class="fxbadge">' + ic('check') + ' Equipado</span>' : '') + (has || e.price === 0 ? '' : ' <span class="fxprice">' + e.price + ' ' + ic('moneda') + '</span>') + '</b><span class="mut">' + esc(e.desc) + '</span></div><div class="fxbtns"><button class="btn sec sm" data-act="fxprev" data-id="' + e.id + '">' + ic('ojo') + ' Probar</button>' + btn + '</div></div>';
     }).join('');
+  }
+  function effectsTab() {
+    var nav = '<nav class="fxnav"><button class="on" data-act="fxsec" data-t="deploy">Despliegues</button></nav>';
+    var list = fxItems('col');
     return '<div class="fxlayout">' + nav + '<div class="fxmain"><h2 class="dedh">Despliegues</h2><p class="mut colhint">Así aparecen tus cartas en la mesa al jugarlas. Los demás jugadores ven el efecto que tengas equipado.</p>' +
-      '<div class="fxdemo"><div class="fxslot"></div><div class="fxcard">' + cardHtml(sample, { lv: 1, skin: '' }) + '</div></div><div class="fxlist">' + list + '</div></div></div>';
+      fxDemo() + '<div class="fxlist">' + list + '</div></div></div>';
   }
   function runFlights() {
     var L = ui.fl; ui.fl = [];
@@ -987,7 +1033,7 @@
       var wrap = document.createElement('div'); wrap.className = 'flyc'; wrap.style.cssText = 'left:' + r.left + 'px;top:' + r.top + 'px;width:' + r.width + 'px;height:' + r.height + 'px';
       var cl = t.cloneNode(true); cl.classList.remove('dealwait', 'sel', 'tgtable'); ['data-cuid', 'data-act', 'data-side'].forEach(function (a) { cl.removeAttribute(a); });
       wrap.appendChild(cl); wrap.style.visibility = 'hidden'; document.body.appendChild(wrap);
-      var anim = (DEPLOY_FX[deployId()] || DEPLOY_FX.default)(wrap, r, f.delay, FLY_MS);
+      var anim = (DEPLOY_FX[deployId()] || DEPLOY_FX.default)(wrap, r, f.delay, deployMeta().ms);
       anim.onfinish = function () {
         wrap.remove();
         var real = app.querySelector('.card[data-cuid="' + f.uid + '"][data-side="' + f.side + '"]');
@@ -995,7 +1041,7 @@
         delete ui.hideUntil[f.side + ':' + f.uid];
       };
       wrap.style.visibility = '';
-      end = Math.max(end, Date.now() + f.delay + FLY_MS);
+      end = Math.max(end, Date.now() + f.delay + deployMeta().ms);
     });
     ui.flyUntil = Math.max(ui.flyUntil || 0, end);
   }
@@ -1369,6 +1415,8 @@
     if (act === 'onlydeck') { ui.onlyDeck = el.checked; return render(); }
     if (act === 'coltab') { ui.colTab = el.dataset.t; ui.dedit = null; ui.msg = ''; ui.delAsk = null; window.scrollTo(0, 0); return render(); }
     if (act === 'fxsec') return;
+    if (act === 'fxgoshop') { ui.screen = 'packs'; ui.shopTab = 'fx'; window.scrollTo(0, 0); return render(); }
+    if (act === 'fxbuy') { return api('fxBuy', { id: el.dataset.id }).then(function (r) { if (r.data && r.data.user) setAcct(r.data.user); ui.msg = r.ok ? '' : (r.data.error || ''); render(); }); }
     if (act === 'fxprev') return previewDeploy(el.dataset.id);
     if (act === 'fxequip') { return api('fxEquip', { kind: 'deploy', id: el.dataset.id }).then(function (r) { if (r.ok) setAcct(r.data.user); ui.msg = ''; renderDeck(); }); }
     if (act === 'dkopen') { var oi = +el.dataset.i; ui.deckOpen = ui.deckOpen === oi ? null : oi; ui.delAsk = null; ui.msg = ''; return renderDeck(); }

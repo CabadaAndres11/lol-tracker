@@ -829,13 +829,13 @@ var D={
   },
   {
    "id": "cita-sorpresa",
-   "name": "Cita sorpresa",
+   "name": "Regalo",
    "cost": 2,
    "rarity": "Rara",
    "type": "accion",
    "size": 1,
    "target": "none",
-   "text": "Tu novia aparece ahora: su apoyo (o su regaño) cae sobre todas tus tropas en mesa (necesitas el nivel 1 de Correa).",
+   "text": "La novia del hueco 5 recibe +3/+3 permanente y lo conserva aunque vuelva a la reserva (necesitas el nivel 1 de Correa y una novia en el hueco 5).",
    "theme": "Correa"
   },
   {

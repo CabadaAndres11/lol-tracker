@@ -20,7 +20,6 @@
     anime: { cede: [1, 2, 3] },
     koi: { atk: [1, 2, 3], cap: 8 },
     voley: { atk: [1, 2, 3], red: [1, 1, 2], cap: 8 },
-    novia: { p: [0.6, 0.75, 0.9], up: [1, 2, 3], down: 1, cap: 10 }, // solo la acción «Cita sorpresa»
     novias: { eriko: [2, 3, 4], eCap: [10, 15, 20], helena: [0, 2, 4], lucia: [3, 4, 5], ari: [0.5, 0.6, 0.7] }, // por nivel de Correa // novias del hueco 5 (sinergia Correa)
     tilt: { hit: [1, 1, 2], perm: [1, 2, 2], cap: 8 },
     pueblo: { per: [1, 2], cap: [4, 8] },
@@ -426,8 +425,8 @@
       run: function (s, p) { var P = s.p[p], i = graveKoi(P); P.grave.splice(P.grave.indexOf(i), 1); i.dead = false; i.tmp = { atk: 0, hp: 0, red: 0 }; i.hp = maxHp(i); P.hand.push(i); return card(i).name + ' vuelve a tu mano'; } },
     'remate-doble': { ok: function (s, p) { return (tiers(s.p[p])['Voley'] || 0) >= 1 ? '' : 'Necesitas el nivel 1 de Voley (2 cartas distintas).'; }, run: function (s, p) { s.p[p].fl.vol = true; return 'tus Voley: ataque doble o defensa total'; } },
     'cita-sorpresa': {
-      ok: function (s, p) { return (tiers(s.p[p])['Correa'] || 0) >= 1 && mesaTroops(s.p[p]).length ? '' : 'Necesitas el nivel 1 de Correa (2 cartas distintas) y tropas en mesa.'; },
-      run: function (s, p) { var P = s.p[p], t = tiers(P), r = noviaRoll(P, t, mesaTroops(P), s); return r.up ? '¡tu novia te apoya! +' + FX.novia.up[t['Correa'] - 1] + '/+' + FX.novia.up[t['Correa'] - 1] + ' permanente' : '¡tu novia te regaña! -1/-1 esta ronda'; } },
+      ok: function (s, p) { var n = s.p[p].mesa[4]; return (tiers(s.p[p])['Correa'] || 0) >= 1 && n && !n.dead ? '' : 'Necesitas el nivel 1 de Correa y una novia en el hueco 5.'; },
+      run: function (s, p) { var n = s.p[p].mesa[4], g = sc(s, 3); grow(n, 'atk', g); grow(n, 'hp', g); return card(n).name + ' recibe un regalo: +' + g + '/+' + g + ' permanente'; } },
     'rabia-contenida': { run: function (s, p) { var n = sc(s, 1); s.p[p].fl.tilt = n; return 'si ganas esta ronda: +' + n + ' ataque a las Tilt'; } },
     'fiesta-del-pueblo': { ok: function (s, p) { return (tiers(s.p[p])['Pueblo'] || 0) >= 1 ? '' : 'Necesitas el nivel 1 de Pueblo (2 cartas distintas).'; }, run: function (s, p) { s.p[p].fl.pueblo = true; return 'el crecimiento del pueblo se duplica'; } },
     'hermano-del-alma': {
@@ -590,19 +589,6 @@
   function grow(i, stat, n) {
     if (stat === 'atk') i.perm.atk += n;
     else { i.perm.hp += n; i.hp += n; }
-  }
-
-  function noviaRoll(P, t, troops, s) {
-    var nt = t['Correa'] - 1, up = s.rng() < FX.novia.p[nt];
-    troops.forEach(function (i) {
-      if (up) gainCap(i, 'nov', 'both', FX.novia.up[nt], FX.novia.cap);
-      else {
-        var da = Math.min(FX.novia.down, atk(i) - 1), dh = Math.min(FX.novia.down, maxHp(i) - 1);
-        if (da > 0) i.tmp.atk -= da;
-        if (dh > 0) { i.tmp.hp -= dh; i.hp = Math.min(i.hp, maxHp(i)); }
-      }
-    });
-    return { up: up };
   }
 
   function startEffects(s) {

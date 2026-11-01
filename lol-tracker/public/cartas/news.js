@@ -1,6 +1,8 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-01', tag: 'Cambio', title: 'Cita sorpresa pasa a ser «Regalo»',
+      items: ['La acción Cita sorpresa (Rara, 2 de oro) pasa a llamarse «Regalo»: la novia que tengas en el hueco 5 recibe +3/+3 permanente y lo conserva aunque vuelva a la reserva. Necesitas el nivel 1 de Correa y una novia en el hueco 5. Ya no tira el dado de apoyar o regañar.'] },
     { date: '2026-11-01', tag: 'Balance', title: 'Lihone Correa pasa a Común',
       items: ['Lihone Correa: Rara → Común. Stats 3/12 → 2/8 y precio 3 → 2 de oro.'] },
     { date: '2026-11-01', tag: 'Novedad', title: 'Las novias en la pantalla Mazo',

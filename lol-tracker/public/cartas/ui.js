@@ -372,6 +372,7 @@
     CL.slice(3, 5).forEach(function (it) { out.push({ kind: 'card', it: it }); });
     return out.slice(0, 6);
   }
+  function thc(c) { var t = c.theme || (c.themes && c.themes[0]); return t && D.themes[t] ? D.themes[t].color : '#a78bfa'; }
   function featInfo(f, a) {
     if (f.kind === 'skin') {
       var c = CARD[f.s.card];
@@ -392,7 +393,7 @@
     var side = '<div class="shtiles">' + tiles.map(function (t) {
       if (t.pack) return '<button class="shtile pack" data-act="shoptab" data-t="packs"><span class="shtv">' + bpkHtml('mini') + '</span><b>Sobre estándar</b><span class="shtp">' + (a.packCost ? ic('moneda') + ' ' + a.packCost : 'Gratis') + '</span></button>';
       var inf = featInfo(t.f, a);
-      return '<button class="shtile" data-act="shopsel" data-i="' + t.k + '"><span class="shtv"' + (inf.art ? ' style="background-image:url(/cartas/art/' + inf.art + '.webp)"' : '') + '>' + (inf.art ? '' : '<i class="shmini">' + ic(inf.card.type === 'tropa' ? 'cartas' : 'brillo') + '</i>') + '</span><em>' + inf.kicker + '</em><b>' + esc(inf.title) + '</b><span class="shtp">' + ic('moneda') + ' ' + inf.price + '</span></button>';
+      return '<button class="shtile" data-act="shopsel" data-i="' + t.k + '"><span class="shtv"' + (inf.art ? ' style="background-image:url(/cartas/art/' + inf.art + '.webp)"' : ' style="background-image:radial-gradient(circle at 50% 45%,' + hexMix(thc(inf.card), '#0b0716', .15) + ',' + hexMix(thc(inf.card), '#0b0716', .7) + ')"') + '>' + (inf.art ? '' : '<i class="shmini">' + (inf.card.theme && D.themes[inf.card.theme] ? tic(inf.card.theme) : ic('brillo')) + '</i>') + '</span><em>' + inf.kicker + '</em><b>' + esc(inf.title) + '</b><span class="shtp">' + ic('moneda') + ' ' + inf.price + '</span></button>';
     }).join('') + '</div>';
     var daily = '<div class="shstrip"><div class="shsl">' + ic('regalo') + '<div><b>Recompensa diaria</b><span>' + (a.dailyAvailable ? 'Cobra hoy +' + a.dailyCoins + ' monedas.' : 'Ya la cobraste hoy. Vuelve mañana.') + '</span></div></div>' + (a.dailyAvailable ? '<button class="btn" data-act="daily">' + ic('regalo') + ' Cobrar +' + a.dailyCoins + ' ' + ic('moneda') + '</button>' : '<span class="mut">' + ic('check') + ' Cobrada</span>') + '</div>';
     return '<div class="shfeat">' + banner + side + '</div>' + daily + shopInfoPanels(a);

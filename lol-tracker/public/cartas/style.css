@@ -1305,3 +1305,4 @@ img.timg[src$="comebacker.png"] { filter: drop-shadow(0 0 1.5px #fff) drop-shado
 .shtile .shtv{inset:0 0 74px 0}
 .shtile.pack b{padding-top:74px}
 @media(max-width:800px){.shtabs{flex-wrap:nowrap;overflow-x:auto}.shtabs button{padding:10px 8px;font-size:.8rem;letter-spacing:.06em;white-space:nowrap}.shcoin{display:none}.shtxt h2{font-size:1.5rem}}
+.shtile .shmini .ic,.shtile .shmini img{width:64px;height:64px;filter:drop-shadow(0 2px 8px rgba(0,0,0,.6))}

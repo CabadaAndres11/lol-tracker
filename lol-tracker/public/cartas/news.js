@@ -1,6 +1,10 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-01', tag: 'Novedad', title: 'Nueva tienda',
+      items: ['La tienda estrena diseño inspirado en la de League of Legends, con cuatro apartados navegables: Destacados, Sobres, Skins y Cartas.',
+        'Destacados muestra en un gran banner la última skin lanzada y las últimas cartas puestas a la venta (cambia de uno a otro con los puntos), junto a accesos rápidos al sobre y a otras novedades, y la recompensa diaria en una franja inferior.',
+        'Sobres reúne los sobres disponibles (por ahora, el estándar), Skins todas las skins que se lancen y Cartas las cartas nuevas que se pongan a la venta.'] },
     { date: '2026-11-01', tag: 'Novedad', title: 'Nuevo menú de inicio y perfil de usuario',
       items: ['El menú de inicio se renueva con un aspecto inspirado en el cliente de League of Legends: un gran botón «Jugar» centrado arriba, un icono por cada apartado (Mazo, Tienda, Sinergias, Normas y Perfil) y, debajo, las 5 últimas noticias con su ilustración, que es la de las cartas que aparecen en la noticia o, si no hay ninguna, el logo del juego. Todo el historial de noticias está en la lista de la izquierda, con scroll, y cada noticia se puede abrir completa con «Leer la noticia completa».',
         'Junto a tu nombre aparece ahora una foto de perfil, vacía por defecto. Al pulsarla entras en tu perfil, donde puedes cambiarla por la ilustración de cualquiera de tus tropas desbloqueadas o de tus skins, y cerrar sesión.',

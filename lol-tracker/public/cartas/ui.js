@@ -352,16 +352,68 @@
       return '<div class="skitem"><div class="skcard">' + cardHtml(c, { lv: 1, extra: '<span class="eyeb" data-act="zoom" data-id="' + it.id + '" title="Ver ampliada en 3D">' + ic('ojo') + '</span>' }) + '</div><b>' + esc(c.name) + '</b>' + btn + '</div>';
     }).join('') + '</div></div>';
   }
+  // ---------- Tienda ----------
+  function skinBtn(a, s) {
+    var hasCard = a.owned.indexOf(s.card) >= 0, own = (a.skins || []).indexOf(s.id) >= 0, eq = a.skinSel && a.skinSel[s.card] === s.id;
+    return own ? (eq ? '<button class="btn sec sm" data-act="skinequip" data-skin="" data-card="' + s.card + '">' + ic('check') + ' Equipada · usar clásica</button>' : '<button class="btn sm" data-act="skinequip" data-skin="' + s.id + '" data-card="' + s.card + '">Equipar</button>')
+      : !hasCard ? '<button class="btn sm" disabled>Necesitas la carta</button>'
+      : '<button class="btn sm" data-act="skinbuy" data-skin="' + s.id + '"' + (a.coins < (a.admin ? 0 : s.price) ? ' disabled' : '') + '>Comprar · ' + (a.admin ? 'gratis' : s.price + ' ' + ic('moneda')) + '</button>';
+  }
+  function cardBtn(a, it) {
+    return a.owned.indexOf(it.id) >= 0 ? '<button class="btn sec sm" disabled>' + ic('check') + ' Ya la tienes</button>'
+      : '<button class="btn sm" data-act="cardbuy" data-card="' + it.id + '"' + (a.coins < (a.admin ? 0 : it.price) ? ' disabled' : '') + '>Comprar · ' + (a.admin ? 'gratis' : it.price + ' ' + ic('moneda')) + '</button>';
+  }
+  // Destacados: la última skin y las últimas cartas (lo más nuevo primero)
+  function shopFeatured() {
+    var SK = (window.CARTAS_SKINS || []).slice().reverse(), CL = (D.shop || []).slice().reverse(), out = [];
+    if (SK[0]) out.push({ kind: 'skin', s: SK[0] });
+    CL.slice(0, 3).forEach(function (it) { out.push({ kind: 'card', it: it }); });
+    SK.slice(1, 3).forEach(function (s) { out.push({ kind: 'skin', s: s }); });
+    CL.slice(3, 5).forEach(function (it) { out.push({ kind: 'card', it: it }); });
+    return out.slice(0, 6);
+  }
+  function featInfo(f, a) {
+    if (f.kind === 'skin') {
+      var c = CARD[f.s.card];
+      return { kicker: 'Nueva skin', title: c.name + ' · ' + f.s.name, sub: 'Cambia solo la ilustración de ' + c.name + '. Necesitas tener la carta.', price: f.s.price, btn: skinBtn(a, f.s), art: f.s.id, zoom: 'data-id="' + f.s.card + '" data-skin="' + f.s.id + '"', card: c, skin: f.s.id };
+    }
+    var cd = CARD[f.it.id];
+    return { kicker: 'Carta nueva', title: cd.name, sub: cd.rarity + ' · ' + (cd.type === 'tropa' ? 'tropa' : 'acción') + (cd.text ? ' — ' + cd.text : '') + (cd.pas ? ' · ' + cd.pas.n : ''), price: f.it.price, btn: cardBtn(a, f.it), art: ARTS[cd.id] ? cd.id : '', zoom: 'data-id="' + cd.id + '"', card: cd, skin: '' };
+  }
+  function shopFeaturedHtml(a) {
+    var F = shopFeatured(), h = '';
+    if (!F.length) return '<p class="mut">Aún no hay novedades.</p>';
+    var sel = Math.min(ui.shopSel || 0, F.length - 1), cur = featInfo(F[sel], a), tint = cur.card.themes && cur.card.themes[0] && D.themes[cur.card.themes[0]] ? D.themes[cur.card.themes[0]].color : (cur.card.theme && D.themes[cur.card.theme] ? D.themes[cur.card.theme].color : '#a78bfa');
+    var banner = '<div class="shban' + (cur.art ? ' hasart' : ' nocard') + '" style="--tint:' + tint + ';' + (cur.art ? '--shart:url(/cartas/art/' + cur.art + '.webp)' : '') + '" key="' + sel + '">' +
+      (cur.art ? '' : '<div class="shcard">' + cardHtml(cur.card, { lv: 1 }) + '</div>') +
+      '<div class="shtxt"><span class="shk">' + cur.kicker + '</span><h2>' + esc(cur.title) + '</h2><p>' + esc(cur.sub) + '</p><div class="shact">' + cur.btn + (a.admin ? '' : '') + '<span class="shpr">' + (cur.price ? ic('moneda') + ' ' + cur.price : '') + '</span><button class="btn sec sm" data-act="zoom" ' + cur.zoom + ' title="Ver ampliada en 3D">' + ic('ojo') + ' Ver en 3D</button></div></div>' +
+      '<div class="shdots">' + F.map(function (x, k) { return '<button class="' + (k === sel ? 'on' : '') + '" data-act="shopsel" data-i="' + k + '">' + (k + 1) + '</button>'; }).join('') + '</div></div>';
+    var tiles = [{ pack: true }].concat(F.map(function (x, k) { return { f: x, k: k }; }).filter(function (t) { return t.k !== sel; }).slice(0, 3));
+    var side = '<div class="shtiles">' + tiles.map(function (t) {
+      if (t.pack) return '<button class="shtile pack" data-act="shoptab" data-t="packs"><span class="shtv">' + bpkHtml('mini') + '</span><b>Sobre estándar</b><span class="shtp">' + (a.packCost ? ic('moneda') + ' ' + a.packCost : 'Gratis') + '</span></button>';
+      var inf = featInfo(t.f, a);
+      return '<button class="shtile" data-act="shopsel" data-i="' + t.k + '"><span class="shtv"' + (inf.art ? ' style="background-image:url(/cartas/art/' + inf.art + '.webp)"' : '') + '>' + (inf.art ? '' : '<i class="shmini">' + ic(inf.card.type === 'tropa' ? 'cartas' : 'brillo') + '</i>') + '</span><em>' + inf.kicker + '</em><b>' + esc(inf.title) + '</b><span class="shtp">' + ic('moneda') + ' ' + inf.price + '</span></button>';
+    }).join('') + '</div>';
+    var daily = '<div class="shstrip"><div class="shsl">' + ic('regalo') + '<div><b>Recompensa diaria</b><span>' + (a.dailyAvailable ? 'Cobra hoy +' + a.dailyCoins + ' monedas.' : 'Ya la cobraste hoy. Vuelve mañana.') + '</span></div></div>' + (a.dailyAvailable ? '<button class="btn" data-act="daily">' + ic('regalo') + ' Cobrar +' + a.dailyCoins + ' ' + ic('moneda') + '</button>' : '<span class="mut">' + ic('check') + ' Cobrada</span>') + '</div>';
+    return '<div class="shfeat">' + banner + side + '</div>' + daily + shopInfoPanels(a);
+  }
+  function shopInfoPanels(a) {
+    var total = D.cards.length + D.actions.length;
+    return '<div class="shinfo">' + (a.admin ? adminStarters() : '') +
+      '<div class="panel"><h2>Cómo conseguir monedas</h2><ul class="rules"><li><b>Recompensa diaria:</b> +' + a.dailyCoins + ' ' + ic('moneda') + ' cada día.</li><li><b>Partidas contra la IA:</b> +10 ' + ic('moneda') + ' por partida y +20 ' + ic('moneda') + ' más si ganas (hoy llevas ' + a.gamesToday + '/' + a.maxGamesToday + ' partidas con premio). Las partidas muy cortas no dan monedas.</li><li><b>Cartas repetidas:</b> no dan monedas, pero suben la carta de nivel (ver Normas).</li></ul></div>' +
+      '<div class="panel"><h2>Tu colección</h2><div class="coinbig">' + a.owned.length + ' / ' + total + '</div><div class="meter colm"><i class="on" style="width:' + Math.round(a.owned.length / total * 100) + '%"></i></div><p class="mut">Solo puedes usar en tu mazo las cartas que tienes.</p><button class="btn sec" data-act="nav" data-to="deck">' + ic('cartas') + ' Ir al mazo</button></div></div>';
+  }
+  function packsTab(a) {
+    var can = a.coins >= a.packCost && !ui.pack;
+    return '<div class="packs-grid one"><div class="panel packbox">' + bpkHtml('') + '<h2>Sobre estándar</h2><p class="mut">' + a.packSize + ' cartas al azar de todo el juego (tropas y acciones). La última siempre es Rara o mejor. Las cartas que ya tengas se cambian por monedas.</p>' +
+      '<button class="btn cta big" data-act="openpack"' + (can ? '' : ' disabled') + '>' + (a.packCost ? 'Abrir sobre · ' + a.packCost + ' ' + ic('moneda') + '' : 'Abrir sobre · gratis') + '</button>' + (a.coins < a.packCost ? '<p class="mut">Te faltan ' + (a.packCost - a.coins) + ' monedas.</p>' : '') + (ui.msg ? '<div class="hint" style="color:var(--bad)">' + esc(ui.msg) + '</div>' : '') + '</div></div>';
+  }
+  var SHTABS = [['feat', 'Destacados'], ['packs', 'Sobres'], ['skins', 'Skins'], ['cards', 'Cartas']];
   function renderPacks() {
-    var a = ui.acct, total = D.cards.length + D.actions.length, can = a.coins >= a.packCost && !ui.pack;
-    var h = head('packs', '' + ic('tienda') + ' Tienda') + '<div class="packs-grid">' +
-      '<div class="panel packbox">' + bpkHtml('') + '<h2>Sobre estándar</h2><p class="mut">' + a.packSize + ' cartas al azar de todo el juego (tropas y acciones). La última siempre es Rara o mejor. Las cartas que ya tengas se cambian por monedas.</p>' +
-      '<button class="btn cta big" data-act="openpack"' + (can ? '' : ' disabled') + '>' + (a.packCost ? 'Abrir sobre · ' + a.packCost + ' ' + ic('moneda') + '' : 'Abrir sobre · gratis') + '</button>' + (a.coins < a.packCost ? '<p class="mut">Te faltan ' + (a.packCost - a.coins) + ' monedas.</p>' : '') + (ui.msg ? '<div class="hint" style="color:var(--bad)">' + esc(ui.msg) + '</div>' : '') + '</div>' +
-      (a.admin ? adminStarters() : '') + newCards(a) + skinShop(a) + '<div class="panel"><h2>Tus monedas</h2><div class="coinbig">' + ic('moneda') + ' ' + a.coins + '</div>' +
-      '<div class="dailybox">' + (a.dailyAvailable ? '<button class="btn" data-act="daily">' + ic('regalo') + ' Recompensa diaria · +' + a.dailyCoins + ' ' + ic('moneda') + '</button>' : '<p class="mut">' + ic('check') + ' Ya cobraste la recompensa de hoy. Vuelve mañana.</p>') + '</div>' +
-      '<h2 style="margin-top:1rem">Cómo conseguir monedas</h2><ul class="rules"><li><b>Recompensa diaria:</b> +' + a.dailyCoins + ' ' + ic('moneda') + ' cada día.</li><li><b>Partidas contra la IA:</b> +10 ' + ic('moneda') + ' por partida y +20 ' + ic('moneda') + ' más si ganas (hoy llevas ' + a.gamesToday + '/' + a.maxGamesToday + ' partidas con premio). Las partidas muy cortas no dan monedas.</li><li><b>Cartas repetidas:</b> no dan monedas, pero suben la carta de nivel (ver Normas).</li></ul></div>' +
-      '<div class="panel"><h2>Tu colección</h2><div class="coinbig">' + a.owned.length + ' / ' + total + '</div><div class="meter colm"><i class="on" style="width:' + Math.round(a.owned.length / total * 100) + '%"></i></div><p class="mut">Solo puedes usar en tu mazo las cartas que tienes. Mira cuáles te faltan en la pestaña Mazo.</p>' +
-      '<button class="btn sec" data-act="nav" data-to="deck">' + ic('cartas') + ' Ir al mazo</button></div></div>';
+    var a = ui.acct, tab = ui.shopTab || 'feat';
+    var body = tab === 'packs' ? packsTab(a) : tab === 'skins' ? (skinShop(a) || '<p class="mut">Aún no hay skins a la venta.</p>') : tab === 'cards' ? (newCards(a) || '<p class="mut">Aún no hay cartas nuevas a la venta.</p>') : shopFeaturedHtml(a);
+    var h = head('packs', ic('tienda') + ' Tienda') + '<div class="shtabs">' + SHTABS.map(function (t) { return '<button class="' + (t[0] === tab ? 'on' : '') + '" data-act="shoptab" data-t="' + t[0] + '">' + t[1] + '</button>'; }).join('') + '<span class="navsp"></span><span class="shcoin">' + ic('moneda') + ' ' + a.coins + '</span></div>' +
+      (ui.msg && tab !== 'packs' ? '<p class="err">' + esc(ui.msg) + '</p>' : '') + '<div class="shbody">' + body + '</div>';
     app.innerHTML = h + packOverlay() + '</div>';
   }
   function packHint() {
@@ -1097,6 +1149,8 @@
     if (act === 'flipcard') { var fi = +el.dataset.i; if (ui.pack && ui.pack.cards) { ui.pack.rev[fi] = true; el.classList.add('flipped'); packHint(); } return; }
     if (act === 'flipall') { if (ui.pack && ui.pack.cards) { ui.pack.rev = ui.pack.rev.map(function () { return true; }); app.querySelectorAll('.pcard').forEach(function (n, k) { setTimeout(function () { n.classList.add('flipped'); }, k * 140); }); packHint(); } return; }
     if (act === 'packbg') { if (ui.pack && ui.pack.cards && ui.pack.stage === 'reveal' && ui.pack.rev.every(Boolean)) { ui.pack = null; render(); } return; }
+    if (act === 'shoptab') { ui.shopTab = el.dataset.t; ui.msg = ''; return render(); }
+    if (act === 'shopsel') { ui.shopSel = +el.dataset.i; ui.shopTab = 'feat'; return render(); }
     if (act === 'newssel') { ui.newsSel = +el.dataset.i; ui.newsFull = false; return refreshNews(); }
     if (act === 'newsmore') { ui.newsFull = !ui.newsFull; return refreshNews(); }
     if (act === 'setavatar') { return api('avatarSet', { card: el.dataset.card }).then(function (r) { if (r.ok) { setAcct(r.data.user); ui.msg = ''; } else ui.msg = (r.data && r.data.error) || 'No se pudo cambiar la foto.'; render(); }); }

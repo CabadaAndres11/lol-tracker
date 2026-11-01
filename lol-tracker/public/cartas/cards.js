@@ -573,7 +573,11 @@ var D={
    "hp": 15,
    "rarity": "Épica",
    "type": "tropa",
-   "size": 2
+   "size": 2,
+  "pas": {
+   "n": "No me tostes",
+   "t": "Recibe 2 de daño menos por cada golpe (mínimo 0)."
+  }
   }
  ],
  "novias": [
@@ -582,16 +586,16 @@ var D={
    "name": "Eriko",
    "person": "Eriko",
    "themes": [],
-   "cost": 4,
-   "atk": 5,
-   "hp": 15,
-   "rarity": "Épica",
+   "cost": 0,
+   "atk": 2,
+   "hp": 12,
+   "rarity": "Legendaria",
    "type": "tropa",
-   "size": 2,
+   "size": 0,
    "novia": true,
    "pas": {
-    "n": "No me tostes",
-    "t": "Recibe 2 de daño menos por cada golpe (mínimo 0)."
+    "n": "Mimos",
+    "t": "Al empezar cada combate da +2/+2 permanente a todas tus cartas en mesa (nivel 2: +3/+3, nivel 3: +4/+4; tope 10/15/20 por carta)."
    }
   },
   {

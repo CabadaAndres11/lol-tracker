@@ -1085,7 +1085,6 @@
       if (b.dataset.tut === 'exit') return tutExit();
       if (b.dataset.tut === 'next') { if (st.fin) return tutExit(true); ui.tut.i++; tutCheck(); }
     };
-    if (!ui.tutAnim) ui.tutAnim = setInterval(function () { var c = document.querySelectorAll('#tut .tut-char img'); if (c.length === 2) { c[0].classList.toggle('on'); c[1].classList.toggle('on'); } }, 900);
     tutSpot(st.hl);
     if (st.hl && !o._rs) { o._rs = 1; window.addEventListener('resize', function () { if (ui.tut) tutSpot(ui.tutHl); }); }
   }

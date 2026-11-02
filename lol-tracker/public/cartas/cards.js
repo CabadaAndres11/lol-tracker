@@ -38,11 +38,10 @@ var D={
   },
   {
    "id": "haikyuu-lihone",
-   "name": "Haikyuu Lihone",
+   "name": "Lihone Setter",
    "person": "Lihone",
    "themes": [
-    "Voley",
-    "Anime"
+    "Voley"
    ],
    "cost": 4,
    "atk": 6,
@@ -129,10 +128,9 @@ var D={
   },
   {
    "id": "aitorlg-friki",
-   "name": "AitoRLG Friki",
+   "name": "PokeAitoRLG",
    "person": "AitoRLG",
    "themes": [
-    "Anime",
     "Pokémon"
    ],
    "cost": 3,
@@ -223,11 +221,10 @@ var D={
   },
   {
    "id": "javihi-friki",
-   "name": "Javihi Friki",
+   "name": "Javihi vs 9",
    "person": "Javihi",
    "themes": [
-    "Lol",
-    "Anime"
+    "Lol"
    ],
    "cost": 3,
    "atk": 5,
@@ -541,7 +538,6 @@ var D={
    "name": "Chipy Correa",
    "person": "Chipy",
    "themes": [
-    "Anime",
     "Correa"
    ],
    "cost": 4,
@@ -576,11 +572,10 @@ var D={
   },
   {
    "id": "pampert-friki",
-   "name": "Pampert Friki",
+   "name": "Pampert Carry",
    "person": "Pampert",
    "themes": [
-    "Lol",
-    "Anime"
+    "Lol"
    ],
    "cost": 2,
    "atk": 4,
@@ -622,6 +617,104 @@ var D={
    "n": "No me tostes",
    "t": "Recibe 2 de daño menos por cada golpe (mínimo 0)."
   }
+  },
+  {
+   "id": "lihone-gabimaru",
+   "name": "Lihone Gabimaru",
+   "person": "Lihone",
+   "themes": [
+    "Anime"
+   ],
+   "cost": 2,
+   "atk": 4,
+   "hp": 6,
+   "rarity": "Común",
+   "type": "tropa",
+   "size": 1
+  },
+  {
+   "id": "dashlight-sun-jin-woo",
+   "name": "Dashlight Sun Jin-Woo",
+   "person": "Dashlight",
+   "themes": [
+    "Anime"
+   ],
+   "cost": 2,
+   "atk": 5,
+   "hp": 5,
+   "rarity": "Común",
+   "type": "tropa",
+   "size": 1
+  },
+  {
+   "id": "aitorlg-maomao",
+   "name": "AitoRLG MaoMao",
+   "person": "AitoRLG",
+   "themes": [
+    "Anime"
+   ],
+   "cost": 2,
+   "atk": 3,
+   "hp": 7,
+   "rarity": "Común",
+   "type": "tropa",
+   "size": 1
+  },
+  {
+   "id": "javihi-smiley",
+   "name": "Javihi Smiley",
+   "person": "Javihi",
+   "themes": [
+    "Anime"
+   ],
+   "cost": 2,
+   "atk": 4,
+   "hp": 6,
+   "rarity": "Común",
+   "type": "tropa",
+   "size": 1
+  },
+  {
+   "id": "mertens-meliodas",
+   "name": "Mertens Meliodas",
+   "person": "Mertens",
+   "themes": [
+    "Anime"
+   ],
+   "cost": 2,
+   "atk": 5,
+   "hp": 5,
+   "rarity": "Común",
+   "type": "tropa",
+   "size": 1
+  },
+  {
+   "id": "chipy-goku",
+   "name": "Chipy Goku",
+   "person": "Chipy",
+   "themes": [
+    "Anime"
+   ],
+   "cost": 2,
+   "atk": 4,
+   "hp": 6,
+   "rarity": "Común",
+   "type": "tropa",
+   "size": 1
+  },
+  {
+   "id": "pampert-asta",
+   "name": "Pampert Asta",
+   "person": "Pampert",
+   "themes": [
+    "Anime"
+   ],
+   "cost": 2,
+   "atk": 3,
+   "hp": 7,
+   "rarity": "Común",
+   "type": "tropa",
+   "size": 1
   }
  ],
  "novias": [
@@ -845,17 +938,6 @@ var D={
    "target": "none",
    "text": "Si ganas esta ronda, ganas +5 de oro.",
    "theme": "Trabajo"
-  },
-  {
-   "id": "capitulo-especial",
-   "name": "Capítulo especial",
-   "cost": 2,
-   "rarity": "Rara",
-   "type": "accion",
-   "size": 1,
-   "target": "none",
-   "text": "Esta ronda, las estadísticas que cedan tus Anime se duplican (necesitas el nivel 1 de Anime).",
-   "theme": "Anime"
   },
   {
    "id": "segunda-temporada",

@@ -435,7 +435,6 @@
       ok: function (s, p) { return s.refreshN[p] >= 5 ? '' : 'Necesitas al menos 5 actualizaciones de tienda en esta partida.'; },
       run: function (s, p) { var P = s.p[p], n = Math.floor(s.refreshN[p] / 5); P.mesa.concat(P.hand).filter(function (i) { return i && isTroop(i) && !i.dead && has(i, 'Informático'); }).forEach(function (i) { grow(i, 'atk', n); }); return '+' + n + ' ataque permanente a las Informático'; } },
     'horas-extra': { run: function (s, p) { var n = sc(s, 5); s.p[p].fl.work = n; return 'si ganas esta ronda: +' + n + ' de oro'; } },
-    'capitulo-especial': { ok: function (s, p) { return (tiers(s.p[p])['Anime'] || 0) >= 1 ? '' : 'Necesitas el nivel 1 de Anime (2 cartas distintas).'; }, run: function (s, p) { s.p[p].fl.anime = true; return 'lo que cedan tus Anime se duplica'; } },
     'segunda-temporada': {
       ok: function (s, p) { return graveKoi(s.p[p]) ? '' : 'Todavía no ha caído ninguna tropa KOI.'; },
       run: function (s, p) { var P = s.p[p], i = graveKoi(P); P.grave.splice(P.grave.indexOf(i), 1); i.dead = false; i.tmp = { atk: 0, hp: 0, red: 0 }; i.hp = maxHp(i); P.hand.push(i); return card(i).name + ' vuelve a tu mano'; } },
@@ -582,7 +581,7 @@
       var i = P.hand[k];
       if (!i || isTroop(i)) continue; // (una acción anterior pudo fusionar cartas y acortar la mano)
       var c = card(i), allies = mesaTroops(P), foes = targetable(s.p[1 - p]);
-      if (c.id === 'cambio-de-linea' || (c.id === 'capitulo-especial' && lv < 1)) continue; // la IA Normal no las usa
+      if (c.id === 'cambio-de-linea') continue; // la IA no la usa
       var tgt = null;
       if (c.target === 'ally') { allies.sort(function (a, b) { return atk(b) - atk(a); }); tgt = allies[0]; if (c.id === 'armadura') tgt = allies.slice().sort(function (a, b) { return maxHp(b) - maxHp(a); })[0]; }
       else if (c.target === 'enemy') {

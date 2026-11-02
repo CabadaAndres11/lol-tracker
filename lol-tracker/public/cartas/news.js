@@ -1,6 +1,10 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-02', tag: 'Cambio', title: 'Renovación de la sinergia Anime',
+      items: ['Salen de Anime: Haikyuu Lihone (ahora Lihone Setter, solo Voley), AitoRLG Friki (PokeAitoRLG, solo Pokémon), Javihi Friki (Javihi vs 9, solo Lol), Pampert Friki (Pampert Carry, solo Lol) y Chipy Correa (solo Correa).',
+        'Nuevas tropas Comunes de Anime (coste 2): Lihone Gabimaru, Dashlight Sun Jin-Woo, AitoRLG MaoMao, Javihi Smiley, Mertens Meliodas, Chipy Goku y Pampert Asta. Por ahora sin ilustración.',
+        'La acción «Capítulo especial» desaparece del juego.'] },
     { date: '2026-11-02', tag: 'Novedad', title: 'Dificultades de la IA: Normal, Difícil y Experto',
       items: ['En «Contra IA» (1 contra 1 y Versus de 4, clásico y Resurrección) ya puedes elegir dificultad. Normal es la IA de siempre.',
         'Difícil: mazos de 2 sinergias coherentes, mejor tienda (guarda para el interés, valora sinergias), usa todas las acciones y gana +1 de oro en rondas de tienda. Monedas ×1,5.',

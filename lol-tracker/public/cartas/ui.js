@@ -185,8 +185,8 @@
       introT.forEach(clearTimeout); introT = [];
       st.classList.add('reset'); st.classList.remove('rdone'); go(0);
       introT.push(setTimeout(function () { st.classList.remove('reset'); }, 80));
-      [[3800, 1], [11500, 2], [19500, 3], [27500, 4], [34500, 5]].forEach(function (x) { introT.push(setTimeout(function () { go(x[1]); }, x[0])); });
-      introT.push(setTimeout(run, 42000));
+      [[1500, 1], [8000, 2], [14500, 3], [20000, 4], [25500, 5]].forEach(function (x) { introT.push(setTimeout(function () { go(x[1]); }, x[0])); });
+      introT.push(setTimeout(run, 33000));
     }
     run();
     introEl.addEventListener('change', function (e) {

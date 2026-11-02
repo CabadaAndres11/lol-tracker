@@ -197,6 +197,60 @@
     document.addEventListener('keydown', introKey);
   }
 
+  // ---------- Pop-up de bienvenida de la versión 1.3 (Anime) ----------
+  function intro13Off() { try { return localStorage.getItem(lk('intro-v13')) === '1'; } catch (e) { return false; } }
+  function maybeIntro13() {
+    if (ui.intro13Seen || !ui.acct || intro13Off() || introEl) return;
+    ui.intro13Seen = true;
+    setTimeout(function () { if (ui.screen === 'home' && !introEl) openIntro13(); }, 700);
+  }
+  function openIntro13() {
+    closeIntro();
+    var k, bg = '';
+    ['dashlight-sun-jin-woo', 'aitorlg-maomao', 'chipy-goku'].forEach(function (id, i) { bg += '<i class="i13art a' + i + '" style="background-image:url(art/' + id + '.webp)"></i>'; });
+    bg += '<i class="i13rays"></i>';
+    for (k = 0; k < 16; k++) bg += '<i class="i13p" style="left:' + (3 + k * 6) + '%;--d:' + ((k * 7) % 11) * .6 + 's;--c:' + ['#f9a8d4', '#86efac', '#c4b5fd', '#fde68a'][k % 4] + '"></i>';
+    var NEW = ['javihi-smiley', 'mertens-meliodas', 'lihone-rudeus', 'chipy-goku', 'pampert-asta', 'dashlight-sun-jin-woo', 'aitorlg-maomao'], cards = '';
+    NEW.forEach(function (id, i) { cards += '<div class="i13c" style="--i:' + i + '">' + cardHtml(CARD[id], { lv: 1 }) + '</div>'; });
+    var troops = '', orbs = '', tx = [7, 21, 35];
+    ['javihi-smiley', 'lihone-rudeus', 'pampert-asta'].forEach(function (id, i) {
+      troops += '<div class="i13t" style="left:' + tx[i] + '%">' + cardHtml(CARD[id], { lv: 1 }) + '</div>';
+      for (var j = 0; j < 3; j++) orbs += '<i class="i13o" style="left:' + (tx[i] + 4 + j * 1.5) + 'cqw;top:' + (30 + (j % 2) * 3) + 'cqw;--dx:' + (52 - tx[i] - 4 - j * 1.5) + 'cqw;--dy:' + (-6 - (j % 2) * 3) + 'cqw;--dl:' + (.5 + i * .5 + j * .22) + 's"></i>';
+    });
+    var gk = '<div class="i13s s2"><div class="i13rv">' + cardHtml(CARD['lihone-viego'], { lv: 1 }) + '<em class="i13dmg">-36</em><i class="i13boom"></i></div>' + troops + orbs + '<i class="i13sph"></i>' +
+      '<div class="i13pc"><span>Nivel 1 · 50%</span><span>Nivel 2 · 75%</span><span>Nivel 3 · 100%</span></div></div>';
+    var sh = '<div class="i13s s3"><div class="i13jin">' + cardHtml(CARD['dashlight-sun-jin-woo'], { lv: 1 }) + '</div><div class="i13foe">' + cardHtml(CARD['mertens-prime'], { lv: 1 }) + '<i class="i13wisp"></i></div>' +
+      '<div class="i13slot"><span>Hueco 5</span></div><div class="i13ghost">' + cardHtml(CARD['mertens-prime'], { lv: 1 }) + '<b>50%</b></div><div class="i13lab">Soldado de Sombra</div></div>';
+    var fx = '<div class="i13s s4"><div class="i13col"><h4>Despliegue</h4><div class="i13row">' +
+      '<div class="i13d d1"><i></i><i></i><i></i></div><div class="i13d d2"><i></i></div><div class="i13d d3">' + FIN_ICO.trebol + '</div></div><small>Sombras · Kamehameha · Grimorio</small></div>' +
+      '<div class="i13col"><h4>Fundas</h4><div class="i13row">' + ['dragonball', 'trebol', 'petalos'].map(function (s) { return '<div class="i13sv">' + cardHtml(CARD['lihone-rudeus'], { lv: 1, slv: s }) + '</div>'; }).join('') + '</div><small>Dragon Ball · Trébol · Boticaria</small></div>' +
+      '<div class="i13col"><h4>Victoria y derrota</h4><div class="i13row">' + ['dball', 'trebol', 'petalos'].map(function (f) { return '<div class="i13f f-' + f + '">' + FIN_ICO[f] + '</div>'; }).join('') + '</div><small>Kamehameha · Trébol · Pétalos</small></div></div>';
+    var h = '<div class="intropanel"><div class="introst i13" data-sc="0"><div class="i13bg">' + bg + '</div>' +
+      '<div class="ititle"><small>¡Ya está aquí la versión 1.3!</small><b>ANIME</b></div><span class="iver">v1.3</span>' +
+      '<div class="i13s s1"><div class="i13fan">' + cards + '</div></div>' + gk + sh + fx +
+      '<div class="icap"><span></span></div></div>' +
+      '<label class="ibtns inever"><input type="checkbox" data-i="never13"' + (intro13Off() ? ' checked' : '') + '> No mostrar más</label><p class="zhint">Pulsa fuera de la animación para cerrarla</p></div>';
+    introEl = document.createElement('div'); introEl.className = 'introov'; introEl.innerHTML = h;
+    document.body.appendChild(introEl);
+    var st = introEl.querySelector('.introst'), cap = st.querySelector('.icap span');
+    var CAPS = ['', 'Siete cartas de Anime nuevas, con rarezas y estadísticas renovadas', 'Genkidama: las tropas Anime guardan el 50, 75 o 100% del daño que reciben y lo sueltan sobre un enemigo (o repartido con Kamehameha)', 'Soldado de Sombra: Sun Jin-Woo levanta al último enemigo que derrota, con el 50% de sus estadísticas, en el hueco 5', 'Nueve efectos nuevos: despliegues, fundas y victoria/derrota'];
+    function go(n) { st.dataset.sc = n; cap.textContent = CAPS[n] || ''; cap.parentNode.classList.toggle('on', !!CAPS[n]); }
+    function run() {
+      introT.forEach(clearTimeout); introT = [];
+      st.classList.add('reset'); go(0);
+      introT.push(setTimeout(function () { st.classList.remove('reset'); }, 80));
+      [[1800, 1], [8500, 2], [17000, 3], [25000, 4]].forEach(function (x) { introT.push(setTimeout(function () { go(x[1]); }, x[0])); });
+      introT.push(setTimeout(run, 33000));
+    }
+    run();
+    introEl.addEventListener('change', function (e) {
+      if (e.target.dataset.i !== 'never13') return;
+      try { if (e.target.checked) localStorage.setItem(lk('intro-v13'), '1'); else localStorage.removeItem(lk('intro-v13')); } catch (er) {}
+    });
+    introEl.addEventListener('click', function (e) { if (e.target === introEl || e.target.classList.contains('intropanel')) closeIntro(); });
+    document.addEventListener('keydown', introKey);
+  }
+
   // ---------- Carta ampliada en 3D (pantalla Mazo) ----------
   var zoomEl = null;
   function closeZoom() { if (zoomEl) { zoomEl.remove(); zoomEl = null; } document.removeEventListener('keydown', zoomKey); }
@@ -453,10 +507,11 @@
       ].map(function (m) { return '<button class="ricon" data-act="nav" data-to="' + m[0] + '"><span class="rii">' + m[1] + '</span><b>' + m[2] + '</b><span class="mut">' + m[3] + '</span></button>'; }).join('') + '</div>' + homeNews() + '</div>';
     h += '<p class="mut" style="text-align:center">' + D.cards.length + ' tropas · ' + D.actions.length + ' acciones</p></div>';
     app.innerHTML = h;
-    maybeIntro12();
+    maybeIntro13();
   }
   // Animaciones de versiones anteriores: se pueden volver a ver desde el perfil
   var ANIM_LIST = [
+    { id: 'v13', ver: 'v1.3', name: 'Bienvenida a la 1.3: Anime', desc: 'Pop-up de la versión 1.3: cartas nuevas de Anime, la Genkidama, el Soldado de Sombra y los nuevos efectos de despliegue, funda y victoria/derrota.' },
     { id: 'v12', ver: 'v1.2', name: 'Bienvenida a la 1.2: Gambling', desc: 'Pop-up de la versión 1.2: sinergia Gambling, nuevas cartas, ruleta de orbes, interés por ahorrar y nuevos efectos de casino.' },
     { id: 'correa', ver: 'v1.1', name: 'Sinergia Correa', desc: 'Pop-up de la versión 1.1: las cartas entran en juego, recibes a las 4 novias y una ocupa el hueco 5.' }
   ];
@@ -1907,7 +1962,7 @@
     if (act === 'sfxtest') { var tc = el.dataset.cat; snd(tc === 'ui' ? 'buy' : tc === 'combat' ? 'heavy' : tc === 'pack' ? 'rev-Épica' : 'win'); return; }
     if (ui.finPrev && act !== 'finprev' && act !== 'finflip' && act !== 'finclose') ui.finPrev = null;
     if (ui.dedit) { var ne = document.getElementById('de-name'); if (ne) ui.dedit.name = ne.value; }
-    if (act === 'playanim') { if (el.dataset.id === 'correa') openIntro(); else if (el.dataset.id === 'v12') openIntro12(); return; }
+    if (act === 'playanim') { if (el.dataset.id === 'correa') openIntro(); else if (el.dataset.id === 'v12') openIntro12(); else if (el.dataset.id === 'v13') openIntro13(); return; }
     if (act === 'avedit') { ui.avEdit = !ui.avEdit; return render(); }
     if (act === 'acctmenu') { var w = el.closest('.acctw'); if (w) w.classList.toggle('open'); return; }
     if (act === 'logout') return logout();

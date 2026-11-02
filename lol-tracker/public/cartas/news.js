@@ -9,6 +9,7 @@
         'Nueva acción «Kamehameha» (Anime, coste 2): reparte a partes iguales entre todas las tropas rivales el daño almacenado en la Genkidama.',
         'Chipy Correa baja a Rara (coste 3, 4/11) y pierde su pasiva.',
         'Tres nuevos efectos de despliegue de Anime (30 monedas cada uno): Soldados de sombra, Kamehameha y Grimorio de cinco hojas.',
+        'Tres nuevas fundas de Anime (40 monedas cada una): Dragon Ball, Trébol de cinco hojas y Pétalos de la boticaria.',
         'Dashlight Sun Jin-Woo — Soldado de Sombra: en la mesa desbloquea el hueco 5. Al derrotar a una tropa, una versión suya con el 50% de estadísticas ocupa ese hueco hasta la siguiente tienda (si el hueco ya tiene un soldado, no se sustituye). En Resurrección, si cae no reaparece.',
         'AitoRLG MaoMao — Boticaria: en la mesa, cada 2 tiendas rellena tu vida al máximo; si ya la tienes completa, recibes la carta «Remedio» que cura 5 de vida.',
         'Todas las cartas Anime ya están a la venta en la tienda. La pestaña Cartas se divide en Tropas y Acciones.',

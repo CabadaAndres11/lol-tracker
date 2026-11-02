@@ -453,8 +453,8 @@
     'rabia-contenida': { run: function (s, p) { var n = sc(s, 1); s.p[p].fl.tilt = n; return 'si ganas esta ronda: +' + n + ' ataque a las Tilt'; } },
     'fiesta-del-pueblo': { ok: function (s, p) { return (tiers(s.p[p])['Pueblo'] || 0) >= 1 ? '' : 'Necesitas el nivel 1 de Pueblo (2 cartas distintas).'; }, run: function (s, p) { s.p[p].fl.pueblo = true; return 'el crecimiento del pueblo se duplica'; } },
     'hermano-del-alma': {
-      ok: function (s, p) { return duoPartner(s.p[p]) ? '' : 'Necesitas un Dúo Inseparable en la mesa.'; },
-      run: function (s, p) { var id = duoPartner(s.p[p]); s.p[p].hand.push(mk(s, id, p)); mergeCheck(s, p); return 'consigues una copia de ' + CARD[id].name; } },
+      ok: function (s, p) { return s.p[p].hda ? 'Ya has usado Hermano del alma desde la última tienda.' : duoPartner(s.p[p]) ? '' : 'Necesitas un Dúo Inseparable en la mesa.'; },
+      run: function (s, p) { var id = duoPartner(s.p[p]); s.p[p].hda = true; s.p[p].hand.push(mk(s, id, p)); mergeCheck(s, p); return 'consigues una copia de ' + CARD[id].name; } },
     'sofa-compartido': {
       ok: function (s, p) { var P = s.p[p]; return mesaTroops(P).some(function (i) { return has(i, 'NINI'); }) && P.hand.some(function (i) { return isTroop(i) && has(i, 'NINI'); }) ? '' : 'Necesitas una NINI en la mesa y otra en la mano.'; },
       run: function (s, p) { var P = s.p[p], n = sc(s, 2); mesaTroops(P).concat(P.hand.filter(isTroop)).filter(function (i) { return has(i, 'NINI'); }).forEach(function (i) { grow(i, 'atk', n); grow(i, 'hp', n); }); return '+' + n + '/+' + n + ' permanente a las NINI'; } },
@@ -1103,6 +1103,7 @@
   // Al abrirse cada tienda: retira el soldado de sombra y, con MaoMao en la mesa, cada 2 tiendas cura o entrega un Remedio. Devuelve texto de registro.
   function shopStart(s, p) {
     var P = s.p[p], out = [];
+    P.hda = false;
     if (P.mesa[4] && P.mesa[4].shadow) { delete P.target[P.mesa[4].uid]; P.mesa[4] = null; out.push('El soldado de sombra desaparece.'); }
     if (mesaTroops(P).some(function (i) { return pas(i) === 'boticaria'; })) {
       P.bot = (P.bot || 0) + 1;

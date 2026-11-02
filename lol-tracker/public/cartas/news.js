@@ -8,6 +8,7 @@
         'Nueva mecánica Anime: la Genkidama. Mientras tengas la sinergia, cada ronda recibes una carta Genkidama (no sale en sobres). Tus Anime almacenan el 50% (nivel 1), 75% (nivel 2) o 100% (nivel 3) del daño que reciben, sin contar el sobrante al caer, y al jugar la carta se libera sobre una tropa rival. Ya no se ceden estadísticas.',
         'Nueva acción «Kamehameha» (Anime, coste 2): reparte a partes iguales entre todas las tropas rivales el daño almacenado en la Genkidama.',
         'Chipy Correa baja a Rara (coste 3, 4/11) y pierde su pasiva.',
+        'Nerfeo de Dúo Inseparable: Javihi Dúo y Sech Dúo pasan de Legendaria a Épica (coste 4, 5/14, ocupan 2 en el mazo en vez de 3). Hermano del alma sube a coste 3 y solo se puede usar una vez entre tiendas.',
         'Nuevo pop-up de bienvenida de la 1.3 con las cartas nuevas, la Genkidama, el Soldado de Sombra y los nuevos efectos. Puedes volver a verlo en Perfil → Animaciones.',
         'Tres nuevos efectos de despliegue de Anime (30 monedas cada uno): Soldados de sombra, Kamehameha y Grimorio de cinco hojas.',
         'Tres nuevas fundas de Anime (40 monedas cada una): Dragon Ball, Trébol de cinco hojas y Pétalos de la boticaria.',

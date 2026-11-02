@@ -241,12 +241,12 @@ var D={
     "Dúo Inseparable",
     "Tilt"
    ],
-   "cost": 5,
-   "atk": 7,
-   "hp": 18,
-   "rarity": "Legendaria",
+   "cost": 4,
+   "atk": 5,
+   "hp": 14,
+   "rarity": "Épica",
    "type": "tropa",
-   "size": 3,
+   "size": 2,
    "pas": {
     "n": "Dúo en sintonía",
     "t": "Solo con su pareja Dúo (Javihi Dúo + Sech Dúo) viva en la mesa: cuando una recibe un ataque, hace la mitad de ese daño (redondeado hacia arriba) a todas las tropas rivales. Si acaban el combate las dos vivas, tu jugador recupera 1 de vida."
@@ -309,12 +309,12 @@ var D={
     "Dúo Inseparable",
     "Tilt"
    ],
-   "cost": 5,
-   "atk": 7,
-   "hp": 18,
-   "rarity": "Legendaria",
+   "cost": 4,
+   "atk": 5,
+   "hp": 14,
+   "rarity": "Épica",
    "type": "tropa",
-   "size": 3,
+   "size": 2,
    "pas": {
     "n": "Dúo en sintonía",
     "t": "Solo con su pareja Dúo (Javihi Dúo + Sech Dúo) viva en la mesa: cuando una recibe un ataque, hace la mitad de ese daño (redondeado hacia arriba) a todas las tropas rivales. Si acaban el combate las dos vivas, tu jugador recupera 1 de vida."
@@ -1024,12 +1024,12 @@ var D={
   {
    "id": "hermano-del-alma",
    "name": "Hermano del alma",
-   "cost": 2,
+   "cost": 3,
    "rarity": "Épica",
    "type": "accion",
    "size": 1,
    "target": "none",
-   "text": "Si tienes un Dúo Inseparable en la mesa, consigues en tu mano una copia de su pareja.",
+   "text": "Si tienes un Dúo Inseparable en la mesa, consigues en tu mano una copia de su pareja. Solo se puede usar una vez entre tiendas.",
    "theme": "Dúo Inseparable"
   },
   {

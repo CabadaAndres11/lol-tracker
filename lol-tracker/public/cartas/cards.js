@@ -195,10 +195,10 @@ var D={
     "Comebacker",
     "Lol"
    ],
-   "cost": 2,
-   "atk": 3,
-   "hp": 7,
-   "rarity": "Común",
+   "cost": 3,
+   "atk": 4,
+   "hp": 11,
+   "rarity": "Rara",
    "type": "tropa",
    "size": 2
   },
@@ -457,10 +457,10 @@ var D={
     "Pokémon",
     "Voley"
    ],
-   "cost": 3,
-   "atk": 4,
-   "hp": 11,
-   "rarity": "Rara",
+   "cost": 2,
+   "atk": 3,
+   "hp": 7,
+   "rarity": "Común",
    "type": "tropa",
    "size": 2
   },
@@ -578,10 +578,10 @@ var D={
     "Lol",
     "Anime"
    ],
-   "cost": 3,
-   "atk": 5,
-   "hp": 10,
-   "rarity": "Rara",
+   "cost": 2,
+   "atk": 4,
+   "hp": 6,
+   "rarity": "Común",
    "type": "tropa",
    "size": 1
   },

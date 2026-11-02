@@ -1,6 +1,9 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-02', tag: 'Equilibrio', title: 'Revisión de rarezas: Comebacker, Anime y Voley',
+      items: ['Para que cada sinergia tenga cartas de varias rarezas: Dashlight Akali pasa a Rara (coste 3, 4/11), Pampert Friki pasa a Común (coste 2, 4/6) y Hellbramn pasa a Común (coste 2, 3/7).',
+        'Así Comebacker ya tiene una Rara y Anime y Voley tienen una Común con la que empezar. Ten en cuenta que las Comunes salen en la primera tienda y en las partidas rápidas.'] },
     { date: '2026-11-02', tag: 'Novedad', title: 'Gambling: nueva acción y cartas a la venta',
       art: ['mertens-gambler'],
       items: ['Nueva acción «Golpe de Suerte» (Gambling, coste 2): 50% de ganar 2 orbes y 50% de perder 2 (mínimo 0). Necesitas el nivel 1 de Gambling y no haber canjeado ya tus orbes.',

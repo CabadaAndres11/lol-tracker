@@ -7,7 +7,7 @@
   var handActions = function (s) { return s.p[0].hand.filter(function (h) { return !E.isTroop(h); }).length; };
   root.CARTAS_TUT = {
     seed: 48,
-    deck: ['dashlight-akali', 'sech-thresh', 'javihi-koisito', 'computer-petea', 'entrenamiento', 'arenga'],
+    deck: ['pampert-friki', 'sech-thresh', 'javihi-koisito', 'computer-petea', 'entrenamiento', 'arenga'],
     opp: ['computer-hellbramn', 'lihone-correa', 'petea-pokemaniaco', 'computer-lihone', 'armadura', 'banquete'],
     steps: [
       { st: 2, kind: 'say', pose: 'a', text: '¡Hola! Soy tu guía. En esta partida de práctica te enseño lo básico: la <b>tienda</b>, las <b>sinergias</b>, la <b>mejora de estadísticas</b>, tu <b>vida</b> y cómo van las <b>rondas</b>. Siempre es la misma partida, así que puedes repetirla cuando quieras.<br><br>El objetivo es simple: <b>dejar la vida del rival a 0</b>.', btn: 'Empezar' },
@@ -16,7 +16,7 @@
       { st: 2, kind: 'say', pose: 'a', hl: '.shopwrap', text: 'Esto es la <b>tienda</b>: 5 cartas al azar <b>de tu propio mazo</b>. El número del círculo dorado es lo que cuesta. Pulsa una carta para comprarla y irá a tu mano. En la primera tienda solo salen tropas Comunes y acciones.' },
       { st: 2, kind: 'say', pose: 'b', hl: '.refwrap', text: 'El botón redondo <b>actualiza</b> la tienda por 1 de oro y te saca otras 5 cartas. En el tutorial lo dejamos desactivado para que siempre salga lo mismo.' },
       { st: 2, kind: 'task', pose: 'b', hl: '.shoprow', text: '<b>Tu turno:</b> tienes justo 10 de oro. <b>Compra las 5 cartas</b> (4 tropas y la acción «Entrenamiento»), a 2 de oro cada una.', done: function (s) { return s.p[0].hand.length + mesaN(s) >= 5; } },
-      { st: 2, kind: 'say', pose: 'a', side: 'r', hl: '.synside', text: '¡Mira a la izquierda! Esas son tus <b>sinergias</b>. Cada tropa tiene 1 o 2, y cuentan las <b>cartas distintas</b> que tienes de cada una entre mesa y mano. Tienes <b>4 de Comebacker</b> (nivel 2) y <b>2 de Lol</b> (nivel 1).<br><br>Al llegar a 2, 4 o 6 cartas se activa un bonus; pasa el ratón por encima de una sinergia para ver qué hace.' },
+      { st: 2, kind: 'say', pose: 'a', side: 'r', hl: '.synside', text: '¡Mira a la izquierda! Esas son tus <b>sinergias</b>. Cada tropa tiene 1 o 2, y cuentan las <b>cartas distintas</b> que tienes de cada una entre mesa y mano. Tienes <b>3 de Comebacker</b> (nivel 1) y <b>2 de Lol</b> (nivel 1).<br><br>Al llegar a 2, 4 o 6 cartas se activa un bonus; pasa el ratón por encima de una sinergia para ver qué hace.' },
       { st: 2, kind: 'task', pose: 'b', hl: '[data-act=endshop]', text: 'Ya está. Pulsa <b>Terminar tienda</b> para pasar a la primera ronda de combate. (Hay tienda cada 3 rondas: 1, 4, 7…)', done: function (s) { return !s.shopOpen; } },
 
       { st: 5, kind: 'say', pose: 'a', hl: '.row4.side0', text: '¡Primera <b>ronda de combate</b>! Esta es tu <b>mesa</b>: tienes <b>4 huecos</b> para tus tropas. Abajo está tu mano. Solo las tropas de la mesa luchan.' },

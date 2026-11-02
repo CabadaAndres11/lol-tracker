@@ -55,11 +55,16 @@
   function pv(s, p, mine, theirs) { return s.pvp ? '\u0001' + p + '\u0002' + mine + '\u0002' + theirs + '\u0003' : (p === 0 ? mine : theirs); }
 
   // ---------- Instancias ----------
+  // Nivel de carta (copias fuera de la partida). La IA Difícil juega con todo a nivel 2 y la Experto a nivel 3, como mínimo.
+  function cardLv(s, owner, id) {
+    var L = (s.lv && s.lv[owner] && s.lv[owner][id]) || 1, a = (s.aiLv && s.aiLv[owner]) | 0;
+    return a > 0 ? Math.max(L, a + 1) : L;
+  }
   function mk(s, id, owner) {
     var c = CARD[id];
     var i = { uid: (s.uidn[owner]++) * (s.uidm || 2) + (s.uidk ? s.uidk[owner] : owner), id: id, owner: owner, gl: 1, perm: { atk: 0, hp: 0 }, tmp: { atk: 0, hp: 0, red: 0 }, dead: false, caps: { lol: 0, pueblo: 0, nini: 0, pel: 0, tilt: 0, pk: 0, duo: 0, nov: 0, cb: 0, vol: 0, koi: 0 } };
     i.hp = c.hp || 0;
-    var L = s.lv && s.lv[owner] && s.lv[owner][id];
+    var L = cardLv(s, owner, id);
     if (L > 1 && c.type === 'tropa') { i.perm.atk += L - 1; i.perm.hp += L - 1; i.hp += L - 1; } // nivel de carta: +1/+1 por nivel
     return i;
   }
@@ -493,7 +498,7 @@
     var why = actionBlock(s, p, c, tgt);
     if (why) { s.err = why; return false; }
     P.hand.splice(handIdx, 1); P.grave.push(i); P.used = (P.used || 0) + 1;
-    s.lvl = (s.lv && s.lv[p] && s.lv[p][c.id]) || 1;
+    s.lvl = cardLv(s, p, c.id);
     var res = ACT[c.id].run(s, p, tgt);
     s.lvl = 1;
     say(s, pv(s, p, 'Juegas ', 'El rival juega ') + c.name + (tgt ? ' sobre ' + card(tgt).name : '') + ': ' + res + '.');
@@ -516,7 +521,7 @@
   // ---------- IA ----------
   // ---------- IA: dificultades (0 Normal, 1 Difícil, 2 Experto) ----------
   function aiLv(s, p) { return (s.aiLv && s.aiLv[p]) || 0; }
-  // Ventajas de la IA: Difícil +1 de oro en las rondas de tienda; Experto +2 de oro en las rondas de tienda y se cura 2 de vida si no la tiene completa
+  // Ventajas de la IA: Difícil +1 de oro en las rondas de tienda y cartas a nivel 2; Experto cartas a nivel 3; Experto +2 de oro en las rondas de tienda y se cura 2 de vida si no la tiene completa
   function aiBonus(s, p) {
     var lv = aiLv(s, p), P = s.p[p];
     if (!lv || s.round < 2) return;

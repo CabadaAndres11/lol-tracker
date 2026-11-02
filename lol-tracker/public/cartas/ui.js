@@ -712,7 +712,7 @@
   function tutStrip() {
     return '<div class="qtut"><img src="/cartas/tutor/guia.webp" alt=""><div class="qtt"><span class="qtk">Aprende a jugar</span><b>Tutorial</b><span>Una partida guiada y siempre igual: la tienda, las sinergias, la mejora de estadísticas, tu vida y las rondas.' + (tutDone() ? ' ' + ic('check') + ' Completado' : '') + '</span></div><button class="btn big" data-act="tutstart">' + ic('libro') + ' ' + (tutDone() ? 'Repetir tutorial' : 'Empezar tutorial') + '</button></div>';
   }
-  var DIFFS = [{ n: 'Normal', d: 'La IA de siempre.', r: 'Monedas ×1' }, { n: 'Difícil', d: 'Mazos coherentes, mejor tienda y +1 de oro en rondas de tienda.', r: 'Monedas ×1,5' }, { n: 'Experto', d: 'Lo anterior, +2 de oro en tienda, se cura 2 de vida y fusiona copias.', r: 'Monedas ×2 y +10 puntos si ganas' }];
+  var DIFFS = [{ n: 'Normal', d: 'La IA de siempre.', r: 'Monedas ×1' }, { n: 'Difícil', d: 'Mazos coherentes, mejor tienda, +1 de oro en rondas de tienda y cartas a nivel 2.', r: 'Monedas ×1,5' }, { n: 'Experto', d: 'Lo anterior, cartas a nivel 3, +2 de oro en tienda, se cura 2 de vida y fusiona copias.', r: 'Monedas ×2 y +10 puntos si ganas' }];
   function curDiff() { if (ui.diff == null) { try { ui.diff = Math.max(0, Math.min(2, +localStorage.getItem('tcg_diff') || 0)); } catch (e) { ui.diff = 0; } } return ui.diff; }
   function diffHtml() {
     var d = curDiff();

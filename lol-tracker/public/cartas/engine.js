@@ -81,7 +81,7 @@
       (DATA.novias || []).forEach(function (n) { if (!P.nvs.some(function (x) { return x.id === n.id; }) && !(P.mesa[4] && P.mesa[4].id === n.id)) P.nvs.push(mk(s, n.id, p)); });
       say(s, pv(s, p, '¡Sinergia Correa! Se desbloquea el hueco 5 y recibes a las 4 novias.', 'El rival desbloquea el hueco 5 y sus novias.'));
     }
-    if (c < 1 && P.mesa[4]) { P.nvs.push(P.mesa[4]); delete P.target[P.mesa[4].uid]; P.mesa[4] = null; } // sin la sinergia, la novia vuelve a la reserva
+    if (c < 1 && P.mesa[4] && !P.mesa[4].shadow) { P.nvs.push(P.mesa[4]); delete P.target[P.mesa[4].uid]; P.mesa[4] = null; } // sin la sinergia, la novia vuelve a la reserva
   }
   function novBack(P, i) { i.dead = false; i.tmp = { atk: 0, hp: 0, red: 0 }; i.hp = Math.max(1, card(i).hp + i.perm.hp); P.nvs.push(i); delete P.target[i.uid]; }
 
@@ -95,7 +95,7 @@
   function themeCounts(P) {
     var seen = {}, out = {};
     P.mesa.concat(P.hand).forEach(function (i) {
-      if (!i || !isTroop(i) || i.dead || seen[i.id]) return;
+      if (!i || !isTroop(i) || i.dead || i.shadow || seen[i.id]) return;
       seen[i.id] = 1;
       card(i).themes.forEach(function (t) { out[t] = (out[t] || 0) + 1; });
     });
@@ -195,7 +195,7 @@
     if (s.round % CFG.shopEvery === 1) {
       s.shops++;
       s.shopOpen = true;
-      [0, 1].forEach(function (p) { openShop(s, p); });
+      [0, 1].forEach(function (p) { var m = shopStart(s, p); if (m && (p === 0 || s.pvp)) say(s, pv(s, p, m, 'Rival: ' + m)); openShop(s, p); });
       say(s, 'Se abre la tienda.');
     } else {
       [0, 1].forEach(function (p) {
@@ -371,7 +371,7 @@
   }
   function retire(s, p, slot) {
     var P = s.p[p], i = P.mesa[slot];
-    if (slot === 4 && i && s.phase === 'prep') { P.mesa[4] = null; P.nvs.push(i); delete P.target[i.uid]; return true; } // la novia vuelve a la reserva
+    if (slot === 4 && i && !i.shadow && s.phase === 'prep') { P.mesa[4] = null; P.nvs.push(i); delete P.target[i.uid]; return true; } // la novia vuelve a la reserva
     if (!s.shopOpen || s.phase !== 'prep' || !i || i.dead) return false;
     if (has(i, 'Lol')) return false;
     if (P.hand.length >= handCap(s)) return false;
@@ -387,6 +387,7 @@
     if (handIdx < 0 || slot === 4) { // novias: handIdx negativo = posición -1-k en la reserva; solo van al hueco 5
       var k = -1 - handIdx, n = (P.nvs || [])[k];
       if (s.phase !== 'prep' || slot !== 4 || !n || (tiers(P)['Correa'] || 0) < 1) return false;
+      if (P.mesa[4] && P.mesa[4].shadow) return false;
       P.nvs.splice(k, 1);
       if (P.mesa[4]) { P.nvs.push(P.mesa[4]); delete P.target[P.mesa[4].uid]; }
       P.mesa[4] = n;
@@ -406,7 +407,8 @@
     if (isNov(i)) { if (k >= 0) P.mesa[k] = null; novBack(P, i); return; } // las novias vuelven a la reserva
     i.dead = true; i.hp = 0;
     if (k >= 0) P.mesa[k] = null;
-    P.grave.push(i); delete P.target[i.uid];
+    if (!i.shadow) P.grave.push(i);
+    delete P.target[i.uid];
   }
   function validTarget(c, i) { if (immune(i) && c.target === 'enemy') return false; return !c.only || has(i, c.only); }
   // Cada acción: ok(s,p,tgt) devuelve '' si se puede jugar o el motivo; run(s,p,tgt) la aplica y devuelve el texto del registro.
@@ -419,6 +421,7 @@
     banquete: { run: function (s, p) { var n = sc(s, 2); mesaTroops(s.p[p]).forEach(function (i) { grow(i, 'hp', n); }); return '+' + n + ' vida máxima permanente a todas'; } },
     intimidacion: { run: function (s, p, t) { var n = sc(s, 3); t.perm.atk -= n; return '-' + n + ' ataque permanente'; } },
     'mal-de-ojo': { ok: function (s, p) { return targetable(s.p[1 - p]).length ? '' : 'El rival no tiene tropas.'; }, run: function (s, p) { var n = sc(s, 1); targetable(s.p[1 - p]).forEach(function (i) { i.perm.atk -= n; }); return '-' + n + ' ataque permanente a todas las rivales'; } },
+    remedio: { ok: function (s, p) { return s.p[p].life < (s.maxLife || CFG.life) ? '' : 'Tu vida ya está al máximo.'; }, run: function (s, p) { var P = s.p[p], ML = s.maxLife || CFG.life, h = Math.min(5, ML - P.life); P.life += h; return '+' + h + ' de vida'; } },
     genkidama: { ok: function (s, p) { return genStored(s.p[p]) > 0 ? '' : 'La Genkidama está vacía: tus Anime aún no han recibido daño.'; }, run: function (s, p, t) { var P = s.p[p], n = genStored(P); P.gen = 0; t.hp -= n; if (t.hp <= 0) dropDead(s, 1 - p, t); return n + ' de daño de Genkidama'; } },
     kamehameha: { ok: function (s, p) { if ((tiers(s.p[p])['Anime'] || 0) < 1) return 'Necesitas el nivel 1 de Anime (2 cartas distintas).'; if (genStored(s.p[p]) <= 0) return 'La Genkidama está vacía: tus Anime aún no han recibido daño.'; return targetable(s.p[1 - p]).length ? '' : 'El rival no tiene tropas.'; },
       run: function (s, p) { var P = s.p[p], tot = genStored(P), foes = targetable(s.p[1 - p]), n = Math.floor(tot / foes.length); P.gen = 0; foes.forEach(function (i) { genCharge(s, i, Math.min(n, Math.max(0, i.hp))); i.hp -= n; if (i.hp <= 0) dropDead(s, 1 - p, i); }); return n + ' de daño a cada tropa rival (Genkidama repartida: ' + tot + ')'; } },
@@ -815,7 +818,7 @@
 
   // Efectos al caer una tropa (KOI, Dúo Inseparable). Devuelve texto de registro y animación.
   // ---------- Pasivas de legendarias ----------
-  var PAS = { 'javihi-duo': 'duo', 'sech-duo': 'duo', 'javihi-prime': 'remate', 'sech': 'embargo', 'potango': 'aliento', 'mertens-prime': 'pereza', 'chipy-lloron': 'llanto', 'lihone-viego': 'racha', 'aitorlg-renata': 'prorroga', 'haikyuu-lihone': 'saque', 'lihone': 'captura', 'pampert-koisito': 'cabezon', 'aitorlg-koisito': 'heredero', 'mertens-gambler': 'malaracha', 'computer-dashlight': 'medallas', 'pampert-gambler': 'colega' };
+  var PAS = { 'dashlight-sun-jin-woo': 'sombra', 'aitorlg-maomao': 'boticaria', 'javihi-duo': 'duo', 'sech-duo': 'duo', 'javihi-prime': 'remate', 'sech': 'embargo', 'potango': 'aliento', 'mertens-prime': 'pereza', 'chipy-lloron': 'llanto', 'lihone-viego': 'racha', 'aitorlg-renata': 'prorroga', 'haikyuu-lihone': 'saque', 'lihone': 'captura', 'pampert-koisito': 'cabezon', 'aitorlg-koisito': 'heredero', 'mertens-gambler': 'malaracha', 'computer-dashlight': 'medallas', 'pampert-gambler': 'colega' };
   function pas(i) { return PAS[i.id] || ''; }
   function duoLinked(s, i) { var o = i.id === 'javihi-duo' ? 'sech-duo' : 'javihi-duo'; return mesaTroops(s.p[i.owner]).some(function (x) { return x.id === o; }); }
   // Prórroga (AitoRLG Renata): la tropa a su derecha no cae a 0 de vida hasta que haya atacado
@@ -958,6 +961,7 @@
         line += ' Dúo en sintonía: ' + dn + ' de daño a todas las tropas rivales.';
         mesaTroops(s.p[a.owner]).forEach(function (v) { line += passiveHit(s, v, dn, 0); });
       }
+      if (tgt.dead && pas(a) === 'sombra' && !P.mesa[4] && !isNov(tgt)) line += shadowRaise(s, a, tgt);
       if (tgt.dead && pas(a) === 'embargo' && !a.dead) {
         E.life -= 2; P.gold += 1; plife = tgt.owner; pdmg = 2;
         line += ' Embargo: ' + pv(s, a.owner, 'el rival pierde 2 de vida y ganas 1 de oro.', 'pierdes 2 de vida y el rival gana 1 de oro.');
@@ -1075,6 +1079,7 @@
     s.p.forEach(function (P) {
       P.mesa.forEach(function (i, k) {
         if (!i) return;
+        if (i.shadow && (i.dead || i.hp <= 0)) { P.mesa[k] = null; delete P.target[i.uid]; return; } // el soldado de sombra caído desaparece (tampoco revive)
         if (isNov(i) && s.mode !== 'revive' && (i.dead || i.hp <= 0)) { P.mesa[k] = null; novBack(P, i); return; } // la novia caída vuelve a la reserva con su vida
         if (s.mode === 'revive') { i.dead = false; i.tmp = { atk: 0, hp: 0, red: 0 }; i.hp = maxHp(i); return; } // Resurrección: todas vuelven con la vida completa
         if (i.dead || i.hp <= 0) { P.grave.push(i); P.mesa[k] = null; delete P.target[i.uid]; return; }
@@ -1085,6 +1090,32 @@
     });
   }
 
+  // ---------- Dashlight Sun Jin-Woo: Soldado de Sombra ----------
+  // Al derrotar a una tropa (con el hueco 5 libre), aparece una versión suya al 50% de estadísticas hasta la siguiente tienda.
+  function shadowRaise(s, a, tgt) {
+    var P = s.p[a.owner], n = mk(s, tgt.id, a.owner), c = card(tgt);
+    var na = Math.max(1, Math.round(atk(tgt) / 2)), nh = Math.max(1, Math.round(maxHp(tgt) / 2));
+    n.shadow = true; n.perm = { atk: na - c.atk, hp: nh - c.hp }; n.hp = nh; n.tmp = { atk: 0, hp: 0, red: 0 };
+    P.mesa[4] = n;
+    return ' Soldado de Sombra: ' + c.name + ' (' + na + '/' + nh + ') ocupa el hueco 5 hasta la siguiente tienda.';
+  }
+  // ---------- AitoRLG MaoMao: Boticaria ----------
+  // Al abrirse cada tienda: retira el soldado de sombra y, con MaoMao en la mesa, cada 2 tiendas cura o entrega un Remedio. Devuelve texto de registro.
+  function shopStart(s, p) {
+    var P = s.p[p], out = [];
+    if (P.mesa[4] && P.mesa[4].shadow) { delete P.target[P.mesa[4].uid]; P.mesa[4] = null; out.push('El soldado de sombra desaparece.'); }
+    if (mesaTroops(P).some(function (i) { return pas(i) === 'boticaria'; })) {
+      P.bot = (P.bot || 0) + 1;
+      if (P.bot >= 2) {
+        P.bot = 0;
+        var ML = s.maxLife || CFG.life;
+        if (P.life < ML) { P.life = ML; out.push('Boticaria: tu vida se rellena al máximo.'); }
+        else if (P.hand.length < CFG.handMax) { P.hand.push(mk(s, 'remedio', p)); out.push('Boticaria: tu vida está al máximo, recibes un Remedio.'); }
+        else out.push('Boticaria: tu mano está llena, no recibes el Remedio.');
+      }
+    }
+    return out.join(' ');
+  }
   // ---------- Anime: Genkidama ----------
   // Las Anime almacenan la mitad del daño que reciben (sin contar el sobrante al caer) mientras la sinergia está activa.
   function genCharge(s, v, n) {
@@ -1169,7 +1200,7 @@
     newGame: newGame, randomDeck: randomDeck, deckSize: deckSize, mulberry32: mulberry32,
     place: place, playAction: playAction, setTarget: setTarget, clearTargets: clearTargets, forfeit: forfeit, setVoley: setVoley, actionBlock: actionBlock, validTarget: validTarget,
     sell: sell, sellValue: sellValue, handCap: handCap, dupBlock: dupBlock, buy: buy, mergeCheck: mergeCheck, willMerge: willMerge, shopOdds: shopOdds, refresh: refresh, refreshCost: refreshCost, pickFromDeck: pickFromDeck, retire: retire,
-    aiDeck: aiDeck, genGive: genGive, genStored: genStored, aiBonus: aiBonus, aiLv: aiLv, aiShop: aiShop, aiPrep: aiPrep, aiTargets: aiTargets, fight: fight, endShop: endShop, pendingTargets: pendingTargets, freeze: freeze, nextRound: nextRound,
+    aiDeck: aiDeck, genGive: genGive, shopStart: shopStart, genStored: genStored, aiBonus: aiBonus, aiLv: aiLv, aiShop: aiShop, aiPrep: aiPrep, aiTargets: aiTargets, fight: fight, endShop: endShop, pendingTargets: pendingTargets, freeze: freeze, nextRound: nextRound,
     interest: interest, isNov: isNov, immune: immune, targetable: targetable, novSync: novSync, themeCounts: themeCounts, tiers: tiers, tierOf: tierOf, atk: atk, maxHp: maxHp, card: card, isTroop: isTroop, has: has, mesaTroops: mesaTroops, viewOf: viewOf,
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.CartasEngine = API;

@@ -124,7 +124,7 @@ function startRound(T) {
   });
   if (T.shopOpen) {
     T.shops++;
-    alive.forEach((p) => { E.openShop(T, p); note(T, p, 'Se abre la tienda.'); });
+    alive.forEach((p) => { const m = E.shopStart(T, p); if (m) note(T, p, m); E.openShop(T, p); note(T, p, 'Se abre la tienda.'); });
     processStuck(T);
   } else {
     alive.forEach((p) => { if (E.noTroops(T.p[p])) eliminate(T, p, 'Te quedaste sin tropas: eliminado.'); });

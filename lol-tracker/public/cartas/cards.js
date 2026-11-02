@@ -640,7 +640,11 @@ var D={
    "hp": 15,
    "rarity": "Épica",
    "type": "tropa",
-   "size": 2
+   "size": 2,
+   "pas": {
+    "n": "Soldado de Sombra",
+    "t": "En mesa desbloquea el hueco 5: al derrotar a una tropa, su versión al 50% lo ocupa hasta la siguiente tienda."
+   }
   },
   {
    "id": "aitorlg-maomao",
@@ -654,7 +658,11 @@ var D={
    "hp": 18,
    "rarity": "Legendaria",
    "type": "tropa",
-   "size": 2
+   "size": 2,
+   "pas": {
+    "n": "Boticaria",
+    "t": "En mesa, cada 2 tiendas rellena tu vida; si ya está llena, recibes una carta que cura 5."
+   }
   },
   {
    "id": "javihi-smiley",
@@ -1060,6 +1068,18 @@ var D={
  ],
  "tokens": [
   {
+   "id": "remedio",
+   "name": "Remedio",
+   "cost": 0,
+   "rarity": "Rara",
+   "type": "accion",
+   "size": 1,
+   "target": "none",
+   "text": "Cura 5 de vida. Te lo da la Boticaria de AitoRLG MaoMao.",
+   "theme": "Anime",
+   "token": true
+  },
+  {
    "id": "genkidama",
    "name": "Genkidama",
    "cost": 0,
@@ -1275,6 +1295,38 @@ var D={
   },
   {
    "id": "golpe-de-suerte",
+   "price": 50
+  },
+  {
+   "id": "javihi-smiley",
+   "price": 40
+  },
+  {
+   "id": "mertens-meliodas",
+   "price": 40
+  },
+  {
+   "id": "lihone-rudeus",
+   "price": 70
+  },
+  {
+   "id": "chipy-goku",
+   "price": 70
+  },
+  {
+   "id": "pampert-asta",
+   "price": 70
+  },
+  {
+   "id": "dashlight-sun-jin-woo",
+   "price": 100
+  },
+  {
+   "id": "aitorlg-maomao",
+   "price": 150
+  },
+  {
+   "id": "kamehameha",
    "price": 50
   }
  ]

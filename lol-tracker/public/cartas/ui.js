@@ -902,6 +902,15 @@
     var p = max ? Math.max(0, Math.min(100, val / max * 100)) : 100;
     return '<div class="orb ' + kind + '" data-orb="' + (idx == null ? '' : idx) + '" style="--p:' + p + '%" title="' + label + '"><b>' + Math.max(0, val) + '</b><span>' + label + '</span></div>';
   }
+  // Gambling: orbes acumuladas junto a la vida (la última que llega entra con un pequeño rebote)
+  function gamOrbs(P, side) {
+    var g = P.gmb || {}, n = g.orbs || 0, t = (E.tiers(P).Gambling || 0);
+    if (!t && !n && !g.done) return '';
+    ui.gprev = ui.gprev || [0, 0]; var fresh = n > ui.gprev[side]; ui.gprev[side] = n;
+    var sp = '', k, show = Math.min(n, 8);
+    for (k = 0; k < show; k++) sp += '<i class="gsp' + (fresh && k === show - 1 ? ' new' : '') + '" style="--k:' + (k % 3) + '"></i>';
+    return '<div class="gorbbox' + (g.done ? ' done' : '') + (side ? ' foe' : '') + '" title="' + (g.done ? 'Orbes canjeadas: ya no se ganan más' : 'Una orbe por ronda sin daño directo; se abren al recibir el primer golpe') + '"><span class="gl">' + ic('dado') + ' Orbes Gambling</span><div class="gsph">' + (g.done ? '<em>canjeadas</em>' : n ? sp + (n > 8 ? '<b>+' + (n - 8) + '</b>' : '') : '<em>' + (t ? 'sin orbes aún' : '') + '</em>') + '</div>' + (!g.done && n ? '<span class="gn">×' + n + '</span>' : '') + '</div>';
+  }
   function synergyHtml(P, foe) {
     var c = E.themeCounts(P), keys = Object.keys(c).filter(function (t) { return !foe || E.tierOf(t, c[t]) > 0; }).sort(function (a, b) { return E.tierOf(b, c[b]) - E.tierOf(a, c[a]) || c[b] - c[a]; });
     var h = '<div class="synside panel' + (foe ? ' foe' : '') + '"><h2>' + (foe ? '' + ic('aviso') + ' Sinergias del RIVAL' : 'Sinergias') + '</h2>';
@@ -910,7 +919,7 @@
       var T = D.themes[t], tier = E.tierOf(t, c[t]), nxt = T.th[tier];
       var tip = '<div class="tip"><b>' + esc(t) + '</b>' + T.tx.map(function (x, k) { return '<p' + (k + 1 === tier ? ' class="cur"' : '') + '><b>' + T.th[k] + ' cartas:</b> ' + esc(x) + '</p>'; }).join('') + '</div>';
       return '<div class="syn-row t' + tier + '" style="--tc:' + T.color + '" tabindex="0"><div class="hexa"><b>' + c[t] + '</b></div><div class="si"><b>' + esc(t) + '</b><div class="th">' +
-        T.th.map(function (n, k) { return '<i class="' + (k < tier ? 'on' : '') + '">' + n + '</i>'; }).join('') + '</div></div><span class="need">' + (nxt ? c[t] + '/' + nxt : ic('check') + ' máx') + '</span>' + (t === 'Gambling' && P.gmb && (P.gmb.orbs || P.gmb.done) ? '<span class="gorbn' + (P.gmb.done ? ' done' : '') + '" title="' + (P.gmb.done ? 'Orbes canjeadas: ya no se ganan más' : 'Orbes acumuladas') + '">' + ic('dado') + ' ' + (P.gmb.done ? 'canjeadas' : '×' + P.gmb.orbs) + '</span>' : '') + tip + '</div>';
+        T.th.map(function (n, k) { return '<i class="' + (k < tier ? 'on' : '') + '">' + n + '</i>'; }).join('') + '</div></div><span class="need">' + (nxt ? c[t] + '/' + nxt : ic('check') + ' máx') + '</span>' + '' + tip + '</div>';
     }).join('') + '</div></div>';
     return h;
   }
@@ -983,7 +992,7 @@
     var ML = s.maxLife || CFG.life;
     if (s.vs4 && s.spec && ui.playing) h += '<div class="v4spec">' + ic('ojo') + ' Descansas: estás viendo el duelo <b>' + esc(s.spec[0]) + '</b> contra <b>' + esc(s.spec[1]) + '</b></div>';
     else if (s.vs4 && !shopMode && !s.rest) h += '<div class="v4vs"><span>Duelo contra</span><b>' + esc(PV.names[1]) + '</b></div>';
-    if (!shopMode && (!s.rest || (s.spec && ui.playing))) h += '<div class="hud top">' + orb('life', view.life[1], ui.tut ? 40 : ML, s.spec && ui.playing ? esc(s.spec[1]) : PV.on ? esc(PV.names[1]) : 'Rival', 1) + '</div>' + mesaRow(1, view, s, false) + '<div class="gap"></div>';
+    if (!shopMode && (!s.rest || (s.spec && ui.playing))) h += '<div class="hud top">' + orb('life', view.life[1], ui.tut ? 40 : ML, s.spec && ui.playing ? esc(s.spec[1]) : PV.on ? esc(PV.names[1]) : 'Rival', 1) + gamOrbs(s.p[1], 1) + '</div>' + mesaRow(1, view, s, false) + '<div class="gap"></div>';
     h += mesaRow(0, view, s, true);
     // HUD inferior: vida, oro y acciones
     var acts = '';
@@ -999,7 +1008,7 @@
       acts = '<div class="hint">' + esc(msg) + '</div><div class="btnrow"><button class="btn big" data-act="fight"' + (pend || (!P.mesa.some(Boolean) && E.mesaTroops(R).length) ? ' disabled' : '') + '>' + ic('espadas') + (s.rest ? ' ¡Listo!' : ' ¡Combatir!') + '</button><button class="btn sec sm" data-act="undo"' + (hasT ? '' : ' disabled') + ' title="Quitar todos los objetivos elegidos">' + ic('deshacer') + ' Deshacer</button></div>';
     } else if (s.phase === 'post') acts = ui.busy ? '' : '<div class="hint">Puedes ceder estadísticas Anime antes de seguir.</div><button class="btn big" data-act="next">Continuar ▶</button>';
     if (PV.on && PV.rdy[1] && !PV.rdy[0] && (shop || prep || s.phase === 'post')) acts = '<div class="hint rivrdy">' + ic('aviso') + ' El rival ya está listo.</div>' + acts;
-    h += '<div class="hud bottom">' + orb('life', view.life[0], ML, s.spec && ui.playing ? esc(s.spec[0]) : 'Tu vida', 0) + orb('gold', P.gold, 0, 'Tu oro') + '<div class="acts">' + acts + '</div></div></div>';
+    h += '<div class="hud bottom">' + orb('life', view.life[0], ML, s.spec && ui.playing ? esc(s.spec[0]) : 'Tu vida', 0) + orb('gold', P.gold, 0, 'Tu oro') + gamOrbs(P, 0) + '<div class="acts">' + acts + '</div></div></div>';
 
     // Mano
     h += '<div class="handwrap' + (ui.dragMesa ? ' dropzone' : '') + '"><div class="hl">Tu mano ' + P.hand.length + (s.mode === 'revive' ? '' : '/' + CFG.handMax) + '</div><div class="hand">';

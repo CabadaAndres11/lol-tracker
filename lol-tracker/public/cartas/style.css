@@ -1825,3 +1825,15 @@ body.tutmode .freezebtn { pointer-events: none; opacity: .35; }
 .synguide li p { margin: 0; color: #cdd4e8; font-size: .92rem; line-height: 1.4; } .synguide li p b { color: #fff; }
 .synguide .gn { display: grid; place-items: center; width: 1.7rem; height: 1.7rem; border-radius: 50%; background: var(--tc); color: #0b1428; font-weight: 800; font-size: .85rem; }
 .synall { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: .8rem; } .synall .synguide { margin: 0; }
+
+/* Orbes Gambling acumuladas (junto a la vida) */
+.gorbbox { display: grid; gap: .25rem; align-content: center; justify-items: center; min-width: 120px; padding: .45rem .8rem; border-radius: 14px; border: 1px solid rgba(217,70,239,.6); background: linear-gradient(180deg, rgba(74,10,96,.75), rgba(24,6,40,.85)); box-shadow: 0 0 14px rgba(217,70,239,.3); }
+.gorbbox .gl { display: flex; align-items: center; gap: .3rem; font-size: .62rem; letter-spacing: .12em; text-transform: uppercase; color: #f5d0fe; } .gorbbox .gl .ic { width: 1.1em; height: 1.1em; }
+.gsph { display: flex; align-items: center; gap: 4px; min-height: 22px; flex-wrap: wrap; justify-content: center; max-width: 150px; } .gsph em { font-size: .72rem; color: #c4b5d8; font-style: normal; } .gsph b { font-size: .75rem; color: #f5d0fe; }
+.gsp { width: 18px; height: 18px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff, #f0abfc 35%, #a21caf 80%); box-shadow: 0 0 8px rgba(217,70,239,.85); will-change: transform; animation: gfloat 2.4s ease-in-out infinite; animation-delay: calc(var(--k) * -.5s); }
+.gsp.new { animation: gsnew .6s cubic-bezier(.2,1.6,.4,1) both, gfloat 2.4s .6s ease-in-out infinite; }
+@keyframes gfloat { 50% { transform: translateY(-3px); } } @keyframes gsnew { from { transform: scale(0) translateY(-14px); } }
+.gorbbox .gn { font-weight: 800; color: #fff; font-size: .9rem; }
+.gorbbox.done { border-color: rgba(148,163,184,.5); background: rgba(20,24,40,.8); box-shadow: none; } .gorbbox.done .gl { color: #94a3b8; }
+.gorbbox.foe { border-color: rgba(148,163,184,.55); }
+@media (prefers-reduced-motion: reduce) { .gsp, .gsp.new { animation: none; } }

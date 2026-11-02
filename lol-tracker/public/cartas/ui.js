@@ -1320,24 +1320,42 @@
 
     // ---------- Efectos de sinergia: cartel, bola, números flotantes ----------
   var FXICON = { pereza: 'sofa', duo: 'duo', novia: 'corazon', eriko: 'corazon', lucia: 'ojo', pueblo: 'pueblo', nini: 'sofa', voley: 'voley', comeback: 'fuego', tilt: 'enfado', koi: 'trofeo', trabajo: 'maletin', gorb: 'dado', gambling: 'dado' };
-  // Gambling: ruleta 3D (una sola tirada) que muestra el total de todas las orbes y, debajo, lo que dio cada una
+  // Gambling: ruleta de casino (una sola tirada) que termina mostrando el total de mejora de todas las orbes
+  function gamWheelSvg(win, total) {
+    var N = 24, step = 360 / N, h = '', k, hi = Math.max(3, total + 2), vals = [];
+    function pt(r, a) { var t = (a - 90) * Math.PI / 180; return (200 + r * Math.cos(t)).toFixed(2) + ' ' + (200 + r * Math.sin(t)).toFixed(2); }
+    for (k = 0; k < N; k++) { var v; if (k === win) v = total; else { do { v = 1 + Math.floor(Math.random() * hi); } while (v === total); } vals.push(v); }
+    h += '<circle cx="200" cy="200" r="178" fill="#0b1226" stroke="#d9b25a" stroke-width="3"/>';
+    for (k = 0; k < N; k++) {
+      var a0 = k * step - step / 2, a1 = k * step + step / 2, col = k % 2 ? '#a21caf' : '#16254a';
+      h += '<path d="M' + pt(122, a0) + ' L' + pt(168, a0) + ' A168 168 0 0 1 ' + pt(168, a1) + ' L' + pt(122, a1) + ' A122 122 0 0 0 ' + pt(122, a0) + 'Z" fill="' + col + '" stroke="#d9b25a" stroke-width="1.4" data-k="' + k + '"/>';
+      h += '<text x="200" y="' + (200 - 146) + '" transform="rotate(' + (k * step) + ' 200 200)" text-anchor="middle" dominant-baseline="middle" font-family="Georgia,serif" font-weight="700" font-size="20" fill="' + (k % 2 ? '#fff' : '#f0d58a') + '">' + vals[k] + '</text>';
+    }
+    h += '<circle cx="200" cy="200" r="118" fill="#0b1226" stroke="#d9b25a" stroke-width="2"/>';
+    for (k = 0; k < 12; k++) h += '<path d="M' + pt(30, k * 30) + ' L' + pt(116, k * 30) + '" stroke="rgba(217,178,90,.45)" stroke-width="2"/>';
+    h += '<circle cx="200" cy="200" r="86" fill="url(#gcone)" stroke="#f0d58a" stroke-width="2"/><circle cx="200" cy="200" r="30" fill="url(#gcone)" stroke="#f0d58a" stroke-width="2"/>';
+    return '<svg viewBox="0 0 400 400" class="gwsvg"><defs><radialGradient id="gcone" cx="40%" cy="35%"><stop offset="0" stop-color="#fff2b8"/><stop offset=".5" stop-color="#d9a52c"/><stop offset="1" stop-color="#5a3a05"/></radialGradient></defs>' + h + '</svg>';
+  }
   function gamblingRoulette(fx) {
     var old = document.getElementById('gambov'); if (old) old.remove();
-    var orbs = fx.orbs || [], total = fx.total || 0, faces = [], n = 14, k;
-    for (k = 0; k < n - 1; k++) faces.push(1 + Math.floor(Math.random() * Math.max(3, total + 2)));
-    faces.push(total); // la última cara es la que queda de frente
-    var ang = 360 / n, rad = 86 / Math.tan(Math.PI / n);
-    var drum = faces.map(function (v, i) { return '<div class="gface" style="transform:rotateX(' + (-i * ang) + 'deg) translateZ(' + rad.toFixed(1) + 'px)"><b>+' + v + '</b><span>/+' + v + '</span></div>'; }).join('');
+    var orbs = fx.orbs || [], total = fx.total || 0, N = 24, step = 360 / N, win = Math.floor(Math.random() * N);
     var el = document.createElement('div'); el.id = 'gambov'; el.className = fx.side === 0 ? 'mine' : 'foe';
     el.innerHTML = '<div class="gcard"><div class="gt">' + (fx.side === 0 ? 'Tu Gambling' : 'Gambling rival') + ' · ' + (orbs.length ? orbs.length + (orbs.length === 1 ? ' orbe' : ' orbes') : 'sin orbes') + '</div>' +
-      '<div class="gscene"><div class="gdrum" style="--r:' + rad.toFixed(1) + 'px">' + drum + '</div><i class="gmark l"></i><i class="gmark r"></i></div>' +
+      '<div class="rscene"><div class="rtilt"><div class="rrim"></div><div class="rwheel">' + gamWheelSvg(win, total) + '</div><div class="rball"><i></i></div><div class="rpin"></div></div></div>' +
+      '<div class="rres"><b>+' + total + '</b><span>/+' + total + '</span></div>' +
       '<div class="gorbs">' + orbs.map(function (v, i) { return '<span class="gorb v' + v + '" style="--i:' + i + '">+' + v + '</span>'; }).join('') + '</div>' +
       '<div class="gtot">+' + total + '/+' + total + ' permanente a las Gambling</div></div>';
     document.body.appendChild(el);
-    var d = el.querySelector('.gdrum'), final = (n - 1) * ang + 360 * 3;
-    if (REDUCED || !d.animate) d.style.transform = 'rotateX(' + final + 'deg)';
-    else d.animate([{ transform: 'rotateX(0deg)' }, { transform: 'rotateX(' + final + 'deg)' }], { duration: 2300, fill: 'forwards', easing: 'cubic-bezier(.12,.6,.1,1)' });
-    setTimeout(function () { el.classList.add('out'); }, 3700); setTimeout(function () { if (el.parentNode) el.remove(); }, 4100);
+    var wheel = el.querySelector('.rwheel'), ball = el.querySelector('.rball'), bi = ball.querySelector('i'), D = REDUCED || !wheel.animate ? 0 : 4300;
+    var wf = 360 * 3 - win * step; // el bolsillo ganador termina arriba, donde cae la bola
+    if (!D) { wheel.style.transform = 'rotate(' + wf + 'deg)'; el.classList.add('done'); }
+    else {
+      wheel.animate([{ transform: 'rotate(0deg)' }, { transform: 'rotate(' + wf + 'deg)' }], { duration: D, fill: 'forwards', easing: 'cubic-bezier(.2,.55,.25,1)' });
+      ball.animate([{ transform: 'rotate(0deg)' }, { transform: 'rotate(' + (-360 * 6) + 'deg)' }], { duration: D - 250, fill: 'forwards', easing: 'cubic-bezier(.25,.5,.3,1)' });
+      bi.animate([{ transform: 'translateY(-178px)', offset: 0 }, { transform: 'translateY(-178px)', offset: .55 }, { transform: 'translateY(-158px)', offset: .8 }, { transform: 'translateY(-149px)', offset: .9 }, { transform: 'translateY(-156px)', offset: .95 }, { transform: 'translateY(-154px)', offset: 1 }], { duration: D - 250, fill: 'forwards' });
+      setTimeout(function () { el.classList.add('done'); var pk = el.querySelector('path[data-k="' + win + '"]'); if (pk) pk.setAttribute('class', 'rwin'); }, D);
+    }
+    setTimeout(function () { el.classList.add('out'); }, D + 2900); setTimeout(function () { if (el.parentNode) el.remove(); }, D + 3300);
   }
   ui.showRoulette = gamblingRoulette; // (también útil para probar la animación desde la consola)
   function fxBanner() {
@@ -1546,7 +1564,7 @@
     var f = ui.frames[ui.shown++], prev = ui.view || (ui.frames[0] && ui.frames[0].view);
     ui.floats = diffFloats(prev, f); combatSnd(prev, f);
     ui.view = f.view; ui.hl = f.hl; render();
-    var fxk = f.hl && f.hl.fx; timer = setTimeout(step, fxk ? (fxk.type === 'gambling' ? 4300 : fxk.type === 'pokemon' ? 1700 : 1250) : 780);
+    var fxk = f.hl && f.hl.fx; timer = setTimeout(step, fxk ? (fxk.type === 'gambling' ? (REDUCED ? 3600 : 7600) : fxk.type === 'pokemon' ? 1700 : 1250) : 780);
     var lg = document.getElementById('log');
     if (lg) lg.innerHTML = '<div class="cur">' + esc(f.text) + '</div>' + ui.frames.slice(0, ui.shown - 1).reverse().slice(0, 7).map(function (x) { return '<div>' + esc(x.text) + '</div>'; }).join('');
   }

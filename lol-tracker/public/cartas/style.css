@@ -1837,3 +1837,21 @@ body.tutmode .freezebtn { pointer-events: none; opacity: .35; }
 .gorbbox.done { border-color: rgba(148,163,184,.5); background: rgba(20,24,40,.8); box-shadow: none; } .gorbbox.done .gl { color: #94a3b8; }
 .gorbbox.foe { border-color: rgba(148,163,184,.55); }
 @media (prefers-reduced-motion: reduce) { .gsp, .gsp.new { animation: none; } }
+
+/* Ruleta de casino (Gambling) */
+.rscene { position: relative; width: 380px; height: 270px; perspective: 900px; display: grid; place-items: center; }
+.rtilt { position: relative; width: 340px; height: 340px; transform: rotateX(46deg); transform-style: preserve-3d; }
+.rrim { position: absolute; inset: -6px; border-radius: 50%; background: radial-gradient(circle, transparent 62%, #1b1030 63%, #07030d 100%); border: 3px solid #d9b25a; box-shadow: 0 0 0 5px #0b0618, 0 0 30px rgba(217,70,239,.45); }
+.rwheel { position: absolute; inset: 0; will-change: transform; } .rwheel .gwsvg { width: 100%; height: 100%; display: block; }
+.rwin { fill: #fbbf24 !important; animation: rwinp .6s ease-in-out 4; }
+@keyframes rwinp { 50% { opacity: .55; } }
+.rball { position: absolute; inset: 0; will-change: transform; } .rball i { position: absolute; left: 50%; top: 50%; width: 15px; height: 15px; margin: -7px 0 0 -7px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff, #e5e7eb 50%, #9ca3af); box-shadow: 0 0 8px #fff, 0 3px 4px rgba(0,0,0,.6); transform: translateY(-178px); will-change: transform; }
+.rpin { position: absolute; left: 50%; top: 50%; width: 16px; height: 16px; margin: -8px 0 0 -8px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff2b8, #d9a52c 60%, #6b4a07); box-shadow: 0 0 10px #f0d58a; }
+.rres { display: flex; align-items: baseline; gap: .15rem; margin-top: .1rem; font-family: var(--serif); color: #fff6c8; text-shadow: 0 0 22px rgba(251,191,36,.9), 0 3px 0 #6b4a07; opacity: 0; transform: scale(.4); will-change: transform, opacity; }
+.rres b { font-size: 4.2rem; line-height: 1; } .rres span { font-size: 1.8rem; opacity: .8; }
+#gambov.done .rres { animation: rresin .6s cubic-bezier(.2,1.7,.4,1) both; }
+@keyframes rresin { from { opacity: 0; transform: scale(.3); } to { opacity: 1; transform: scale(1); } }
+#gambov .gorb { animation-delay: calc(4.5s + var(--i) * .18s); } #gambov .gtot { animation-delay: 4.9s; }
+#gambov.done .gorb, #gambov.done .gtot { animation-delay: calc(var(--i, 0) * .18s + .3s); }
+@media (max-width: 480px) { .rscene { width: 290px; height: 220px; } .rtilt { width: 270px; height: 270px; } .rball i { transform: translateY(-141px); } }
+@media (prefers-reduced-motion: reduce) { #gambov.done .rres { opacity: 1; transform: none; animation: none; } }

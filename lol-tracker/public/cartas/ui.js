@@ -1148,6 +1148,8 @@
         if (prep && sel && (sel.k === 'mine' || (sel.k === 'act' && CARD[s.p[0].hand[sel.i].id].target === 'enemy'))) o.cls += ' tgtable';
         if (prep && aim[v.uid]) o.extra = '<span class="aim">' + ic('diana') + '×' + aim[v.uid] + '</span>';
       }
+      var wl = k > 0 ? P.mesa[k - 1] : null; // Prórroga (AitoRLG Renata): marca la casilla que protege
+      if (wl && !wl.dead && wl.id === 'aitorlg-renata' && !v.dead && !(I && I.shadow)) { o.cls += ' warded' + (I && I.tmp && I.tmp.ward ? ' wardhold' : ''); o.extra = (o.extra || '') + '<span class="wardfx" title="Prórroga: no cae a 0 de vida hasta que ataque">' + ic('escudo') + '</span>'; }
       o.gl = I ? I.gl : 1; o.lv = lvG(side, v.id); o.skin = skG(side, v.id); if (mine) o.slv = sleeveId(); if (mine && k === 4 && !(I && I.shadow)) under += novSwitch(s); h += '<div class="cw">' + cardHtml(c, o) + under + '</div>';
     });
     return h + '</div>';

@@ -2149,3 +2149,11 @@ body.tutmode .freezebtn { pointer-events: none; opacity: .35; }
 .i13f .finimg, .i13f .finsvg { width: 72%; height: 72%; object-fit: contain; }
 
 .i13bg::after { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 55%, rgba(8,5,22,.55) 0%, rgba(8,5,22,0) 70%); }
+
+/* Prórroga (AitoRLG Renata): aura en la casilla que protege */
+.card.warded { position: relative; }
+.card.warded::after { content: ''; position: absolute; inset: -4px; border-radius: 12px; pointer-events: none; z-index: 6; border: 2px solid rgba(250,204,21,.9); box-shadow: 0 0 14px rgba(250,204,21,.65), inset 0 0 12px rgba(250,204,21,.35); animation: wardpulse 2.2s ease-in-out infinite; }
+.card.wardhold::after { border-color: #fff; box-shadow: 0 0 22px #facc15, 0 0 40px rgba(250,204,21,.7), inset 0 0 18px rgba(250,204,21,.6); animation-duration: .8s; }
+@keyframes wardpulse { 0%, 100% { opacity: .55; transform: scale(1); } 50% { opacity: 1; transform: scale(1.03); } }
+.wardfx { position: absolute; left: 50%; top: -11px; z-index: 7; width: 24px; height: 24px; margin-left: -12px; display: grid; place-items: center; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fde68a, #d97706); border: 1.5px solid #fff7d6; color: #422006; box-shadow: 0 0 10px rgba(250,204,21,.9); pointer-events: none; }
+.wardfx svg { width: 14px; height: 14px; }

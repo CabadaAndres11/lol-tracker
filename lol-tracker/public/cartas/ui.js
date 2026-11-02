@@ -184,9 +184,9 @@
     function run() {
       introT.forEach(clearTimeout); introT = [];
       st.classList.add('reset'); st.classList.remove('rdone'); go(0);
-      introT.push(setTimeout(function () { st.classList.remove('reset'); go(1); }, 80));
-      [[3000, 2], [8500, 3], [15000, 4], [20500, 5]].forEach(function (x) { introT.push(setTimeout(function () { go(x[1]); }, x[0] + 80)); });
-      introT.push(setTimeout(run, 27500));
+      introT.push(setTimeout(function () { st.classList.remove('reset'); }, 80));
+      [[3800, 1], [11500, 2], [19500, 3], [27500, 4], [34500, 5]].forEach(function (x) { introT.push(setTimeout(function () { go(x[1]); }, x[0])); });
+      introT.push(setTimeout(run, 42000));
     }
     run();
     introEl.addEventListener('change', function (e) {

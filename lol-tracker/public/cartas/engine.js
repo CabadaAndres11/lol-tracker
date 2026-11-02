@@ -261,8 +261,9 @@
   }
   function openShop(s, p) {
     var P = s.p[p], t = tiers(P);
-    P.refreshes = 0; P.pickUsed = false; P.offers = [];
-    for (var n = 0; n < CFG.shopOffers; n++) P.offers.push(drawOffer(s, p));
+    var kept = P.frozen ? P.offers.filter(Boolean).slice(0, CFG.shopOffers) : []; // ofertas fijadas: se conservan las que no compraste
+    P.frozen = false; P.refreshes = 0; P.pickUsed = false; P.offers = kept;
+    while (P.offers.length < CFG.shopOffers) P.offers.push(drawOffer(s, p));
     fixFirstShop(s, p);
     if (mesaTroops(P).some(function (i) { return has(i, 'Trabajo'); }) && FX.trabajo.shop[(t['Trabajo'] || 0) - 1]) {
       var b = FX.trabajo.shop[(t['Trabajo'] || 0) - 1];
@@ -275,12 +276,19 @@
     var il = t['Informático'] || 0, free = il >= 2 ? 3 : il >= 1 ? 1 : 0;
     return P.refreshes < free ? 0 : CFG.refreshCost;
   }
+  // Fijar las ofertas de la tienda: en la próxima tienda saldrán las que dejes sin comprar (los huecos vendidos se rellenan)
+  function freeze(s, p) {
+    var P = s.p[p];
+    if (!s.shopOpen || s.phase !== 'prep' || s.over) return false;
+    P.frozen = !P.frozen;
+    return true;
+  }
   function refresh(s, p) {
     var P = s.p[p];
     if (!s.shopOpen || s.phase !== 'prep') return false;
     var c = refreshCost(s, p);
     if (P.gold < c) return false;
-    P.gold -= c; P.refreshes++; s.refreshN[p]++;
+    P.gold -= c; P.refreshes++; s.refreshN[p]++; P.frozen = false;
     var keep = P.offers.filter(function (x) { return x && x.extra; });
     P.offers = [];
     for (var n = 0; n < CFG.shopOffers; n++) P.offers.push(drawOffer(s, p));
@@ -1063,7 +1071,7 @@
     newGame: newGame, randomDeck: randomDeck, deckSize: deckSize, mulberry32: mulberry32,
     place: place, playAction: playAction, setTarget: setTarget, clearTargets: clearTargets, forfeit: forfeit, setVoley: setVoley, actionBlock: actionBlock, validTarget: validTarget,
     sell: sell, sellValue: sellValue, handCap: handCap, dupBlock: dupBlock, buy: buy, mergeCheck: mergeCheck, willMerge: willMerge, shopOdds: shopOdds, refresh: refresh, refreshCost: refreshCost, pickFromDeck: pickFromDeck, retire: retire,
-    aiDeck: aiDeck, aiShop: aiShop, aiPrep: aiPrep, aiTargets: aiTargets, fight: fight, endShop: endShop, pendingTargets: pendingTargets, cede: cede, nextRound: nextRound,
+    aiDeck: aiDeck, aiShop: aiShop, aiPrep: aiPrep, aiTargets: aiTargets, fight: fight, endShop: endShop, pendingTargets: pendingTargets, freeze: freeze, cede: cede, nextRound: nextRound,
     isNov: isNov, immune: immune, targetable: targetable, novSync: novSync, themeCounts: themeCounts, tiers: tiers, tierOf: tierOf, atk: atk, maxHp: maxHp, card: card, isTroop: isTroop, has: has, mesaTroops: mesaTroops, viewOf: viewOf,
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.CartasEngine = API;

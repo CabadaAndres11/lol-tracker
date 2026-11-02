@@ -1,6 +1,9 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-02', tag: 'Novedad', title: 'Fijar las ofertas de la tienda',
+      items: ['La tienda de la partida tiene un nuevo botón «Fijar», bajo el de actualizar. Si lo activas, en la próxima tienda saldrán las mismas ofertas que dejes sin comprar; los huecos de las cartas que compres se rellenan con ofertas nuevas.',
+        'Mientras están fijadas, la tienda se ve con un borde azul helado y el botón pasa a «Fijadas». Púlsalo otra vez para soltarlas. Si actualizas la tienda, el fijado se quita.'] },
     { date: '2026-11-02', tag: 'Cambio', title: 'Tienda de efectos por apartados',
       items: ['La pestaña Efectos de la tienda se divide en apartados laterales, como en Colección: Despliegues, Fundas y Victoria y derrota. Así se ve solo lo que buscas y es más fácil comparar y comprar.'] },
     { date: '2026-11-02', tag: 'Novedad', title: 'Efectos de victoria y derrota: pack Eclipse',

@@ -924,14 +924,14 @@
     // Tienda (bajo la mano): pulsar una carta para comprarla
     if (shop) {
       var t = E.tiers(P), rc = E.refreshCost(s, 0);
-      h += '<div class="shopwrap"><div class="hl">' + ic('carrito') + ' Tienda' + (s.round === 1 ? ' (solo Comunes)' : '') + ' · pulsa una carta para comprarla' + (s.round === 1 && !s.vs4 ? ' · primer combate: ' + (s.first === 0 ? 'atacas primero' : 'ataca primero el rival') : '') + '</div>' + oddsHtml(s) + '<div class="shoprow">';
+      h += '<div class="shopwrap' + (P.frozen ? ' frozen' : '') + '"><div class="hl">' + ic('carrito') + ' Tienda' + (s.round === 1 ? ' (solo Comunes)' : '') + ' · pulsa una carta para comprarla' + (s.round === 1 && !s.vs4 ? ' · primer combate: ' + (s.first === 0 ? 'atacas primero' : 'ataca primero el rival') : '') + '</div>' + oddsHtml(s) + '<div class="shoprow">';
       for (var k = 0; k < CFG.shopOffers; k++) {
         var id = P.offers[k];
         if (!id) { h += '<div class="cw"><div class="slot">Vendida</div></div>'; continue; }
         var c2 = CARD[id], mg = c2.type === 'tropa' && E.willMerge(P, c2.id), cant = P.gold < c2.cost || (P.hand.length >= E.handCap(s) && !mg);
         h += '<div class="cw">' + cardHtml(c2, { lv: lvG(0, c2.id), tag: 'button', cls: 'offer' + (cant ? ' cant' : '') + (mg ? ' mergeable' : ''), attrs: 'data-act="buy" data-i="' + k + '" title="Comprar por ' + c2.cost + ' de oro"' }) + '</div>';
       }
-      h += '<div class="refwrap"><button class="refresh" data-act="refresh" title="Actualizar tienda (' + rc + ' oro)"' + (P.gold < rc ? ' disabled' : '') + '>' + REFRESH_SVG + '</button><span class="rlabel">Actualizar · ' + rc + ' oro</span></div></div>';
+      h += '<div class="refwrap"><button class="refresh" data-act="refresh" title="Actualizar tienda (' + rc + ' oro)"' + (P.gold < rc ? ' disabled' : '') + '>' + REFRESH_SVG + '</button><span class="rlabel">Actualizar · ' + rc + ' oro</span><button class="freezebtn' + (P.frozen ? ' on' : '') + '" data-act="freeze" title="' + (P.frozen ? 'Ofertas fijadas: en la próxima tienda saldrán las que no compres. Pulsa para soltarlas' : 'Fijar las ofertas: en la próxima tienda saldrán las que dejes sin comprar') + '">' + ic('candado') + ' ' + (P.frozen ? 'Fijadas' : 'Fijar') + '</button></div></div>';
       h += '</div>';
     }
     h += '</section><aside class="gr">';
@@ -1457,7 +1457,7 @@
     if (PLAYACTS[act]) { if (!ui.picked) return askDeck(act); ui.picked = false; }
     if (act === 'tutstart') return startTutorial();
     if (act === 'tutexit') { tutExit(); return; }
-    if (ui.tut && act === 'refresh') return;
+    if (ui.tut && (act === 'refresh' || act === 'freeze')) return;
     if (act === 'nav') {
       clearTimeout(timer); ui.playing = false;
       if (el.dataset.to === 'play') { ui.screen = 'modes'; window.scrollTo(0, 0); return render(); }
@@ -1559,7 +1559,7 @@
     if (!s || ui.playing) return;
     if (act === 'unready') { if (PV.on && PV.rdy[0]) { PV.rdy[0] = false; ui.hint = ''; pvpSend('unready'); render(); } return; }
     if (PV.on && PV.rdy[0]) return;
-    if (PV.on && (PV.busy || PV.q.length) && (act === 'buy' || act === 'refresh' || act === 'pick')) return;
+    if (PV.on && (PV.busy || PV.q.length) && (act === 'buy' || act === 'refresh' || act === 'freeze' || act === 'pick')) return;
     if (PV.on && (act === 'fight' || act === 'endshop' || act === 'next')) {
       if (act === 'fight' && (E.pendingTargets(s).length || (!P.mesa.some(Boolean) && E.mesaTroops(s.p[1]).length))) return;
       PV.rdy[0] = true; ui.sel = null; ui.hint = ''; pvpSend('ready'); return render();
@@ -1577,6 +1577,7 @@
     }
     if (act === 'buy') { var bi = +el.dataset.i, bc = CARD[P.offers[bi]]; if (!E.buy(s, 0, bi)) ui.hint = bc && P.gold < bc.cost ? 'No tienes oro suficiente.' : 'Tu mano está llena.'; else { ui.hint = ''; pvs('buy', [bi]); } return render(); }
     if (act === 'undo') { E.clearTargets(s, 0); pvs('clear'); ui.hint = ''; nextPending(s); return render(); }
+    if (act === 'freeze') { if (PV.on) { pvpSend('freeze'); } else E.freeze(s, 0); return render(); }
     if (act === 'refresh') { if (PV.on) { pvpSend('refresh'); ui.hint = 'Actualizando tienda…'; return render(); } E.refresh(s, 0); return render(); }
     if (act === 'pick') { var pk = document.getElementById('pick-sel').value; if (E.pickFromDeck(s, 0, pk)) pvs('pick', [pk]); return render(); }
     if (act === 'voley') { E.setVoley(s, 0, +el.dataset.uid, el.dataset.m); pvs('voley', [+el.dataset.uid, el.dataset.m]); return render(); }

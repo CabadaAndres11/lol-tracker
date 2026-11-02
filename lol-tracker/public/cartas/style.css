@@ -1656,3 +1656,13 @@ body.tutmode .refresh{pointer-events:none;opacity:.35}
 .fincrack path { fill: none; stroke: rgba(255,170,180,.85); stroke-width: 2.4; stroke-linejoin: round; stroke-dasharray: 1400; stroke-dashoffset: 1400; filter: none; animation: fincrack 1s 1s ease-out forwards; }
 @keyframes fincrack { to { stroke-dashoffset: 0; } }
 @media (prefers-reduced-motion: reduce) { .finrays, .finfx .fp, .finband::after { animation: none !important; } .finfx .fp { display: none; } }
+
+/* ---------- Fijar ofertas de la tienda ---------- */
+.freezebtn { display: inline-flex; align-items: center; gap: .35rem; margin-top: .35rem; padding: .35rem .8rem; border-radius: 999px; font: inherit; font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; cursor: pointer; color: #cfd8ee; background: rgba(255,255,255,.06); border: 1px solid rgba(200,170,110,.45); transition: background .15s, color .15s, border-color .15s; }
+.freezebtn .ic { width: 1.1em; height: 1.1em; }
+.freezebtn:hover { color: var(--gold); border-color: var(--gold); }
+.freezebtn.on { color: #08121f; background: linear-gradient(180deg, #bfe6ff, #6db8ee); border-color: #d6efff; box-shadow: 0 0 14px rgba(120,200,255,.55); }
+.shopwrap.frozen { border-color: #8fd0ff; box-shadow: 0 14px 34px rgba(0,0,0,.6), 0 0 0 1px rgba(143,208,255,.35), inset 0 0 40px rgba(120,200,255,.14); }
+.shopwrap.frozen::after { background: linear-gradient(90deg, transparent, #8fd0ff, transparent); }
+.shopwrap.frozen .card.offer { box-shadow: 0 0 0 1.5px rgba(143,208,255,.85), 0 0 14px rgba(120,200,255,.35), 0 8px 18px rgba(0,0,0,.55); }
+body.tutmode .freezebtn { pointer-events: none; opacity: .35; }

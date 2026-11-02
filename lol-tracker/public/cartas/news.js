@@ -3,7 +3,7 @@
   var NEWS = [
     { date: '2026-11-02', tag: 'Cambio', title: 'Renovación de la sinergia Anime',
       items: ['Salen de Anime: Haikyuu Lihone (ahora Lihone Setter, solo Voley), AitoRLG Friki (PokeAitoRLG, solo Pokémon), Javihi Friki (Javihi vs 9, solo Lol), Pampert Friki (Pampert Carry, solo Lol) y Chipy Correa (solo Correa).',
-        'Nuevas tropas Comunes de Anime (coste 2): Lihone Rudeus, Dashlight Sun Jin-Woo, AitoRLG MaoMao, Javihi Smiley, Mertens Meliodas, Chipy Goku y Pampert Asta.',
+        'Nuevas tropas de Anime: Javihi Smiley y Mertens Meliodas (Comunes), Lihone Rudeus, Chipy Goku y Pampert Asta (Raras), Dashlight Sun Jin-Woo (Épica) y AitoRLG MaoMao (Legendaria). Además, Lihone Viego pasa a Legendaria (coste 5, 6/19).',
         'La acción «Capítulo especial» desaparece del juego.'] },
     { date: '2026-11-02', tag: 'Novedad', title: 'Dificultades de la IA: Normal, Difícil y Experto',
       items: ['En «Contra IA» (1 contra 1 y Versus de 4, clásico y Resurrección) ya puedes elegir dificultad. Normal es la IA de siempre.',

@@ -25,10 +25,10 @@ var D={
     "Lol",
     "Comebacker"
    ],
-   "cost": 4,
-   "atk": 4,
-   "hp": 16,
-   "rarity": "Épica",
+   "cost": 5,
+   "atk": 6,
+   "hp": 19,
+   "rarity": "Legendaria",
    "type": "tropa",
    "size": 3,
    "pas": {
@@ -625,10 +625,10 @@ var D={
    "themes": [
     "Anime"
    ],
-   "cost": 2,
-   "atk": 4,
-   "hp": 6,
-   "rarity": "Común",
+   "cost": 3,
+   "atk": 5,
+   "hp": 10,
+   "rarity": "Rara",
    "type": "tropa",
    "size": 1
   },
@@ -639,10 +639,10 @@ var D={
    "themes": [
     "Anime"
    ],
-   "cost": 2,
+   "cost": 4,
    "atk": 5,
-   "hp": 5,
-   "rarity": "Común",
+   "hp": 15,
+   "rarity": "Épica",
    "type": "tropa",
    "size": 1
   },
@@ -653,10 +653,10 @@ var D={
    "themes": [
     "Anime"
    ],
-   "cost": 2,
-   "atk": 3,
-   "hp": 7,
-   "rarity": "Común",
+   "cost": 5,
+   "atk": 6,
+   "hp": 18,
+   "rarity": "Legendaria",
    "type": "tropa",
    "size": 1
   },
@@ -695,10 +695,10 @@ var D={
    "themes": [
     "Anime"
    ],
-   "cost": 2,
-   "atk": 4,
-   "hp": 6,
-   "rarity": "Común",
+   "cost": 3,
+   "atk": 6,
+   "hp": 9,
+   "rarity": "Rara",
    "type": "tropa",
    "size": 1
   },
@@ -709,10 +709,10 @@ var D={
    "themes": [
     "Anime"
    ],
-   "cost": 2,
-   "atk": 3,
-   "hp": 7,
-   "rarity": "Común",
+   "cost": 3,
+   "atk": 5,
+   "hp": 10,
+   "rarity": "Rara",
    "type": "tropa",
    "size": 1
   }

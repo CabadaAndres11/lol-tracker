@@ -1040,7 +1040,8 @@
   // Efectos de despliegue (cada uno devuelve la animación del contenedor .flyc). Se equipan en Colección → Efectos.
   var DEPLOY_LIST = [
     { id: 'default', name: 'Por defecto', desc: 'La carta aparece grande en mitad de la pantalla, da un par de vueltas y vuela hasta su hueco.', price: 0, ms: 2000, gap: 450 },
-    { id: 'meteoro', name: 'Meteoro dorado', desc: 'La carta cae como un meteoro envuelta en luz dorada, gira en el aire y se estrella en su hueco con una onda de choque y chispas.', price: 30, ms: 2900, gap: 600 }
+    { id: 'meteoro', name: 'Meteoro dorado', desc: 'La carta cae como un meteoro envuelta en luz dorada, gira en el aire y se estrella en su hueco con una onda de choque y chispas.', price: 30, ms: 2900, gap: 600 },
+    { id: 'arcano', name: 'Aparición arcana', desc: 'Un círculo mágico se enciende en el aire y la carta se materializa entre destellos violetas antes de posarse en su hueco.', price: 30, ms: 2800, gap: 550 }
   ];
   var SLEEVE_LIST = [
     { id: 'sin', name: 'Sin funda', desc: 'Tus cartas se ven tal cual, con el borde de su rareza y el reverso de cristal.', price: 0 },
@@ -1101,6 +1102,33 @@
         { transform: T(cx, cy - 34, sc * 1.14, 1500, 0), filter: G(1), opacity: 1, offset: .78, easing: 'cubic-bezier(.6,0,.9,.4)' },
         { transform: T(0, 6, .9, 1800, 0), filter: G(.9), opacity: 1, offset: .9, easing: 'cubic-bezier(.2,.9,.3,1)' },
         { transform: T(0, 0, 1, 1800, 0), filter: G(0), opacity: 1, offset: 1 }
+      ], { duration: dur, delay: delay, fill: 'both' });
+    },
+    'arcano': function (wrap, r, delay, dur) {
+      var W = window.innerWidth, H = window.innerHeight, cx = W / 2 - (r.left + r.width / 2), cy = H / 2 - (r.top + r.height / 2) - 10;
+      var sc = Math.max(1.4, Math.min(3, Math.min(300, W * .62, H * .5 * 5 / 7) / r.width)) * 1.05, mx = r.left + r.width / 2 + cx, my = r.top + r.height / 2 + cy;
+      var T = function (x, y, z, ry) { return 'perspective(1100px) translate(' + x + 'px,' + y + 'px) scale(' + z + ') rotateY(' + (ry || 0) + 'deg)'; };
+      var G = function (a) { return 'drop-shadow(0 0 ' + Math.round(6 + a * 30) + 'px rgba(170,110,255,' + (.2 + a * .8).toFixed(2) + ')) drop-shadow(0 18px 24px rgba(0,0,0,.5))'; };
+      var mk = function (cls, size, kf, o) { var e = document.createElement('div'); e.className = cls; e.style.cssText = 'left:' + mx + 'px;top:' + (my + (o || 0)) + 'px;width:' + size + 'px;height:' + size + 'px'; document.body.appendChild(e); var a = e.animate(kf, { duration: dur * .86, delay: delay, fill: 'both' }); a.onfinish = function () { e.remove(); }; return e; };
+      var R = Math.round(sc * r.width * 1.5);
+      // círculo mágico: dos anillos que giran en sentidos opuestos, aplastados en perspectiva
+      mk('fxarc a', R, [{ transform: 'translate(-50%,-50%) rotateX(68deg) rotateZ(0) scale(.2)', opacity: 0, offset: 0 }, { transform: 'translate(-50%,-50%) rotateX(68deg) rotateZ(120deg) scale(1)', opacity: 1, offset: .25 }, { transform: 'translate(-50%,-50%) rotateX(68deg) rotateZ(320deg) scale(1.05)', opacity: 1, offset: .7 }, { transform: 'translate(-50%,-50%) rotateX(68deg) rotateZ(420deg) scale(.5)', opacity: 0, offset: 1 }], R * .42);
+      mk('fxarc b', Math.round(R * .68), [{ transform: 'translate(-50%,-50%) rotateX(68deg) rotateZ(0) scale(.2)', opacity: 0, offset: 0 }, { transform: 'translate(-50%,-50%) rotateX(68deg) rotateZ(-140deg) scale(1)', opacity: 1, offset: .25 }, { transform: 'translate(-50%,-50%) rotateX(68deg) rotateZ(-340deg) scale(1.05)', opacity: 1, offset: .7 }, { transform: 'translate(-50%,-50%) rotateX(68deg) rotateZ(-440deg) scale(.5)', opacity: 0, offset: 1 }], R * .42);
+      // pilar de luz y destellos que suben
+      mk('fxpillar', Math.round(sc * r.width * .9), [{ transform: 'translate(-50%,-50%) scaleY(.1)', opacity: 0, offset: 0 }, { transform: 'translate(-50%,-50%) scaleY(1)', opacity: .85, offset: .3 }, { transform: 'translate(-50%,-50%) scaleY(1.1)', opacity: .5, offset: .6 }, { transform: 'translate(-50%,-50%) scaleY(1.2)', opacity: 0, offset: 1 }]);
+      for (var i = 0; i < 14; i++) {
+        var sp = document.createElement('i'), x = (Math.random() - .5) * sc * r.width * 1.1, y0 = sc * r.height * (.3 + Math.random() * .2), rise = sc * r.height * (.7 + Math.random() * .6), d0 = delay + dur * (.1 + Math.random() * .4);
+        sp.className = 'fxspark vio'; sp.style.cssText = 'left:' + (mx + x) + 'px;top:' + (my + y0) + 'px'; document.body.appendChild(sp);
+        sp.animate([{ transform: 'translate(-50%,-50%) scale(.3)', opacity: 0, offset: 0 }, { transform: 'translate(-50%,-50%) scale(1)', opacity: 1, offset: .25 }, { transform: 'translate(-50%,' + (-rise - 50) + 'px) scale(.2)', opacity: 0, offset: 1 }], { duration: 900 + Math.random() * 600, delay: d0, fill: 'both', easing: 'ease-out' }).onfinish = function () { this.effect.target.remove(); };
+      }
+      impact(r.left + r.width / 2, r.top + r.height / 2, delay + dur * .9);
+      return wrap.animate([
+        { transform: T(cx, cy + 40, sc * .7), filter: G(1) + ' brightness(3)', opacity: 0, offset: 0 },
+        { transform: T(cx, cy + 20, sc * .85), filter: G(1) + ' brightness(2.2)', opacity: .35, offset: .22, easing: 'ease-out' },
+        { transform: T(cx, cy - 6, sc), filter: G(1) + ' brightness(1.35)', opacity: 1, offset: .46, easing: 'ease-in-out' },
+        { transform: T(cx, cy - 22, sc * 1.03), filter: G(.6) + ' brightness(1)', opacity: 1, offset: .72, easing: 'cubic-bezier(.5,0,.8,.4)' },
+        { transform: T(0, 4, .94), filter: G(.8), opacity: 1, offset: .9, easing: 'cubic-bezier(.2,.9,.3,1)' },
+        { transform: T(0, 0, 1), filter: G(0), opacity: 1, offset: 1 }
       ], { duration: dur, delay: delay, fill: 'both' });
     },
     'default': function (wrap, r, delay, dur) {

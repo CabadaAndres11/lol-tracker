@@ -56,7 +56,7 @@ function drawCard(minRarity) {
   return pool[crypto.randomInt(0, pool.length)].id;
 }
 // Efectos cosméticos disponibles (por ahora todos son de todos los jugadores)
-const FX_KINDS = { deploy: { default: 0, meteoro: 30 }, sleeve: { sin: 0, oro: 40, neon: 30 }, finish: { default: 0, eclipse: 50 } }; // precio en monedas de cada efecto, por tipo
+const FX_KINDS = { deploy: { default: 0, meteoro: 30, arcano: 30 }, sleeve: { sin: 0, oro: 40, neon: 30 }, finish: { default: 0, eclipse: 50 } }; // precio en monedas de cada efecto, por tipo
 const FX_PRICE = Object.assign({}, FX_KINDS.deploy, FX_KINDS.sleeve, FX_KINDS.finish);
 const FX_DEFAULT = { deploy: 'default', sleeve: 'sin', finish: 'default' };
 const FX_DEPLOY = Object.keys(FX_PRICE);

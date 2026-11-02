@@ -1,6 +1,9 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-02', tag: 'Novedad', title: 'Nuevo despliegue: Aparición arcana',
+      items: ['Nuevo efecto de despliegue «Aparición arcana» (30 monedas): un círculo mágico se enciende en el aire, un pilar de luz y destellos violetas suben y la carta se materializa antes de posarse en su hueco con una onda de choque.',
+        'Lo encuentras en la tienda (Efectos → Despliegues) y puedes probarlo y equiparlo en Colección → Efectos.'] },
     { date: '2026-11-02', tag: 'Novedad', title: 'Misiones, cajas e Inventario',
       items: ['Nuevo apartado «Misiones» en el menú: 22 retos (jugar partidas, ganar seguidas, usar cartas, jugar 1v1 o Versus 4, subir una carta a nivel 3, abrir sobres, completar la colección…). Cada misión completada te da una caja.',
         'También recibes una caja por cada rango nuevo de la clasificación, empezando por Bronce; se recoge directamente en Clasificación.',

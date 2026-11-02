@@ -661,11 +661,12 @@
           var pk = troops.filter(function (i) { return has(i, 'Pokémon'); });
           var probs = FX.pokemon.probs[t['Pokémon'] - 1], r = s.rng() * 100, ball = 0;
           if (r < probs[0]) ball = 0; else if (r < probs[0] + probs[1]) ball = 1; else ball = 2;
+          var med = ball === 0 && troops.some(function (i) { return pas(i) === 'medallas'; }); if (med) ball = 1; // 8 Medallas: la Pokéball se convierte en Superball
           s.lastBall[p] = ball;
           var b = FX.pokemon.bonus[ball];
           if (b > 0) pk = pk.filter(function (i) { return gainCap(i, 'pk', 'both', b, FX.pokemon.cap) > 0; });
           troops.filter(function (i) { return pas(i) === 'captura'; }).forEach(function (i) { if (gainCap(i, 'cap', 'both', 1, 6) > 0) fxFrame(s, p, 'captura', 'Captura', '+1/+1 permanente a ' + card(i).name, [i.uid]); });
-          if (pk.length) { fxFrame(s, p, 'pokemon', FX.pokemon.names[ball] + (bn ? ' (extra)' : ''), '+' + b + '/+' + b + ' permanente a las Pokémon', pk.map(function (i) { return i.uid; })); s.frames[s.frames.length - 1].hl.fx.ball = ball; }
+          if (pk.length) { fxFrame(s, p, 'pokemon', FX.pokemon.names[ball] + (bn ? ' (extra)' : '') + (med ? ' · 8 Medallas' : ''), '+' + b + '/+' + b + ' permanente a las Pokémon', pk.map(function (i) { return i.uid; })); s.frames[s.frames.length - 1].hl.fx.ball = ball; }
         }
       }
       // Novias del hueco 5 (sinergia Correa)
@@ -760,7 +761,7 @@
 
   // Efectos al caer una tropa (KOI, Dúo Inseparable). Devuelve texto de registro y animación.
   // ---------- Pasivas de legendarias ----------
-  var PAS = { 'javihi-duo': 'duo', 'sech-duo': 'duo', 'javihi-prime': 'remate', 'sech': 'embargo', 'potango': 'aliento', 'mertens-prime': 'pereza', 'chipy-lloron': 'llanto', 'lihone-viego': 'racha', 'aitorlg-renata': 'prorroga', 'haikyuu-lihone': 'saque', 'lihone': 'captura', 'chipy-correa': 'consuelo', 'pampert-koisito': 'cabezon', 'aitorlg-koisito': 'heredero', 'mertens-gambler': 'malaracha', 'pampert-gambler': 'colega' };
+  var PAS = { 'javihi-duo': 'duo', 'sech-duo': 'duo', 'javihi-prime': 'remate', 'sech': 'embargo', 'potango': 'aliento', 'mertens-prime': 'pereza', 'chipy-lloron': 'llanto', 'lihone-viego': 'racha', 'aitorlg-renata': 'prorroga', 'haikyuu-lihone': 'saque', 'lihone': 'captura', 'chipy-correa': 'consuelo', 'pampert-koisito': 'cabezon', 'aitorlg-koisito': 'heredero', 'mertens-gambler': 'malaracha', 'computer-dashlight': 'medallas', 'pampert-gambler': 'colega' };
   function pas(i) { return PAS[i.id] || ''; }
   function duoLinked(s, i) { var o = i.id === 'javihi-duo' ? 'sech-duo' : 'javihi-duo'; return mesaTroops(s.p[i.owner]).some(function (x) { return x.id === o; }); }
   // Prórroga (AitoRLG Renata): la tropa a su derecha no cae a 0 de vida hasta que haya atacado

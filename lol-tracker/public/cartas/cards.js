@@ -165,12 +165,16 @@ var D={
     "Informático",
     "Pokémon"
    ],
-   "cost": 2,
-   "atk": 3,
-   "hp": 7,
-   "rarity": "Común",
+   "cost": 5,
+   "atk": 6,
+   "hp": 18,
+   "rarity": "Legendaria",
    "type": "tropa",
-   "size": 1
+   "size": 1,
+   "pas": {
+    "n": "8 Medallas",
+    "t": "Mientras esté en la mesa, la bola Pokémon de cada ronda nunca es Pokéball: si saliera, se convierte en Superball."
+   }
   },
   {
    "id": "dashlight-correa",

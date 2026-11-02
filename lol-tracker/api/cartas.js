@@ -120,6 +120,12 @@ const isAdmin = (u) => String(u.name).toLowerCase() === 'admin';
 async function loadUser(cfg, name) {
   const raw = await redis(cfg, ['GET', uKey(name)]);
   const u = raw ? JSON.parse(raw) : null;
+  if (u && ((u.owned || []).includes('dashlight-gambler') || JSON.stringify(u.decks || '').includes('dashlight-gambler'))) { // Dashlight Gambler pasó a ser Pampert Gambler
+    const fix = (a) => Array.isArray(a) ? a.map((x) => x === 'dashlight-gambler' ? 'pampert-gambler' : x) : a;
+    u.owned = [...new Set(fix(u.owned || []))]; if (u.decks) u.decks = JSON.parse(JSON.stringify(u.decks).split('dashlight-gambler').join('pampert-gambler'));
+    if (u.dups && u.dups['dashlight-gambler'] != null) { u.dups['pampert-gambler'] = u.dups['dashlight-gambler']; delete u.dups['dashlight-gambler']; }
+    await redis(cfg, ['SET', uKey(u.name), JSON.stringify(u)]);
+  }
   if (u && !u.c100) { u.coins = 100; u.c100 = true; await redis(cfg, ['SET', uKey(u.name), JSON.stringify(u)]); } // ajuste único: todas las cuentas existentes pasan a 100 monedas
   if (u && isAdmin(u) && !u.adminView) u.owned = ALL.map((c) => c.id); // la cuenta ADMIN lo tiene todo (para pruebas), salvo en modo "vista de jugador nuevo"
   return u;

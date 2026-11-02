@@ -753,7 +753,7 @@
 
   // Efectos al caer una tropa (KOI, Dúo Inseparable). Devuelve texto de registro y animación.
   // ---------- Pasivas de legendarias ----------
-  var PAS = { 'javihi-duo': 'duo', 'sech-duo': 'duo', 'javihi-prime': 'remate', 'sech': 'embargo', 'potango': 'aliento', 'mertens-prime': 'pereza', 'chipy-lloron': 'llanto', 'lihone-viego': 'racha', 'aitorlg-renata': 'prorroga', 'haikyuu-lihone': 'saque', 'lihone': 'captura', 'chipy-correa': 'consuelo', 'pampert-koisito': 'cabezon', 'aitorlg-koisito': 'heredero', 'mertens-gambler': 'malaracha', 'dashlight-gambler': 'colega' };
+  var PAS = { 'javihi-duo': 'duo', 'sech-duo': 'duo', 'javihi-prime': 'remate', 'sech': 'embargo', 'potango': 'aliento', 'mertens-prime': 'pereza', 'chipy-lloron': 'llanto', 'lihone-viego': 'racha', 'aitorlg-renata': 'prorroga', 'haikyuu-lihone': 'saque', 'lihone': 'captura', 'chipy-correa': 'consuelo', 'pampert-koisito': 'cabezon', 'aitorlg-koisito': 'heredero', 'mertens-gambler': 'malaracha', 'pampert-gambler': 'colega' };
   function pas(i) { return PAS[i.id] || ''; }
   function duoLinked(s, i) { var o = i.id === 'javihi-duo' ? 'sech-duo' : 'javihi-duo'; return mesaTroops(s.p[i.owner]).some(function (x) { return x.id === o; }); }
   // Prórroga (AitoRLG Renata): la tropa a su derecha no cae a 0 de vida hasta que haya atacado
@@ -986,7 +986,7 @@
         if (dl.length && g.orbs >= 20) {
           var dm = Math.floor(g.orbs / 2), E = s.p[1 - p];
           E.life -= dm;
-          frame(s, pv(s, p, '', 'Rival · ') + 'Colega de los Desarrolladores: ' + dm + ' de daño directo a ' + pv(s, p, 'la vida del rival', 'tu vida') + '.', { life: 1 - p, dmg: dm, fx: { type: 'colega', side: p, title: 'Colega de los Desarrolladores', sub: dm + ' de daño directo', uids: dl.map(function (i) { return i.uid; }), neg: false } });
+          frame(s, pv(s, p, '', 'Rival · ') + 'Jackpot: ' + dm + ' de daño directo a ' + pv(s, p, 'la vida del rival', 'tu vida') + '.', { life: 1 - p, dmg: dm, fx: { type: 'colega', side: p, title: 'Jackpot', sub: dm + ' de daño directo', uids: dl.map(function (i) { return i.uid; }), neg: false } });
           if (E.life <= 0) { s.over = true; s.phase = 'over'; s.winner = p; s.reason = 'Vida a cero.'; return; }
           gamOpen(s, p, g.orbs, t, 'Rival · ');
           gamHit(s, 1 - p); gamState(s.p[1 - p]).hit = false; // este golpe llega tras repartir las orbes de la ronda: no debe castigar la siguiente

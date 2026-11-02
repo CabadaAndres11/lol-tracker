@@ -402,9 +402,9 @@ var D={
    }
   },
   {
-   "id": "dashlight-gambler",
-   "name": "Dashlight Gambler",
-   "person": "Dashlight",
+   "id": "pampert-gambler",
+   "name": "Pampert Gambler",
+   "person": "Pampert",
    "themes": [
     "Gambling",
     "Informático"
@@ -416,7 +416,7 @@ var D={
    "type": "tropa",
    "size": 1,
    "pas": {
-    "n": "Colega de los Desarrolladores",
+    "n": "Jackpot",
     "t": "Si tienes 20 orbes Gambling o más y termina la ronda viva, inflige a la vida del jugador rival la mitad de las orbes que tengas como daño directo y abre todas: ya no se consiguen más orbes."
    }
   },

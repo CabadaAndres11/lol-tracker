@@ -92,7 +92,8 @@
     bandera: '<path d="M16 58V8"/><path d="M16 10h34l-8 12 8 12H16"/>',
     caja: '<path d="M32 7L55 18v28L32 57 9 46V18z"/><path d="M9 18l23 11 23-11M32 29v28"/>',
     mision: '<circle cx="32" cy="32" r="22"/><circle cx="32" cy="32" r="11"/><circle cx="32" cy="32" r="2.5"/><path d="M32 4v9M32 51v9M4 32h9M51 32h9"/>',
-    altavoz: '<path d="M10 24h10l14-11v38L20 40H10z"/><path d="M43 24c4 4 4 12 0 16M49 17c8 8 8 22 0 30"/>'
+    altavoz: '<path d="M10 24h10l14-11v38L20 40H10z"/><path d="M43 24c4 4 4 12 0 16M49 17c8 8 8 22 0 30"/>',
+    lapiz: '<path d="M12 52l3-12L43 12l9 9-28 28z"/><path d="M37 18l9 9"/>'
   };
   Object.keys(LN).forEach(function (k) { I[k] = L(LN[k]); });
   // alias: nombres con varios usos

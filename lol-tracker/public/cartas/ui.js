@@ -403,14 +403,14 @@
   function renderProfile() {
     var a = ui.acct, mySkins = (window.CARTAS_SKINS || []).filter(function (k) { return (a.skins || []).indexOf(k.id) >= 0; }), cur = a.avatar || '', own = D.cards.filter(function (c) { return ARTS[c.id] && ui.ownedSet && ui.ownedSet[c.id]; }).sort(function (x, y) { return RARS.indexOf(y.rarity) - RARS.indexOf(x.rarity) || x.name.localeCompare(y.name); });
     app.innerHTML = head('profile', '' + ic('usuario') + ' Mi perfil') + (ui.msg ? '<p class="err">' + esc(ui.msg) + '</p>' : '') +
-      '<div class="panel profhead">' + avatarHtml('xl') + '<div><h2>' + esc(a.name) + '</h2><p class="mut">' + a.pts + ' puntos de clasificación · ' + a.coins + ' ' + ic('moneda') + ' · ' + a.owned.length + ' cartas desbloqueadas</p><div class="btnrow"><button class="btn sec" data-act="logout">' + ic('puerta') + ' Cerrar sesión</button></div></div></div>' +
+      '<div class="panel profhead"><button class="avedit' + (ui.avEdit ? ' on' : '') + '" data-act="avedit" title="Cambiar foto de perfil" aria-label="Cambiar foto de perfil">' + avatarHtml('xl') + '<span class="avpen">' + ic('lapiz') + '</span></button><div><h2>' + esc(a.name) + '</h2><p class="mut">' + a.pts + ' puntos de clasificación · ' + a.coins + ' ' + ic('moneda') + ' · ' + a.owned.length + ' cartas desbloqueadas</p><div class="btnrow"><button class="btn sec" data-act="logout">' + ic('puerta') + ' Cerrar sesión</button></div></div></div>' +
       sfxPanel() +
-      '<div class="panel"><h2>Foto de perfil</h2><p class="mut">Elige la ilustración de una de tus cartas desbloqueadas o de una de tus skins. Cuantas más consigas, más opciones tendrás.</p>' +
+      (!ui.avEdit ? '' : '<div class="panel"><h2>Foto de perfil</h2><p class="mut">Elige la ilustración de una de tus cartas desbloqueadas o de una de tus skins. Cuantas más consigas, más opciones tendrás.</p>' +
       '<div class="avgrid"><button class="avopt none' + (cur ? '' : ' on') + '" data-act="setavatar" data-card="" title="Sin foto"><span class="avt">' + ic('usuario') + '</span><b>Ninguna</b></button>' + own.map(function (c) {
         return '<button class="avopt' + (cur === c.id ? ' on' : '') + '" data-act="setavatar" data-card="' + c.id + '" title="' + esc(c.name) + '"><span class="avt has" style="background-image:url(/cartas/art/' + c.id + '.webp)"></span><b>' + esc(c.name) + '</b></button>';
       }).join('') + '</div>' + (mySkins.length ? '<h3 class="avsub">Skins</h3><div class="avgrid">' + mySkins.map(function (k) {
         return '<button class="avopt skin' + (cur === k.id ? ' on' : '') + '" data-act="setavatar" data-card="' + k.id + '" title="' + esc(CARD[k.card].name + ' · ' + k.name) + '"><span class="avt has" style="background-image:url(/cartas/art/' + k.id + '.webp)"></span><b>' + esc(k.name) + '</b></button>';
-      }).join('') + '</div>' : '') + '</div></div>';
+      }).join('') + '</div>' : '') + '<div class="btnrow"><button class="btn sec" data-act="avedit">Cerrar</button></div></div>') + '</div>';
   }
 
   function renderBoot() { app.innerHTML = '<div class="wrap"><p class="mut" style="text-align:center;margin-top:30vh">Cargando…</p></div>'; }
@@ -1560,6 +1560,7 @@
     if (act === 'sfxtest') { var tc = el.dataset.cat; snd(tc === 'ui' ? 'buy' : tc === 'combat' ? 'heavy' : tc === 'pack' ? 'rev-Épica' : 'win'); return; }
     if (ui.finPrev && act !== 'finprev' && act !== 'finflip' && act !== 'finclose') ui.finPrev = null;
     if (ui.dedit) { var ne = document.getElementById('de-name'); if (ne) ui.dedit.name = ne.value; }
+    if (act === 'avedit') { ui.avEdit = !ui.avEdit; return render(); }
     if (act === 'acctmenu') { var w = el.closest('.acctw'); if (w) w.classList.toggle('open'); return; }
     if (act === 'logout') return logout();
     if (act === 'pinshow') { ui.showPin = !ui.showPin; app.querySelectorAll('#lg-pin,#lg-pin2').forEach(function (i) { i.type = ui.showPin ? 'text' : 'password'; }); app.querySelectorAll('.pineye').forEach(function (b) { b.classList.toggle('on', ui.showPin); b.title = ui.showPin ? 'Ocultar PIN' : 'Ver PIN'; }); return; }
@@ -1614,7 +1615,7 @@
     if (act === 'shopsel') { ui.shopSel = +el.dataset.i; ui.shopTab = 'feat'; return render(); }
     if (act === 'newssel') { ui.newsSel = +el.dataset.i; ui.newsFull = false; return refreshNews(); }
     if (act === 'newsmore') { ui.newsFull = !ui.newsFull; return refreshNews(); }
-    if (act === 'setavatar') { return api('avatarSet', { card: el.dataset.card }).then(function (r) { if (r.ok) { setAcct(r.data.user); ui.msg = ''; } else ui.msg = (r.data && r.data.error) || 'No se pudo cambiar la foto.'; render(); }); }
+    if (act === 'setavatar') { return api('avatarSet', { card: el.dataset.card }).then(function (r) { if (r.ok) { setAcct(r.data.user); ui.msg = ''; ui.avEdit = false; } else ui.msg = (r.data && r.data.error) || 'No se pudo cambiar la foto.'; render(); }); }
     if (PLAYACTS[act]) { if (!ui.picked) return askDeck(act); ui.picked = false; }
     if (act === 'tutstart') return startTutorial();
     if (act === 'tutexit') { tutExit(); return; }
@@ -1641,7 +1642,7 @@
       clearTimeout(timer); ui.playing = false;
       if (el.dataset.to === 'missions' || el.dataset.to === 'ladder') refreshAcct(function () { if (ui.screen === 'missions' || ui.screen === 'ladder') render(); });
       if (el.dataset.to === 'play') { ui.screen = 'modes'; window.scrollTo(0, 0); return render(); }
-      ui.screen = el.dataset.to; ui.msg = ''; window.scrollTo(0, 0); return render();
+      ui.screen = el.dataset.to; ui.msg = ''; ui.avEdit = false; window.scrollTo(0, 0); return render();
     }
     if (act === 'filter') { var t = el.dataset.t, k0 = ui.filters.indexOf(t); if (k0 >= 0) ui.filters.splice(k0, 1); else ui.filters.push(t); ui.screen = 'deck'; var y0 = window.scrollY; renderDeck(); window.scrollTo(0, y0); return; }
     if (act === 'filterset') { ui.filters = el.dataset.t ? [el.dataset.t] : []; ui.screen = 'deck'; window.scrollTo(0, 0); return render(); }

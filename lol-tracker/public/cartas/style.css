@@ -1792,3 +1792,27 @@ body.tutmode .freezebtn { pointer-events: none; opacity: .35; }
 .avedit .avpen .ic { width: 16px; height: 16px; }
 .avedit:hover .avpen, .avedit.on .avpen { transform: scale(1.12); }
 .avedit:hover .avt, .avedit.on .avt { filter: brightness(1.15); }
+
+/* ---------- Gambling: orbes y ruleta 3D ---------- */
+.gorbn { display: inline-flex; align-items: center; gap: .25rem; margin-left: .4rem; font-size: .78rem; color: #f0abfc; } .gorbn .ic { width: 1em; height: 1em; } .gorbn.done { color: #94a3b8; }
+#gambov { position: fixed; inset: 0; z-index: 7000; display: grid; place-items: center; pointer-events: none; background: radial-gradient(ellipse at center, rgba(40,10,60,.72), rgba(4,2,10,.82)); animation: gfade .3s ease-out both; }
+#gambov.out { animation: gfadeo .4s ease-in both; }
+@keyframes gfade { from { opacity: 0; } } @keyframes gfadeo { to { opacity: 0; } }
+#gambov .gcard { display: grid; justify-items: center; gap: 1rem; padding: 1.4rem 2.2rem 1.6rem; border-radius: 18px; border: 2px solid #d946ef; background: linear-gradient(180deg, rgba(60,14,84,.92), rgba(18,6,34,.95)); box-shadow: 0 0 40px rgba(217,70,239,.45); animation: gpop .45s cubic-bezier(.2,1.4,.4,1) both; }
+#gambov.foe .gcard { border-color: #94a3b8; box-shadow: 0 0 30px rgba(148,163,184,.3); }
+@keyframes gpop { from { opacity: 0; transform: scale(.6); } }
+#gambov .gt { font-family: var(--serif); letter-spacing: .16em; text-transform: uppercase; color: #f5d0fe; font-size: .95rem; }
+.gscene { position: relative; width: 230px; height: 190px; perspective: 700px; display: grid; place-items: center; overflow: hidden; border-radius: 14px; background: linear-gradient(180deg, #05020a, #1b0a2a 50%, #05020a); border: 1px solid rgba(217,70,239,.5); }
+.gdrum { position: relative; width: 100%; height: 0; transform-style: preserve-3d; will-change: transform; }
+.gface { position: absolute; left: 50%; top: 0; width: 190px; height: 172px; margin: -86px 0 0 -95px; display: flex; align-items: center; justify-content: center; gap: .1rem; backface-visibility: hidden; border-radius: 10px; background: linear-gradient(180deg, #fdf4ff, #f5d0fe 50%, #fdf4ff); color: #4a044e; font-family: var(--serif); box-shadow: inset 0 0 18px rgba(134,25,143,.35); }
+.gface b { font-size: 3.4rem; line-height: 1; } .gface span { font-size: 1.5rem; opacity: .75; margin-top: .9rem; }
+.gmark { position: absolute; top: 50%; width: 0; height: 0; border: 10px solid transparent; margin-top: -10px; } .gmark.l { left: 0; border-left-color: #fbbf24; } .gmark.r { right: 0; border-right-color: #fbbf24; }
+.gorbs { display: flex; gap: .5rem; flex-wrap: wrap; justify-content: center; min-height: 2.2rem; }
+.gorb { display: grid; place-items: center; width: 2.3rem; height: 2.3rem; border-radius: 50%; font-weight: 800; color: #fff; background: radial-gradient(circle at 35% 30%, #f0abfc, #a21caf 70%); box-shadow: 0 0 12px rgba(217,70,239,.7); opacity: 0; will-change: transform, opacity; animation: gorbin .45s calc(2.4s + var(--i) * .22s) cubic-bezier(.2,1.6,.4,1) both; }
+.gorb.v2 { background: radial-gradient(circle at 35% 30%, #fde68a, #d97706 70%); box-shadow: 0 0 12px rgba(251,191,36,.7); }
+.gorb.v3 { background: radial-gradient(circle at 35% 30%, #a5f3fc, #0891b2 70%); box-shadow: 0 0 14px rgba(34,211,238,.8); }
+@keyframes gorbin { from { opacity: 0; transform: scale(0) translateY(-20px); } to { opacity: 1; transform: none; } }
+#gambov .gtot { color: #fdf4ff; font-size: 1.25rem; font-weight: 700; letter-spacing: .04em; opacity: 0; animation: gorbin .5s 2.5s ease-out both; }
+@media (prefers-reduced-motion: reduce) { .gorb, #gambov .gtot { opacity: 1; animation: none; } }
+/* Con la miniatura de la novia, las etiquetas de sinergia suben para no taparse */
+.card:has(.novt) .tags { bottom: 25.5cqw; }

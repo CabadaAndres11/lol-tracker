@@ -79,7 +79,8 @@ var D={
    "name": "Lihone Correa",
    "person": "Lihone",
    "themes": [
-    "Correa"
+    "Correa",
+    "Gambling"
    ],
    "cost": 2,
    "atk": 2,
@@ -112,7 +113,8 @@ var D={
    "name": "AitoRLG Koisito",
    "person": "AitoRLG",
    "themes": [
-    "KOI"
+    "KOI",
+    "Gambling"
    ],
    "cost": 5,
    "atk": 6,
@@ -175,7 +177,8 @@ var D={
    "name": "Dashlight Correa",
    "person": "Dashlight",
    "themes": [
-    "Correa"
+    "Correa",
+    "Gambling"
    ],
    "cost": 3,
    "atk": 3,
@@ -370,7 +373,8 @@ var D={
    "name": "Petea Pokemaniaco",
    "person": "Petea",
    "themes": [
-    "Pokémon"
+    "Pokémon",
+    "Gambling"
    ],
    "cost": 2,
    "atk": 3,
@@ -378,7 +382,37 @@ var D={
    "rarity": "Común",
    "type": "tropa",
    "size": 2
+  },  {
+   "id": "mertens-gambler",
+   "name": "Mertens Gambler",
+   "person": "Mertens",
+   "themes": [
+    "Gambling",
+    "NINI"
+   ],
+   "cost": 3,
+   "atk": 4,
+   "hp": 11,
+   "rarity": "Rara",
+   "type": "tropa",
+   "size": 1
   },
+  {
+   "id": "dashlight-gambler",
+   "name": "Dashlight Gambler",
+   "person": "Dashlight",
+   "themes": [
+    "Gambling",
+    "Informático"
+   ],
+   "cost": 3,
+   "atk": 4,
+   "hp": 10,
+   "rarity": "Rara",
+   "type": "tropa",
+   "size": 1
+  },
+
   {
    "id": "computer-petea",
    "name": "Computer Petea",
@@ -914,6 +948,19 @@ var D={
   }
  ],
  "themes": {
+  "Gambling": {
+   "th": [
+    2,
+    3,
+    4
+   ],
+   "color": "#d946ef",
+   "tx": [
+    "Ganas 1 orbe por cada ronda en la que no recibes daño directo en tu vida. El primer daño directo abre todas las orbes con una ruleta (60% +1/+1, 30% +2/+2, 10% +3/+3): la suma se queda permanente en las Gambling (sin tope) y no ganas más orbes.",
+    "2 orbes por ronda. Probabilidades 40% / 40% / 20%.",
+    "3 orbes por ronda. Probabilidades 20% / 40% / 40%."
+   ]
+  },
   "Pokémon": {
    "th": [
     2,

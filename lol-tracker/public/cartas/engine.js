@@ -26,6 +26,7 @@
     duo: { stat: 2, death: 2, cap: 12 },
     nini: { per: 2, cap: 8 },
     pelayos: { cap: 10 },
+    gambling: { orbs: [1, 2, 3], probs: [[60, 30, 10], [40, 40, 20], [20, 40, 40]] }, // orbes por ronda sin daño directo; probabilidad (%) de que cada orbe dé +1/+1, +2/+2 o +3/+3
   };
 
   var CARD = {};
@@ -587,6 +588,20 @@
   function fxFrame(s, p, type, title, sub, uids, neg) {
     frame(s, pv(s, p, '', 'Rival · ') + title + (sub ? ' ' + sub : ''), { fx: { type: type, side: p, title: title, sub: sub || '', uids: uids || [], neg: !!neg } });
   }
+  // Gambling: una orbe por ronda sin daño directo a tu vida; el primer daño directo abre todas las orbes (ruleta) y cierra la sinergia.
+  function gamState(P) { return P.gmb || (P.gmb = { orbs: 0, done: false, hit: false }); }
+  function gamHit(s, q) {
+    var P = s.p[q], g = gamState(P); g.hit = true;
+    var t = (s.tiers && s.tiers[q] && s.tiers[q]['Gambling']) || tiers(P)['Gambling']; if (!t || g.done || P.life <= 0) return; // nivel con el que empezó el combate: quien recibe daño directo suele haberse quedado sin tropas en mesa
+    var pr = FX.gambling.probs[t - 1], res = [], total = 0, k;
+    for (k = 0; k < g.orbs; k++) { var r = s.rng() * 100, v = r < pr[0] ? 1 : (r < pr[0] + pr[1] ? 2 : 3); res.push(v); total += v; }
+    // Reciben la mejora todas las Gambling en mesa (en Resurrección también las caídas, que vuelven) y en la mano
+    var gm = P.mesa.concat(P.hand).filter(function (i) { return i && isTroop(i) && !isNov(i) && has(i, 'Gambling') && (!i.dead || s.mode === 'revive'); });
+    if (total > 0) gm.forEach(function (i) { grow(i, 'atk', total); grow(i, 'hp', total); });
+    g.done = true; g.orbs = 0; g.res = res;
+    frame(s, pv(s, q, '', 'Rival · ') + 'Gambling: ' + (res.length ? 'se abren ' + res.length + (res.length === 1 ? ' orbe' : ' orbes') + ' (' + res.map(function (v) { return '+' + v; }).join(' ') + '): +' + total + '/+' + total + ' permanente a las Gambling.' : 'no había orbes que abrir.'),
+      { fx: { type: 'gambling', side: q, title: 'Gambling', sub: res.length ? '+' + total + '/+' + total + ' permanente' : 'sin orbes', uids: gm.map(function (i) { return i.uid; }), orbs: res, total: total } });
+  }
   // Ganancia permanente con tope por tropa y temática. stat: 'atk' | 'hp' | 'both'. Devuelve lo realmente ganado.
   function gainCap(i, key, stat, n, cap) {
     var g = Math.min(n, cap - (i.caps[key] || 0));
@@ -835,6 +850,7 @@
         E.life -= dmg;
         frame(s, card(a).name + ' golpea directamente: ' + dmg + ' de daño a ' + pv(s, a.owner, 'la vida del rival', 'tu vida') + '.', { att: a.uid, life: 1 - a.owner, dmg: dmg });
         if (E.life <= 0) { s.over = true; s.phase = 'over'; s.winner = a.owner; s.reason = 'Vida a cero.'; break; }
+        gamHit(s, 1 - a.owner);
         if (a.tmp.ward) { a.tmp.ward = false; a.dead = true; a.hp = 0; frame(s, card(a).name + ' no derriba a nadie y cae.' + deathFx(s, a, 0).line, null); }
         finishDying(a);
         continue;
@@ -917,6 +933,7 @@
       }
       frame(s, line, { att: a.uid, tgt: tgt.uid, dmg: real, rec: rec, retarget: retarget, fx: fxk, plife: plife, pdmg: pdmg });
       if (E.life <= 0 && !s.over) { s.over = true; s.phase = 'over'; s.winner = a.owner; s.reason = 'Vida a cero.'; break; }
+      if (plife != null && pdmg > 0) gamHit(s, plife);
       finishDying(a);
     }
     if (!s.over) {
@@ -948,6 +965,12 @@
           var ML = s.maxLife || CFG.life;
           if (s.p[p].life < ML) { s.p[p].life += 1; fxFrame(s, p, 'duo', 'Dúo en sintonía', '+1 de vida', m.filter(function (i) { return pas(i) === 'duo'; }).map(function (i) { return i.uid; })); }
         }
+      });
+      [0, 1].forEach(function (p) { // Gambling: ronda sin daño directo a tu vida = orbes
+        var P = s.p[p], g = gamState(P), hit = g.hit, t = tiers(P)['Gambling']; g.hit = false;
+        if (!t || g.done || hit) return;
+        var n = FX.gambling.orbs[t - 1]; g.orbs += n;
+        fxFrame(s, p, 'gorb', 'Gambling', '+' + n + (n === 1 ? ' orbe' : ' orbes') + ' (' + g.orbs + ' acumuladas)', mesaTroops(P).filter(function (i) { return has(i, 'Gambling'); }).map(function (i) { return i.uid; }));
       });
       cleanup(s);
       frame(s, 'Fin de la ronda ' + s.round + '.', null);

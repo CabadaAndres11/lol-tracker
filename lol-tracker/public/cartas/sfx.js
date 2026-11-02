@@ -62,6 +62,8 @@
     heal: ['combat', function () { arp('combat', [N.G4, N.C5, N.E5], 0.06, { type: 'sine', d: 0.28, v: 0.22 }); }],
     buff: ['combat', function () { tone('combat', 520, 0.2, { to: 880, type: 'triangle', v: 0.2 }); }],
     magic: ['combat', function () { arp('combat', [N.E5, N.A5, N.C6, N.E6], 0.05, { type: 'sine', d: 0.3, v: 0.16 }); noise('combat', 0.3, { f: 3000, to: 8000, q: 1.5, v: 0.1 }); }],
+    orb: ['combat', function () { tone('combat', 1175, 0.1, { type: 'sine', v: 0.2 }); tone('combat', 1760, 0.3, { at: 0.08, type: 'sine', v: 0.18 }); }],
+    roulette: ['combat', function () { var t = 0, g = 0.06; for (var i = 0; i < 26; i++) { tone('combat', 900 + (i % 3) * 120, 0.03, { at: t, type: 'square', v: 0.08 }); t += g; g *= 1.085; } arp('combat', [N.C5, N.E5, N.G5, N.C6], 0.07, { at: t + 0.1, type: 'triangle', d: 0.45, v: 0.2 }); }],
     round: ['event', function () { tone('event', 220, 0.5, { type: 'sawtooth', v: 0.12 }); tone('event', 330, 0.5, { type: 'sawtooth', v: 0.1 }); tone('event', 440, 0.45, { at: 0.12, type: 'triangle', v: 0.14 }); }],
     end: ['event', function () { tone('event', 110, 0.9, { v: 0.4 }); tone('event', 165, 0.8, { v: 0.2 }); noise('event', 0.4, { f: 400, ft: 'lowpass', v: 0.15 }); }],
     win: ['event', function () { arp('event', [N.C5, N.E5, N.G5, N.C6], 0.13, { d: 0.45, v: 0.26 }); [N.C5, N.E5, N.G5].forEach(function (f) { tone('event', f, 1, { at: 0.55, type: 'triangle', v: 0.16 }); }); arp('event', [N.E6, N.G6], 0.1, { at: 0.7, type: 'sine', d: 0.5, v: 0.12 }); }],

@@ -902,7 +902,7 @@
       var T = D.themes[t], tier = E.tierOf(t, c[t]), nxt = T.th[tier];
       var tip = '<div class="tip"><b>' + esc(t) + '</b>' + T.tx.map(function (x, k) { return '<p' + (k + 1 === tier ? ' class="cur"' : '') + '><b>' + T.th[k] + ' cartas:</b> ' + esc(x) + '</p>'; }).join('') + '</div>';
       return '<div class="syn-row t' + tier + '" style="--tc:' + T.color + '" tabindex="0"><div class="hexa"><b>' + c[t] + '</b></div><div class="si"><b>' + esc(t) + '</b><div class="th">' +
-        T.th.map(function (n, k) { return '<i class="' + (k < tier ? 'on' : '') + '">' + n + '</i>'; }).join('') + '</div></div><span class="need">' + (nxt ? c[t] + '/' + nxt : ic('check') + ' máx') + '</span>' + tip + '</div>';
+        T.th.map(function (n, k) { return '<i class="' + (k < tier ? 'on' : '') + '">' + n + '</i>'; }).join('') + '</div></div><span class="need">' + (nxt ? c[t] + '/' + nxt : ic('check') + ' máx') + '</span>' + (t === 'Gambling' && P.gmb && (P.gmb.orbs || P.gmb.done) ? '<span class="gorbn' + (P.gmb.done ? ' done' : '') + '" title="' + (P.gmb.done ? 'Orbes canjeadas: ya no se ganan más' : 'Orbes acumuladas') + '">' + ic('dado') + ' ' + (P.gmb.done ? 'canjeadas' : '×' + P.gmb.orbs) + '</span>' : '') + tip + '</div>';
     }).join('') + '</div></div>';
     return h;
   }
@@ -1302,9 +1302,30 @@
   }
 
     // ---------- Efectos de sinergia: cartel, bola, números flotantes ----------
-  var FXICON = { pereza: 'sofa', duo: 'duo', novia: 'corazon', eriko: 'corazon', lucia: 'ojo', pueblo: 'pueblo', nini: 'sofa', voley: 'voley', comeback: 'fuego', tilt: 'enfado', koi: 'trofeo', trabajo: 'maletin' };
+  var FXICON = { pereza: 'sofa', duo: 'duo', novia: 'corazon', eriko: 'corazon', lucia: 'ojo', pueblo: 'pueblo', nini: 'sofa', voley: 'voley', comeback: 'fuego', tilt: 'enfado', koi: 'trofeo', trabajo: 'maletin', gorb: 'dado', gambling: 'dado' };
+  // Gambling: ruleta 3D (una sola tirada) que muestra el total de todas las orbes y, debajo, lo que dio cada una
+  function gamblingRoulette(fx) {
+    var old = document.getElementById('gambov'); if (old) old.remove();
+    var orbs = fx.orbs || [], total = fx.total || 0, faces = [], n = 14, k;
+    for (k = 0; k < n - 1; k++) faces.push(1 + Math.floor(Math.random() * Math.max(3, total + 2)));
+    faces.push(total); // la última cara es la que queda de frente
+    var ang = 360 / n, rad = 86 / Math.tan(Math.PI / n);
+    var drum = faces.map(function (v, i) { return '<div class="gface" style="transform:rotateX(' + (-i * ang) + 'deg) translateZ(' + rad.toFixed(1) + 'px)"><b>+' + v + '</b><span>/+' + v + '</span></div>'; }).join('');
+    var el = document.createElement('div'); el.id = 'gambov'; el.className = fx.side === 0 ? 'mine' : 'foe';
+    el.innerHTML = '<div class="gcard"><div class="gt">' + (fx.side === 0 ? 'Tu Gambling' : 'Gambling rival') + ' · ' + (orbs.length ? orbs.length + (orbs.length === 1 ? ' orbe' : ' orbes') : 'sin orbes') + '</div>' +
+      '<div class="gscene"><div class="gdrum" style="--r:' + rad.toFixed(1) + 'px">' + drum + '</div><i class="gmark l"></i><i class="gmark r"></i></div>' +
+      '<div class="gorbs">' + orbs.map(function (v, i) { return '<span class="gorb v' + v + '" style="--i:' + i + '">+' + v + '</span>'; }).join('') + '</div>' +
+      '<div class="gtot">+' + total + '/+' + total + ' permanente a las Gambling</div></div>';
+    document.body.appendChild(el);
+    var d = el.querySelector('.gdrum'), final = (n - 1) * ang + 360 * 3;
+    if (REDUCED || !d.animate) d.style.transform = 'rotateX(' + final + 'deg)';
+    else d.animate([{ transform: 'rotateX(0deg)' }, { transform: 'rotateX(' + final + 'deg)' }], { duration: 2300, fill: 'forwards', easing: 'cubic-bezier(.12,.6,.1,1)' });
+    setTimeout(function () { el.classList.add('out'); }, 3700); setTimeout(function () { if (el.parentNode) el.remove(); }, 4100);
+  }
+  ui.showRoulette = gamblingRoulette; // (también útil para probar la animación desde la consola)
   function fxBanner() {
     var fx = ui.playing && ui.hl && ui.hl.fx; if (!fx) return;
+    if (fx.type === 'gambling') return gamblingRoulette(fx);
     var b = document.getElementById('board'), row = b && b.querySelector('.row4.side' + fx.side); if (!row) return;
     var br = b.getBoundingClientRect(), rr = row.getBoundingClientRect(), el = document.createElement('div');
     el.className = 'fxb t-' + fx.type + (fx.neg ? ' neg' : '');
@@ -1498,7 +1519,7 @@
   }
   function combatSnd(prev, f) {
     var hl = f.hl; if (!hl) return;
-    if (hl.fx) snd(hl.fx.type === 'heal' ? 'heal' : 'magic');
+    if (hl.fx) snd(hl.fx.type === 'heal' ? 'heal' : hl.fx.type === 'gambling' ? 'roulette' : hl.fx.type === 'gorb' ? 'orb' : 'magic');
     if (hl.dmg > 0) snd(hl.dmg >= 6 ? 'heavy' : 'hit'); else if (hl.att && hl.tgt && hl.dmg === 0) snd('miss');
     if (ui.floats.some(function (x) { return x.cls === 'pos'; })) snd('buff', 150);
     if (prev) { var cnt = function (v) { var n = 0; v.mesa.forEach(function (row) { row.forEach(function (c) { if (c) n++; }); }); return n; }; if (cnt(f.view) < cnt(prev)) snd('death', 140); }
@@ -1508,7 +1529,7 @@
     var f = ui.frames[ui.shown++], prev = ui.view || (ui.frames[0] && ui.frames[0].view);
     ui.floats = diffFloats(prev, f); combatSnd(prev, f);
     ui.view = f.view; ui.hl = f.hl; render();
-    var fxk = f.hl && f.hl.fx; timer = setTimeout(step, fxk ? (fxk.type === 'pokemon' ? 1700 : 1250) : 780);
+    var fxk = f.hl && f.hl.fx; timer = setTimeout(step, fxk ? (fxk.type === 'gambling' ? 4300 : fxk.type === 'pokemon' ? 1700 : 1250) : 780);
     var lg = document.getElementById('log');
     if (lg) lg.innerHTML = '<div class="cur">' + esc(f.text) + '</div>' + ui.frames.slice(0, ui.shown - 1).reverse().slice(0, 7).map(function (x) { return '<div>' + esc(x.text) + '</div>'; }).join('');
   }

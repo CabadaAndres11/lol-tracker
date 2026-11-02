@@ -25,10 +25,10 @@ var D={
     "Lol",
     "Comebacker"
    ],
-   "cost": 4,
-   "atk": 4,
-   "hp": 16,
-   "rarity": "Épica",
+   "cost": 5,
+   "atk": 6,
+   "hp": 19,
+   "rarity": "Legendaria",
    "type": "tropa",
    "size": 3,
    "pas": {
@@ -38,11 +38,10 @@ var D={
   },
   {
    "id": "haikyuu-lihone",
-   "name": "Haikyuu Lihone",
+   "name": "Lihone Setter",
    "person": "Lihone",
    "themes": [
-    "Voley",
-    "Anime"
+    "Voley"
    ],
    "cost": 4,
    "atk": 6,
@@ -129,10 +128,9 @@ var D={
   },
   {
    "id": "aitorlg-friki",
-   "name": "AitoRLG Friki",
+   "name": "PokeAitoRLG",
    "person": "AitoRLG",
    "themes": [
-    "Anime",
     "Pokémon"
    ],
    "cost": 3,
@@ -223,11 +221,10 @@ var D={
   },
   {
    "id": "javihi-friki",
-   "name": "Javihi Friki",
+   "name": "Javihi vs 9",
    "person": "Javihi",
    "themes": [
-    "Lol",
-    "Anime"
+    "Lol"
    ],
    "cost": 3,
    "atk": 5,
@@ -244,12 +241,12 @@ var D={
     "Dúo Inseparable",
     "Tilt"
    ],
-   "cost": 5,
-   "atk": 7,
-   "hp": 18,
-   "rarity": "Legendaria",
+   "cost": 4,
+   "atk": 5,
+   "hp": 14,
+   "rarity": "Épica",
    "type": "tropa",
-   "size": 3,
+   "size": 2,
    "pas": {
     "n": "Dúo en sintonía",
     "t": "Solo con su pareja Dúo (Javihi Dúo + Sech Dúo) viva en la mesa: cuando una recibe un ataque, hace la mitad de ese daño (redondeado hacia arriba) a todas las tropas rivales. Si acaban el combate las dos vivas, tu jugador recupera 1 de vida."
@@ -312,12 +309,12 @@ var D={
     "Dúo Inseparable",
     "Tilt"
    ],
-   "cost": 5,
-   "atk": 7,
-   "hp": 18,
-   "rarity": "Legendaria",
+   "cost": 4,
+   "atk": 5,
+   "hp": 14,
+   "rarity": "Épica",
    "type": "tropa",
-   "size": 3,
+   "size": 2,
    "pas": {
     "n": "Dúo en sintonía",
     "t": "Solo con su pareja Dúo (Javihi Dúo + Sech Dúo) viva en la mesa: cuando una recibe un ataque, hace la mitad de ese daño (redondeado hacia arriba) a todas las tropas rivales. Si acaban el combate las dos vivas, tu jugador recupera 1 de vida."
@@ -541,19 +538,14 @@ var D={
    "name": "Chipy Correa",
    "person": "Chipy",
    "themes": [
-    "Anime",
     "Correa"
    ],
-   "cost": 4,
+   "cost": 3,
    "atk": 4,
-   "hp": 16,
-   "rarity": "Épica",
+   "hp": 11,
+   "rarity": "Rara",
    "type": "tropa",
-   "size": 2,
-   "pas": {
-    "n": "Consuelo",
-    "t": "Mientras esté en tu mano, las Anime que ceden estadísticas siempre se quedan con 1 de ataque o 1 de vida."
-   }
+   "size": 2
   },
   {
    "id": "chipy-lloron",
@@ -576,11 +568,10 @@ var D={
   },
   {
    "id": "pampert-friki",
-   "name": "Pampert Friki",
+   "name": "Pampert Carry",
    "person": "Pampert",
    "themes": [
-    "Lol",
-    "Anime"
+    "Lol"
    ],
    "cost": 2,
    "atk": 4,
@@ -622,6 +613,112 @@ var D={
    "n": "No me tostes",
    "t": "Recibe 2 de daño menos por cada golpe (mínimo 0)."
   }
+  },
+  {
+   "id": "lihone-rudeus",
+   "name": "Lihone Rudeus",
+   "person": "Lihone",
+   "themes": [
+    "Anime"
+   ],
+   "cost": 3,
+   "atk": 5,
+   "hp": 10,
+   "rarity": "Rara",
+   "type": "tropa",
+   "size": 1
+  },
+  {
+   "id": "dashlight-sun-jin-woo",
+   "name": "Dashlight Sun Jin-Woo",
+   "person": "Dashlight",
+   "themes": [
+    "Anime"
+   ],
+   "cost": 4,
+   "atk": 5,
+   "hp": 15,
+   "rarity": "Épica",
+   "type": "tropa",
+   "size": 2,
+   "pas": {
+    "n": "Soldado de Sombra",
+    "t": "En mesa desbloquea el hueco 5: al derrotar a una tropa, su versión al 50% lo ocupa hasta la siguiente tienda."
+   }
+  },
+  {
+   "id": "aitorlg-maomao",
+   "name": "AitoRLG MaoMao",
+   "person": "AitoRLG",
+   "themes": [
+    "Anime"
+   ],
+   "cost": 5,
+   "atk": 6,
+   "hp": 18,
+   "rarity": "Legendaria",
+   "type": "tropa",
+   "size": 2,
+   "pas": {
+    "n": "Boticaria",
+    "t": "En mesa, cada 2 tiendas rellena tu vida; si ya está llena, recibes una carta que cura 5."
+   }
+  },
+  {
+   "id": "javihi-smiley",
+   "name": "Javihi Smiley",
+   "person": "Javihi",
+   "themes": [
+    "Anime"
+   ],
+   "cost": 2,
+   "atk": 4,
+   "hp": 6,
+   "rarity": "Común",
+   "type": "tropa",
+   "size": 1
+  },
+  {
+   "id": "mertens-meliodas",
+   "name": "Mertens Meliodas",
+   "person": "Mertens",
+   "themes": [
+    "Anime"
+   ],
+   "cost": 2,
+   "atk": 5,
+   "hp": 5,
+   "rarity": "Común",
+   "type": "tropa",
+   "size": 1
+  },
+  {
+   "id": "chipy-goku",
+   "name": "Chipy Goku",
+   "person": "Chipy",
+   "themes": [
+    "Anime"
+   ],
+   "cost": 3,
+   "atk": 6,
+   "hp": 9,
+   "rarity": "Rara",
+   "type": "tropa",
+   "size": 1
+  },
+  {
+   "id": "pampert-asta",
+   "name": "Pampert Asta",
+   "person": "Pampert",
+   "themes": [
+    "Anime"
+   ],
+   "cost": 3,
+   "atk": 5,
+   "hp": 10,
+   "rarity": "Rara",
+   "type": "tropa",
+   "size": 1
   }
  ],
  "novias": [
@@ -758,6 +855,18 @@ var D={
    "foe": true
   },
   {
+   "id": "kamehameha",
+   "name": "Kamehameha",
+   "cost": 2,
+   "rarity": "Rara",
+   "type": "accion",
+   "size": 1,
+   "target": "none",
+   "text": "Reparte a partes iguales entre todas las tropas rivales el daño almacenado en la Genkidama (necesitas el nivel 1 de Anime).",
+   "theme": "Anime",
+   "foe": true
+  },
+  {
    "id": "golpe-certero",
    "name": "Golpe certero",
    "cost": 2,
@@ -847,17 +956,6 @@ var D={
    "theme": "Trabajo"
   },
   {
-   "id": "capitulo-especial",
-   "name": "Capítulo especial",
-   "cost": 2,
-   "rarity": "Rara",
-   "type": "accion",
-   "size": 1,
-   "target": "none",
-   "text": "Esta ronda, las estadísticas que cedan tus Anime se duplican (necesitas el nivel 1 de Anime).",
-   "theme": "Anime"
-  },
-  {
    "id": "segunda-temporada",
    "name": "Segunda temporada",
    "cost": 3,
@@ -898,7 +996,7 @@ var D={
    "type": "accion",
    "size": 1,
    "target": "none",
-   "text": "La novia del hueco 5 recibe +3/+3 permanente y lo conserva aunque vuelva a la reserva (necesitas el nivel 1 de Correa y una novia en el hueco 5).",
+   "text": "Mejora el hueco 5 con +3/+3 permanente: lo recibe la novia que lo ocupe y se mantiene aunque la cambies o caiga (necesitas el nivel 1 de Correa y una novia en el hueco 5).",
    "theme": "Correa"
   },
   {
@@ -926,12 +1024,12 @@ var D={
   {
    "id": "hermano-del-alma",
    "name": "Hermano del alma",
-   "cost": 2,
+   "cost": 3,
    "rarity": "Épica",
    "type": "accion",
    "size": 1,
    "target": "none",
-   "text": "Si tienes un Dúo Inseparable en la mesa, consigues en tu mano una copia de su pareja.",
+   "text": "Si tienes un Dúo Inseparable en la mesa, consigues en tu mano una copia de su pareja. Solo se puede usar una vez entre tiendas.",
    "theme": "Dúo Inseparable"
   },
   {
@@ -966,6 +1064,33 @@ var D={
    "target": "none",
    "text": "50%: ganas 2 orbes Gambling. 50%: pierdes 2 orbes (mínimo 0).",
    "theme": "Gambling"
+  }
+ ],
+ "tokens": [
+  {
+   "id": "remedio",
+   "name": "Remedio",
+   "cost": 0,
+   "rarity": "Rara",
+   "type": "accion",
+   "size": 1,
+   "target": "none",
+   "text": "Cura 5 de vida. Te lo da la Boticaria de AitoRLG MaoMao.",
+   "theme": "Anime",
+   "token": true
+  },
+  {
+   "id": "genkidama",
+   "name": "Genkidama",
+   "cost": 0,
+   "rarity": "Legendaria",
+   "type": "accion",
+   "size": 1,
+   "target": "enemy",
+   "text": "Libera sobre una tropa rival el daño almacenado por tus Anime (50% / 75% / 100% del daño recibido según tu nivel de Anime). Te la da la sinergia Anime cada ronda.",
+   "theme": "Anime",
+   "foe": true,
+   "token": true
   }
  ],
  "themes": {
@@ -1055,9 +1180,9 @@ var D={
    ],
    "color": "#f472b6",
    "tx": [
-    "Al final de ronda, 1 Anime puede ceder su ataque o su vida máxima a otra.",
-    "2 Anime pueden ceder.",
-    "3 Anime pueden ceder."
+    "Cada ronda recibes una Genkidama. Tus Anime almacenan el 50% del daño que reciben; al jugarla se libera sobre una tropa rival.",
+    "Almacenan el 75% del daño recibido.",
+    "Almacenan el 100% del daño recibido."
    ]
   },
   "KOI": {
@@ -1170,6 +1295,38 @@ var D={
   },
   {
    "id": "golpe-de-suerte",
+   "price": 50
+  },
+  {
+   "id": "javihi-smiley",
+   "price": 40
+  },
+  {
+   "id": "mertens-meliodas",
+   "price": 40
+  },
+  {
+   "id": "lihone-rudeus",
+   "price": 70
+  },
+  {
+   "id": "chipy-goku",
+   "price": 70
+  },
+  {
+   "id": "pampert-asta",
+   "price": 70
+  },
+  {
+   "id": "dashlight-sun-jin-woo",
+   "price": 100
+  },
+  {
+   "id": "aitorlg-maomao",
+   "price": 150
+  },
+  {
+   "id": "kamehameha",
    "price": 50
   }
  ]

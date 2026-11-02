@@ -119,12 +119,12 @@ function startRound(T) {
   alive.forEach((p) => {
     const got = E.income(T, p);
     if (T.bots && T.bots[p] && T.aiLv && T.aiLv[p]) { const l0 = T.p[p].life; E.aiBonus(T, p); if (T.p[p].life > l0) noteAll(T, T.names[p] + ' (IA Experto) se cura ' + (T.p[p].life - l0) + ' de vida.'); }
-    T.p[p].target = {}; T.p[p].anime = 0; T.p[p].fl = {};
+    T.p[p].target = {}; T.p[p].anime = 0; T.p[p].fl = {}; E.genGive(T, p);
     note(T, p, 'Ronda ' + T.round + ': +' + got + ' de oro' + (T.p[p].lastInt ? ' (incluye +' + T.p[p].lastInt + ' de interés por ahorrar)' : '') + '.');
   });
   if (T.shopOpen) {
     T.shops++;
-    alive.forEach((p) => { E.openShop(T, p); note(T, p, 'Se abre la tienda.'); });
+    alive.forEach((p) => { const m = E.shopStart(T, p); if (m) note(T, p, m); E.openShop(T, p); note(T, p, 'Se abre la tienda.'); });
     processStuck(T);
   } else {
     alive.forEach((p) => { if (E.noTroops(T.p[p])) eliminate(T, p, 'Te quedaste sin tropas: eliminado.'); });

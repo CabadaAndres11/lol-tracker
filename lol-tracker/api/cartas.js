@@ -56,7 +56,7 @@ function drawCard(minRarity) {
   return pool[crypto.randomInt(0, pool.length)].id;
 }
 // Efectos cosméticos disponibles (por ahora todos son de todos los jugadores)
-const FX_KINDS = { deploy: { default: 0, meteoro: 30, arcano: 30, perro: 30, fichas: 30 }, sleeve: { sin: 0, oro: 40, neon: 30, casino: 40 }, finish: { default: 0, eclipse: 50, hechizo: 50, poker: 50 } }; // precio en monedas de cada efecto, por tipo
+const FX_KINDS = { deploy: { default: 0, meteoro: 30, arcano: 30, perro: 30, fichas: 30, sombras: 30, kame: 30, grimorio: 30 }, sleeve: { sin: 0, oro: 40, neon: 30, casino: 40, dragonball: 40, trebol: 40, petalos: 40 }, finish: { default: 0, eclipse: 50, hechizo: 50, poker: 50, dball: 50, trebol: 50, petalos: 50 } }; // precio en monedas de cada efecto, por tipo
 const FX_PRICE = Object.assign({}, FX_KINDS.deploy, FX_KINDS.sleeve, FX_KINDS.finish);
 const FX_DEFAULT = { deploy: 'default', sleeve: 'sin', finish: 'default' };
 const FX_DEPLOY = Object.keys(FX_PRICE);
@@ -124,6 +124,14 @@ async function loadUser(cfg, name) {
     const fix = (a) => Array.isArray(a) ? a.map((x) => x === 'dashlight-gambler' ? 'pampert-gambler' : x) : a;
     u.owned = [...new Set(fix(u.owned || []))]; if (u.decks) u.decks = JSON.parse(JSON.stringify(u.decks).split('dashlight-gambler').join('pampert-gambler'));
     if (u.dups && u.dups['dashlight-gambler'] != null) { u.dups['pampert-gambler'] = u.dups['dashlight-gambler']; delete u.dups['dashlight-gambler']; }
+    await redis(cfg, ['SET', uKey(u.name), JSON.stringify(u)]);
+  }
+  const GONE = ['capitulo-especial']; // cartas eliminadas del juego
+  if (u && ((u.owned || []).some((x) => GONE.includes(x)) || GONE.some((g) => JSON.stringify(u.decks || '').includes(g)))) {
+    u.owned = (u.owned || []).filter((x) => !GONE.includes(x));
+    const clean = (v) => Array.isArray(v) ? v.filter((x) => !GONE.includes(x)).map(clean) : v && typeof v === 'object' ? Object.fromEntries(Object.entries(v).map(([k, x]) => [k, clean(x)])) : v;
+    if (u.decks) u.decks = clean(u.decks);
+    if (u.dups) GONE.forEach((g) => delete u.dups[g]);
     await redis(cfg, ['SET', uKey(u.name), JSON.stringify(u)]);
   }
   if (u && !u.c100) { u.coins = 100; u.c100 = true; await redis(cfg, ['SET', uKey(u.name), JSON.stringify(u)]); } // ajuste único: todas las cuentas existentes pasan a 100 monedas
@@ -276,7 +284,6 @@ const SEAT_OPS = {
   pick: (s, p, a) => E.pickFromDeck(s, p, String(a[0])),
   retire: (s, p, a) => E.retire(s, p, +a[0]),
   sell: (s, p, a) => E.sell(s, p, a[0] === 'mesa' ? 'mesa' : 'hand', +a[1]),
-  cede: (s, p, a, x) => E.cede(s, x(a[0]), x(a[1]), a[2] === 'hp' ? 'hp' : 'atk', p),
 };
 async function pvpHandle(cfg, act, body, u) {
   const me = u.name;
@@ -371,6 +378,16 @@ const ALL_THEMES = Object.keys(DATA.themes);
 const v4Key = (id) => `cartas:vs4:g:${id}`;
 const v4Ptr = (n) => `cartas:vs4:user:${n.toLowerCase()}`;
 const v4In = (n) => `cartas:vs4:in:${n.toLowerCase()}`;
+const v4Pub = (e) => ({ name: e.name, avatar: e.avatar || '', cover: e.cover || '', bot: !!e.bot });
+function v4BotFor(room) { // IA en dificultad Normal con un mazo de una temática que aún no esté en la sala
+  const used = new Set(room.players.filter((p) => p.bot).map((p) => p.theme));
+  const free = ALL_THEMES.filter((t) => !used.has(t)), lead = free[crypto.randomInt(0, free.length)] || ALL_THEMES[0];
+  const rng = E.mulberry32(crypto.randomInt(1, 2 ** 30));
+  const others = ALL_THEMES.filter((t) => t !== lead).sort(() => rng() - 0.5).slice(0, 2);
+  const deck = E.aiDeck(rng, [lead].concat(others), 0);
+  const troops = deck.filter((id) => E.CARD[id] && E.CARD[id].type === 'tropa');
+  return { name: 'Bot · ' + lead, deck, bot: true, diff: 0, theme: lead, cover: troops[0] || '' };
+}
 async function loadV4(cfg, id) {
   const raw = await redis(cfg, ['GET', v4Key(id)]);
   if (!raw) return null;
@@ -445,11 +462,10 @@ const V4_OPS = {
   pick: (T, p, a) => E.pickFromDeck(T, p, String(a[0])),
   retire: (T, p, a) => E.retire(T, p, +a[0]),
   sell: (T, p, a) => E.sell(T, p, a[0] === 'mesa' ? 'mesa' : 'hand', +a[1]),
-  cede: (T, p, a) => E.cede(T, a[0], a[1], a[2] === 'hp' ? 'hp' : 'atk', p),
 };
 async function vs4Handle(cfg, act, body, u) {
   const me = u.name, lme = me.toLowerCase();
-  const wantsGame = act === 'vs4Create' || act === 'vs4Join' || act === 'vs4Search' || act === 'vs4Bots' || (act === 'vs4Poll' && !body.id);
+  const wantsGame = act === 'vs4Create' || act === 'vs4AddBot' || act === 'vs4RmBot' || act === 'vs4Join' || act === 'vs4Search' || act === 'vs4Bots' || (act === 'vs4Poll' && !body.id);
   if (wantsGame || act === 'vs4Cancel') {
     const cur = await redis(cfg, ['GET', v4Ptr(me)]);
     if (cur && act !== 'vs4Cancel') {
@@ -462,7 +478,7 @@ async function vs4Handle(cfg, act, body, u) {
       if (where === 'Q') return { ok: true, none: true };
       const raw = await redis(cfg, ['GET', `cartas:vs4:room:${where}`]);
       if (!raw) { await redis(cfg, ['DEL', v4In(me)]); return { ok: true, gone: true }; }
-      return { ok: true, wait: true, code: where, players: JSON.parse(raw).players.map((p) => p.name) };
+      const rm = JSON.parse(raw); return { ok: true, wait: true, code: where, players: rm.players.map(v4Pub), host: rm.host };
     }
     if (act === 'vs4Cancel') {
       const where = await redis(cfg, ['GET', v4In(me)]);
@@ -485,7 +501,8 @@ async function vs4Handle(cfg, act, body, u) {
     }
     const err = checkDeck(u, body.deck); if (err) return { status: 400, error: err };
     const vmode = body.mode === 'revive' ? 'revive' : '', vqk = vmode ? 'cartas:vs4:q:rv' : 'cartas:vs4:q';
-    const mine = { name: me, deck: body.deck, lv: levelsOf(u, body.deck), sk: skinsOf(u, body.deck) };
+    const cov = String(body.cover || '').replace(/[^a-z0-9-]/g, '').slice(0, 40);
+    const mine = { name: me, deck: body.deck, lv: levelsOf(u, body.deck), sk: skinsOf(u, body.deck), avatar: u.avatar || '', cover: E.CARD[cov] ? cov : '' };
     if (act === 'vs4Bots') { // partida contra 3 IAs, cada una con un mazo de una temática distinta
       const diff = Math.max(0, Math.min(2, body.diff | 0));
       const lv = ALL_THEMES.slice().sort(() => crypto.randomInt(0, 2) - 0.5).slice(0, 3);
@@ -504,7 +521,23 @@ async function vs4Handle(cfg, act, body, u) {
         for (let i = 0; i < 5; i++) code += AL[crypto.randomInt(0, AL.length)];
         await redis(cfg, ['SET', `cartas:vs4:room:${code}`, JSON.stringify({ host: lme, mode: vmode, players: [mine] }), 'EX', 900]);
         await redis(cfg, ['SET', v4In(me), code, 'EX', 900]);
-        return { ok: true, wait: true, code, players: [me] };
+        return { ok: true, wait: true, code, players: [v4Pub(mine)], host: lme };
+      }
+      if (act === 'vs4AddBot' || act === 'vs4RmBot') { // el anfitrión rellena o vacía huecos con IAs en dificultad Normal
+        const code = await redis(cfg, ['GET', v4In(me)]);
+        const raw = code && code !== 'Q' ? await redis(cfg, ['GET', `cartas:vs4:room:${code}`]) : null;
+        if (!raw) return { status: 404, error: 'No estás en una sala.' };
+        const room = JSON.parse(raw);
+        if (room.host !== lme) return { status: 403, error: 'Solo quien creó la sala puede añadir bots.' };
+        if (act === 'vs4RmBot') room.players = room.players.filter((p) => !(p.bot && p.name === String(body.name || '')));
+        else if (room.players.length < 4) room.players.push(v4BotFor(room));
+        if (room.players.length === 4) {
+          await redis(cfg, ['DEL', `cartas:vs4:room:${code}`]);
+          const g = await newV4Game(cfg, room.players, room.mode, 0);
+          return v4View(g, g.names.indexOf(me));
+        }
+        await redis(cfg, ['SET', `cartas:vs4:room:${code}`, JSON.stringify(room), 'EX', 900]);
+        return { ok: true, wait: true, code, players: room.players.map(v4Pub), host: room.host };
       }
       if (act === 'vs4Join') {
         const code = String(body.code || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
@@ -522,7 +555,7 @@ async function vs4Handle(cfg, act, body, u) {
         }
         await redis(cfg, ['SET', `cartas:vs4:room:${code}`, JSON.stringify(room), 'EX', 900]);
         await redis(cfg, ['SET', v4In(me), code, 'EX', 900]);
-        return { ok: true, wait: true, code, players: room.players.map((p) => p.name) };
+        return { ok: true, wait: true, code, players: room.players.map(v4Pub), host: room.host };
       }
       // búsqueda automática: cola de jugadores; arranca al juntarse 4
       const now = Date.now();
@@ -532,11 +565,11 @@ async function vs4Handle(cfg, act, body, u) {
         const take = q.slice(0, 4); q = q.slice(4);
         await redis(cfg, ['SET', vqk, JSON.stringify(q), 'EX', 30]);
         const g = await newV4Game(cfg, take, vmode);
-        return g.names.includes(me) ? v4View(g, g.names.indexOf(me)) : { ok: true, wait: true, players: q.map((e) => e.name) };
+        return g.names.includes(me) ? v4View(g, g.names.indexOf(me)) : { ok: true, wait: true, players: q.map(v4Pub) };
       }
       await redis(cfg, ['SET', vqk, JSON.stringify(q), 'EX', 30]);
       await redis(cfg, ['SET', v4In(me), 'Q', 'EX', 60]);
-      return { ok: true, wait: true, players: q.map((e) => e.name) };
+      return { ok: true, wait: true, players: q.map(v4Pub) };
     });
   }
   // ---- con partida ----

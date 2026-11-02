@@ -1968,3 +1968,13 @@ body.tutmode .freezebtn { pointer-events: none; opacity: .35; }
 .subtabs button.on { border-color: var(--gold); color: var(--gold); background: rgba(240,201,106,.1); }
 /* Soldado de Sombra */
 .card.shadowc, .shadowc .card { filter: grayscale(.35) brightness(.85) saturate(1.2); box-shadow: 0 0 18px 2px rgba(124,58,237,.75); }
+
+/* Animación de la Genkidama (solo transform/opacity en movimiento) */
+.gkov { position: fixed; inset: 0; z-index: 9000; pointer-events: all; overflow: hidden; }
+.gkov i { position: absolute; border-radius: 50%; pointer-events: none; opacity: 0; will-change: transform, opacity; }
+.gkp { background: radial-gradient(circle, #fff 0%, #f9a8d4 45%, rgba(244,114,182,0) 75%); box-shadow: 0 0 10px 3px rgba(244,114,182,.8); }
+.gkr { border: 3px solid rgba(249,168,212,.9); box-shadow: 0 0 18px rgba(244,114,182,.8); }
+.gks { background: radial-gradient(circle at 38% 34%, #fff 0%, #bae6fd 22%, #f9a8d4 52%, #a78bfa 80%, rgba(167,139,250,.0) 100%); box-shadow: 0 0 40px 14px rgba(125,211,252,.75), 0 0 90px 30px rgba(244,114,182,.45); }
+.gkh { background: radial-gradient(circle, rgba(186,230,253,.55) 0%, rgba(244,114,182,.25) 45%, rgba(167,139,250,0) 72%); }
+.gkx { border: 6px solid #fff; box-shadow: 0 0 40px 12px rgba(125,211,252,.9), inset 0 0 30px rgba(244,114,182,.8); }
+.gkf { background: radial-gradient(circle, #fff 0%, rgba(255,255,255,.85) 25%, rgba(244,114,182,.35) 60%, rgba(244,114,182,0) 75%); }

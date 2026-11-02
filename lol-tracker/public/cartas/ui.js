@@ -934,6 +934,66 @@
     app.innerHTML = h;
   }
 
+  // ---------- Animación de la Genkidama / Kamehameha ----------
+  // La energía sale de las tropas Anime, se forma la esfera en el centro de la mesa y se lanza contra el rival.
+  function ctr(el) { var r = el.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2, w: r.width, h: r.height }; }
+  function genCapture(c, uid) {
+    var s = ui.s, srcs = [], tg = [];
+    document.querySelectorAll('[data-cuid][data-side="0"]').forEach(function (el) { var I = inst(s.p[0], +el.dataset.cuid); if (I && E.has(I, 'Anime') && !I.dead) srcs.push(ctr(el)); });
+    document.querySelectorAll('[data-cuid][data-side="1"]').forEach(function (el) { if (c.id === 'kamehameha' || +el.dataset.cuid === uid) tg.push(ctr(el)); });
+    var b = document.getElementById('board'), bc = b ? ctr(b) : { x: innerWidth / 2, y: innerHeight / 2 };
+    var tot = E.genStored(s.p[0]);
+    return { id: c.id, srcs: srcs, tg: tg, mid: { x: bc.x, y: bc.y }, pow: Math.min(1, tot / 30) };
+  }
+  function genPlay(fx) {
+    var ov = document.createElement('div'); ov.className = 'gkov'; document.body.appendChild(ov);
+    var T0 = 0, anims = [];
+    function el(cls, x, y, size) { var e = document.createElement('i'); e.className = cls; e.style.left = x - size / 2 + 'px'; e.style.top = y - size / 2 + 'px'; e.style.width = e.style.height = size + 'px'; ov.appendChild(e); return e; }
+    function go(e, kf, o) { var a = e.animate(kf, Object.assign({ fill: 'both', easing: 'ease-in-out' }, o)); anims.push(a); return a; }
+    var mid = fx.mid, S = 90 + fx.pow * 90;
+    snd('magic');
+    // 1) la energía sale de cada tropa Anime y viaja hasta el centro
+    fx.srcs.forEach(function (sc, k) {
+      for (var j = 0; j < 9; j++) {
+        var sz = 7 + Math.random() * 8, e = el('gkp', sc.x + (Math.random() - .5) * sc.w * .6, sc.y + (Math.random() - .5) * sc.h * .6, sz);
+        var dx = mid.x - parseFloat(e.style.left) - sz / 2, dy = mid.y - parseFloat(e.style.top) - sz / 2, bend = (Math.random() - .5) * 140;
+        go(e, [{ transform: 'translate(0,0) scale(.4)', opacity: 0 }, { transform: 'translate(' + dx * .45 + 'px,' + (dy * .45 + bend) + 'px) scale(1.2)', opacity: 1, offset: .45 }, { transform: 'translate(' + dx + 'px,' + dy + 'px) scale(.3)', opacity: 0 }], { duration: 850 + Math.random() * 250, delay: k * 110 + j * 70 });
+      }
+      var ring = el('gkr', sc.x, sc.y, Math.max(sc.w, sc.h) * .9);
+      go(ring, [{ transform: 'scale(.6)', opacity: 0 }, { transform: 'scale(1.1)', opacity: .9, offset: .4 }, { transform: 'scale(1.4)', opacity: 0 }], { duration: 700, delay: k * 110 });
+    });
+    var formAt = 700 + fx.srcs.length * 110 + 300;
+    // 2) se forma la esfera
+    var sph = el('gks', mid.x, mid.y, S), halo = el('gkh', mid.x, mid.y, S * 2.2);
+    go(sph, [{ transform: 'scale(0)', opacity: 0 }, { transform: 'scale(1)', opacity: 1, offset: .6 }, { transform: 'scale(1.12)', opacity: 1 }], { duration: 700, delay: formAt - 600 });
+    go(halo, [{ transform: 'scale(.2)', opacity: 0 }, { transform: 'scale(1)', opacity: .8 }], { duration: 700, delay: formAt - 600 });
+    var pulse = sph.animate([{ transform: 'scale(1.12)' }, { transform: 'scale(.98)' }, { transform: 'scale(1.12)' }], { duration: 380, delay: formAt + 100, iterations: 2, fill: 'both' }); anims.push(pulse);
+    var launch = formAt + 800;
+    // 3) se lanza contra el rival (o se abre en rayos hacia cada tropa en la Kamehameha)
+    var tgs = fx.tg.length ? fx.tg : [{ x: mid.x, y: mid.y - 160, w: 100, h: 140 }];
+    tgs.forEach(function (t, k) {
+      var b = k === 0 ? sph : el('gks', mid.x, mid.y, S * .6), hl = k === 0 ? halo : el('gkh', mid.x, mid.y, S * 1.3);
+      var dx = t.x - mid.x, dy = t.y - mid.y;
+      if (k) { go(b, [{ opacity: 0 }, { opacity: 1 }], { duration: 1, delay: launch }); go(hl, [{ opacity: 0 }, { opacity: .8 }], { duration: 1, delay: launch }); }
+      var sc0 = k ? 1 : 1.12;
+      go(b, [{ transform: 'translate(0,0) scale(' + sc0 + ')', opacity: 1 }, { transform: 'translate(' + dx * .96 + 'px,' + dy * .96 + 'px) scale(' + (sc0 * .8) + ')', opacity: 1, offset: .92 }, { transform: 'translate(' + dx + 'px,' + dy + 'px) scale(.2)', opacity: 0 }], { duration: 420, delay: launch, easing: 'cubic-bezier(.6,0,.9,.5)' });
+      go(hl, [{ transform: 'translate(0,0) scale(1)', opacity: .8 }, { transform: 'translate(' + dx + 'px,' + dy + 'px) scale(.5)', opacity: 0 }], { duration: 420, delay: launch, easing: 'cubic-bezier(.6,0,.9,.5)' });
+      var hit = el('gkx', t.x, t.y, Math.max(t.w, t.h) * 1.6), fl = el('gkf', t.x, t.y, Math.max(t.w, t.h) * 1.1);
+      go(hit, [{ transform: 'scale(.2)', opacity: 0 }, { transform: 'scale(.7)', opacity: 1, offset: .25 }, { transform: 'scale(1.5)', opacity: 0 }], { duration: 650, delay: launch + 400 });
+      go(fl, [{ transform: 'scale(.5)', opacity: 0 }, { transform: 'scale(1)', opacity: 1, offset: .2 }, { transform: 'scale(1.2)', opacity: 0 }], { duration: 450, delay: launch + 400 });
+    });
+    var shake = document.querySelector('#app'); if (shake && !REDUCED) go(shake, [{ transform: 'translate(0,0)' }, { transform: 'translate(-5px,3px)' }, { transform: 'translate(5px,-3px)' }, { transform: 'translate(-3px,-2px)' }, { transform: 'translate(0,0)' }], { duration: 380, delay: launch + 420, easing: 'linear', fill: 'none' });
+    setTimeout(function () { snd('hit'); }, launch + 400);
+    var end = launch + 400 + 700;
+    setTimeout(function () { anims.forEach(function (a) { try { a.cancel(); } catch (e) {} }); ov.remove(); ui.genfx = null; render(); }, end);
+  }
+  // Juega una acción propia; si es Genkidama/Kamehameha, anima antes de mostrar el resultado
+  function playA(i, uid) {
+    var s = ui.s, h = s.p[0].hand[i], c = h && CARD[h.id], fx = c && (c.id === 'genkidama' || c.id === 'kamehameha') && !REDUCED && !PV.on ? genCapture(c, uid) : null;
+    var ok = E.playAction(s, 0, i, uid);
+    if (ok && fx && fx.srcs.length) { ui.genfx = fx; genPlay(fx); }
+    return ok;
+  }
   // ---------- Partida ----------
   function inst(P, uid) { return P.mesa.filter(function (i) { return i && i.uid === uid; })[0]; }
   function startGame() {
@@ -1553,6 +1613,7 @@
     ui.screen = sc; ui.msg = ''; window.scrollTo(0, 0); render();
   }
   function render() {
+    if (ui.genfx) return; // la animación de la Genkidama pinta el resultado al terminar
     document.body.classList.remove('shopbg');
     if (PV.wait && ui.screen !== 'pvp') pvpCancelWait();
     var f = { home: renderHome, deck: renderDeck, modes: renderModes, pvp: renderPvp, login: renderLogin, starter: renderStarter, packs: renderPacks, profile: renderProfile, ladder: renderLadder, missions: renderMissions, boot: renderBoot }[ui.screen];
@@ -1921,7 +1982,7 @@
         if (!P.mesa.slice(0, 4).some(function (x) { return !x; })) { ui.hint = 'La mesa está llena: solo puedes retirar tropas en la tienda.'; ui.sel = null; }
         else { ui.sel = { k: 'hand', i: i }; ui.hint = 'Pulsa un hueco libre para colocarla.'; }
       } else if (s.shopOpen) { ui.hint = 'Las acciones se juegan en las rondas de combate.'; ui.sel = null; }
-      else if (c.target === 'none') { ui.hint = E.playAction(s, 0, i, null) ? (pvs('action', [i, null]), '') : s.err; ui.sel = null; }
+      else if (c.target === 'none') { ui.hint = playA(i, null) ? (pvs('action', [i, null]), '') : s.err; ui.sel = null; }
       else { ui.sel = { k: 'act', i: i }; ui.hint = c.target === 'ally' ? 'Elige una tropa tuya en la mesa.' : 'Elige una tropa rival.'; }
       return render();
     }
@@ -1941,14 +2002,14 @@
     }
     if (act === 'mine') {
       var uid = +el.dataset.cuid;
-      if (ui.sel && ui.sel.k === 'act') { if (E.playAction(s, 0, ui.sel.i, uid)) { pvs('action', [ui.sel.i, uid]); ui.sel = null; ui.hint = ''; } else ui.hint = s.err || 'Esa acción no va sobre una tropa tuya.'; return render(); }
+      if (ui.sel && ui.sel.k === 'act') { if (playA(ui.sel.i, uid)) { pvs('action', [ui.sel.i, uid]); ui.sel = null; ui.hint = ''; } else ui.hint = s.err || 'Esa acción no va sobre una tropa tuya.'; return render(); }
       if (s.shopOpen) return;
       if (ui.sel && ui.sel.k === 'mine' && ui.sel.uid === uid) { ui.sel = null; ui.hint = ''; return render(); }
       ui.sel = { k: 'mine', uid: uid }; ui.hint = 'Ahora pulsa la tropa rival a la que atacará.'; return render();
     }
     if (act === 'foe') {
       var fu = +el.dataset.cuid;
-      if (ui.sel && ui.sel.k === 'act') { if (E.playAction(s, 0, ui.sel.i, fu)) { pvs('action', [ui.sel.i, fu]); ui.sel = null; ui.hint = ''; } else ui.hint = s.err || 'Esa acción no va sobre una tropa rival.'; return render(); }
+      if (ui.sel && ui.sel.k === 'act') { if (playA(ui.sel.i, fu)) { pvs('action', [ui.sel.i, fu]); ui.sel = null; ui.hint = ''; } else ui.hint = s.err || 'Esa acción no va sobre una tropa rival.'; return render(); }
       if (ui.sel && ui.sel.k === 'mine') { E.setTarget(s, 0, ui.sel.uid, fu); pvs('target', [ui.sel.uid, fu]); ui.hint = ''; nextPending(s); return render(); }
     }
   });
@@ -2011,8 +2072,8 @@
       if (c.type === 'tropa') {
         var slotEl = t.closest('.slot.free'), onBoard = t.closest('#board'), idx = slotEl ? +slotEl.dataset.i : (onBoard ? P.mesa.slice(0, 4).indexOf(null) : -1);
         if (idx >= 0 && E.place(s, 0, drag.i, idx)) { ok = true; ui.landed = P.mesa[idx].uid; snd('place'); pvs('place', [drag.i, idx]); }
-      } else if (c.target === 'none') { if (t.closest('#board')) { ok = E.playAction(s, 0, drag.i, null); if (ok) pvs('action', [drag.i, null]); } }
-      else { var cd = t.closest('[data-cuid]'); if (cd && cd.dataset.side === (c.target === 'ally' ? '0' : '1')) { ok = E.playAction(s, 0, drag.i, +cd.dataset.cuid); if (ok) pvs('action', [drag.i, +cd.dataset.cuid]); } }
+      } else if (c.target === 'none') { if (t.closest('#board')) { ok = playA(drag.i, null); if (ok) pvs('action', [drag.i, null]); } }
+      else { var cd = t.closest('[data-cuid]'); if (cd && cd.dataset.side === (c.target === 'ally' ? '0' : '1')) { ok = playA(drag.i, +cd.dataset.cuid); if (ok) pvs('action', [drag.i, +cd.dataset.cuid]); } }
     }
     ui.sel = null; ui.hint = ok ? '' : (s.err && c && c.type !== 'tropa' ? s.err : 'No se pudo soltar ahí.');
     if (ok && !s.shopOpen) nextPending(s);

@@ -1,6 +1,8 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-02', tag: 'Cambio', title: 'Tienda de efectos por apartados',
+      items: ['La pestaña Efectos de la tienda se divide en apartados laterales, como en Colección: Despliegues, Fundas y Victoria y derrota. Así se ve solo lo que buscas y es más fácil comparar y comprar.'] },
     { date: '2026-11-02', tag: 'Novedad', title: 'Efectos de victoria y derrota: pack Eclipse',
       items: ['Colección → Efectos estrena el apartado «Victoria y derrota». Cada pack incluye las dos animaciones, la de victoria y la de derrota, con su banner y efectos propios. Por defecto llevas el de siempre (trofeo y confeti, o corazón roto).',
         'En la tienda (pestaña Efectos) llega el primero: «Eclipse» (50 monedas). Victoria: banner de oro con rayos de sol que giran, ondas de luz y lluvia dorada. Derrota: banner carmesí que tiembla y se agrieta, con ceniza y brasas flotando.',

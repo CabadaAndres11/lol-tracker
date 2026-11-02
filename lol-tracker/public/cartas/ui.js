@@ -438,9 +438,13 @@
       '<div class="panel"><h2>Tu colección</h2><div class="coinbig">' + a.owned.length + ' / ' + total + '</div><div class="meter colm"><i class="on" style="width:' + Math.round(a.owned.length / total * 100) + '%"></i></div><p class="mut">Solo puedes usar en tus mazos las cartas que tienes.</p><button class="btn sec" data-act="nav" data-to="deck">' + ic('cartas') + ' Ir a la colección</button></div></div>';
   }
   function shopFx() {
-    return '<div class="panel"><h2>' + ic('brillo') + ' Efectos · Despliegues</h2><p class="mut">Cambian cómo aparecen tus cartas en la mesa. Pruébalos antes de comprar; una vez tuyos, los equipas en Colección → Efectos.</p>' + fxDemo() + '<div class="fxlist">' + fxItems('shop', 'deploy') + '</div></div>' +
-      '<div class="panel"><h2>' + ic('cartas') + ' Efectos · Fundas</h2><p class="mut">Cambian el borde de tus cartas en la partida y el reverso al abrir sobres.</p>' + slvDemo() + '<div class="fxlist">' + fxItems('shop', 'sleeve') + '</div></div>' +
-      '<div class="panel"><h2>' + ic('trofeo') + ' Efectos · Victoria y derrota</h2><p class="mut">Cada pack trae la animación de victoria y la de derrota, con banner y efectos propios. Pruébalo antes de comprar.</p><div class="fxlist">' + fxItems('shop', 'finish') + '</div></div>' + finPrevHtml();
+    var sec = ui.shopFxSec === 'sleeve' || ui.shopFxSec === 'finish' ? ui.shopFxSec : 'deploy';
+    var T = [['deploy', 'Despliegues'], ['sleeve', 'Fundas'], ['finish', 'Victoria y derrota']];
+    var nav = '<nav class="fxnav">' + T.map(function (t) { return '<button class="' + (t[0] === sec ? 'on' : '') + '" data-act="shopfxsec" data-t="' + t[0] + '">' + t[1] + '</button>'; }).join('') + '</nav>', body;
+    if (sec === 'sleeve') body = '<h2 class="dedh">Fundas</h2><p class="mut colhint">Cambian el borde de tus cartas en la partida y el reverso al abrir sobres. Pruébalas antes de comprar; una vez tuyas, las equipas en Colección → Efectos.</p>' + slvDemo() + '<div class="fxlist">' + fxItems('shop', 'sleeve') + '</div>';
+    else if (sec === 'finish') body = '<h2 class="dedh">Victoria y derrota</h2><p class="mut colhint">Cada pack trae la animación de victoria y la de derrota, con banner y efectos propios. Pruébalo antes de comprar; una vez tuyo, lo equipas en Colección → Efectos.</p><div class="fxlist">' + fxItems('shop', 'finish') + '</div>' + finPrevHtml();
+    else body = '<h2 class="dedh">Despliegues</h2><p class="mut colhint">Cambian cómo aparecen tus cartas en la mesa. Pruébalos antes de comprar; una vez tuyos, los equipas en Colección → Efectos.</p>' + fxDemo() + '<div class="fxlist">' + fxItems('shop', 'deploy') + '</div>';
+    return '<div class="fxlayout">' + nav + '<div class="fxmain">' + body + '</div></div>';
   }
   function packsTab(a) {
     var can = a.coins >= a.packCost && !ui.pack;
@@ -1472,6 +1476,7 @@
     if (act === 'novtog') { e.stopPropagation(); ui.novView = ui.novView || {}; ui.novView[el.dataset.id] = !ui.novView[el.dataset.id]; var y0 = window.scrollY; renderDeck(); window.scrollTo(0, y0); return; }
     if (act === 'onlydeck') { ui.onlyDeck = el.checked; return render(); }
     if (act === 'coltab') { ui.colTab = el.dataset.t; ui.dedit = null; ui.msg = ''; ui.delAsk = null; window.scrollTo(0, 0); return render(); }
+    if (act === 'shopfxsec') { ui.shopFxSec = el.dataset.t; ui.slvPrev = null; return render(); }
     if (act === 'fxsec') { ui.fxSec = el.dataset.t; ui.slvPrev = null; return renderDeck(); }
     if (act === 'finprev') { ui.finPrev = { id: el.dataset.id, win: true }; return ui.screen === 'packs' ? render() : renderDeck(); }
     if (act === 'finflip') { if (ui.finPrev) ui.finPrev.win = !ui.finPrev.win; return ui.screen === 'packs' ? render() : renderDeck(); }

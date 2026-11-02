@@ -7,6 +7,7 @@
       items: ['Nueva sinergia «Gambling» (2 / 3 / 4 cartas distintas): ganas orbes por cada ronda en la que no recibes daño directo en tu vida. Cuantas más Gambling tengas, más orbes por ronda: 1, 2 o 3.',
         'Cuando recibes daño directo por primera vez, se abren todas las orbes con una ruleta 3D: cada una da +1/+1, +2/+2 o +3/+3 permanente a tus Gambling (en mesa y en mano), sin tope. A partir de ese momento ya no ganas más orbes.',
         'Lihone Correa, AitoRLG Koisito, Dashlight Correa y Petea Pokemaniaco pasan a tener también Gambling. Nuevas tropas: Mertens Gambler y Dashlight Gambler (sin ilustración por ahora).',
+        'Las orbes se ganan según la sinergia con la que empezaste el combate, aunque tus Gambling caigan durante la ronda.',
         'En la partida verás tus orbes acumuladas (y las del rival) junto a la vida, con un pequeño rebote cada vez que llega una nueva; al canjearlas pasan a «canjeadas».'] },
     { date: '2026-11-02', tag: 'Cambio', title: 'Foto de perfil más limpia',
       items: ['En Mi perfil, el panel de foto de perfil ya no está siempre abierto: aparece al pulsar tu icono (con un pequeño lápiz) y se cierra al elegir una foto o con el botón «Cerrar».'] },

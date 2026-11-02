@@ -967,7 +967,7 @@
         }
       });
       [0, 1].forEach(function (p) { // Gambling: ronda sin daño directo a tu vida = orbes
-        var P = s.p[p], g = gamState(P), hit = g.hit, t = tiers(P)['Gambling']; g.hit = false;
+        var P = s.p[p], g = gamState(P), hit = g.hit, t = (s.tiers && s.tiers[p] && s.tiers[p]['Gambling']) || tiers(P)['Gambling']; g.hit = false; // nivel con el que empezó el combate (aunque las Gambling hayan caído)
         if (!t || g.done || hit) return;
         var n = FX.gambling.orbs[t - 1]; g.orbs += n;
         fxFrame(s, p, 'gorb', 'Gambling', '+' + n + (n === 1 ? ' orbe' : ' orbes') + ' (' + g.orbs + ' acumuladas)', mesaTroops(P).filter(function (i) { return has(i, 'Gambling'); }).map(function (i) { return i.uid; }));

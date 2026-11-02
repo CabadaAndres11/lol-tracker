@@ -1,6 +1,8 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-02', tag: 'Corrección', title: 'Efectos de despliegue y probabilidades de la tienda',
+      items: ['Corregido un fallo introducido con las probabilidades de las cajas que rompía la tienda de la partida (se mostraba el cuadro de las cajas en lugar de las probabilidades de la tienda) y podía impedir que se vieran los efectos de despliegue al jugar.'] },
     { date: '2026-11-02', tag: 'Novedad', title: 'Nuevo despliegue: Perro mensajero',
       items: ['Nuevo efecto de despliegue «Perro mensajero» (30 monedas): un perro cruza la pantalla corriendo y arrastra la carta con una cuerda hasta su hueco; ahí la suelta y la carta se levanta de un salto con una onda de luz mientras el perro sigue su camino.',
         'Disponible en la tienda (Efectos → Despliegues) y se equipa en Colección → Efectos.'] },

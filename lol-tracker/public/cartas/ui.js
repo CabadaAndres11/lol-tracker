@@ -289,11 +289,11 @@
   function invTab() {
     var n = (ui.acct && ui.acct.boxes) || 0;
     return (ui.msg ? '<p class="err">' + esc(ui.msg) + '</p>' : '') + '<div class="invwrap"><div class="invbox' + (n ? '' : ' empty') + '">' + boxImg() + (n ? '<span class="invn">×' + n + '</span>' : '') + '<button class="bxinfo" data-act="boxinfo" aria-label="Probabilidades de la caja" title="Probabilidades">i</button></div><div class="invinfo"><h2 class="dedh">Cajas</h2>' +
-      (ui.boxInfo ? oddsHtml() : '') + '<p class="mut colhint">Dentro de cada caja hay una carta que no tengas, una skin o un efecto. Nunca te tocará algo repetido hasta que lo tengas todo.</p>' +
+      (ui.boxInfo ? boxOddsHtml() : '') + '<p class="mut colhint">Dentro de cada caja hay una carta que no tengas, una skin o un efecto. Nunca te tocará algo repetido hasta que lo tengas todo.</p>' +
       (n ? '<button class="btn cta big" data-act="boxopen">' + ic('caja') + ' Abrir caja</button><p class="mut">Tienes ' + n + (n === 1 ? ' caja' : ' cajas') + ' sin abrir.</p>' :
         '<p class="mut">No tienes cajas ahora mismo. Consíguelas completando misiones y subiendo de rango.</p><div class="btnrow"><button class="btn sec" data-act="nav" data-to="missions">' + ic('mision') + ' Misiones</button><button class="btn sec" data-act="nav" data-to="ladder">' + ic('trofeo') + ' Clasificación</button></div>') + '</div></div>';
   }
-  function oddsHtml() {
+  function boxOddsHtml() {
     var a = ui.acct || {}, W = { 'Común': 50, 'Rara': 30, 'Épica': 15, 'Legendaria': 5 };
     var cards = D.cards.filter(function (c) { return !ui.ownedSet[c.id]; });
     var skins = (window.CARTAS_SKINS || []).filter(function (k) { return (a.skins || []).indexOf(k.id) < 0; });

@@ -89,7 +89,9 @@
     estrella: '<path d="M32 8l7.6 15.6 17.2 2.4-12.5 12 3 17L32 46.6 16.7 55l3-17L7.2 26l17.2-2.4z"/>',
     avance: '<path d="M12 14l17 18-17 18M34 14l17 18-17 18"/>',
     brillo: '<path d="M32 6c2 14 6 20 20 26-14 6-18 12-20 26-2-14-6-20-20-26 14-6 18-12 20-26z"/>',
-    bandera: '<path d="M16 58V8"/><path d="M16 10h34l-8 12 8 12H16"/>'
+    bandera: '<path d="M16 58V8"/><path d="M16 10h34l-8 12 8 12H16"/>',
+    caja: '<path d="M32 7L55 18v28L32 57 9 46V18z"/><path d="M9 18l23 11 23-11M32 29v28"/>',
+    mision: '<circle cx="32" cy="32" r="22"/><circle cx="32" cy="32" r="11"/><circle cx="32" cy="32" r="2.5"/><path d="M32 4v9M32 51v9M4 32h9M51 32h9"/>'
   };
   Object.keys(LN).forEach(function (k) { I[k] = L(LN[k]); });
   // alias: nombres con varios usos

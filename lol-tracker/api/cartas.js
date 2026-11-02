@@ -5,6 +5,7 @@ const crypto = require('crypto');
 const { redisConfig, redis } = require('./_redis');
 const DATA = require('../public/cartas/cards.js');
 const SKINS = require('../public/cartas/skins.js');
+const MS = require('../public/cartas/missions.js');
 const SKIN_BY_ID = {}; SKINS.forEach((s) => { SKIN_BY_ID[s.id] = s; });
 
 const START_COINS = 150;
@@ -61,9 +62,53 @@ const FX_DEFAULT = { deploy: 'default', sleeve: 'sin', finish: 'default' };
 const FX_DEPLOY = Object.keys(FX_PRICE);
 const fxOwned = (u) => ['default', 'sin', ...((u.fxOwned || []).filter((x) => FX_DEPLOY.includes(x) && FX_PRICE[x] > 0))];
 const fxSel = (u, kind) => { const id = (u.fx || {})[kind]; return id && FX_KINDS[kind][id] !== undefined && fxOwned(u).includes(id) ? id : FX_DEFAULT[kind]; };
+// ---------- Misiones y cajas ----------
+// Registra una partida válida en las estadísticas de la cuenta. kind: 'ia' | 'pvp' | 'v4'
+function recordGame(u, o) {
+  const st = (u.st = u.st || {});
+  st.games = (st.games || 0) + 1;
+  if (o.won) { st.wins = (st.wins || 0) + 1; st.streak = (st.streak || 0) + 1; st.bestStreak = Math.max(st.bestStreak || 0, st.streak); } else st.streak = 0;
+  st.cards = (st.cards || 0) + Math.max(0, Math.min(60, Number(o.cards) || 0));
+  if (o.mode === 'revive') st.revive = (st.revive || 0) + 1;
+  if (o.kind === 'pvp') st.mp = (st.mp || 0) + 1;
+  if (o.kind === 'v4') st.v4 = (st.v4 || 0) + 1;
+}
+function missionStats(u) {
+  const st = u.st || {};
+  const fxCount = fxOwned(u).filter((x) => FX_PRICE[x] > 0).length;
+  return {
+    games: st.games || 0, wins: st.wins || 0, bestStreak: st.bestStreak || 0, cards: st.cards || 0, revive: st.revive || 0, mp: st.mp || 0, v4: st.v4 || 0, packs: st.packs || 0,
+    lv3: Object.keys(u.dups || {}).filter((id) => (u.dups[id] || 0) >= 3).length, owned: (u.owned || []).length, skins: (u.skins || []).length, fx: fxCount,
+  };
+}
+const rankReached = (u) => Math.max(u.ptsMax || 0, u.pts || 0);
+// Caja: una carta, una skin o un efecto que aún no tengas; si lo tienes todo, una carta repetida.
+function rollBox(u) {
+  const cards = ALL.filter((c) => !(u.owned || []).includes(c.id));
+  const skins = SKINS.filter((s) => !(u.skins || []).includes(s.id));
+  const fxs = FX_DEPLOY.filter((id) => FX_PRICE[id] > 0 && !fxOwned(u).includes(id));
+  const pools = [['card', cards, 5], ['skin', skins, 3], ['fx', fxs, 2]].filter((p) => p[1].length);
+  if (!pools.length) { // lo tiene todo: carta repetida
+    const c = ALL[crypto.randomInt(0, ALL.length)];
+    u.dups = u.dups || {}; const before = levelOf(u, c.id); u.dups[c.id] = (u.dups[c.id] || 0) + 1;
+    return { kind: 'card', id: c.id, isNew: false, dup: true, lvl: levelOf(u, c.id), lvlUp: levelOf(u, c.id) > before };
+  }
+  let r = crypto.randomInt(0, pools.reduce((a, p) => a + p[2], 0)), pool = pools[0];
+  for (const p of pools) { if (r < p[2]) { pool = p; break; } r -= p[2]; }
+  const [kind, list] = pool;
+  if (kind === 'card') { // más probables las comunes
+    const tot = list.reduce((a, c) => a + WEIGHTS[c.rarity], 0); let x = crypto.randomInt(0, tot), pick = list[0];
+    for (const c of list) { if (x < WEIGHTS[c.rarity]) { pick = c; break; } x -= WEIGHTS[c.rarity]; }
+    u.owned.push(pick.id); return { kind, id: pick.id, isNew: true };
+  }
+  if (kind === 'skin') { const pick = list[crypto.randomInt(0, list.length)]; u.skins = u.skins || []; u.skins.push(pick.id); return { kind, id: pick.id, isNew: true }; }
+  const id = list[crypto.randomInt(0, list.length)]; u.fxOwned = [...(u.fxOwned || []), id];
+  const fk = Object.keys(FX_KINDS).find((k) => FX_KINDS[k][id] !== undefined);
+  return { kind: 'fx', id, fxKind: fk, isNew: true };
+}
 function publicUser(u) {
   return {
-    name: u.name, pts: u.pts || 0, coins: u.coins, owned: u.owned, dups: u.dups || {}, skins: u.skins || [], skinSel: u.skinSel || {}, decks: u.decks || null, avatar: u.avatar || '', fx: { deploy: fxSel(u, 'deploy'), sleeve: fxSel(u, 'sleeve'), finish: fxSel(u, 'finish') }, fxOwned: fxOwned(u),
+    name: u.name, pts: u.pts || 0, coins: u.coins, owned: u.owned, dups: u.dups || {}, skins: u.skins || [], skinSel: u.skinSel || {}, decks: u.decks || null, avatar: u.avatar || '', fx: { deploy: fxSel(u, 'deploy'), sleeve: fxSel(u, 'sleeve'), finish: fxSel(u, 'finish') }, fxOwned: fxOwned(u), boxes: u.boxes || 0, ms: { stats: missionStats(u), claimed: u.msClaimed || [] }, rkClaimed: u.rkClaimed || [], ptsMax: rankReached(u),
     dailyAvailable: u.lastDaily !== today(),
     gamesToday: u.rewardDay === today() ? u.rewardCount : 0,
     maxGamesToday: MAX_GAME_REWARDS_PER_DAY,
@@ -100,6 +145,7 @@ const BOT_COINS = { played: 10, place: [0, 20, 10, 3, 0] }; // Versus de 4 contr
 async function addPts(cfg, u, delta) {
   const before = u.pts || 0;
   u.pts = Math.max(0, before + delta);
+  u.ptsMax = Math.max(u.ptsMax || 0, u.pts);
   if (!isAdmin(u)) await redis(cfg, ['HSET', LADDER_KEY, u.name, String(u.pts)]);
   return u.pts - before;
 }
@@ -189,6 +235,7 @@ async function payPvp(cfg, g) {
     const u = await loadUser(cfg, g.names[seat]); if (!u) continue;
     if (u.rewardDay !== today()) { u.rewardDay = today(); u.rewardCount = 0; }
     const won = s.winner === seat;
+    if (valid) recordGame(u, { won: won && g.ab !== seat, kind: 'pvp', mode: s.mode, cards: (s.p[seat] || {}).used });
     let gained = 0;
     if (valid && g.ab !== seat && u.rewardCount < MAX_GAME_REWARDS_PER_DAY) {
       gained = PVP_COINS.played + (won ? PVP_COINS.win : 0); u.rewardCount++; u.coins += gained;
@@ -357,6 +404,7 @@ async function payV4(cfg, g) {
     const u = await loadUser(cfg, g.names[seat]); if (!u) continue;
     if (u.rewardDay !== today()) { u.rewardDay = today(); u.rewardCount = 0; }
     const abandoned = (T.ab || []).includes(seat);
+    if (valid) recordGame(u, { won: !abandoned && T.place[seat] === 1, kind: 'v4', mode: T.mode, cards: (T.p[seat] || {}).used });
     let gained = 0;
     if (valid && !abandoned && u.rewardCount < MAX_GAME_REWARDS_PER_DAY) {
       gained = g.bots ? BOT_COINS.played + (BOT_COINS.place[T.place[seat]] || 0) : PVP_COINS.played + (V4.PLACE_BONUS[T.place[seat]] || 0); u.rewardCount++; u.coins += gained;
@@ -705,10 +753,38 @@ module.exports = async function handler(req, res) {
         if (!isNew) copies = 1 + u.dups[id]; else lvl = 1;
         return { id, isNew, dupCoins: 0, lvl, lvlUp, copies };
       });
+      u.st = u.st || {}; u.st.packs = (u.st.packs || 0) + 1;
       await saveUser(cfg, u);
       res.status(200).json({ cards, user: publicUser(u) }); return;
     }
 
+    if (act === 'missionClaim') { // recoger la caja de una misión completada
+      const m = MS.MISSIONS.find((x) => x.id === String(body.id || ''));
+      if (!m) { res.status(400).json({ error: 'Esa misión no existe.' }); return; }
+      u.msClaimed = u.msClaimed || [];
+      if (u.msClaimed.includes(m.id)) { res.status(409).json({ error: 'Ya has recogido esa caja.', user: publicUser(u) }); return; }
+      if ((missionStats(u)[m.stat] || 0) < m.goal) { res.status(403).json({ error: 'Aún no has completado esa misión.', user: publicUser(u) }); return; }
+      u.msClaimed.push(m.id); u.boxes = (u.boxes || 0) + 1;
+      await saveUser(cfg, u);
+      res.status(200).json({ user: publicUser(u) }); return;
+    }
+    if (act === 'rankClaim') { // recoger la caja de un rango alcanzado
+      const rk = MS.RANK_BOXES.find((x) => x.id === String(body.id || ''));
+      if (!rk) { res.status(400).json({ error: 'Ese rango no existe.' }); return; }
+      u.rkClaimed = u.rkClaimed || [];
+      if (u.rkClaimed.includes(rk.id)) { res.status(409).json({ error: 'Ya has recogido esa caja.', user: publicUser(u) }); return; }
+      if (rankReached(u) < rk.min) { res.status(403).json({ error: 'Aún no has alcanzado ese rango.', user: publicUser(u) }); return; }
+      u.rkClaimed.push(rk.id); u.boxes = (u.boxes || 0) + 1;
+      await saveUser(cfg, u);
+      res.status(200).json({ user: publicUser(u) }); return;
+    }
+    if (act === 'boxOpen') { // abrir una caja del inventario
+      if ((u.boxes || 0) < 1) { res.status(409).json({ error: 'No tienes cajas.', user: publicUser(u) }); return; }
+      u.boxes -= 1;
+      const reward = rollBox(u);
+      await saveUser(cfg, u);
+      res.status(200).json({ reward, user: publicUser(u) }); return;
+    }
     if (act === 'gameStart') { u.startedAt = Date.now(); await saveUser(cfg, u); res.status(200).json({ ok: true }); return; }
 
     if (act === 'gameFinish') {
@@ -717,6 +793,7 @@ module.exports = async function handler(req, res) {
       const valid = u.startedAt && secs >= MIN_GAME_SECONDS && rounds >= MIN_GAME_ROUNDS;
       u.startedAt = 0;
       if (u.rewardDay !== today()) { u.rewardDay = today(); u.rewardCount = 0; }
+      if (valid) recordGame(u, { won: !!body.won, kind: 'ia', mode: body.mode === 'revive' ? 'revive' : '', cards: body.cards });
       let gained = 0;
       if (valid && u.rewardCount < MAX_GAME_REWARDS_PER_DAY) {
         gained = GAME_COINS.played + (body.won ? GAME_COINS.win : 0);

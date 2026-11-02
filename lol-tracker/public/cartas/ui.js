@@ -199,7 +199,7 @@
   }
 
   // ---------- Navegación ----------
-  var NAV = [['home', 'casa', 'Inicio'], ['play', 'espadas', 'Jugar'], ['deck', 'cartas', 'Colección'], ['packs', 'tienda', 'Tienda'], ['ladder', 'trofeo', 'Clasificación']];
+  var NAV = [['home', 'casa', 'Inicio'], ['play', 'espadas', 'Jugar'], ['deck', 'cartas', 'Colección'], ['packs', 'tienda', 'Tienda'], ['missions', 'mision', 'Misiones'], ['ladder', 'trofeo', 'Clasificación']];
   function artOk(id) { return !!id && (!!ARTS[id] || (window.CARTAS_SKINS || []).some(function (k) { return k.id === id; })); }
   function avatarHtml(cls) {
     var id = ui.acct && ui.acct.avatar, ok = artOk(id);
@@ -208,7 +208,7 @@
   function navHtml(cur) {
     var home = cur === 'home';
     var acct = ui.acct ? '<button class="navb coinpill" data-act="nav" data-to="packs" title="Tus monedas">' + ic('moneda') + ' ' + ui.acct.coins + '</button><button class="navb avtb' + (cur === 'profile' ? ' on' : '') + '" data-act="nav" data-to="profile" title="Tu perfil">' + avatarHtml('sm') + '</button><span class="acctw"><button class="navb who" data-act="acctmenu" title="Tu cuenta">' + esc(ui.acct.name) + ' ▾</button><div class="acctmenu"><div class="am-name">Sesión de <b>' + esc(ui.acct.name) + '</b></div><button class="am-prof" data-act="nav" data-to="profile">' + ic('usuario') + ' Mi perfil</button><button data-act="logout">' + ic('puerta') + ' Cerrar sesión</button></div></span>' : '';
-    return '<nav class="nav' + (home ? ' navhome' : '') + '">' + (home ? '<span class="navlogo"><img src="/cartas/logo-icon.png" alt="">TCG Arena</span>' : NAV.map(function (n) { return '<button class="navb' + (n[0] === cur ? ' on' : '') + '" data-act="nav" data-to="' + n[0] + '">' + ic(n[1]) + ' ' + n[2] + '</button>'; }).join('')) +
+    return '<nav class="nav' + (home ? ' navhome' : '') + '">' + (home ? '<span class="navlogo"><img src="/cartas/logo-icon.png" alt="">TCG Arena</span>' : NAV.map(function (n) { var bd = n[0] === 'missions' && claimableCount() ? '<i class="nbadge">' + claimableCount() + '</i>' : ''; return '<button class="navb' + (n[0] === cur ? ' on' : '') + '" data-act="nav" data-to="' + n[0] + '">' + ic(n[1]) + ' ' + n[2] + bd + '</button>'; }).join('')) +
       '<span class="navsp"></span>' + acct + '</nav><a class="hubback" href="/" title="Volver al inicio">← Juegos</a>';
   }
   function oddsHtml(s) {
@@ -254,6 +254,63 @@
     var ok = artOk(id);
     return '<span class="avt rkav' + (ok ? ' has' : '') + '"' + (ok ? ' style="background-image:url(/cartas/art/' + id + '.webp)"' : '') + '>' + (ok ? '' : ic('usuario')) + '</span>';
   }
+  // ---------- Misiones, cajas e inventario ----------
+  var MSN = window.CARTAS_MISSIONS || { MISSIONS: [], RANK_BOXES: [] };
+  function msProg(m) { var st = (ui.acct && ui.acct.ms && ui.acct.ms.stats) || {}; return Math.min(m.goal, st[m.stat] || 0); }
+  function msDone(m) { return msProg(m) >= m.goal; }
+  function msClaimed(m) { return ((ui.acct && ui.acct.ms && ui.acct.ms.claimed) || []).indexOf(m.id) >= 0; }
+  function rkReached(rb) { return ui.acct && (ui.acct.ptsMax || ui.acct.pts || 0) >= rb.min; }
+  function rkClaimed(rb) { return ((ui.acct && ui.acct.rkClaimed) || []).indexOf(rb.id) >= 0; }
+  function claimableCount() {
+    if (!ui.acct) return 0;
+    return MSN.MISSIONS.filter(function (m) { return msDone(m) && !msClaimed(m); }).length + MSN.RANK_BOXES.filter(function (r) { return rkReached(r) && !rkClaimed(r); }).length;
+  }
+  function boxImg(cls) { return '<img class="bximg ' + (cls || '') + '" src="/cartas/img/box.webp" alt="Caja">'; }
+  function rankBoxBtn(r) {
+    var rb = MSN.RANK_BOXES.filter(function (x) { return x.min === r.min; })[0]; if (!rb) return '<span></span>';
+    if (rkClaimed(rb)) return '<span class="rkboxd" title="Caja recogida">' + ic('check') + ' Caja</span>';
+    if (rkReached(rb)) return '<button class="rkbox" data-act="rkclaim" data-id="' + rb.id + '">' + ic('caja') + ' Recoger</button>';
+    return '<span class="rkboxl" title="Alcanza este rango para ganar una caja">' + ic('caja') + '</span>';
+  }
+  function refreshAcct(then) { api('me').then(function (r) { if (r.ok) { setAcct(r.data.user); if (then) then(); } }); }
+  function renderMissions() {
+    var a = ui.acct, all = MSN.MISSIONS.slice().sort(function (x, y) {
+      var kx = msClaimed(x) ? 2 : msDone(x) ? 0 : 1, ky = msClaimed(y) ? 2 : msDone(y) ? 0 : 1; return kx - ky;
+    });
+    var done = MSN.MISSIONS.filter(msClaimed).length;
+    var items = all.map(function (m) {
+      var p = msProg(m), cl = msClaimed(m), ok = msDone(m), btn = cl ? '<span class="msd">' + ic('check') + ' Recogida</span>' : ok ? '<button class="btn sm cta" data-act="msclaim" data-id="' + m.id + '">' + ic('caja') + ' Recoger caja</button>' : '<span class="msbox" title="Recompensa: una caja">' + ic('caja') + '</span>';
+      return '<li class="msn' + (cl ? ' done' : ok ? ' ready' : '') + '"><div class="msi">' + ic('mision') + '</div><div class="msb"><b>' + esc(m.t) + '</b><span class="mut">' + esc(m.d) + '</span><div class="meter msm"><i class="on" style="width:' + Math.round(p / m.goal * 100) + '%"></i></div></div><span class="msp">' + p + ' / ' + m.goal + '</span>' + btn + '</li>';
+    }).join('');
+    app.innerHTML = head('missions', ic('mision') + ' Misiones') + (ui.msg ? '<p class="err">' + esc(ui.msg) + '</p>' : '') +
+      '<div class="panel msbar">' + boxImg('sm') + '<div><h2>' + (a.boxes || 0) + ' ' + ((a.boxes || 0) === 1 ? 'caja' : 'cajas') + ' en tu inventario</h2><p class="mut">Cada misión te da una caja con una carta, una skin o un efecto que aún no tengas. Las cajas no se abren al recogerlas: las guardas en tu inventario. Misiones completadas: ' + done + ' / ' + MSN.MISSIONS.length + '.</p></div><button class="btn sec" data-act="goinv">' + ic('cartas') + ' Ir al inventario</button></div>' +
+      '<ul class="mslist">' + items + '</ul></div>';
+  }
+  function invTab() {
+    var n = (ui.acct && ui.acct.boxes) || 0;
+    return (ui.msg ? '<p class="err">' + esc(ui.msg) + '</p>' : '') + '<div class="invwrap"><div class="invbox' + (n ? '' : ' empty') + '">' + boxImg() + (n ? '<span class="invn">×' + n + '</span>' : '') + '</div><div class="invinfo"><h2 class="dedh">Cajas</h2>' +
+      '<p class="mut colhint">Dentro de cada caja hay una carta que no tengas, una skin o un efecto. Nunca te tocará algo repetido hasta que lo tengas todo.</p>' +
+      (n ? '<button class="btn cta big" data-act="boxopen">' + ic('caja') + ' Abrir caja</button><p class="mut">Tienes ' + n + (n === 1 ? ' caja' : ' cajas') + ' sin abrir.</p>' :
+        '<p class="mut">No tienes cajas ahora mismo. Consíguelas completando misiones y subiendo de rango.</p><div class="btnrow"><button class="btn sec" data-act="nav" data-to="missions">' + ic('mision') + ' Misiones</button><button class="btn sec" data-act="nav" data-to="ladder">' + ic('trofeo') + ' Clasificación</button></div>') + '</div></div>';
+  }
+  function rewardInfo(r) {
+    if (r.kind === 'card') { var c = CARD[r.id]; return { best: c.rarity, label: r.dup ? '¡Carta repetida!' : '¡Nueva carta!', name: c.name, sub: r.dup ? (r.lvUp ? 'Sube a nivel ' + r.lvl : 'Ya lo tenías todo: +1 copia') : c.rarity, visual: cardHtml(c, { lv: r.dup ? r.lvl : 1, skin: '' }) }; }
+    if (r.kind === 'skin') {
+      var sk = (window.CARTAS_SKINS || []).filter(function (k) { return k.id === r.id; })[0] || {}, bc = CARD[sk.card];
+      return { best: 'Épica', label: '¡Nueva skin!', name: sk.name || r.id, sub: bc ? 'Para ' + bc.name + (ui.ownedSet && ui.ownedSet[sk.card] ? '' : ' (aún no tienes la carta)') : '', visual: bc ? cardHtml(bc, { lv: 1, skin: sk.id }) : '' };
+    }
+    var lst = r.fxKind === 'sleeve' ? SLEEVE_LIST : r.fxKind === 'finish' ? FIN_LIST : DEPLOY_LIST, e = lst.filter(function (x) { return x.id === r.id; })[0] || { name: r.id, desc: '' };
+    var kl = r.fxKind === 'sleeve' ? 'Funda' : r.fxKind === 'finish' ? 'Victoria y derrota' : 'Despliegue', icn = r.fxKind === 'sleeve' ? 'cartas' : r.fxKind === 'finish' ? 'trofeo' : 'brillo';
+    return { best: 'Rara', label: '¡Nuevo efecto!', name: e.name, sub: kl + ' · equípalo en Colección → Efectos', visual: '<div class="bxfx">' + ic(icn) + '<b>' + esc(e.name) + '</b><span>' + esc(kl) + '</span></div>' };
+  }
+  function boxHtml(cls) { return '<div class="bxb ' + cls + '"><div class="bxglow"></div><div class="bxrays"></div><div class="bxbody"></div><div class="bxlid"></div></div>'; }
+  function boxOverlay() {
+    var b = ui.box; if (!b) return '';
+    if (b.stage === 'shake') return '<div class="packov boxov best-Común">' + boxHtml('shake') + '</div>';
+    var info = rewardInfo(b.reward);
+    if (b.stage === 'burst') return '<div class="packov boxov best-' + info.best + (info.best === 'Legendaria' ? ' rainbow' : '') + '">' + boxHtml('open') + pkFx(info.best) + '</div>';
+    return '<div class="packov boxov best-' + info.best + '" data-act="boxclose"><div class="bxrev"><p class="bxt">' + info.label + '</p><div class="bxvis">' + info.visual + '</div><p class="bxn">' + esc(info.name) + '</p><p class="mut bxs">' + esc(info.sub) + '</p><p class="pmsg pulse">Haz clic para continuar</p></div></div>';
+  }
   function renderLadder() {
     ensureLadder();
     var L = ui.ladder, me = ui.acct ? ui.acct.name.toLowerCase() : '';
@@ -262,14 +319,14 @@
       var rk = rankOf(r.pts);
       return '<li class="rkrow' + (r.name.toLowerCase() === me ? ' me' : '') + (k < 3 ? ' top' + (k + 1) : '') + '" style="--rc:' + RANKS[rk].c + '"><span class="rkpos">' + (k + 1) + '</span>' + rkAv(r.avatar) + '<b class="rkname">' + esc(r.name) + '</b><span class="rkrank">' + rkEmblem(rk) + '<i>' + RANKS[rk].n + '</i></span><span class="rkpts">' + r.pts + '</span></li>';
     }).join('') : '<li class="mut rkempty">' + (L ? 'Aún no hay jugadores.' : 'Cargando…') + '</li>';
-    var tiers = RANKS.slice().reverse().map(function (r) { var i = RANKS.indexOf(r); return '<li class="' + (i === mk ? 'cur' : '') + '" style="--rc:' + r.c + '">' + rkEmblem(i) + '<b>' + r.n + '</b><span>' + r.min + (RANKS[i + 1] ? '–' + (RANKS[i + 1].min - 1) : '+') + '</span></li>'; }).join('');
+    var tiers = RANKS.slice().reverse().map(function (r) { var i = RANKS.indexOf(r); return '<li class="' + (i === mk ? 'cur' : '') + '" style="--rc:' + r.c + '">' + rkEmblem(i) + '<b>' + r.n + '</b><span>' + r.min + (RANKS[i + 1] ? '–' + (RANKS[i + 1].min - 1) : '+') + '</span>' + rankBoxBtn(r) + '</li>'; }).join('');
     app.innerHTML = head('ladder', '' + ic('trofeo') + ' Clasificación') +
       '<div class="rkwrap"><div class="rkmain"><div class="rkhead"><div><span class="rkk">Temporada de lanzamiento</span><h2>Mejores jugadores</h2></div><span class="rkcol">Top 10</span></div>' +
       '<div class="rkcolh"><span>#</span><span>Jugador</span><span>Rango</span><span>Puntos</span></div><ol class="rklist">' + rows + '</ol>' +
       '<p class="mut rknote">Puntúan las partidas contra otros jugadores: 1 contra 1 (+20 / -20) y Versus de 4 (+40 / +20 / -20 / -40 según tu puesto). Aparecen todas las cuentas, hayan jugado o no.</p></div>' +
       '<aside class="rkside" style="--rc:' + mr.c + '"><div class="rkbanner">' + rkEmblem(mk, true) + '<span class="rkpl">' + (L && L.pos ? 'Clasificación: ' + L.pos + (L.total ? ' de ' + L.total : '') : 'Sin clasificar') + '</span><b class="rkrn">' + mr.n + '</b><span class="rkpp">' + myPts + ' PL</span>' +
       (nx ? '<div class="meter rkm"><i class="on" style="width:' + Math.round((myPts - mr.min) / (nx.min - mr.min) * 100) + '%"></i></div><span class="rknx">' + (nx.min - myPts) + ' puntos para ' + nx.n + '</span>' : '<span class="rknx">Rango máximo</span>') + '</div>' +
-      '<ul class="rktiers">' + tiers + '</ul></aside></div></div>';
+      '<p class="mut rkboxnote">' + ic('caja') + ' Cada rango, desde Bronce, te da una caja. Recógela aquí y ábrela en Colección → Inventario.</p><ul class="rktiers">' + tiers + '</ul></aside></div></div>';
   }
   // Ilustraciones de una noticia: las indicadas (art) o las cartas que se nombran en el texto; si no hay, el logo.
   function newsArts(n) {
@@ -312,6 +369,7 @@
       '<div class="ricons">' + [
         ['deck', ic('cartas'), 'Colección', ui.acct.owned.length + ' cartas'],
         ['packs', ic('tienda'), 'Tienda', (ui.acct ? ui.acct.coins : 0) + ' monedas'],
+        ['missions', ic('mision'), 'Misiones', claimableCount() ? claimableCount() + ' por recoger' : 'Gana cajas'],
         ['ladder', ic('trofeo'), 'Clasificación', ui.acct.pts + ' puntos'],
         ['profile', ic('usuario'), 'Perfil', 'Foto y cuenta'],
       ].map(function (m) { return '<button class="ricon" data-act="nav" data-to="' + m[0] + '"><span class="rii">' + m[1] + '</span><b>' + m[2] + '</b><span class="mut">' + m[3] + '</span></button>'; }).join('') + '</div>' + homeNews() + '</div>';
@@ -567,7 +625,7 @@
   function deckTile(sl, i, attrs, cls) {
     return '<button class="dkt' + (cls || '') + '" ' + attrs + '><span class="dkc"' + coverStyle(sl) + '>' + (deckCoverId(sl) ? '' : ic('cartas')) + '</span><b>' + esc(sl.name) + '</b><span class="dks">' + sl.ids.length + ' cartas · ' + E.deckSize(sl.ids) + '/' + CFG.deckBudget + ' espacio</span></button>';
   }
-  var COLTABS = [['cards', 'Cartas'], ['decks', 'Mazos'], ['skins', 'Skins'], ['fx', 'Efectos']];
+  var COLTABS = [['cards', 'Cartas'], ['decks', 'Mazos'], ['skins', 'Skins'], ['fx', 'Efectos'], ['inv', 'Inventario']];
   function colSummary(n, total, label) {
     return '<div class="colsum"><div class="colring"><b>' + n + '</b><span>/ ' + total + '</span></div><span class="mut">' + label + '</span></div>';
   }
@@ -645,8 +703,8 @@
   function renderDeck() {
     var tab = ui.dedit ? 'decks' : (ui.colTab || 'cards');
     var h = head('deck', '' + ic('cartas') + ' Colección') + '<div class="shtabs">' + COLTABS.map(function (t) { return '<button class="' + (t[0] === tab ? 'on' : '') + '" data-act="coltab" data-t="' + t[0] + '">' + t[1] + '</button>'; }).join('') + '</div>';
-    h += '<div class="shbody">' + (tab === 'decks' ? (ui.dedit ? deckEditor() : decksTab()) : tab === 'skins' ? skinsTab() : tab === 'fx' ? effectsTab() : cardsTab()) + '</div></div>';
-    app.innerHTML = h;
+    h += '<div class="shbody">' + (tab === 'decks' ? (ui.dedit ? deckEditor() : decksTab()) : tab === 'skins' ? skinsTab() : tab === 'fx' ? effectsTab() : tab === 'inv' ? invTab() : cardsTab()) + '</div></div>';
+    app.innerHTML = h + (tab === 'inv' ? boxOverlay() : '');
   }
   function pickHtml() {
     var tiles = [0, 1, 2].map(function (i) {
@@ -944,7 +1002,7 @@
       if (!s.rep && PV.on) s.rep = 1;
       if (!s.rep) {
         s.rep = 1; ui.reward = null;
-        api('gameFinish', { won: win, rounds: s.round }).then(function (r) {
+        api('gameFinish', { won: win, rounds: s.round, cards: s.p[0].used || 0, mode: s.mode || '' }).then(function (r) {
           ui.reward = r.ok ? r.data : { gained: 0, err: 1 };
           if (r.ok) setAcct(r.data.user);
           if (ui.s === s && ui.screen === 'game' && s.phase === 'over' && !ui.playing) render();
@@ -1240,9 +1298,9 @@
   window.addEventListener('resize', function () { var o = document.querySelector('#board svg.arrows'); if (o) o.remove(); drawArrows(); });
 
   // ---------- Navegación por URL (#/mazo, #/tienda…): al recargar se vuelve a la misma sección ----------
-  var ROUTES = { home: 'inicio', modes: 'jugar', pvp: 'jugar', game: 'jugar', deck: 'coleccion', packs: 'tienda', profile: 'perfil', ladder: 'clasificacion' };
-  var ROUTE_SCREEN = { inicio: 'home', jugar: 'modes', coleccion: 'deck', mazo: 'deck', tienda: 'packs', perfil: 'profile', clasificacion: 'ladder' };
-  var ROUTE_TITLE = { home: 'Inicio', modes: 'Jugar', pvp: 'Jugar', game: 'Partida', deck: 'Colección', packs: 'Tienda', profile: 'Perfil', ladder: 'Clasificación' };
+  var ROUTES = { home: 'inicio', modes: 'jugar', pvp: 'jugar', game: 'jugar', deck: 'coleccion', packs: 'tienda', profile: 'perfil', ladder: 'clasificacion', missions: 'misiones' };
+  var ROUTE_SCREEN = { inicio: 'home', jugar: 'modes', coleccion: 'deck', mazo: 'deck', tienda: 'packs', perfil: 'profile', clasificacion: 'ladder', misiones: 'missions' };
+  var ROUTE_TITLE = { home: 'Inicio', modes: 'Jugar', pvp: 'Jugar', game: 'Partida', deck: 'Colección', packs: 'Tienda', profile: 'Perfil', ladder: 'Clasificación', missions: 'Misiones' };
   function hashScreen() { var m = /^#\/([a-z]+)/.exec(location.hash || ''); return m && ROUTE_SCREEN[m[1]] || null; }
   function landing() { var sc = hashScreen() || 'home'; return sc; }
   function syncHash() {
@@ -1264,7 +1322,7 @@
   function render() {
     document.body.classList.remove('shopbg');
     if (PV.wait && ui.screen !== 'pvp') pvpCancelWait();
-    var f = { home: renderHome, deck: renderDeck, modes: renderModes, pvp: renderPvp, login: renderLogin, starter: renderStarter, packs: renderPacks, profile: renderProfile, ladder: renderLadder, boot: renderBoot }[ui.screen];
+    var f = { home: renderHome, deck: renderDeck, modes: renderModes, pvp: renderPvp, login: renderLogin, starter: renderStarter, packs: renderPacks, profile: renderProfile, ladder: renderLadder, missions: renderMissions, boot: renderBoot }[ui.screen];
     if (f) f(); else renderGame();
     if (ui.screen !== 'game') clearFlights();
     if (ui.tut && ui.screen !== 'game') ui.tut = null;
@@ -1458,8 +1516,26 @@
     if (act === 'tutstart') return startTutorial();
     if (act === 'tutexit') { tutExit(); return; }
     if (ui.tut && (act === 'refresh' || act === 'freeze')) return;
+    if (act === 'msclaim') { return api('missionClaim', { id: el.dataset.id }).then(function (r) { if (r.data && r.data.user) setAcct(r.data.user); ui.msg = r.ok ? '' : (r.data.error || ''); render(); }); }
+    if (act === 'rkclaim') { return api('rankClaim', { id: el.dataset.id }).then(function (r) { if (r.data && r.data.user) setAcct(r.data.user); ui.msg = r.ok ? '' : (r.data.error || ''); render(); }); }
+    if (act === 'goinv') { ui.screen = 'deck'; ui.colTab = 'inv'; ui.dedit = null; window.scrollTo(0, 0); return render(); }
+    if (act === 'boxclose') { ui.box = null; return renderDeck(); }
+    if (act === 'boxopen') {
+      if (ui.box || !ui.acct || !ui.acct.boxes) return;
+      var bx = ui.box = { stage: 'shake' }, t0 = Date.now(); ui.msg = ''; renderDeck();
+      return api('boxOpen').then(function (r) {
+        setTimeout(function () {
+          if (ui.box !== bx) return;
+          var show = function () { if (ui.screen === 'deck' && (ui.colTab || '') === 'inv') renderDeck(); };
+          if (!r.ok) { ui.box = null; ui.msg = (r.data && r.data.error) || 'No se pudo abrir la caja.'; if (r.data && r.data.user) setAcct(r.data.user); return show(); }
+          bx.reward = r.data.reward; setAcct(r.data.user); bx.stage = 'burst'; show();
+          setTimeout(function () { if (ui.box === bx) { bx.stage = 'reveal'; show(); } }, REDUCED ? 300 : 1900);
+        }, Math.max(0, (REDUCED ? 200 : 1700) - (Date.now() - t0)));
+      });
+    }
     if (act === 'nav') {
       clearTimeout(timer); ui.playing = false;
+      if (el.dataset.to === 'missions' || el.dataset.to === 'ladder') refreshAcct(function () { if (ui.screen === 'missions' || ui.screen === 'ladder') render(); });
       if (el.dataset.to === 'play') { ui.screen = 'modes'; window.scrollTo(0, 0); return render(); }
       ui.screen = el.dataset.to; ui.msg = ''; window.scrollTo(0, 0); return render();
     }

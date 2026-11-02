@@ -387,6 +387,7 @@
     var i = P.hand[handIdx];
     if (s.phase !== 'prep' || !i || !isTroop(i) || P.mesa[slot] || dupBlock(s, p, handIdx)) return false;
     P.hand.splice(handIdx, 1); P.mesa[slot] = i;
+    if (!i.counted) { i.counted = 1; P.used = (P.used || 0) + 1; } // cartas usadas (para las misiones): cada tropa cuenta una vez
     novSync(s, p);
     return true;
   }
@@ -475,7 +476,7 @@
     else if (c.target === 'enemy') tgt = targetable(s.p[1 - p]).filter(function (x) { return x.uid === targetUid; })[0];
     var why = actionBlock(s, p, c, tgt);
     if (why) { s.err = why; return false; }
-    P.hand.splice(handIdx, 1); P.grave.push(i);
+    P.hand.splice(handIdx, 1); P.grave.push(i); P.used = (P.used || 0) + 1;
     s.lvl = (s.lv && s.lv[p] && s.lv[p][c.id]) || 1;
     var res = ACT[c.id].run(s, p, tgt);
     s.lvl = 1;

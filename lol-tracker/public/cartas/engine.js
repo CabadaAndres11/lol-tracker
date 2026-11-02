@@ -18,7 +18,7 @@
     comebacker: { atk: [1, 2, 2], others: [0, 0, 1], cap: 8 },
     lol: { atk: [1, 1, 2], hp: [0, 1, 2], cap: [4, 6, 8] },
     trabajo: { shop: [0, 0, 2] },
-    anime: { half: 2 }, // Genkidama: se almacena 1/2 del daño que reciben las Anime
+    anime: { store: [0.5, 0.75, 1] }, // Genkidama: fracción del daño recibido que almacenan las Anime, por nivel
     koi: { atk: [1, 1, 2], cap: 5, heir: [0.5, 0.75, 1] }, // mejora al caer (tope por tropa) + herencia: % del ataque de la KOI caída pasa a una KOI viva al azar (sin tope)
     voley: { atk: [1, 2, 3], red: [1, 1, 2], cap: 8 },
     novias: { eriko: [2, 3, 4], eCap: [10, 15, 20], helena: [0, 2, 4], lucia: [3, 4, 5], ari: [0.5, 0.6, 0.7] }, // por nivel de Correa // novias del hueco 5 (sinergia Correa)
@@ -420,6 +420,8 @@
     intimidacion: { run: function (s, p, t) { var n = sc(s, 3); t.perm.atk -= n; return '-' + n + ' ataque permanente'; } },
     'mal-de-ojo': { ok: function (s, p) { return targetable(s.p[1 - p]).length ? '' : 'El rival no tiene tropas.'; }, run: function (s, p) { var n = sc(s, 1); targetable(s.p[1 - p]).forEach(function (i) { i.perm.atk -= n; }); return '-' + n + ' ataque permanente a todas las rivales'; } },
     genkidama: { ok: function (s, p) { return genStored(s.p[p]) > 0 ? '' : 'La Genkidama está vacía: tus Anime aún no han recibido daño.'; }, run: function (s, p, t) { var P = s.p[p], n = genStored(P); P.gen = 0; t.hp -= n; if (t.hp <= 0) dropDead(s, 1 - p, t); return n + ' de daño de Genkidama'; } },
+    kamehameha: { ok: function (s, p) { if ((tiers(s.p[p])['Anime'] || 0) < 1) return 'Necesitas el nivel 1 de Anime (2 cartas distintas).'; if (genStored(s.p[p]) <= 0) return 'La Genkidama está vacía: tus Anime aún no han recibido daño.'; return targetable(s.p[1 - p]).length ? '' : 'El rival no tiene tropas.'; },
+      run: function (s, p) { var P = s.p[p], tot = genStored(P), foes = targetable(s.p[1 - p]), n = Math.floor(tot / foes.length); P.gen = 0; foes.forEach(function (i) { genCharge(s, i, Math.min(n, Math.max(0, i.hp))); i.hp -= n; if (i.hp <= 0) dropDead(s, 1 - p, i); }); return n + ' de daño a cada tropa rival (Genkidama repartida: ' + tot + ')'; } },
     'golpe-certero': { run: function (s, p, t) { var n = sc(s, 6); genCharge(s, t, Math.min(n, Math.max(0, t.hp))); t.hp -= n; if (t.hp <= 0) dropDead(s, 1 - p, t); return n + ' de daño'; } },
     lluvia: { ok: function (s, p) { return targetable(s.p[1 - p]).length ? '' : 'El rival no tiene tropas.'; }, run: function (s, p) { var n = sc(s, 2); targetable(s.p[1 - p]).forEach(function (i) { genCharge(s, i, Math.min(n, Math.max(0, i.hp))); i.hp -= n; if (i.hp <= 0) dropDead(s, 1 - p, i); }); return n + ' de daño a todas las rivales'; } },
     'bola-extra': { ok: function (s, p) { return (tiers(s.p[p])['Pokémon'] || 0) >= 1 ? '' : 'Necesitas el nivel 1 de Pokémon (2 cartas distintas).'; }, run: function (s, p) { s.p[p].fl.pk = (s.p[p].fl.pk || 0) + 1; return 'bola extra esta ronda'; } },
@@ -583,7 +585,7 @@
       var i = P.hand[k];
       if (!i || isTroop(i)) continue; // (una acción anterior pudo fusionar cartas y acortar la mano)
       var c = card(i), allies = mesaTroops(P), foes = targetable(s.p[1 - p]);
-      if (c.id === 'cambio-de-linea' || (c.id === 'genkidama' && genStored(P) < 3)) continue; // la IA no la usa
+      if (c.id === 'cambio-de-linea' || (c.id === 'genkidama' && genStored(P) < 3) || (c.id === 'kamehameha' && genStored(P) < 2 * Math.max(1, foes.length))) continue; // la IA no la usa
       var tgt = null;
       if (c.target === 'ally') { allies.sort(function (a, b) { return atk(b) - atk(a); }); tgt = allies[0]; if (c.id === 'armadura') tgt = allies.slice().sort(function (a, b) { return maxHp(b) - maxHp(a); })[0]; }
       else if (c.target === 'enemy') {
@@ -813,7 +815,7 @@
 
   // Efectos al caer una tropa (KOI, Dúo Inseparable). Devuelve texto de registro y animación.
   // ---------- Pasivas de legendarias ----------
-  var PAS = { 'javihi-duo': 'duo', 'sech-duo': 'duo', 'javihi-prime': 'remate', 'sech': 'embargo', 'potango': 'aliento', 'mertens-prime': 'pereza', 'chipy-lloron': 'llanto', 'lihone-viego': 'racha', 'aitorlg-renata': 'prorroga', 'haikyuu-lihone': 'saque', 'lihone': 'captura', 'chipy-correa': 'consuelo', 'pampert-koisito': 'cabezon', 'aitorlg-koisito': 'heredero', 'mertens-gambler': 'malaracha', 'computer-dashlight': 'medallas', 'pampert-gambler': 'colega' };
+  var PAS = { 'javihi-duo': 'duo', 'sech-duo': 'duo', 'javihi-prime': 'remate', 'sech': 'embargo', 'potango': 'aliento', 'mertens-prime': 'pereza', 'chipy-lloron': 'llanto', 'lihone-viego': 'racha', 'aitorlg-renata': 'prorroga', 'haikyuu-lihone': 'saque', 'lihone': 'captura', 'pampert-koisito': 'cabezon', 'aitorlg-koisito': 'heredero', 'mertens-gambler': 'malaracha', 'computer-dashlight': 'medallas', 'pampert-gambler': 'colega' };
   function pas(i) { return PAS[i.id] || ''; }
   function duoLinked(s, i) { var o = i.id === 'javihi-duo' ? 'sech-duo' : 'javihi-duo'; return mesaTroops(s.p[i.owner]).some(function (x) { return x.id === o; }); }
   // Prórroga (AitoRLG Renata): la tropa a su derecha no cae a 0 de vida hasta que haya atacado
@@ -1089,9 +1091,9 @@
     if (!v || n <= 0 || !has(v, 'Anime')) return;
     var t = s.tiers && s.tiers[v.owner];
     if (!t || !t['Anime']) return;
-    var P = s.p[v.owner]; P.gen = (P.gen || 0) + n;
+    var P = s.p[v.owner]; P.gen = (P.gen || 0) + n * FX.anime.store[Math.min(2, t['Anime'] - 1)];
   }
-  function genStored(P) { return Math.floor((P.gen || 0) / FX.anime.half); }
+  function genStored(P) { return Math.floor((P.gen || 0) + 1e-9); }
   // Cada ronda con la sinergia activa se entrega una carta Genkidama (si no tienes ya una y hay hueco en la mano)
   function genGive(s, p) {
     var P = s.p[p];

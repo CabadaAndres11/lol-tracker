@@ -540,16 +540,12 @@ var D={
    "themes": [
     "Correa"
    ],
-   "cost": 4,
+   "cost": 3,
    "atk": 4,
-   "hp": 16,
-   "rarity": "Épica",
+   "hp": 11,
+   "rarity": "Rara",
    "type": "tropa",
-   "size": 2,
-   "pas": {
-    "n": "Consuelo",
-    "t": "Mientras esté en tu mano, las Anime que ceden estadísticas siempre se quedan con 1 de ataque o 1 de vida."
-   }
+   "size": 2
   },
   {
    "id": "chipy-lloron",
@@ -851,6 +847,18 @@ var D={
    "foe": true
   },
   {
+   "id": "kamehameha",
+   "name": "Kamehameha",
+   "cost": 2,
+   "rarity": "Rara",
+   "type": "accion",
+   "size": 1,
+   "target": "none",
+   "text": "Reparte a partes iguales entre todas las tropas rivales el daño almacenado en la Genkidama (necesitas el nivel 1 de Anime).",
+   "theme": "Anime",
+   "foe": true
+  },
+  {
    "id": "golpe-certero",
    "name": "Golpe certero",
    "cost": 2,
@@ -1059,7 +1067,7 @@ var D={
    "type": "accion",
    "size": 1,
    "target": "enemy",
-   "text": "Libera sobre una tropa rival el daño almacenado: la mitad del daño que han recibido tus Anime. Te la da la sinergia Anime cada ronda.",
+   "text": "Libera sobre una tropa rival el daño almacenado por tus Anime (50% / 75% / 100% del daño recibido según tu nivel de Anime). Te la da la sinergia Anime cada ronda.",
    "theme": "Anime",
    "foe": true,
    "token": true
@@ -1152,9 +1160,9 @@ var D={
    ],
    "color": "#f472b6",
    "tx": [
-    "Cada ronda recibes una Genkidama. Tus Anime almacenan la mitad del daño que reciben; al jugarla se libera sobre una tropa rival.",
-    "Por definir.",
-    "Por definir."
+    "Cada ronda recibes una Genkidama. Tus Anime almacenan el 50% del daño que reciben; al jugarla se libera sobre una tropa rival.",
+    "Almacenan el 75% del daño recibido.",
+    "Almacenan el 100% del daño recibido."
    ]
   },
   "KOI": {

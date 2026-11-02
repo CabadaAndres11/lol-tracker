@@ -1072,29 +1072,32 @@
     { id: 'default', name: 'Por defecto', desc: 'La carta aparece grande en mitad de la pantalla, da un par de vueltas y vuela hasta su hueco.', price: 0, ms: 2000, gap: 450 },
     { id: 'meteoro', name: 'Meteoro dorado', desc: 'La carta cae como un meteoro envuelta en luz dorada, gira en el aire y se estrella en su hueco con una onda de choque y chispas.', price: 30, ms: 2900, gap: 600 },
     { id: 'arcano', name: 'Aparición arcana', desc: 'Un círculo mágico se enciende en el aire y la carta se materializa entre destellos violetas antes de posarse en su hueco.', price: 30, ms: 2800, gap: 550 },
-    { id: 'perro', name: 'Perro mensajero', desc: 'Un perro cruza la pantalla corriendo y arrastra la carta con una cuerda hasta su hueco; ahí la suelta y la carta se levanta de un salto.', price: 30, ms: 3300, gap: 700 }
+    { id: 'perro', name: 'Perro mensajero', desc: 'Un perro cruza la pantalla corriendo y arrastra la carta con una cuerda hasta su hueco; ahí la suelta y la carta se levanta de un salto.', price: 30, ms: 3300, gap: 700 },
+    { id: 'fichas', name: 'Reparto de casino', desc: 'Una carta sale lanzada girando como en un reparto de póker, cae sobre una lluvia de fichas, se da la vuelta y vuela a su hueco levantando fichas al aterrizar.', price: 30, ms: 3000, gap: 600 }
   ];
   try { new Image().src = 'img/dog.webp'; } catch (e) {}
   var SLEEVE_LIST = [
     { id: 'sin', name: 'Sin funda', desc: 'Tus cartas se ven tal cual, con el borde de su rareza y el reverso de cristal.', price: 0 },
     { id: 'oro', name: 'Oro real', desc: 'Borde de pan de oro bruñido y reverso azul noche con celosía dorada. Elegante y sobrio.', price: 40 },
-    { id: 'neon', name: 'Neón', desc: 'Borde de luz degradado de cian a magenta y reverso oscuro con rejilla luminosa.', price: 30 }
+    { id: 'neon', name: 'Neón', desc: 'Borde de luz degradado de cian a magenta y reverso oscuro con rejilla luminosa.', price: 30 },
+    { id: 'casino', name: 'Casino', desc: 'Borde de ficha de póker a rayas rojas, blancas y negras, y reverso de fieltro verde con palos de la baraja y una ficha en el centro.', price: 40 }
   ];
   // ---------- Efectos de victoria y derrota (cada pack trae los dos) ----------
   var FIN_LIST = [
     { id: 'default', name: 'Por defecto', desc: 'Victoria: trofeo y lluvia de confeti. Derrota: corazón roto y aviso sobrio.', price: 0 },
     { id: 'eclipse', name: 'Eclipse', desc: 'Victoria: banner de oro con rayos de sol, ondas de luz y lluvia dorada. Derrota: banner carmesí que se agrieta, con ceniza y brasas flotando.', price: 50 },
-    { id: 'hechizo', name: 'Hechizo arcano', desc: 'Victoria: un círculo mágico se enciende tras un banner violeta y las letras se materializan entre destellos que suben. Derrota: el círculo se apaga entre parpadeos y el banner se agrieta mientras caen motas de energía.', price: 50 }
+    { id: 'hechizo', name: 'Hechizo arcano', desc: 'Victoria: un círculo mágico se enciende tras un banner violeta y las letras se materializan entre destellos que suben. Derrota: el círculo se apaga entre parpadeos y el banner se agrieta mientras caen motas de energía.', price: 50 },
+    { id: 'poker', name: 'Mano ganadora', desc: 'Victoria: lluvia de fichas de casino sobre un banner de fieltro verde y oro. Derrota: las fichas se deslizan apagadas y el banner se agrieta: la banca gana.', price: 50 }
   ];
   function finId() { var id = ui.acct && ui.acct.fx && ui.acct.fx.finish; return id && FIN_LIST.some(function (e) { return e.id === id; }) && fxHas(id) ? id : 'default'; }
   function finOverlay(id, win, title, sub, rw, btns, extra) {
-    if (id === 'eclipse' || id === 'hechizo') {
-      var arc = id === 'hechizo', fx = '<div class="finfx">' + (arc ? '<div class="arcw"><i class="arc a"></i><i class="arc b"></i></div><i class="ring"></i><i class="ring r2"></i>' : '<div class="finrays"></div><i class="ring"></i><i class="ring r2"></i>'), n = win ? 34 : 30;
+    if (id === 'eclipse' || id === 'hechizo' || id === 'poker') {
+      var arc = id === 'hechizo', pok = id === 'poker', fx = '<div class="finfx">' + (pok ? '<i class="ring"></i><i class="ring r2"></i>' : arc ? '<div class="arcw"><i class="arc a"></i><i class="arc b"></i></div><i class="ring"></i><i class="ring r2"></i>' : '<div class="finrays"></div><i class="ring"></i><i class="ring r2"></i>'), n = win ? 34 : 30;
       for (var q = 0; q < n; q++) fx += '<i class="fp" style="--x:' + ((q * 29 + (q % 4) * 7) % 100) + '%;--d:' + (((q * 37) % 100) / 100 * 3).toFixed(2) + 's;--t:' + (3.6 + ((q * 13) % 10) / 4).toFixed(2) + 's;--s:' + (5 + (q % 5) * 2) + 'px;--w:' + ((q % 2 ? 1 : -1) * (14 + (q % 4) * 9)) + 'px"></i>';
       fx += '</div>';
       var letters = title.replace(/[¡!]/g, '').toUpperCase().split('').map(function (ch, k) { return '<span style="--i:' + k + '">' + (ch === ' ' ? '&nbsp;' : esc(ch)) + '</span>'; }).join('');
       var crack = win ? '' : '<svg class="fincrack" viewBox="0 0 1000 120" preserveAspectRatio="none"><path d="M0 60 L120 40 L210 78 L330 30 L430 70 L520 22 L610 80 L720 36 L820 74 L920 44 L1000 62" /><path d="M520 22 L540 -10 M430 70 L410 130 M720 36 L750 -10"/></svg>';
-      return '<div class="overlay fin fin-' + (arc ? 'arcano' : 'eclipse') + ' ' + (win ? 'owin' : 'olose') + (extra ? ' finprev' : '') + '">' + fx + '<div class="finband"><div class="finbandin"><span class="finico">' + ic(win ? 'trofeo' : 'corazonroto') + '</span><div class="fintxt">' + letters + '</div><span class="finico">' + ic(win ? 'trofeo' : 'corazonroto') + '</span></div>' + crack + '</div><p class="finsub">' + sub + '</p><div class="finpanel">' + rw + '<div class="finbtns">' + btns + '</div></div></div>';
+      return '<div class="overlay fin fin-' + (arc ? 'arcano' : pok ? 'poker' : 'eclipse') + ' ' + (win ? 'owin' : 'olose') + (extra ? ' finprev' : '') + '">' + fx + '<div class="finband"><div class="finbandin"><span class="finico">' + ic(win ? (pok ? 'dado' : 'trofeo') : 'corazonroto') + '</span><div class="fintxt">' + letters + '</div><span class="finico">' + ic(win ? (pok ? 'dado' : 'trofeo') : 'corazonroto') + '</span></div>' + crack + '</div><p class="finsub">' + sub + '</p><div class="finpanel">' + rw + '<div class="finbtns">' + btns + '</div></div></div>';
     }
     var conf = ''; if (win) for (var q2 = 0; q2 < 36; q2++) conf += '<i style="left:' + (q2 * 2.8 + (q2 % 3)) + '%;--d:' + ((q2 * 37) % 100) / 100 * 1.2 + 's;--c:' + ['#ffc533', '#ff6b8b', '#4f9dff', '#38d39f', '#a78bfa'][q2 % 5] + '"></i>';
     return '<div class="overlay ' + (win ? 'owin' : 'olose') + (extra ? ' finprev' : '') + '">' + (win ? '<div class="confetti">' + conf + '</div>' : '') + '<div class="panel over"><div class="obig">' + ic(win ? 'trofeo' : 'corazonroto') + '</div><h2>' + title + '</h2><p class="mut">' + sub + '</p>' + rw + btns + '</div></div>';
@@ -1163,6 +1166,44 @@
         { transform: T(cx, cy - 22, sc * 1.03), filter: G(.6) + ' brightness(1)', opacity: 1, offset: .72, easing: 'cubic-bezier(.5,0,.8,.4)' },
         { transform: T(0, 4, .94), filter: G(.8), opacity: 1, offset: .9, easing: 'cubic-bezier(.2,.9,.3,1)' },
         { transform: T(0, 0, 1), filter: G(0), opacity: 1, offset: 1 }
+      ], { duration: dur, delay: delay, fill: 'both' });
+    },
+    'fichas': function (wrap, r, delay, dur) {
+      var W = window.innerWidth, H = window.innerHeight, cx = W / 2 - (r.left + r.width / 2), cy = H / 2 - (r.top + r.height / 2) - 10;
+      var sc = Math.max(1.4, Math.min(3, Math.min(300, W * .62, H * .5 * 5 / 7) / r.width)) * 1.05, mx = r.left + r.width / 2 + cx, my = r.top + r.height / 2 + cy;
+      var T = function (x, y, z, ry, rz) { return 'perspective(1100px) translate(' + x + 'px,' + y + 'px) scale(' + z + ') rotateY(' + (ry || 0) + 'deg) rotateZ(' + (rz || 0) + 'deg)'; };
+      var G = function (a) { return 'drop-shadow(0 0 ' + Math.round(6 + a * 22) + 'px rgba(250,204,21,' + (.15 + a * .6).toFixed(2) + ')) drop-shadow(0 18px 24px rgba(0,0,0,.5))'; };
+      var COL = [['#dc2626', '#f8fafc'], ['#111827', '#f8fafc'], ['#2563eb', '#f8fafc'], ['#16a34a', '#f8fafc'], ['#e5e7eb', '#1f2937'], ['#7c3aed', '#f8fafc']];
+      var chip = function (x, y, size, k) { var e = document.createElement('i'); e.className = 'fxchip'; e.style.cssText = 'left:' + x + 'px;top:' + y + 'px;width:' + size + 'px;height:' + size + 'px;--cc:' + COL[k % 6][0] + ';--st:' + COL[k % 6][1]; document.body.appendChild(e); return e; };
+      var i, k;
+      for (i = 0; i < 22; i++) { // lluvia de fichas que se apilan alrededor de la carta y se desvanecen antes de que salga volando
+        var x = mx + (Math.random() - .5) * sc * r.width * 1.6, y = my + (Math.random() - .5) * sc * r.height * .95, sz = 26 + Math.random() * 14, st = dur * (.05 + Math.random() * .36), life = dur * .78 - st, ro = (Math.random() - .5) * 720;
+        var c = chip(x, y, sz, i);
+        c.animate([
+          { transform: 'translate(-50%,' + (-(y + 90)) + 'px) rotate(' + ro + 'deg)', opacity: 0, offset: 0 },
+          { transform: 'translate(-50%,-50%) rotate(' + (ro * .1) + 'deg)', opacity: 1, offset: .22, easing: 'cubic-bezier(.5,0,.9,.5)' },
+          { transform: 'translate(-50%,-90%) rotate(' + (ro * .08) + 'deg)', opacity: 1, offset: .3, easing: 'ease-in' },
+          { transform: 'translate(-50%,-50%) rotate(0deg)', opacity: 1, offset: .38 },
+          { transform: 'translate(-50%,-50%) rotate(0deg)', opacity: 1, offset: .82 },
+          { transform: 'translate(-50%,-50%) rotate(0deg) scale(.6)', opacity: 0, offset: 1 }
+        ], { duration: life, delay: delay + st, fill: 'both' }).onfinish = (function (n) { return function () { n.remove(); }; })(c);
+      }
+      // al aterrizar en el hueco, las fichas salen disparadas
+      var sx = r.left + r.width / 2, sy = r.top + r.height / 2, tl = delay + dur * .9;
+      for (k = 0; k < 12; k++) {
+        var a = (k / 12) * Math.PI * 2 + Math.random() * .4, dist = 80 + Math.random() * 90, b = chip(sx, sy, 22 + Math.random() * 8, k + 2);
+        b.animate([{ transform: 'translate(-50%,-50%) scale(.3)', opacity: 0, offset: 0 }, { transform: 'translate(-50%,-50%) scale(1)', opacity: 1, offset: .1 }, { transform: 'translate(' + (Math.cos(a) * dist - 12) + 'px,' + (Math.sin(a) * dist - 40) + 'px) rotate(' + (360 + Math.random() * 360) + 'deg) scale(.7)', opacity: 0, offset: 1 }], { duration: 750 + Math.random() * 300, delay: tl, fill: 'both', easing: 'cubic-bezier(.1,.7,.3,1)' }).onfinish = (function (n) { return function () { n.remove(); }; })(b);
+      }
+      snd('chips', delay + dur * .14); snd('chips', delay + dur * .5);
+      impact(sx, sy, tl);
+      return wrap.animate([
+        { transform: T(cx - W * .6, cy - H * .5, sc * .5, 0, -540), filter: G(.3), opacity: 0, offset: 0 },
+        { transform: T(cx, cy, sc, 0, 0), filter: G(.6), opacity: 1, offset: .17, easing: 'cubic-bezier(.2,.8,.3,1)' },
+        { transform: T(cx, cy + 6, sc * .98, 0, 0), filter: G(.6), opacity: 1, offset: .24 },
+        { transform: T(cx, cy, sc, 360, 0), filter: G(1), opacity: 1, offset: .52, easing: 'ease-in-out' },
+        { transform: T(cx, cy - 12, sc * 1.03, 360, 0), filter: G(.8), opacity: 1, offset: .72, easing: 'cubic-bezier(.5,0,.8,.4)' },
+        { transform: T(0, 6, .92, 360, 0), filter: G(.6), opacity: 1, offset: .9, easing: 'cubic-bezier(.2,.9,.3,1)' },
+        { transform: T(0, 0, 1, 360, 0), filter: G(0), opacity: 1, offset: 1 }
       ], { duration: dur, delay: delay, fill: 'both' });
     },
     'perro': function (wrap, r, delay, dur) {

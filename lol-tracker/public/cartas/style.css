@@ -1860,3 +1860,31 @@ body.tutmode .freezebtn { pointer-events: none; opacity: .35; }
 .goldw { display: flex; flex-direction: column; align-items: center; gap: .25rem; position: relative; }
 .gint { font-style: normal; font-size: .64rem; font-weight: 700; letter-spacing: .04em; color: #fde68a; background: rgba(120,70,5,.85); border: 1px solid #fbbf24; border-radius: 999px; padding: .05rem .45rem; white-space: nowrap; }
 .goldw .gint { position: absolute; top: 100%; margin-top: .2rem; }
+
+/* ---------- Fichas de póker: despliegue «Reparto de casino», funda «Casino» y pack «Mano ganadora» ---------- */
+.fxchip { position: fixed; z-index: 7990; border-radius: 50%; pointer-events: none; will-change: transform, opacity; background: repeating-conic-gradient(var(--st, #f8fafc) 0 14deg, var(--cc) 14deg 45deg); box-shadow: 0 3px 6px rgba(0,0,0,.5), inset 0 0 0 2px rgba(0,0,0,.25); }
+.fxchip::after { content: ''; position: absolute; inset: 20%; border-radius: 50%; background: var(--cc); border: 2px dashed rgba(255,255,255,.85); box-shadow: inset 0 0 6px rgba(0,0,0,.35); }
+.slv-casino { --slv: repeating-linear-gradient(135deg, #dc2626 0 9px, #f8fafc 9px 15px, #111827 15px 24px, #f8fafc 24px 30px); }
+.card.slv-casino { box-shadow: 0 6px 16px rgba(0,0,0,.45), 0 0 10px rgba(220,38,38,.45); }
+.slv-casino .slvback, .slv-casino .pcard .pback { border: 3px solid #f8fafc; color: #fde68a; background:
+  radial-gradient(circle at 50% 50%, #dc2626 0 9%, #f8fafc 9% 11%, #dc2626 11% 14%, #f8fafc 14% 15%, transparent 16%), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='44'%3E%3Ctext x='5' y='17' font-size='14' fill='rgba(255%2C255%2C255%2C.2)'%3E%E2%99%A0%3C/text%3E%3Ctext x='26' y='39' font-size='14' fill='rgba(255%2C90%2C90%2C.28)'%3E%E2%99%A5%3C/text%3E%3Ctext x='26' y='17' font-size='12' fill='rgba(255%2C255%2C255%2C.14)'%3E%E2%99%A3%3C/text%3E%3Ctext x='5' y='39' font-size='12' fill='rgba(255%2C90%2C90%2C.2)'%3E%E2%99%A6%3C/text%3E%3C/svg%3E"), linear-gradient(160deg, #0f6b40, #093d25 72%); }
+.slv-casino .slvback { box-shadow: 0 0 0 1px #7f1d1d, 0 12px 24px rgba(0,0,0,.55), 0 0 18px rgba(220,38,38,.4); }
+.card[class*="slv-"].slv-casino { box-shadow: 0 6px 16px rgba(0,0,0,.45), 0 0 10px rgba(220,38,38,.45); }
+.fin-poker.owin { background: radial-gradient(ellipse 70% 50% at 50% 45%, rgba(20,115,62,.6), transparent 70%), linear-gradient(rgba(4,16,10,.92), rgba(2,8,5,.96)); }
+.fin-poker.olose { background: radial-gradient(ellipse 70% 50% at 50% 45%, rgba(80,16,22,.5), transparent 70%), linear-gradient(rgba(10,6,6,.93), rgba(3,2,2,.97)); }
+.fin-poker .finfx .ring { border-color: rgba(250,204,21,.9); } .fin-poker.olose .finfx .ring { border-color: rgba(200,60,60,.6); }
+.fin-poker .finfx .fp { top: -8vh; border-radius: 50%; transform: none; width: calc(var(--s) * 3.4); height: calc(var(--s) * 3.4); background: repeating-conic-gradient(#f8fafc 0 14deg, var(--cc) 14deg 45deg); box-shadow: 0 2px 5px rgba(0,0,0,.5); }
+.fin-poker .finfx .fp::after { content: ''; position: absolute; inset: 20%; border-radius: 50%; background: var(--cc); border: 1.5px dashed rgba(255,255,255,.8); }
+.fin-poker .finfx .fp:nth-child(5n+1) { --cc: #dc2626; } .fin-poker .finfx .fp:nth-child(5n+2) { --cc: #1f2937; } .fin-poker .finfx .fp:nth-child(5n+3) { --cc: #2563eb; } .fin-poker .finfx .fp:nth-child(5n+4) { --cc: #16a34a; } .fin-poker .finfx .fp:nth-child(5n) { --cc: #7c3aed; }
+.fin-poker.olose .finfx .fp, .fin-poker.olose .finfx .fp:nth-child(3n+3) { top: -8vh; bottom: auto; width: calc(var(--s) * 3.4); height: calc(var(--s) * 3.4); border-radius: 50%; animation-name: finash; background: repeating-conic-gradient(#8b929c 0 14deg, var(--cc) 14deg 45deg); }
+.fin-poker .finband { border-color: #facc15; background: linear-gradient(90deg, rgba(6,40,22,0), rgba(14,100,56,.9) 14%, rgba(22,135,76,.93) 50%, rgba(14,100,56,.9) 86%, rgba(6,40,22,0)); box-shadow: 0 0 40px rgba(250,204,21,.32); }
+.fin-poker .finband::after { background: linear-gradient(100deg, transparent 30%, rgba(255,245,180,.5) 48%, transparent 62%); }
+.fin-poker .fintxt { color: #fff7cc; text-shadow: 0 0 22px rgba(250,204,21,.85), 0 4px 0 #064e2b; }
+.fin-poker .finico { color: #fde68a; } .fin-poker .finico .ic { filter: drop-shadow(0 0 8px rgba(250,204,21,.9)); }
+.fin-poker .finsub { color: #cdeccf; }
+.fin-poker.olose .finband { border-color: #7f1d1d; background: linear-gradient(90deg, rgba(20,6,6,0), rgba(60,12,16,.92) 14%, rgba(34,8,10,.95) 50%, rgba(60,12,16,.92) 86%, rgba(20,6,6,0)); box-shadow: 0 0 36px rgba(160,30,40,.3); }
+.fin-poker.olose .finband::after { background: linear-gradient(100deg, transparent 30%, rgba(255,140,140,.22) 48%, transparent 62%); }
+.fin-poker.olose .fintxt { color: #fca5a5; text-shadow: 0 0 16px rgba(220,50,60,.6), 0 4px 0 #3a0a10; }
+.fin-poker.olose .finico { color: #f4a3a3; } .fin-poker.olose .finico .ic { filter: drop-shadow(0 0 8px rgba(220,50,60,.7)); }
+.fin-poker.olose .finsub { color: #cfaaaa; }
+.fin-poker .fincrack path { stroke: rgba(255,190,190,.85); }

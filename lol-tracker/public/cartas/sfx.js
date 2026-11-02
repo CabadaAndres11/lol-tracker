@@ -69,6 +69,7 @@
     win: ['event', function () { arp('event', [N.C5, N.E5, N.G5, N.C6], 0.13, { d: 0.45, v: 0.26 }); [N.C5, N.E5, N.G5].forEach(function (f) { tone('event', f, 1, { at: 0.55, type: 'triangle', v: 0.16 }); }); arp('event', [N.E6, N.G6], 0.1, { at: 0.7, type: 'sine', d: 0.5, v: 0.12 }); }],
     lose: ['event', function () { arp('event', [N.E4, N.D4, N.C4, N.B3], 0.3, { type: 'triangle', d: 0.6, v: 0.25 }); tone('event', 110, 1.4, { at: 0.6, type: 'sawtooth', v: 0.07 }); }],
     deploy: ['event', function () { noise('event', 0.4, { f: 400, to: 2500, q: 1.2, v: 0.22 }); }],
+    chips: ['event', function () { [0, .07, .12, .2, .27, .31, .4].forEach(function (t, i) { tone('event', 2300 + (i * 337) % 900, 0.05, { at: t, type: 'square', v: 0.05 }); noise('event', 0.04, { at: t, f: 4500, ft: 'highpass', v: 0.12 }); }); }],
     land: ['event', function () { tone('event', 110, 0.3, { to: 45, v: 0.6 }); noise('event', 0.15, { f: 800, ft: 'lowpass', v: 0.3 }); tone('event', 1568, 0.5, { at: 0.03, v: 0.08 }); }],
     shake: ['pack', function () { for (var i = 0; i < 8; i++) { tone('pack', 90 + (i % 2) * 20, 0.12, { at: i * 0.19, type: 'triangle', v: 0.35 }); noise('pack', 0.1, { at: i * 0.19, f: 300, ft: 'lowpass', v: 0.25 }); } }],
     rip: ['pack', function () { noise('pack', 0.45, { f: 2500, to: 9000, ft: 'highpass', v: 0.3 }); tone('pack', 220, 0.4, { to: 880, type: 'triangle', v: 0.15 }); }],

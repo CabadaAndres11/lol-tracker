@@ -104,11 +104,6 @@
     document.removeEventListener('keydown', introKey);
   }
   function introKey(e) { if (e.key === 'Escape') closeIntro(); }
-  function maybeIntro() {
-    if (ui.introSeen || !ui.acct || introOff() || introEl) return;
-    ui.introSeen = true;
-    setTimeout(function () { if (ui.screen === 'home') openIntro(); }, 700);
-  }
   function openIntro() {
     closeIntro();
     var boys = ['lihone-correa', 'dashlight-correa', 'potango', 'chipy-correa'], girls = ['eriko', 'helena', 'lucia', 'ari'];
@@ -120,7 +115,7 @@
       '<div class="iq rival">' + cardHtml(CARD['sech-thresh'], { lv: 1 }) + '</div>' +
       '<span class="ifx fe">+2/+2</span><span class="ifx d1">-6</span><span class="ifx d2">-3</span><span class="ifx d3">-5</span><span class="ifx d5">-4</span><span class="ifx d6">-2</span><span class="ifx d4">¡Cae!</span>' +
       '<div class="icap"><span></span></div></div>' +
-      '<label class="ibtns inever"><input type="checkbox" data-i="never"' + (introOff() ? ' checked' : '') + '> No mostrar más</label><p class="zhint">Pulsa fuera de la animación para cerrarla</p></div>';
+      '<p class="zhint">Pulsa fuera de la animación para cerrarla</p></div>';
     introEl = document.createElement('div'); introEl.className = 'introov'; introEl.innerHTML = h;
     document.body.appendChild(introEl);
     var st = introEl.querySelector('.introst'), cap = st.querySelector('.icap span');
@@ -398,7 +393,15 @@
       ].map(function (m) { return '<button class="ricon" data-act="nav" data-to="' + m[0] + '"><span class="rii">' + m[1] + '</span><b>' + m[2] + '</b><span class="mut">' + m[3] + '</span></button>'; }).join('') + '</div>' + homeNews() + '</div>';
     h += '<p class="mut" style="text-align:center">' + D.cards.length + ' tropas · ' + D.actions.length + ' acciones</p></div>';
     app.innerHTML = h;
-    maybeIntro();
+  }
+  // Animaciones de versiones anteriores: se pueden volver a ver desde el perfil
+  var ANIM_LIST = [
+    { id: 'correa', ver: 'v1.1', name: 'Sinergia Correa', desc: 'Pop-up de la versión 1.1: las cartas entran en juego, recibes a las 4 novias y una ocupa el hueco 5.' }
+  ];
+  function animPanel() {
+    return '<div class="panel animpanel"><h2>' + ic('brillo') + ' Animaciones</h2><p class="mut">Aquí se guardan las animaciones de presentación de versiones anteriores para que puedas volver a verlas.</p><div class="animlist">' + ANIM_LIST.map(function (x) {
+      return '<div class="animrow"><span class="animver">' + x.ver + '</span><div class="animtx"><b>' + esc(x.name) + '</b><span class="mut">' + esc(x.desc) + '</span></div><button class="btn sm" data-act="playanim" data-id="' + x.id + '">' + ic('play') + ' Reproducir</button></div>';
+    }).join('') + '</div></div>';
   }
   function renderProfile() {
     var a = ui.acct, mySkins = (window.CARTAS_SKINS || []).filter(function (k) { return (a.skins || []).indexOf(k.id) >= 0; }), cur = a.avatar || '', own = D.cards.filter(function (c) { return ARTS[c.id] && ui.ownedSet && ui.ownedSet[c.id]; }).sort(function (x, y) { return RARS.indexOf(y.rarity) - RARS.indexOf(x.rarity) || x.name.localeCompare(y.name); });
@@ -409,7 +412,7 @@
         return '<button class="avopt' + (cur === c.id ? ' on' : '') + '" data-act="setavatar" data-card="' + c.id + '" title="' + esc(c.name) + '"><span class="avt has" style="background-image:url(/cartas/art/' + c.id + '.webp)"></span><b>' + esc(c.name) + '</b></button>';
       }).join('') + '</div>' + (mySkins.length ? '<h3 class="avsub">Skins</h3><div class="avgrid">' + mySkins.map(function (k) {
         return '<button class="avopt skin' + (cur === k.id ? ' on' : '') + '" data-act="setavatar" data-card="' + k.id + '" title="' + esc(CARD[k.card].name + ' · ' + k.name) + '"><span class="avt has" style="background-image:url(/cartas/art/' + k.id + '.webp)"></span><b>' + esc(k.name) + '</b></button>';
-      }).join('') + '</div>' : '') + '<div class="btnrow"><button class="btn sec" data-act="avedit">Cerrar</button></div></div>') + sfxPanel() + '</div>';
+      }).join('') + '</div>' : '') + '<div class="btnrow"><button class="btn sec" data-act="avedit">Cerrar</button></div></div>') + sfxPanel() + animPanel() + '</div>';
   }
 
   function renderBoot() { app.innerHTML = '<div class="wrap"><p class="mut" style="text-align:center;margin-top:30vh">Cargando…</p></div>'; }
@@ -1656,6 +1659,7 @@
     if (act === 'sfxtest') { var tc = el.dataset.cat; snd(tc === 'ui' ? 'buy' : tc === 'combat' ? 'heavy' : tc === 'pack' ? 'rev-Épica' : 'win'); return; }
     if (ui.finPrev && act !== 'finprev' && act !== 'finflip' && act !== 'finclose') ui.finPrev = null;
     if (ui.dedit) { var ne = document.getElementById('de-name'); if (ne) ui.dedit.name = ne.value; }
+    if (act === 'playanim') { if (el.dataset.id === 'correa') openIntro(); return; }
     if (act === 'avedit') { ui.avEdit = !ui.avEdit; return render(); }
     if (act === 'acctmenu') { var w = el.closest('.acctw'); if (w) w.classList.toggle('open'); return; }
     if (act === 'logout') return logout();

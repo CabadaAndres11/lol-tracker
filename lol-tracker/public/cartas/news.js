@@ -1,6 +1,9 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-02', tag: 'Cambio', title: 'Nuevo apartado «Animaciones» en el perfil',
+      items: ['En Perfil → Animaciones podrás volver a ver las animaciones de presentación de versiones anteriores. Por ahora está el pop-up de la versión 1.1 con la sinergia Correa.',
+        'Ese pop-up ya no aparece solo al abrir el menú.'] },
     { date: '2026-11-02', tag: 'Novedad', title: 'Versión 1.2 · Efectos de fichas de póker',
       items: ['Nuevo despliegue «Reparto de casino» (30 monedas): la carta sale lanzada girando, cae sobre una lluvia de fichas, se da la vuelta y vuela a su hueco levantando fichas.',
         'Nueva funda «Casino» (40 monedas): borde de ficha de póker a rayas y reverso de fieltro verde con palos de la baraja.',

@@ -1888,3 +1888,10 @@ body.tutmode .freezebtn { pointer-events: none; opacity: .35; }
 .fin-poker.olose .finico { color: #f4a3a3; } .fin-poker.olose .finico .ic { filter: drop-shadow(0 0 8px rgba(220,50,60,.7)); }
 .fin-poker.olose .finsub { color: #cfaaaa; }
 .fin-poker .fincrack path { stroke: rgba(255,190,190,.85); }
+
+/* Perfil → Animaciones */
+.animlist { display: grid; gap: .6rem; margin-top: .6rem; }
+.animrow { display: flex; align-items: center; gap: .9rem; padding: .7rem .9rem; border: 1px solid rgba(217,178,90,.3); border-radius: 12px; background: rgba(14,26,51,.55); }
+.animver { font-family: var(--serif); font-weight: 700; color: #f0d58a; border: 1px solid #b8923f; border-radius: 999px; padding: .15rem .6rem; font-size: .85rem; }
+.animtx { flex: 1; display: grid; gap: .15rem; } .animtx b { color: #fff; }
+@media (max-width: 560px) { .animrow { flex-wrap: wrap; } .animtx { flex-basis: 100%; order: 3; } }

@@ -2,6 +2,7 @@
 (function (root) {
   var NEWS = [
     { date: '2026-11-02', tag: 'Novedad', title: '¡Ya está aquí la versión 1.2! Nueva sinergia: Gambling',
+      art: ['pampert-gambler'],
       items: ['Nueva sinergia «Gambling» (2 / 3 / 4 cartas distintas): ganas orbes por cada ronda en la que no recibes daño directo en tu vida. Cuantas más Gambling tengas, más orbes por ronda: 1, 2 o 3. Las orbes se ganan según la sinergia con la que empezaste el combate, aunque tus Gambling caigan durante la ronda.',
         'Cuando recibes daño directo por primera vez, se abren todas las orbes en una ruleta de casino (la bola cae y al terminar muestra el total de mejora, p. ej. +6/+6): cada una da +1/+1, +2/+2 o +3/+3 permanente a tus Gambling (en mesa y en mano), sin tope. A partir de ese momento ya no ganas más orbes. En la partida verás tus orbes acumuladas (y las del rival) junto a la vida.',
         'Lihone Correa, AitoRLG Koisito, Dashlight Correa y Petea Pokemaniaco pasan a tener también Gambling. Nuevas tropas: Mertens Gambler (épica, pasiva «Mala Racha»: si termina la ronda viva y tienes más de 10 orbes, se abre la mitad y sigues acumulando) y Pampert Gambler (legendaria, pasiva «Jackpot»: con 20 orbes o más y viva al final de la ronda, inflige a la vida rival la mitad de tus orbes como daño directo y abre todas). Hay una nueva skin de Dashlight Correa en la tienda: «Dashlight Gambler».',

@@ -1721,3 +1721,10 @@ body.tutmode .freezebtn { pointer-events: none; opacity: .35; }
 .bxfx .ic { width: 3.4rem; height: 3.4rem; color: color-mix(in srgb, var(--ac) 60%, #fff); } .bxfx b { font-family: var(--serif); font-size: 1.1rem; } .bxfx span { font-size: .75rem; letter-spacing: .1em; text-transform: uppercase; opacity: .8; }
 .boxov .pkfx { top: 38%; }
 @media (prefers-reduced-motion: reduce) { .bxb.shake, .invbox { animation: none; } }
+
+.bxinfo { position: absolute; top: 4px; left: 4px; width: 30px; height: 30px; border-radius: 50%; border: 1px solid #d9b25a; background: #0e1a33; color: #f0d58a; font: italic 700 17px Georgia, serif; cursor: pointer; z-index: 3; }
+.bxinfo:hover { background: #1b2c52; }
+.bxodds { background: rgba(14,26,51,.7); border: 1px solid rgba(217,178,90,.35); border-radius: 10px; padding: 12px 14px; margin: 0 0 14px; }
+.bxodds h3 { margin: 0 0 6px; font-size: 15px; color: #f0d58a; }
+.bxodds ul { list-style: none; margin: 8px 0; padding: 0; display: grid; gap: 4px; }
+.bxodds li { display: grid; grid-template-columns: 1fr auto; gap: 0 10px; } .bxodds li b { color: #f0d58a; } .bxodds li em { grid-column: 1 / -1; font-size: 12px; opacity: .6; font-style: normal; }

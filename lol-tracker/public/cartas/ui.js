@@ -288,10 +288,22 @@
   }
   function invTab() {
     var n = (ui.acct && ui.acct.boxes) || 0;
-    return (ui.msg ? '<p class="err">' + esc(ui.msg) + '</p>' : '') + '<div class="invwrap"><div class="invbox' + (n ? '' : ' empty') + '">' + boxImg() + (n ? '<span class="invn">×' + n + '</span>' : '') + '</div><div class="invinfo"><h2 class="dedh">Cajas</h2>' +
-      '<p class="mut colhint">Dentro de cada caja hay una carta que no tengas, una skin o un efecto. Nunca te tocará algo repetido hasta que lo tengas todo.</p>' +
+    return (ui.msg ? '<p class="err">' + esc(ui.msg) + '</p>' : '') + '<div class="invwrap"><div class="invbox' + (n ? '' : ' empty') + '">' + boxImg() + (n ? '<span class="invn">×' + n + '</span>' : '') + '<button class="bxinfo" data-act="boxinfo" aria-label="Probabilidades de la caja" title="Probabilidades">i</button></div><div class="invinfo"><h2 class="dedh">Cajas</h2>' +
+      (ui.boxInfo ? oddsHtml() : '') + '<p class="mut colhint">Dentro de cada caja hay una carta que no tengas, una skin o un efecto. Nunca te tocará algo repetido hasta que lo tengas todo.</p>' +
       (n ? '<button class="btn cta big" data-act="boxopen">' + ic('caja') + ' Abrir caja</button><p class="mut">Tienes ' + n + (n === 1 ? ' caja' : ' cajas') + ' sin abrir.</p>' :
         '<p class="mut">No tienes cajas ahora mismo. Consíguelas completando misiones y subiendo de rango.</p><div class="btnrow"><button class="btn sec" data-act="nav" data-to="missions">' + ic('mision') + ' Misiones</button><button class="btn sec" data-act="nav" data-to="ladder">' + ic('trofeo') + ' Clasificación</button></div>') + '</div></div>';
+  }
+  function oddsHtml() {
+    var a = ui.acct || {}, W = { 'Común': 50, 'Rara': 30, 'Épica': 15, 'Legendaria': 5 };
+    var cards = D.cards.filter(function (c) { return !ui.ownedSet[c.id]; });
+    var skins = (window.CARTAS_SKINS || []).filter(function (k) { return (a.skins || []).indexOf(k.id) < 0; });
+    var fxs = DEPLOY_LIST.concat(SLEEVE_LIST, FIN_LIST).filter(function (e) { return e.price > 0 && fxHas && !fxHas(e.id); });
+    var pools = [['Carta nueva', cards.length, 5], ['Skin nueva', skins.length, 3], ['Efecto nuevo', fxs.length, 2]], tot = 0;
+    pools.forEach(function (p) { if (p[1]) tot += p[2]; });
+    var rows = pools.map(function (p) { return '<li><span>' + p[0] + '</span><b>' + (p[1] ? Math.round(p[2] / tot * 1000) / 10 + '%' : '—') + '</b><em>' + (p[1] ? p[1] + ' sin conseguir' : 'ya las tienes todas') + '</em></li>'; }).join('');
+    var wt = 0; cards.forEach(function (c) { wt += W[c.rarity]; });
+    var rr = wt ? '<p class="mut">Rareza de la carta (entre las que te faltan): ' + RANK.map(function (r) { var w = 0; cards.forEach(function (c) { if (c.rarity === r) w += W[c.rarity]; }); return r + ' ' + Math.round(w / wt * 1000) / 10 + '%'; }).join(' · ') + '</p>' : '';
+    return '<div class="bxodds"><h3>Probabilidades</h3><p class="mut">Se calculan con lo que aún no tienes: base 50% carta, 30% skin y 20% efecto. Si una categoría ya está completa, su parte se reparte entre las demás. Nunca sale algo repetido hasta que lo tengas todo.</p><ul>' + rows + '</ul>' + rr + '</div>';
   }
   function rewardInfo(r) {
     if (r.kind === 'card') { var c = CARD[r.id]; return { best: c.rarity, label: r.dup ? '¡Carta repetida!' : '¡Nueva carta!', name: c.name, sub: r.dup ? (r.lvUp ? 'Sube a nivel ' + r.lvl : 'Ya lo tenías todo: +1 copia') : c.rarity, visual: cardHtml(c, { lv: r.dup ? r.lvl : 1, skin: '' }) }; }
@@ -1519,6 +1531,7 @@
     if (act === 'msclaim') { return api('missionClaim', { id: el.dataset.id }).then(function (r) { if (r.data && r.data.user) setAcct(r.data.user); ui.msg = r.ok ? '' : (r.data.error || ''); render(); }); }
     if (act === 'rkclaim') { return api('rankClaim', { id: el.dataset.id }).then(function (r) { if (r.data && r.data.user) setAcct(r.data.user); ui.msg = r.ok ? '' : (r.data.error || ''); render(); }); }
     if (act === 'goinv') { ui.screen = 'deck'; ui.colTab = 'inv'; ui.dedit = null; window.scrollTo(0, 0); return render(); }
+    if (act === 'boxinfo') { ui.boxInfo = !ui.boxInfo; return renderDeck(); }
     if (act === 'boxclose') { ui.box = null; return renderDeck(); }
     if (act === 'boxopen') {
       if (ui.box || !ui.acct || !ui.acct.boxes) return;

@@ -619,8 +619,8 @@ var D={
   }
   },
   {
-   "id": "lihone-gabimaru",
-   "name": "Lihone Gabimaru",
+   "id": "lihone-rudeus",
+   "name": "Lihone Rudeus",
    "person": "Lihone",
    "themes": [
     "Anime"

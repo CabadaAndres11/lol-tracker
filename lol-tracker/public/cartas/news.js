@@ -1,6 +1,8 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-02', tag: 'Corrección', title: 'Pedir refuerzos en partidas online',
+      items: ['Corregido un fallo que impedía lanzar «Pedir refuerzos» en el Versus de 4 y en partidas online: la acción daba error en tu pantalla y la partida se quedaba como congelada hasta la siguiente actualización. Ahora se juega con normalidad y la carta que consigues la decide el servidor.'] },
     { date: '2026-11-02', tag: 'Novedad', title: 'Nuevo pack de victoria y derrota: Hechizo arcano',
       items: ['Nuevo pack «Hechizo arcano» (50 monedas), con el mismo toque mágico del despliegue arcano. Victoria: un círculo mágico se enciende tras un banner violeta, las letras se materializan y suben destellos violetas y celestes.',
         'Derrota: el círculo se apaga entre parpadeos, las letras caen titilando, el banner se agrieta y caen motas de energía.',

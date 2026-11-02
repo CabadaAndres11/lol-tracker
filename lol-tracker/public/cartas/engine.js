@@ -422,7 +422,7 @@
         if (s.p[p].life >= s.p[1 - p].life) return 'Solo si tu vida es menor que la del rival.';
         return s.p[p].hand.length - 1 >= handCap(s) ? 'Tu mano está llena.' : '';
       },
-      run: function (s, p) { var id = s.rng() < .5 ? 'lihone-viego' : 'aitorlg-renata'; s.p[p].hand.push(mk(s, id, p)); mergeCheck(s, p); return 'consigues a ' + CARD[id].name; } },
+      run: function (s, p) { var id = (typeof s.rng === 'function' ? s.rng() : Math.random()) < .5 ? 'lihone-viego' : 'aitorlg-renata'; s.p[p].hand.push(mk(s, id, p)); mergeCheck(s, p); return 'consigues a ' + CARD[id].name; } },
     'cambio-de-linea': { run: function (s, p, t) { var P = s.p[p]; P.mesa[P.mesa.indexOf(t)] = null; t.hp = maxHp(t); t.tmp = { atk: 0, hp: 0, red: 0 }; delete P.target[t.uid]; P.hand.push(t); return 'vuelve a la mano con la vida completa'; } },
     parche: {
       ok: function (s, p) { return s.refreshN[p] >= 5 ? '' : 'Necesitas al menos 5 actualizaciones de tienda en esta partida.'; },

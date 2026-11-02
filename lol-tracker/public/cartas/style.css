@@ -1978,3 +1978,24 @@ body.tutmode .freezebtn { pointer-events: none; opacity: .35; }
 .gkh { background: radial-gradient(circle, rgba(186,230,253,.55) 0%, rgba(244,114,182,.25) 45%, rgba(167,139,250,0) 72%); }
 .gkx { border: 6px solid #fff; box-shadow: 0 0 40px 12px rgba(125,211,252,.9), inset 0 0 30px rgba(244,114,182,.8); }
 .gkf { background: radial-gradient(circle, #fff 0%, rgba(255,255,255,.85) 25%, rgba(244,114,182,.35) 60%, rgba(244,114,182,0) 75%); }
+
+/* Despliegues Anime: Soldados de sombra, Kamehameha, Grimorio */
+.fxshp{position:fixed;z-index:7990;border-radius:50%;pointer-events:none;opacity:0;background:radial-gradient(ellipse,rgba(15,5,35,.95) 0%,rgba(76,29,149,.75) 45%,rgba(124,58,237,0) 72%)}
+.fxsm{position:fixed;z-index:8050;border-radius:50%;pointer-events:none;opacity:0;background:radial-gradient(circle,rgba(30,10,60,.85) 0%,rgba(91,33,182,.55) 45%,rgba(124,58,237,0) 70%)}
+.fxten{position:fixed;z-index:8040;pointer-events:none;opacity:0;transform-origin:50% 100%;border-radius:50% 50% 0 0;background:linear-gradient(to top,rgba(20,6,45,.95),rgba(109,40,217,.6),rgba(167,139,250,0))}
+.fxeye{position:fixed;z-index:8200;pointer-events:none;opacity:0;border-radius:50%;background:#c4b5fd;box-shadow:0 0 12px 4px #7c3aed,0 0 26px 8px rgba(124,58,237,.7)}
+.fxk{position:fixed;z-index:7995;pointer-events:none;opacity:0;image-rendering:pixelated;background-repeat:no-repeat}
+.fxkau{position:fixed;z-index:7994;border-radius:50%;pointer-events:none;opacity:0;background:radial-gradient(circle,rgba(186,230,253,.55) 0%,rgba(56,189,248,.3) 50%,rgba(56,189,248,0) 72%)}
+.fxgri{position:fixed;z-index:8040;pointer-events:none;opacity:0;perspective:900px;transform-style:preserve-3d}
+.fxgri>div{position:absolute;pointer-events:none}
+.fxgau{border-radius:50%;opacity:0;background:radial-gradient(circle,rgba(0,0,0,.55) 0%,rgba(127,29,29,.5) 38%,rgba(185,28,28,.18) 56%,rgba(0,0,0,0) 72%)}
+.fxgbk{border-radius:6px 12px 12px 6px;background:linear-gradient(135deg,#1c1917,#0c0a09);box-shadow:0 14px 36px rgba(0,0,0,.7),0 0 0 2px #292524 inset}
+.fxgpg{border-radius:3px 8px 8px 3px;background:repeating-linear-gradient(to bottom,#f5ecd0 0 5px,#e7dcb8 5px 6px);box-shadow:inset 8px 0 14px rgba(0,0,0,.35)}
+.fxgg{border-radius:12px;opacity:0;background:radial-gradient(circle,#fff 0%,#fef3c7 30%,rgba(250,204,21,.65) 55%,rgba(250,204,21,0) 75%)}
+.fxgcv{transform-origin:0 50%;transform-style:preserve-3d}
+.fxgcv>div{position:absolute;inset:0;border-radius:6px 12px 12px 6px;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.fxgf{display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 30% 25%,#3a3330 0%,#1a1614 45%,#0a0807 100%);box-shadow:0 0 0 3px #3b2f1f inset,0 0 0 6px #0a0807 inset,0 10px 28px rgba(127,29,29,.5)}
+.fxgem{display:block;width:62%;filter:drop-shadow(0 2px 3px rgba(0,0,0,.8))}
+.fxgem svg,.fxgem2 svg{width:100%;height:100%;display:block}
+.fxgb{transform:rotateY(180deg);background:linear-gradient(135deg,#292524,#0c0a09);box-shadow:0 0 0 3px #3b2f1f inset}
+.fxgem2{border-radius:50%;opacity:0;filter:drop-shadow(0 0 14px #facc15) drop-shadow(0 0 30px #fde68a)}

@@ -1189,7 +1189,10 @@
     { id: 'meteoro', name: 'Meteoro dorado', desc: 'La carta cae como un meteoro envuelta en luz dorada, gira en el aire y se estrella en su hueco con una onda de choque y chispas.', price: 30, ms: 2900, gap: 600 },
     { id: 'arcano', name: 'Aparición arcana', desc: 'Un círculo mágico se enciende en el aire y la carta se materializa entre destellos violetas antes de posarse en su hueco.', price: 30, ms: 2800, gap: 550 },
     { id: 'perro', name: 'Perro mensajero', desc: 'Un perro cruza la pantalla corriendo y arrastra la carta con una cuerda hasta su hueco; ahí la suelta y la carta se levanta de un salto.', price: 30, ms: 3300, gap: 700 },
-    { id: 'fichas', name: 'Reparto de casino', desc: 'Una carta sale lanzada girando como en un reparto de póker, cae sobre una lluvia de fichas, se da la vuelta y vuela a su hueco levantando fichas al aterrizar.', price: 30, ms: 3000, gap: 600 }
+    { id: 'fichas', name: 'Reparto de casino', desc: 'Una carta sale lanzada girando como en un reparto de póker, cae sobre una lluvia de fichas, se da la vuelta y vuela a su hueco levantando fichas al aterrizar.', price: 30, ms: 3000, gap: 600 },
+    { id: 'sombras', name: 'Soldados de sombra', desc: 'Un charco de sombras moradas se abre en el suelo, la carta se va formando como una silueta de humo con ojos brillantes y, al completarse, vuela a su hueco.', price: 30, ms: 3200, gap: 650 },
+    { id: 'kame', name: 'Kamehameha', desc: 'Un guerrero carga su energía, dispara un Kamehameha que cruza la pantalla y el rayo deja la carta en su hueco.', price: 30, ms: 3300, gap: 700 },
+    { id: 'grimorio', name: 'Grimorio de cinco hojas', desc: 'Un grimorio negro con un trébol de cinco hojas flota entre humo, se abre con un destello y de sus páginas sale la carta, que vuela a su hueco.', price: 30, ms: 3400, gap: 700 }
   ];
   try { new Image().src = 'img/dog.webp'; } catch (e) {}
   var SLEEVE_LIST = [
@@ -1320,6 +1323,129 @@
         { transform: T(cx, cy - 12, sc * 1.03, 360, 0), filter: G(.8), opacity: 1, offset: .72, easing: 'cubic-bezier(.5,0,.8,.4)' },
         { transform: T(0, 6, .92, 360, 0), filter: G(.6), opacity: 1, offset: .9, easing: 'cubic-bezier(.2,.9,.3,1)' },
         { transform: T(0, 0, 1, 360, 0), filter: G(0), opacity: 1, offset: 1 }
+      ], { duration: dur, delay: delay, fill: 'both' });
+    },
+    'sombras': function (wrap, r, delay, dur) {
+      var W = window.innerWidth, H = window.innerHeight, cx = W / 2 - (r.left + r.width / 2), cy = H / 2 - (r.top + r.height / 2) - 10;
+      var sc = Math.max(1.4, Math.min(3, Math.min(300, W * .62, H * .5 * 5 / 7) / r.width)) * 1.05, mx = r.left + r.width / 2 + cx, my = r.top + r.height / 2 + cy;
+      var T = function (x, y, z) { return 'perspective(1100px) translate(' + x + 'px,' + y + 'px) scale(' + z + ')'; };
+      var SIL = 'brightness(0) drop-shadow(0 0 16px rgba(139,92,246,.95)) drop-shadow(0 0 40px rgba(76,29,149,.9))';
+      var G = function (a) { return 'drop-shadow(0 0 ' + Math.round(6 + a * 26) + 'px rgba(139,92,246,' + (.2 + a * .8).toFixed(2) + ')) drop-shadow(0 18px 24px rgba(0,0,0,.5))'; };
+      var E = function (cls, x, y, w, h, kf, d0, du) { var e = document.createElement('i'); e.className = cls; e.style.cssText = 'left:' + x + 'px;top:' + y + 'px;width:' + w + 'px;height:' + h + 'px'; document.body.appendChild(e); var a = e.animate(kf, { duration: du, delay: delay + d0, fill: 'both' }); a.onfinish = function () { e.remove(); }; return e; };
+      var cw = sc * r.width, ch = sc * r.height, i;
+      // charco de sombras bajo la carta
+      E('fxshp', mx, my + ch * .46, cw * 1.9, ch * .5, [{ transform: 'translate(-50%,-50%) scale(.1)', opacity: 0, offset: 0 }, { transform: 'translate(-50%,-50%) scale(1)', opacity: .95, offset: .2 }, { transform: 'translate(-50%,-50%) scale(1.08)', opacity: .9, offset: .62 }, { transform: 'translate(-50%,-50%) scale(1.25)', opacity: 0, offset: 1 }], 0, dur * .78);
+      // humo morado que sube y se enrosca alrededor de la silueta
+      for (i = 0; i < 22; i++) {
+        var ax = (Math.random() - .5) * cw * 1.5, sz = cw * (.35 + Math.random() * .45), st = dur * (.04 + Math.random() * .42), rise = ch * (.5 + Math.random() * .9), dr = (Math.random() - .5) * 200;
+        E('fxsm', mx + ax, my + ch * (.1 + Math.random() * .4), sz, sz, [{ transform: 'translate(-50%,-50%) scale(.3) rotate(0deg)', opacity: 0, offset: 0 }, { transform: 'translate(-50%,-' + (rise * .5 + 50) + 'px) scale(.9) rotate(' + dr * .5 + 'deg)', opacity: .75, offset: .4 }, { transform: 'translate(-50%,-' + (rise + 50) + 'px) scale(1.3) rotate(' + dr + 'deg)', opacity: 0, offset: 1 }], st, dur * .45);
+      }
+      // zarcillos de sombra que suben
+      for (i = 0; i < 9; i++) {
+        var tx = mx + (Math.random() - .5) * cw * 1.3, th = ch * (.7 + Math.random() * .5), st2 = dur * (.05 + Math.random() * .35);
+        E('fxten', tx, my + ch * .45, 10 + Math.random() * 12, th, [{ transform: 'translate(-50%,-100%) scaleY(.05)', opacity: 0, offset: 0 }, { transform: 'translate(-50%,-100%) scaleY(1)', opacity: .85, offset: .45 }, { transform: 'translate(-50%,-100%) scaleY(1.1)', opacity: 0, offset: 1 }], st2, dur * .4);
+      }
+      // ojos brillantes de la sombra
+      [-1, 1].forEach(function (sd) { E('fxeye', mx + sd * cw * .17, my - ch * .27, 15 * (sc / 2), 6 * (sc / 2), [{ transform: 'translate(-50%,-50%) scaleY(.1)', opacity: 0, offset: 0 }, { transform: 'translate(-50%,-50%) scaleY(1)', opacity: 1, offset: .12 }, { transform: 'translate(-50%,-50%) scaleY(.1)', opacity: 1, offset: .2 }, { transform: 'translate(-50%,-50%) scaleY(1)', opacity: 1, offset: .3 }, { transform: 'translate(-50%,-50%) scaleY(1)', opacity: 1, offset: .86 }, { transform: 'translate(-50%,-50%) scaleY(1)', opacity: 0, offset: 1 }], dur * .16, dur * .46); });
+      // destello morado y chispas al aterrizar
+      var sx = r.left + r.width / 2, sy = r.top + r.height / 2;
+      for (i = 0; i < 14; i++) {
+        var a = (i / 14) * Math.PI * 2 + Math.random() * .3, dist = 60 + Math.random() * 90, sp = document.createElement('i');
+        sp.className = 'fxspark vio'; sp.style.cssText = 'left:' + sx + 'px;top:' + sy + 'px'; document.body.appendChild(sp);
+        sp.animate([{ transform: 'translate(-50%,-50%) scale(1)', opacity: 0, offset: 0 }, { transform: 'translate(-50%,-50%) scale(1)', opacity: 1, offset: .08 }, { transform: 'translate(' + (Math.cos(a) * dist) + 'px,' + (Math.sin(a) * dist) + 'px) scale(.1)', opacity: 0, offset: 1 }], { duration: 700 + Math.random() * 300, delay: delay + dur * .9, fill: 'both', easing: 'ease-out' }).onfinish = (function (n) { return function () { n.remove(); }; })(sp);
+      }
+      snd('magic', delay + dur * .1); snd('magic', delay + dur * .55);
+      impact(sx, sy, delay + dur * .9);
+      return wrap.animate([
+        { transform: T(cx, cy + 70, sc * .85), filter: SIL, opacity: 0, offset: 0 },
+        { transform: T(cx, cy + 40, sc * .92), filter: SIL, opacity: .55, offset: .22, easing: 'ease-out' },
+        { transform: T(cx, cy + 10, sc), filter: SIL, opacity: .92, offset: .5, easing: 'ease-in' },
+        { transform: T(cx, cy, sc), filter: 'brightness(2.4) saturate(.6) ' + G(1), opacity: 1, offset: .6, easing: 'ease-out' },
+        { transform: T(cx, cy - 8, sc * 1.02), filter: G(.8), opacity: 1, offset: .72, easing: 'cubic-bezier(.5,0,.8,.4)' },
+        { transform: T(0, 5, .94), filter: G(.8), opacity: 1, offset: .9, easing: 'cubic-bezier(.2,.9,.3,1)' },
+        { transform: T(0, 0, 1), filter: G(0), opacity: 1, offset: 1 }
+      ], { duration: dur, delay: delay, fill: 'both' });
+    },
+    'kame': function (wrap, r, delay, dur) {
+      var k = Math.max(1.5, r.height / 110), sx = r.left + r.width / 2, sy = r.top + r.height / 2;
+      var SH = 'img/kame.png';
+      var FR = [[13, 50], [67, 99], [123, 154], [163, 226], [245, 278], [300, 338], [362, 400]]; // fotogramas de Goku en la hoja (x0, x1)
+      var Y0 = 40, Y1 = 110, FEET = 105, BC = 78; // fila de pies y centro del rayo en la hoja
+      var feetY = sy + (FEET - BC) * k, top = feetY - (FEET - Y0) * k, gx = Math.max(6, sx - r.width * .5 - 520 * k / 3.2), hands = gx + 52 * k;
+      var piece = function (x0, x1, y0, y1) { var e = document.createElement('div'); e.className = 'fxk'; e.style.width = (x1 - x0 + 1) * k + 'px'; e.style.height = (y1 - y0 + 1) * k + 'px'; e.style.backgroundImage = 'url(' + SH + ')'; e.style.backgroundSize = 820 * k + 'px ' + 158 * k + 'px'; e.style.backgroundPosition = -x0 * k + 'px ' + -y0 * k + 'px'; document.body.appendChild(e); return e; };
+      var all = [], A = function (e, kf, o) { all.push(e); var a = e.animate(kf, Object.assign({ fill: 'both', delay: delay }, o)); a.onfinish = function () { e.remove(); }; return a; };
+      var fu = [0, .09, .17, .25, .43, .51, .57], fe = [.09, .17, .25, .43, .51, .57, .93]; // cuándo se ve cada fotograma
+      FR.forEach(function (f, n) {
+        var e = piece(f[0], f[1], Y0, Y1), w = (f[1] - f[0] + 1) * k, left = n === 6 ? hands - w : gx + 18 * k - w / 2 + (n === 3 ? 0 : 0);
+        e.style.left = left + 'px'; e.style.top = top + 'px';
+        var a0 = fu[n], a1 = fe[n], kf = [{ opacity: 0, offset: 0 }]; if (a0 > 0) kf.push({ opacity: 0, offset: a0 - .001 }); kf.push({ opacity: 1, offset: a0 }, { opacity: 1, offset: a1 - .001 }, { opacity: 0, offset: a1 }, { opacity: 0, offset: 1 });
+        A(e, kf, { duration: dur });
+      });
+      // aura azul alrededor de Goku mientras carga
+      var au = document.createElement('i'); au.className = 'fxkau'; au.style.cssText = 'left:' + (gx + 18 * k) + 'px;top:' + (feetY - 30 * k) + 'px;width:' + 60 * k + 'px;height:' + 60 * k + 'px'; document.body.appendChild(au);
+      A(au, [{ transform: 'translate(-50%,-50%) scale(.3)', opacity: 0, offset: 0 }, { transform: 'translate(-50%,-50%) scale(1)', opacity: .85, offset: .3 }, { transform: 'translate(-50%,-50%) scale(1.3)', opacity: .9, offset: .55 }, { transform: 'translate(-50%,-50%) scale(1.8)', opacity: 0, offset: .65 }, { opacity: 0, offset: 1 }], { duration: dur });
+      // rayo: arranque + tramo central que se estira + cabeza que avanza hasta el hueco
+      var SW = 127 * k, HW = 129 * k, headCx = sx, startX = hands - 4 * k, headTargetLeft = headCx - HW / 2, midLen = Math.max(10, headTargetLeft - (startX + SW)), midW = 121 * k;
+      var by = sy - (BC - 15) * k, bh = (142 - 15 + 1) * k;
+      var st = piece(402, 528, 15, 142), mi = piece(530, 650, 15, 142), he = piece(652, 779, 15, 142);
+      st.style.left = startX + 'px'; st.style.top = by + 'px'; mi.style.left = startX + SW + 'px'; mi.style.top = by + 'px'; mi.style.transformOrigin = '0 50%'; he.style.top = by + 'px'; he.style.left = startX + SW + 'px';
+      var t0 = .57, t1 = .79, tf = .93;
+      A(st, [{ opacity: 0, transform: 'scale(.2)', offset: 0 }, { opacity: 0, transform: 'scale(.2)', offset: t0 }, { opacity: 1, transform: 'scale(1)', offset: t0 + .05 }, { opacity: 1, transform: 'scale(1)', offset: tf - .02 }, { opacity: 0, transform: 'scale(1)', offset: 1 }], { duration: dur });
+      st.style.transformOrigin = '0 50%';
+      var sxm = midLen / midW;
+      A(mi, [{ opacity: 0, transform: 'scaleX(.01)', offset: 0 }, { opacity: 0, transform: 'scaleX(.01)', offset: t0 + .02 }, { opacity: 1, transform: 'scaleX(.01)', offset: t0 + .04 }, { opacity: 1, transform: 'scaleX(' + sxm + ')', offset: t1, easing: 'cubic-bezier(.3,0,.5,1)' }, { opacity: 1, transform: 'scaleX(' + sxm + ')', offset: tf - .02 }, { opacity: 0, transform: 'scaleX(' + sxm + ')', offset: 1 }], { duration: dur });
+      A(he, [{ opacity: 0, transform: 'translateX(0)', offset: 0 }, { opacity: 0, transform: 'translateX(0)', offset: t0 + .02 }, { opacity: 1, transform: 'translateX(0)', offset: t0 + .04 }, { opacity: 1, transform: 'translateX(' + midLen + 'px)', offset: t1, easing: 'cubic-bezier(.3,0,.5,1)' }, { opacity: 1, transform: 'translateX(' + midLen + 'px)', offset: tf - .02 }, { opacity: 0, transform: 'translateX(' + midLen + 'px)', offset: 1 }], { duration: dur });
+      snd('magic', delay + dur * .3); snd('hit', delay + dur * .6);
+      impact(sx, sy, delay + dur * t1);
+      // la carta viaja con la cabeza del rayo y se queda en su hueco
+      var G = function (a) { return 'drop-shadow(0 0 ' + Math.round(6 + a * 28) + 'px rgba(80,200,255,' + (.2 + a * .8).toFixed(2) + ')) drop-shadow(0 18px 24px rgba(0,0,0,.5))'; };
+      var from = hands - sx;
+      return wrap.animate([
+        { transform: 'translateX(' + from + 'px) scale(.5)', filter: G(1), opacity: 0, offset: 0 },
+        { transform: 'translateX(' + from + 'px) scale(.5)', filter: G(1), opacity: 0, offset: t0 + .03 },
+        { transform: 'translateX(' + from + 'px) scale(.9)', filter: G(1), opacity: 1, offset: t0 + .07 },
+        { transform: 'translateX(' + (from * .02) + 'px) scale(1.25)', filter: G(1), opacity: 1, offset: t1, easing: 'cubic-bezier(.3,0,.5,1)' },
+        { transform: 'translateX(0) scale(1.08)', filter: G(.8), opacity: 1, offset: t1 + .06, easing: 'ease-out' },
+        { transform: 'translateX(0) scale(1)', filter: G(0), opacity: 1, offset: 1 }
+      ], { duration: dur, delay: delay, fill: 'both' });
+    },
+    'grimorio': function (wrap, r, delay, dur) {
+      var W = window.innerWidth, H = window.innerHeight, cx = W / 2 - (r.left + r.width / 2), cy = H / 2 - (r.top + r.height / 2) - 10;
+      var sc = Math.max(1.4, Math.min(3, Math.min(300, W * .62, H * .5 * 5 / 7) / r.width)) * 1.0, mx = r.left + r.width / 2 + cx, my = r.top + r.height / 2 + cy;
+      var T = function (x, y, z) { return 'perspective(1100px) translate(' + x + 'px,' + y + 'px) scale(' + z + ')'; };
+      var G = function (a) { return 'drop-shadow(0 0 ' + Math.round(6 + a * 28) + 'px rgba(250,230,120,' + (.2 + a * .8).toFixed(2) + ')) drop-shadow(0 18px 24px rgba(0,0,0,.5))'; };
+      var bw = Math.round(sc * r.width * 1.05), bh = Math.round(bw * 1.3);
+      var mk = function (cls, parent, w, h, x, y) { var e = document.createElement('div'); e.className = cls; e.style.cssText = 'width:' + w + 'px;height:' + h + 'px;left:' + x + 'px;top:' + y + 'px'; parent.appendChild(e); return e; };
+      var clover = '<svg viewBox="-50 -50 100 100"><defs><linearGradient id="gcl" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4b3a24"/><stop offset=".5" stop-color="#9a7b43"/><stop offset="1" stop-color="#33260f"/></linearGradient></defs>' + [0, 72, 144, 216, 288].map(function (a) { return '<path transform="rotate(' + a + ')" d="M0 -3 C-19 -10 -24 -34 -10 -39 C-4 -41 0 -35 0 -31 C0 -35 4 -41 10 -39 C24 -34 19 -10 0 -3Z" fill="url(#gcl)" stroke="#1a1208" stroke-width="1.4"/>'; }).join('') + '<path d="M0 0 L4 22" stroke="url(#gcl)" stroke-width="3.4" stroke-linecap="round"/></svg>';
+      var box = document.createElement('div'); box.className = 'fxgri'; box.style.cssText = 'left:' + mx + 'px;top:' + my + 'px;width:' + bw + 'px;height:' + bh + 'px'; document.body.appendChild(box);
+      var aura = mk('fxgau', box, bw * 2, bw * 2, bw / 2 - bw, bh / 2 - bw);
+      var back = mk('fxgbk', box, bw, bh, 0, 0), pages = mk('fxgpg', box, bw * .94, bh * .95, bw * .04, bh * .025);
+      var glow = mk('fxgg', box, bw * .9, bh * .9, bw * .05, bh * .05);
+      var cover = mk('fxgcv', box, bw, bh, 0, 0); cover.innerHTML = '<div class="fxgf"><span class="fxgem">' + clover + '</span></div><div class="fxgb"></div>';
+      var bigGlow = mk('fxgem2', box, bw * .6, bw * .6, bw * .2, bh * .5 - bw * .3); bigGlow.innerHTML = clover;
+      var all = [box], A = function (e, kf, o) { var a = e.animate(kf, Object.assign({ fill: 'both', delay: delay }, o)); return a; };
+      A(box, [{ transform: 'translate(-50%,-50%) translateY(60px) rotate(-30deg) scale(.2)', opacity: 0, offset: 0 }, { transform: 'translate(-50%,-50%) translateY(0) rotate(-14deg) scale(1)', opacity: 1, offset: .16, easing: 'ease-out' }, { transform: 'translate(-50%,-50%) translateY(-10px) rotate(-12deg) scale(1)', opacity: 1, offset: .3 }, { transform: 'translate(-50%,-50%) translateY(-6px) rotate(-6deg) scale(1.02)', opacity: 1, offset: .5 }, { transform: 'translate(-50%,-50%) translateY(10px) rotate(0deg) scale(.9)', opacity: 1, offset: .66 }, { transform: 'translate(-50%,-50%) translateY(40px) rotate(0deg) scale(.6)', opacity: 0, offset: .8 }, { opacity: 0, offset: 1 }], { duration: dur }).onfinish = function () { box.remove(); };
+      A(aura, [{ transform: 'scale(.3) rotate(0deg)', opacity: 0, offset: 0 }, { transform: 'scale(1) rotate(60deg)', opacity: .9, offset: .3 }, { transform: 'scale(1.1) rotate(160deg)', opacity: .8, offset: .62 }, { transform: 'scale(1.3) rotate(220deg)', opacity: 0, offset: .82 }, { opacity: 0, offset: 1 }], { duration: dur });
+      // la tapa se abre (gira sobre el lomo) y la luz sale por las páginas
+      A(cover, [{ transform: 'rotateY(0deg)', offset: 0 }, { transform: 'rotateY(0deg)', offset: .33 }, { transform: 'rotateY(-168deg)', offset: .5, easing: 'cubic-bezier(.3,.1,.3,1)' }, { transform: 'rotateY(-168deg)', offset: 1 }], { duration: dur });
+      A(glow, [{ opacity: 0, transform: 'scale(.6)', offset: 0 }, { opacity: 0, transform: 'scale(.6)', offset: .38 }, { opacity: 1, transform: 'scale(1.1)', offset: .5 }, { opacity: .8, transform: 'scale(1.5)', offset: .64 }, { opacity: 0, transform: 'scale(1.9)', offset: .8 }, { opacity: 0, offset: 1 }], { duration: dur });
+      A(bigGlow, [{ opacity: 0, transform: 'scale(.4)', offset: 0 }, { opacity: 0, transform: 'scale(.4)', offset: .3 }, { opacity: .95, transform: 'scale(1)', offset: .42 }, { opacity: 0, transform: 'scale(1.6)', offset: .56 }, { opacity: 0, offset: 1 }], { duration: dur });
+      // motas de luz que suben del libro
+      for (var i = 0; i < 16; i++) {
+        var sp = document.createElement('i'), x = mx + (Math.random() - .5) * bw * .9, rise = bh * (.5 + Math.random() * .9), d0 = dur * (.4 + Math.random() * .2);
+        sp.className = 'fxspark'; sp.style.cssText = 'left:' + x + 'px;top:' + my + 'px'; document.body.appendChild(sp);
+        sp.animate([{ transform: 'translate(-50%,-50%) scale(.4)', opacity: 0, offset: 0 }, { transform: 'translate(-50%,-50%) scale(1)', opacity: 1, offset: .2 }, { transform: 'translate(-50%,' + (-rise) + 'px) scale(.2)', opacity: 0, offset: 1 }], { duration: 800 + Math.random() * 500, delay: delay + d0, fill: 'both', easing: 'ease-out' }).onfinish = (function (n) { return function () { n.remove(); }; })(sp);
+      }
+      snd('magic', delay + dur * .12); snd('magic', delay + dur * .42);
+      impact(r.left + r.width / 2, r.top + r.height / 2, delay + dur * .9);
+      return wrap.animate([
+        { transform: T(cx, cy + 30, .35), filter: G(1), opacity: 0, offset: 0 },
+        { transform: T(cx, cy + 30, .35), filter: G(1), opacity: 0, offset: .46 },
+        { transform: T(cx, cy + 10, .6), filter: G(1) + ' brightness(2)', opacity: .9, offset: .53, easing: 'ease-out' },
+        { transform: T(cx, cy - 30, sc), filter: G(1) + ' brightness(1.2)', opacity: 1, offset: .68, easing: 'ease-in-out' },
+        { transform: T(cx, cy - 36, sc * 1.03), filter: G(.7), opacity: 1, offset: .78, easing: 'cubic-bezier(.5,0,.8,.4)' },
+        { transform: T(0, 5, .94), filter: G(.8), opacity: 1, offset: .92, easing: 'cubic-bezier(.2,.9,.3,1)' },
+        { transform: T(0, 0, 1), filter: G(0), opacity: 1, offset: 1 }
       ], { duration: dur, delay: delay, fill: 'both' });
     },
     'perro': function (wrap, r, delay, dur) {

@@ -140,6 +140,7 @@
     var s = { rs: (seed == null ? (Date.now() & 0xffffff) : seed) | 0, uidn: [1, 1], fightN: 0, round: 0, shops: 0, phase: 'prep', shopOpen: false, first: 0, over: false, winner: -1, reason: '', log: [], frames: [], p: [newPlayer(deckA), newPlayer(deckB)], lastBall: [null, null], refreshN: [0, 0], err: '', acts: [] };
     bindRng(s);
     if (opts && opts.pvp) s.pvp = true;
+    if (opts && opts.ai) s.aiLv = [(opts.aiA | 0), opts.ai | 0]; // dificultad de la IA por jugador: 0 Normal, 1 Difícil, 2 Experto
     if (opts && opts.mode === 'revive') { s.mode = 'revive'; s.maxLife = CFG.reviveLife; s.p.forEach(function (P) { P.life = CFG.reviveLife; }); }
     if (opts && opts.lv) s.lv = opts.lv;
     if (opts && opts.sk) s.sk = opts.sk;
@@ -186,6 +187,7 @@
     s.shopOpen = false;
     [0, 1].forEach(function (p) {
       var got = income(s, p);
+      if (!s.pvp && s.aiLv) aiBonus(s, p);
       if (p === 0 || s.pvp) say(s, pv(s, p, 'Ronda ' + s.round + ': +' + got + ' de oro' + (s.p[p].lastInt ? ' (incluye +' + s.p[p].lastInt + ' de interés por ahorrar)' : '') + '.', 'El rival cobra +' + got + ' de oro.'));
       s.p[p].target = {}; s.p[p].anime = 0; s.p[p].fl = {};
     });
@@ -506,32 +508,73 @@
   function setVoley(s, p, uid, mode) { s.p[p].voley[uid] = mode; }
 
   // ---------- IA ----------
+  // ---------- IA: dificultades (0 Normal, 1 Difícil, 2 Experto) ----------
+  function aiLv(s, p) { return (s.aiLv && s.aiLv[p]) || 0; }
+  // Ventajas de la IA: Difícil +1 de oro en las rondas de tienda; Experto +2 de oro en las rondas de tienda y se cura 2 de vida si no la tiene completa
+  function aiBonus(s, p) {
+    var lv = aiLv(s, p), P = s.p[p];
+    if (!lv || s.round < 2) return;
+    if (s.round % CFG.shopEvery === 1) P.gold += (lv >= 2 ? 2 : 1);
+    var ML = s.maxLife || CFG.life;
+    if (lv >= 2 && P.life > 0 && P.life < ML) { var h = Math.min(2, ML - P.life); P.life += h; if (!s.pvp) say(s, 'El rival (Experto) se cura ' + h + ' de vida.'); }
+  }
+  function heldThemes(P) {
+    var m = {};
+    P.hand.concat(mesaTroops(P)).forEach(function (i) { if (i && isTroop(i)) card(i).themes.forEach(function (t) { m[t] = (m[t] || 0) + 1; }); });
+    return m;
+  }
+  function aiCardScore(s, P, c, lv, held) {
+    var sc = c.type === 'tropa' ? (c.atk + c.hp * 0.45) / (1 + c.cost * 0.25) : 1.5;
+    if (lv >= 1) {
+      if (c.type === 'tropa') {
+        c.themes.forEach(function (t) { if (held[t] > 0) sc += 2.2; });
+        var copies = P.hand.concat(mesaTroops(P)).filter(function (i) { return i && i.id === c.id; }).length;
+        if (copies >= 2) sc += lv >= 2 ? 7 : 4; else if (copies === 1) sc += 2.5;
+        if (lv >= 2 && c.rarity === 'Legendaria') sc += 2;
+      } else if (c.theme && held[c.theme] >= 2) sc += 2;
+    }
+    return sc;
+  }
   function aiShop(s, p) {
     var P = s.p[p];
     if (!s.shopOpen) return;
-    var guard = 0, refreshes = 0;
+    var lv = aiLv(s, p), maxRef = lv >= 1 ? 5 : 3, guard = 0, refreshes = 0;
     while (guard++ < 14) {
-      var best = -1, bestScore = -1, troopsHeld = P.hand.filter(isTroop).length + mesaTroops(P).length;
+      var best = -1, bestScore = -1, troopsHeld = P.hand.filter(isTroop).length + mesaTroops(P).length, held = lv >= 1 ? heldThemes(P) : {};
+      var keep = lv >= 1 && troopsHeld >= 4 ? Math.floor(P.gold / CFG.interest.per) * CFG.interest.per : 0; // oro que conserva para cobrar interés
+      var full = P.hand.length >= handCap(s), bestFull = -1, bestFullScore = -1;
       P.offers.forEach(function (id, k) {
         var c = CARD[id];
-        if (!c || c.cost > P.gold || P.hand.length >= handCap(s)) return;
-        var score = c.type === 'tropa' ? (c.atk + c.hp * 0.45) / (1 + c.cost * 0.25) + (troopsHeld < 4 ? 6 : 0) : 1.5;
-        score += s.rng() * 0.8;
+        if (!c || c.cost > P.gold) return;
+        var score = aiCardScore(s, P, c, lv, held) + (c.type === 'tropa' && troopsHeld < 4 ? 6 : 0) + s.rng() * 0.8;
+        if (full) { if (score > bestFullScore) { bestFullScore = score; bestFull = k; } return; }
+        if (keep && P.gold - c.cost < keep && score < 8) return;
         if (score > bestScore) { bestScore = score; best = k; }
       });
       if (best >= 0) { buy(s, p, best); continue; }
-      if (troopsHeld < 4 && refreshes < 3 && P.gold >= refreshCost(s, p) + 1 && P.hand.length < handCap(s)) { if (refresh(s, p)) { refreshes++; continue; } }
+      if (full && lv >= 2 && bestFull >= 0) { // Experto: vende la tropa que peor encaja para comprar una mejor
+        var worst = -1, ws = 1e9;
+        P.hand.forEach(function (i, k) { if (!i || !isTroop(i)) return; var v = aiCardScore(s, P, card(i), 1, held); if (v < ws) { ws = v; worst = k; } });
+        if (worst >= 0 && bestFullScore >= ws + 3 && sell(s, p, 'hand', worst)) continue;
+      }
+      if (troopsHeld < 4 && refreshes < maxRef && P.gold >= refreshCost(s, p) + 1 && P.hand.length < handCap(s)) { if (refresh(s, p)) { refreshes++; continue; } }
       break;
     }
   }
   function aiPrep(s, p) {
-    var P = s.p[p], me = P;
+    var P = s.p[p], me = P, lv = aiLv(s, p);
     var guard = 0;
     while (guard++ < 6) {
       var slot = P.mesa.slice(0, 4).indexOf(null);
       if (slot < 0) break;
-      var best = -1, bs = -1;
-      P.hand.forEach(function (i, k) { if (isTroop(i) && !dupBlock(s, p, k)) { var sc = atk(i) + maxHp(i) * 0.6 + s.rng(); if (sc > bs) { bs = sc; best = k; } } });
+      var best = -1, bs = -1, held = lv >= 1 ? heldThemes(P) : {};
+      P.hand.forEach(function (i, k) {
+        if (isTroop(i) && !dupBlock(s, p, k)) {
+          var sc = atk(i) + maxHp(i) * 0.6 + s.rng();
+          if (lv >= 1) card(i).themes.forEach(function (t) { if (held[t] >= 2) sc += 1.5; });
+          if (sc > bs) { bs = sc; best = k; }
+        }
+      });
       if (best < 0) break;
       place(s, p, best, slot);
     }
@@ -539,7 +582,7 @@
       var i = P.hand[k];
       if (!i || isTroop(i)) continue; // (una acción anterior pudo fusionar cartas y acortar la mano)
       var c = card(i), allies = mesaTroops(P), foes = targetable(s.p[1 - p]);
-      if (c.id === 'cambio-de-linea' || c.id === 'capitulo-especial') continue; // la IA no las usa
+      if (c.id === 'cambio-de-linea' || (c.id === 'capitulo-especial' && lv < 1)) continue; // la IA Normal no las usa
       var tgt = null;
       if (c.target === 'ally') { allies.sort(function (a, b) { return atk(b) - atk(a); }); tgt = allies[0]; if (c.id === 'armadura') tgt = allies.slice().sort(function (a, b) { return maxHp(b) - maxHp(a); })[0]; }
       else if (c.target === 'enemy') {
@@ -551,8 +594,9 @@
     }
     // Novias: si tiene la sinergia, la IA elige una al azar para el hueco 5
     if (!P.mesa[4] && P.nvs && P.nvs.length && (tiers(P)['Correa'] || 0) >= 1) place(s, p, -1 - Math.floor(s.rng() * P.nvs.length), 4);
-    // Voley: ataca salvo que esté en desventaja numérica
-    mesaTroops(P).forEach(function (i) { if (has(i, 'Voley')) P.voley[i.uid] = s.rng() < 0.7 ? 'atk' : 'def'; });
+    // Voley: ataca salvo que esté en desventaja numérica (Experto decide según el recuento real)
+    var outn = mesaTroops(P).length < mesaTroops(s.p[1 - p]).length;
+    mesaTroops(P).forEach(function (i) { if (has(i, 'Voley')) P.voley[i.uid] = lv >= 2 ? (outn ? 'def' : 'atk') : (s.rng() < 0.7 ? 'atk' : 'def'); });
   }
   // Reparto coordinado: concentra el daño para rematar tropas (primero las más peligrosas).
   function aiTargets(s, p) {
@@ -567,12 +611,19 @@
     });
   }
   // Mazo de la IA: elige 3 temáticas y llena el mazo con las cartas que más encajan.
-  function aiDeck(rng, forced) {
-    var themes = Object.keys(DATA.themes), pick = forced ? forced.slice() : [];
-    while (pick.length < 3) { var t = themes[Math.floor(rng() * themes.length)]; if (pick.indexOf(t) < 0) pick.push(t); }
+  function aiDeck(rng, forced, lvl) {
+    lvl = lvl | 0;
+    var themes = Object.keys(DATA.themes), pick = forced ? forced.slice() : [], want = lvl >= 1 ? 2 : 3;
+    if (lvl >= 1) { // solo temáticas con cartas suficientes para llegar al nivel 2
+      var viable = themes.filter(function (t) { return DATA.cards.filter(function (c) { return c.themes.indexOf(t) >= 0; }).length >= Math.max(3, DATA.themes[t].th[1] || 0); });
+      if (viable.length >= 3) { themes = viable; pick = pick.map(function (t) { return viable.indexOf(t) >= 0 ? t : null; }).filter(Boolean); }
+      want = Math.max(want, Math.min(3, pick.length));
+    }
+    while (pick.length < want) { var t = themes[Math.floor(rng() * themes.length)]; if (pick.indexOf(t) < 0) pick.push(t); }
     var sc = DATA.cards.map(function (c) { return { c: c, v: c.themes.filter(function (t) { return pick.indexOf(t) >= 0; }).length * 10 + rng() * 6 }; }).sort(function (a, b) { return b.v - a.v; });
     var com = sc.filter(function (x) { return x.c.rarity === 'Común'; }).slice(0, 2);
-    var order = com.concat(sc.filter(function (x) { return com.indexOf(x) < 0; })), deck = [], used = 0;
+    var leg = lvl >= 2 ? sc.filter(function (x) { return x.c.rarity === 'Legendaria' && x.v >= 10; }).slice(0, 1) : [];
+    var order = com.concat(leg).concat(sc.filter(function (x) { return com.indexOf(x) < 0 && leg.indexOf(x) < 0; })), deck = [], used = 0;
     order.forEach(function (x) { if (used + x.c.size <= CFG.deckBudget - 2) { deck.push(x.c.id); used += x.c.size; } });
     DATA.actions.slice().sort(function () { return rng() - .5; }).forEach(function (a) { if (used + a.size <= CFG.deckBudget && deck.length < 20) { deck.push(a.id); used += a.size; } });
     return deck;
@@ -1130,7 +1181,7 @@
     newGame: newGame, randomDeck: randomDeck, deckSize: deckSize, mulberry32: mulberry32,
     place: place, playAction: playAction, setTarget: setTarget, clearTargets: clearTargets, forfeit: forfeit, setVoley: setVoley, actionBlock: actionBlock, validTarget: validTarget,
     sell: sell, sellValue: sellValue, handCap: handCap, dupBlock: dupBlock, buy: buy, mergeCheck: mergeCheck, willMerge: willMerge, shopOdds: shopOdds, refresh: refresh, refreshCost: refreshCost, pickFromDeck: pickFromDeck, retire: retire,
-    aiDeck: aiDeck, aiShop: aiShop, aiPrep: aiPrep, aiTargets: aiTargets, fight: fight, endShop: endShop, pendingTargets: pendingTargets, freeze: freeze, cede: cede, nextRound: nextRound,
+    aiDeck: aiDeck, aiBonus: aiBonus, aiLv: aiLv, aiShop: aiShop, aiPrep: aiPrep, aiTargets: aiTargets, fight: fight, endShop: endShop, pendingTargets: pendingTargets, freeze: freeze, cede: cede, nextRound: nextRound,
     interest: interest, isNov: isNov, immune: immune, targetable: targetable, novSync: novSync, themeCounts: themeCounts, tiers: tiers, tierOf: tierOf, atk: atk, maxHp: maxHp, card: card, isTroop: isTroop, has: has, mesaTroops: mesaTroops, viewOf: viewOf,
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.CartasEngine = API;

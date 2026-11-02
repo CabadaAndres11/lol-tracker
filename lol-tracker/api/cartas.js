@@ -147,6 +147,7 @@ const PVP_COINS = { played: 15, win: 40 };
 const LADDER_KEY = 'cartas:ladder';
 const PTS_1V1 = { win: 20, lose: -20 };
 const PTS_V4 = [0, 40, 20, -20, -40];
+const DIFF_MULT = [1, 1.5, 2], EXPERT_PTS = 10; // dificultad de la IA: multiplicador de monedas y puntos por vencer al Experto
 const BOT_COINS = { played: 10, place: [0, 20, 10, 3, 0] }; // Versus de 4 contra 3 IAs: menos monedas y sin puntos de clasificación
 async function addPts(cfg, u, delta) {
   const before = u.pts || 0;
@@ -382,12 +383,12 @@ function v4Deadline(g) {
   if (T.phase === 'prep') g.dl = now + ((T.shopOpen ? 60 : 45) + 3) * 1000;
   else g.dl = now + (14 + Math.max(0, ...T.fx.map((f) => (f && f.frames ? f.frames.length : 0))) * 1.2) * 1000;
 }
-async function newV4Game(cfg, players, mode) {
+async function newV4Game(cfg, players, mode, diff) {
   const order = players.slice().sort(() => crypto.randomInt(0, 2) - 0.5);
   const id = crypto.randomBytes(8).toString('hex'), now = Date.now();
   const bots = order.map((p) => !!p.bot), hasBots = bots.some(Boolean);
-  const T = V4.newTable(order.map((p) => p.deck), order.map((p) => p.name), crypto.randomInt(1, 2 ** 30), order.map((p) => p.lv || {}), order.map((p) => p.sk || {}), mode === 'revive' ? 'revive' : '', hasBots ? bots : null);
-  const g = { id, names: order.map((p) => p.name), T, v: 1, hb: [now, now, now, now], t0: now, paid: [false, false, false, false], rew: [null, null, null, null], bots: hasBots ? bots : null };
+  const T = V4.newTable(order.map((p) => p.deck), order.map((p) => p.name), crypto.randomInt(1, 2 ** 30), order.map((p) => p.lv || {}), order.map((p) => p.sk || {}), mode === 'revive' ? 'revive' : '', hasBots ? bots : null, order.map((p) => (p.bot ? p.diff | 0 : 0)));
+  const g = { id, names: order.map((p) => p.name), T, v: 1, hb: [now, now, now, now], t0: now, paid: [false, false, false, false], rew: [null, null, null, null], bots: hasBots ? bots : null, diff: hasBots ? diff | 0 : 0 };
   v4Deadline(g);
   await saveV4(cfg, g);
   for (const p of order) { if (p.bot) continue; await redis(cfg, ['SET', v4Ptr(p.name), id, 'EX', PVP_TTL]); await redis(cfg, ['DEL', v4In(p.name)]); }
@@ -413,9 +414,9 @@ async function payV4(cfg, g) {
     if (valid) recordGame(u, { won: !abandoned && T.place[seat] === 1, kind: 'v4', mode: T.mode, cards: (T.p[seat] || {}).used });
     let gained = 0;
     if (valid && !abandoned && u.rewardCount < MAX_GAME_REWARDS_PER_DAY) {
-      gained = g.bots ? BOT_COINS.played + (BOT_COINS.place[T.place[seat]] || 0) : PVP_COINS.played + (V4.PLACE_BONUS[T.place[seat]] || 0); u.rewardCount++; u.coins += gained;
+      gained = g.bots ? Math.round((BOT_COINS.played + (BOT_COINS.place[T.place[seat]] || 0)) * DIFF_MULT[g.diff | 0]) : PVP_COINS.played + (V4.PLACE_BONUS[T.place[seat]] || 0); u.rewardCount++; u.coins += gained;
     }
-    const pd = g.bots ? 0 : PTS_V4[T.place[seat]] || 0;
+    const pd = g.bots ? (g.diff === 2 && valid && !abandoned && T.place[seat] === 1 && gained > 0 ? EXPERT_PTS : 0) : PTS_V4[T.place[seat]] || 0;
     const pts = (valid || (abandoned && pd < 0)) && pd ? await addPts(cfg, u, pd) : 0;
     g.rew[seat] = { gained, capped: valid && !abandoned && gained === 0, place: T.place[seat], pts, total: u.pts || 0 };
     await saveUser(cfg, u);
@@ -486,14 +487,15 @@ async function vs4Handle(cfg, act, body, u) {
     const vmode = body.mode === 'revive' ? 'revive' : '', vqk = vmode ? 'cartas:vs4:q:rv' : 'cartas:vs4:q';
     const mine = { name: me, deck: body.deck, lv: levelsOf(u, body.deck), sk: skinsOf(u, body.deck) };
     if (act === 'vs4Bots') { // partida contra 3 IAs, cada una con un mazo de una temática distinta
+      const diff = Math.max(0, Math.min(2, body.diff | 0));
       const lv = ALL_THEMES.slice().sort(() => crypto.randomInt(0, 2) - 0.5).slice(0, 3);
       const rng = E.mulberry32(crypto.randomInt(1, 2 ** 30));
       const bots = lv.map((lead) => {
         const others = ALL_THEMES.filter((t) => t !== lead).sort(() => rng() - 0.5).slice(0, 2);
-        return { name: 'Bot · ' + lead, deck: E.aiDeck(rng, [lead].concat(others)), bot: true };
+        return { name: 'Bot · ' + lead, deck: E.aiDeck(rng, [lead].concat(others), diff), bot: true, diff };
       });
       await redis(cfg, ['DEL', v4In(me)]);
-      const g = await newV4Game(cfg, [mine].concat(bots), vmode);
+      const g = await newV4Game(cfg, [mine].concat(bots), vmode, diff);
       return v4View(g, g.names.indexOf(me));
     }
     return withLock(cfg, 'v4q', async () => {
@@ -791,22 +793,24 @@ module.exports = async function handler(req, res) {
       await saveUser(cfg, u);
       res.status(200).json({ reward, user: publicUser(u) }); return;
     }
-    if (act === 'gameStart') { u.startedAt = Date.now(); await saveUser(cfg, u); res.status(200).json({ ok: true }); return; }
+    if (act === 'gameStart') { u.startedAt = Date.now(); u.gameDiff = Math.max(0, Math.min(2, body.diff | 0)); await saveUser(cfg, u); res.status(200).json({ ok: true }); return; }
 
     if (act === 'gameFinish') {
       const secs = (Date.now() - (u.startedAt || 0)) / 1000;
       const rounds = Number(body.rounds) || 0;
       const valid = u.startedAt && secs >= MIN_GAME_SECONDS && rounds >= MIN_GAME_ROUNDS;
       u.startedAt = 0;
+      const diff = u.gameDiff | 0; u.gameDiff = 0;
       if (u.rewardDay !== today()) { u.rewardDay = today(); u.rewardCount = 0; }
       if (valid) recordGame(u, { won: !!body.won, kind: 'ia', mode: body.mode === 'revive' ? 'revive' : '', cards: body.cards });
-      let gained = 0;
+      let gained = 0, pts = 0;
       if (valid && u.rewardCount < MAX_GAME_REWARDS_PER_DAY) {
-        gained = GAME_COINS.played + (body.won ? GAME_COINS.win : 0);
+        gained = Math.round((GAME_COINS.played + (body.won ? GAME_COINS.win : 0)) * DIFF_MULT[diff]);
         u.rewardCount++; u.coins += gained;
+        if (body.won && diff === 2) pts = await addPts(cfg, u, EXPERT_PTS);
       }
       await saveUser(cfg, u);
-      res.status(200).json({ gained, user: publicUser(u), capped: valid && gained === 0 }); return;
+      res.status(200).json({ gained, pts, user: publicUser(u), capped: valid && gained === 0 }); return;
     }
 
     res.status(400).json({ error: 'Acción desconocida.' });

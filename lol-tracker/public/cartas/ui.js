@@ -655,6 +655,12 @@
   function tutStrip() {
     return '<div class="qtut"><img src="/cartas/tutor/guia.webp" alt=""><div class="qtt"><span class="qtk">Aprende a jugar</span><b>Tutorial</b><span>Una partida guiada y siempre igual: la tienda, las sinergias, la mejora de estadísticas, tu vida y las rondas.' + (tutDone() ? ' ' + ic('check') + ' Completado' : '') + '</span></div><button class="btn big" data-act="tutstart">' + ic('libro') + ' ' + (tutDone() ? 'Repetir tutorial' : 'Empezar tutorial') + '</button></div>';
   }
+  var DIFFS = [{ n: 'Normal', d: 'La IA de siempre.', r: 'Monedas ×1' }, { n: 'Difícil', d: 'Mazos coherentes, mejor tienda y +1 de oro en rondas de tienda.', r: 'Monedas ×1,5' }, { n: 'Experto', d: 'Lo anterior, +2 de oro en tienda, se cura 2 de vida y fusiona copias.', r: 'Monedas ×2 y +10 puntos si ganas' }];
+  function curDiff() { if (ui.diff == null) { try { ui.diff = Math.max(0, Math.min(2, +localStorage.getItem('tcg_diff') || 0)); } catch (e) { ui.diff = 0; } } return ui.diff; }
+  function diffHtml() {
+    var d = curDiff();
+    return '<div class="qdiff"><span class="qdl">Dificultad de la IA</span><div class="qdbtns">' + DIFFS.map(function (x, i) { return '<button class="' + (i === d ? 'on' : '') + '" data-act="qdiff" data-v="' + i + '">' + x.n + '</button>'; }).join('') + '</div><span class="qdd">' + DIFFS[d].d + ' <b>' + DIFFS[d].r + '</b></span></div>';
+  }
   function renderModes() {
     var qt = ui.qt === 'pl' ? 'pl' : 'ia', qm = QMODES.filter(function (m) { return m.id === ui.qm; })[0] || QMODES[0], qo = ui.qo === 'vs4' ? 'vs4' : '1v1';
     var opts = QOPTS[qt], cur = opts.filter(function (o) { return o.id === qo; })[0];
@@ -665,7 +671,7 @@
       '<div class="qmodes">' + QMODES.map(function (m) { return '<button class="qmode' + (m === qm ? ' on' : '') + '" data-act="qmode" data-v="' + m.id + '"><span class="qframe">' + ic(m.icon) + '</span><b>' + m.name + '</b><span class="qsub">' + m.sub + '</span></button>'; }).join('') + '</div>' +
       '<div class="qbody" style="--qart:url(/cartas/art/' + QART[qt][qm.id][qo] + '.webp)"><div class="qleft"><p class="qdesc">' + qm.desc + '</p><p class="qdeck">Antes de jugar elegirás uno de tus mazos guardados.</p>' +
       '<div class="qopts">' + opts.map(function (o) { return '<button class="qopt' + (o === cur ? ' on' : '') + '" data-act="qopt" data-v="' + o.id + '"><i class="qdia"></i><span class="qot"><b>' + ic(o.icon) + ' ' + o.name + '</b><span>' + o.sub + '</span></span></button>'; }).join('') + '</div>' +
-      '<p class="qnote ' + (qt === 'ia' ? 'ia' : 'pl') + '">' + (qt === 'ia' ? 'Contra IA: menos monedas y sin puntos de clasificación.' : 'Contra jugadores: puntúan en la clasificación.') + '</p></div><div class="qart" aria-hidden="true"></div></div>' +
+      (qt === 'ia' ? diffHtml() : '') + '<p class="qnote ' + (qt === 'ia' ? 'ia' : 'pl') + '">' + (qt === 'ia' ? 'Contra IA: menos monedas y sin puntos de clasificación (salvo al vencer al Experto).' : 'Contra jugadores: puntúan en la clasificación.') + '</p></div><div class="qart" aria-hidden="true"></div></div>' +
       '<div class="qconfirm"><button class="qgo" data-act="' + cur.act[qm.id] + '"><span class="qx">' + ic('avance') + '</span><span class="qgot">Confirmar</span></button></div></div>' + (ui.pick ? pickHtml() : '');
   }
   function themeCards(t) { return D.cards.filter(function (c) { return c.themes.indexOf(t) >= 0; }).concat(D.actions.filter(function (a) { return a.theme === t; })); }
@@ -950,8 +956,8 @@
     var seed = Math.floor(Math.random() * 1e9), r = E.mulberry32(seed + 7);
     var mylv = {}; ui.deck.forEach(function (id) { var l = lvOf(id); if (l > 1) mylv[id] = l; });
     var mysk = {}; ui.deck.forEach(function (id) { var k = ui.acct && ui.acct.skinSel && ui.acct.skinSel[id]; if (k && ui.acct.skins.indexOf(k) >= 0) mysk[id] = k; });
-    ui.s = E.newGame(ui.deck, E.aiDeck(r), seed, { lv: [mylv, {}], sk: [mysk, {}], mode: ui.mode });
-    ui.reward = null; api('gameStart');
+    ui.s = E.newGame(ui.deck, E.aiDeck(r, null, curDiff()), seed, { lv: [mylv, {}], sk: [mysk, {}], mode: ui.mode, ai: curDiff() });
+    ui.reward = null; api('gameStart', { diff: curDiff() });
     ui.screen = 'game'; ui.sel = null; ui.view = null; ui.playing = false; ui.hint = ''; ui.landed = null; ui.busy = false; ui.seenKey = null;
     announce(); render();
   }
@@ -1752,6 +1758,7 @@
     }
     if (act === 'qtype') { if (ui.qt === el.dataset.v) return; ui.qt = el.dataset.v; ui.qfx = 'opt'; return renderModes(); }
     if (act === 'qmode') { if (ui.qm === el.dataset.v) return; ui.qm = el.dataset.v; ui.qfx = 'mode'; return renderModes(); }
+    if (act === 'qdiff') { ui.diff = +el.dataset.v | 0; try { localStorage.setItem('tcg_diff', String(ui.diff)); } catch (e) {} return renderModes(); }
     if (act === 'qopt') { if (ui.qo === el.dataset.v) return; ui.qo = el.dataset.v; ui.qfx = 'opt'; return renderModes(); }
     if (act === 'cardbuy') return api('cardBuy', { id: el.dataset.card }).then(function (r) { if (r.data && r.data.user) setAcct(r.data.user); ui.msg = r.ok ? '' : (r.data.error || ''); render(); });
     if (act === 'skinbuy') return api('skinBuy', { id: el.dataset.skin }).then(function (r) { if (r.data && r.data.user) setAcct(r.data.user); ui.msg = r.ok ? '' : (r.data.error || ''); render(); });
@@ -1881,7 +1888,7 @@
     if (act === 'startvs4b' || act === 'startrevvs4b') {
       if (deckError()) { ui.screen = 'deck'; return render(); }
       saveDeck(); if (PV.on) pvpLeaveGame(); ui.msg = ''; PV.wait = null; PV.px = 'vs4'; ui.lobby = 'vs4'; PV.mode = act === 'startrevvs4b' ? 'revive' : ''; ui.botGame = true;
-      return api('vs4Bots', { deck: ui.deck, mode: PV.mode }).then(pvpGot);
+      return api('vs4Bots', { deck: ui.deck, mode: PV.mode, diff: curDiff() }).then(pvpGot);
     }
     if (act === 'pvpsearch') { PV.wait = { kind: 'search' }; ui.msg = ''; render(); return api(PV.px + 'Search', { deck: ui.deck, mode: PV.mode }).then(pvpGot); }
     if (act === 'pvpcreate') { PV.wait = { kind: 'code', code: '' }; ui.msg = ''; render(); return api(PV.px + 'Create', { deck: ui.deck, mode: PV.mode }).then(pvpGot); }

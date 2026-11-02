@@ -1133,6 +1133,12 @@ img.timg[src$="comebacker.png"] { filter: drop-shadow(0 0 1.5px #fff) drop-shado
 .qot b .ic { width: 1.2em; height: 1.2em; margin: 0; }
 .qot span { font-size: .82rem; line-height: 1.4; }
 .qopt.on { color: var(--ink); } .qopt.on b { color: var(--gold); }
+.qdiff { display: flex; flex-direction: column; gap: .35rem; margin: .5rem 0 .2rem; }
+.qdl { font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; opacity: .7; }
+.qdbtns { display: flex; gap: .4rem; flex-wrap: wrap; }
+.qdbtns button { padding: .4rem .9rem; border-radius: 3px; border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.04); color: inherit; font-weight: 700; cursor: pointer; }
+.qdbtns button.on { border-color: var(--gold); color: var(--gold); background: rgba(240,201,106,.1); }
+.qdd { font-size: .78rem; opacity: .85; }
 .qnote { margin: .3rem 0 0; font-size: .8rem; font-weight: 700; padding: .45rem .7rem; border-radius: 3px; }
 .qnote.ia { color: #5eead4; background: rgba(94,234,212,.1); border: 1px solid rgba(94,234,212,.35); }
 .qnote.pl { color: var(--gold); background: rgba(240,201,106,.08); border: 1px solid rgba(240,201,106,.35); }

@@ -1,6 +1,10 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-02', tag: 'Novedad', title: 'Dificultades de la IA: Normal, Difícil y Experto',
+      items: ['En «Contra IA» (1 contra 1 y Versus de 4, clásico y Resurrección) ya puedes elegir dificultad. Normal es la IA de siempre.',
+        'Difícil: mazos de 2 sinergias coherentes, mejor tienda (guarda para el interés, valora sinergias), usa todas las acciones y gana +1 de oro en rondas de tienda. Monedas ×1,5.',
+        'Experto: además fusiona copias, vende lo que no encaja, decide mejor en Voley, gana +2 de oro en rondas de tienda, se cura 2 de vida si no la tiene completa y siempre lleva una legendaria. Monedas ×2 y +10 puntos de clasificación si le ganas.'] },
     { date: '2026-11-02', tag: 'Novedad', title: 'Computer Dashlight, legendaria Pokémon: 8 Medallas',
       art: ['computer-dashlight'],
       items: ['Computer Dashlight pasa a Legendaria (coste 5, 6/18) y es la insignia de la sinergia Pokémon. Pasiva «8 Medallas»: mientras esté en la mesa, la bola de cada ronda nunca es Pokéball; si saliera, se convierte en Superball.'] },

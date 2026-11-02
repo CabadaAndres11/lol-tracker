@@ -1728,3 +1728,6 @@ body.tutmode .freezebtn { pointer-events: none; opacity: .35; }
 .bxodds h3 { margin: 0 0 6px; font-size: 15px; color: #f0d58a; }
 .bxodds ul { list-style: none; margin: 8px 0; padding: 0; display: grid; gap: 4px; }
 .bxodds li { display: grid; grid-template-columns: 1fr auto; gap: 0 10px; } .bxodds li b { color: #f0d58a; } .bxodds li em { grid-column: 1 / -1; font-size: 12px; opacity: .6; font-style: normal; }
+.bxodds { position: relative; }
+.bxclose { position: absolute; top: 8px; right: 10px; width: 28px; height: 28px; border: 0; background: transparent; color: #f0d58a; font-size: 22px; line-height: 1; cursor: pointer; border-radius: 50%; }
+.bxclose:hover { background: rgba(255,255,255,.1); }

@@ -303,7 +303,7 @@
     var rows = pools.map(function (p) { return '<li><span>' + p[0] + '</span><b>' + (p[1] ? Math.round(p[2] / tot * 1000) / 10 + '%' : '—') + '</b><em>' + (p[1] ? p[1] + ' sin conseguir' : 'ya las tienes todas') + '</em></li>'; }).join('');
     var wt = 0; cards.forEach(function (c) { wt += W[c.rarity]; });
     var rr = wt ? '<p class="mut">Rareza de la carta (entre las que te faltan): ' + RANK.map(function (r) { var w = 0; cards.forEach(function (c) { if (c.rarity === r) w += W[c.rarity]; }); return r + ' ' + Math.round(w / wt * 1000) / 10 + '%'; }).join(' · ') + '</p>' : '';
-    return '<div class="bxodds"><h3>Probabilidades</h3><p class="mut">Se calculan con lo que aún no tienes: base 50% carta, 30% skin y 20% efecto. Si una categoría ya está completa, su parte se reparte entre las demás. Nunca sale algo repetido hasta que lo tengas todo.</p><ul>' + rows + '</ul>' + rr + '</div>';
+    return '<div class="bxodds"><button class="bxclose" data-act="boxinfo" aria-label="Ocultar">×</button><h3>Probabilidades</h3><p class="mut">Se calculan con lo que aún no tienes: base 50% carta, 30% skin y 20% efecto. Si una categoría ya está completa, su parte se reparte entre las demás. Nunca sale algo repetido hasta que lo tengas todo.</p><ul>' + rows + '</ul>' + rr + '</div>';
   }
   function rewardInfo(r) {
     if (r.kind === 'card') { var c = CARD[r.id]; return { best: c.rarity, label: r.dup ? '¡Carta repetida!' : '¡Nueva carta!', name: c.name, sub: r.dup ? (r.lvUp ? 'Sube a nivel ' + r.lvl : 'Ya lo tenías todo: +1 copia') : c.rarity, visual: cardHtml(c, { lv: r.dup ? r.lvl : 1, skin: '' }) }; }

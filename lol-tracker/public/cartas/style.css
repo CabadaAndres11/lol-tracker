@@ -2177,3 +2177,6 @@ body.tutmode .freezebtn { pointer-events: none; opacity: .35; }
 .v4s.on, .v4s:not(.empty) { animation: v4in .35s ease-out; }
 @keyframes v4in { from { opacity: 0; transform: scale(.94); } to { opacity: 1; transform: none; } }
 .pvpwait.v4w { max-width: 980px; }
+
+.dsyn .syn-row { cursor: pointer; }
+.dsyn .syn-row:hover { filter: brightness(1.15); }

@@ -35,6 +35,8 @@
     { date: '2026-11-03', tag: 'Novedad', title: 'Versus de 4: sala con huecos y bots',
       items: ['La sala del Versus de 4 muestra cuatro huecos con el nombre, la foto de perfil y la portada del mazo de cada jugador.',
         'Quien crea la sala puede pulsar «Añadir bot» en los huecos vacíos para jugar con 3 jugadores y 1 IA o 2 y 2. Las IAs son siempre de dificultad Normal y se quitan con la ×.'] },
+    { date: '2026-11-03', tag: 'Cambio', title: 'Editor de mazos: sinergias incluidas',
+      items: ['Vuelve el conteo de sinergias en el editor de mazos: ves cuántas cartas distintas llevas de cada sinergia y qué nivel alcanzas. Pulsa una para ver sus cartas.'] },
     { date: '2026-11-03', tag: 'Cambio', title: 'Mejoras visuales en partida',
       art: ['aitorlg-renata'],
       items: ['La tropa que protege la Prórroga de AitoRLG Renata se marca en la mesa con un aura dorada y un escudo (más intenso cuando aguanta a 0 de vida).',

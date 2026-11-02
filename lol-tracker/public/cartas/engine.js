@@ -7,6 +7,7 @@
   var CFG = {
     slots: 4, handMax: 5, life: 12, gold: 8, income: 2, shopEvery: 3, shopOffers: 5,
     refreshCost: 1, deckBudget: 20, maxRounds: 40,
+    interest: { per: 5, max: 3 }, // interés (estilo TFT): +1 de oro por cada 'per' de oro que conserves al terminar la ronda, hasta 'max'
     reviveLife: 20, // modo Resurrección: vida inicial (la vida solo se pierde con golpes directos; la carta que ataca recibe el ataque de la atacada)
     merge: [1, 2, 4], // fusión de 3 copias iguales (estilo TFT): multiplicador de las estadísticas base por estrella
     rarityWeight: { 'Común': 50, 'Rara': 30, 'Épica': 15, 'Legendaria': 5 },
@@ -162,8 +163,11 @@
     P.hand = hand.map(function (id) { return mk(s, id, p); });
   }
 
+  // Interés por oro ahorrado: se cobra al empezar la ronda sobre el oro que te sobró de la anterior (no en la primera)
+  function interest(P) { return Math.min(CFG.interest.max, Math.floor(Math.max(0, P.gold) / CFG.interest.per)); }
   function income(s, p) {
-    var P = s.p[p], t = tiers(P), g = s.inc || CFG.income, extra = 0;
+    var P = s.p[p], t = tiers(P), g = s.inc || CFG.income, extra = 0, ik = s.round > 1 ? interest(P) : 0;
+    P.lastInt = ik; extra += ik;
     if (mesaTroops(P).some(function (i) { return has(i, 'Trabajo'); })) {
       var tw = t['Trabajo'] || 0;
       if (tw === 1 && s.round % 2 === 0) extra = 1;
@@ -182,7 +186,7 @@
     s.shopOpen = false;
     [0, 1].forEach(function (p) {
       var got = income(s, p);
-      if (p === 0 || s.pvp) say(s, pv(s, p, 'Ronda ' + s.round + ': +' + got + ' de oro.', 'El rival cobra +' + got + ' de oro.'));
+      if (p === 0 || s.pvp) say(s, pv(s, p, 'Ronda ' + s.round + ': +' + got + ' de oro' + (s.p[p].lastInt ? ' (incluye +' + s.p[p].lastInt + ' de interés por ahorrar)' : '') + '.', 'El rival cobra +' + got + ' de oro.'));
       s.p[p].target = {}; s.p[p].anime = 0; s.p[p].fl = {};
     });
     if (s.round % CFG.shopEvery === 1) {
@@ -1123,7 +1127,7 @@
     place: place, playAction: playAction, setTarget: setTarget, clearTargets: clearTargets, forfeit: forfeit, setVoley: setVoley, actionBlock: actionBlock, validTarget: validTarget,
     sell: sell, sellValue: sellValue, handCap: handCap, dupBlock: dupBlock, buy: buy, mergeCheck: mergeCheck, willMerge: willMerge, shopOdds: shopOdds, refresh: refresh, refreshCost: refreshCost, pickFromDeck: pickFromDeck, retire: retire,
     aiDeck: aiDeck, aiShop: aiShop, aiPrep: aiPrep, aiTargets: aiTargets, fight: fight, endShop: endShop, pendingTargets: pendingTargets, freeze: freeze, cede: cede, nextRound: nextRound,
-    isNov: isNov, immune: immune, targetable: targetable, novSync: novSync, themeCounts: themeCounts, tiers: tiers, tierOf: tierOf, atk: atk, maxHp: maxHp, card: card, isTroop: isTroop, has: has, mesaTroops: mesaTroops, viewOf: viewOf,
+    interest: interest, isNov: isNov, immune: immune, targetable: targetable, novSync: novSync, themeCounts: themeCounts, tiers: tiers, tierOf: tierOf, atk: atk, maxHp: maxHp, card: card, isTroop: isTroop, has: has, mesaTroops: mesaTroops, viewOf: viewOf,
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.CartasEngine = API;
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -118,7 +118,7 @@ function startRound(T) {
   alive.forEach((p) => {
     const got = E.income(T, p);
     T.p[p].target = {}; T.p[p].anime = 0; T.p[p].fl = {};
-    note(T, p, 'Ronda ' + T.round + ': +' + got + ' de oro.');
+    note(T, p, 'Ronda ' + T.round + ': +' + got + ' de oro' + (T.p[p].lastInt ? ' (incluye +' + T.p[p].lastInt + ' de interés por ahorrar)' : '') + '.');
   });
   if (T.shopOpen) {
     T.shops++;

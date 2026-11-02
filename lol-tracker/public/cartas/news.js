@@ -1,6 +1,9 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-02', tag: 'Novedad', title: 'Versión 1.2 · Interés por ahorrar oro',
+      items: ['Nuevo sistema de interés (como en TFT, con cifras más bajas): el oro que conservas sin gastar te da un extra al empezar la siguiente ronda: +1 por cada 5 de oro ahorrado, hasta un máximo de +3 (5 de oro = +1, 10 = +2, 15 o más = +3).',
+        'Funciona en todos los modos. Junto a tu oro verás cuánto interés cobrarás; el registro indica el interés incluido en el cobro de cada ronda. No se cobra en la primera ronda.'] },
     { date: '2026-11-02', tag: 'Novedad', title: 'Guía de sinergias en el editor de mazos',
       items: ['Al montar un mazo en Colección → Mazos, al elegir una sinergia verás qué hace en cada nivel (2, 3 o 4 cartas distintas). El botón «Guía de todas las sinergias» las muestra todas juntas.'] },
     { date: '2026-11-02', tag: 'Novedad', title: 'Versión 1.2 · Nueva sinergia: Gambling',

@@ -1855,3 +1855,8 @@ body.tutmode .freezebtn { pointer-events: none; opacity: .35; }
 #gambov.done .gorb, #gambov.done .gtot { animation-delay: calc(var(--i, 0) * .18s + .3s); }
 @media (max-width: 480px) { .rscene { width: 290px; height: 220px; } .rtilt { width: 270px; height: 270px; } .rball i { transform: translateY(-141px); } }
 @media (prefers-reduced-motion: reduce) { #gambov.done .rres { opacity: 1; transform: none; animation: none; } }
+
+/* Interés por oro ahorrado */
+.goldw { display: flex; flex-direction: column; align-items: center; gap: .25rem; position: relative; }
+.gint { font-style: normal; font-size: .64rem; font-weight: 700; letter-spacing: .04em; color: #fde68a; background: rgba(120,70,5,.85); border: 1px solid #fbbf24; border-radius: 999px; padding: .05rem .45rem; white-space: nowrap; }
+.goldw .gint { position: absolute; top: 100%; margin-top: .2rem; }

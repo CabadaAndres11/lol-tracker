@@ -1199,7 +1199,7 @@
         var id = P.offers[k];
         if (!id) { h += '<div class="cw"><div class="slot">Vendida</div></div>'; continue; }
         var c2 = CARD[id], mg = c2.type === 'tropa' && E.willMerge(P, c2.id), cant = P.gold < c2.cost || (P.hand.length >= E.handCap(s) && !mg);
-        h += '<div class="cw">' + cardHtml(c2, { lv: lvG(0, c2.id), tag: 'button', cls: 'offer' + (cant ? ' cant' : '') + (mg ? ' mergeable' : ''), attrs: 'data-act="buy" data-i="' + k + '" title="Comprar por ' + c2.cost + ' de oro"' }) + '</div>';
+        h += '<div class="cw">' + cardHtml(c2, { lv: lvG(0, c2.id), skin: skG(0, c2.id), tag: 'button', cls: 'offer' + (cant ? ' cant' : '') + (mg ? ' mergeable' : ''), attrs: 'data-act="buy" data-i="' + k + '" title="Comprar por ' + c2.cost + ' de oro"' }) + '</div>';
       }
       h += '<div class="refwrap"><button class="refresh" data-act="refresh" title="Actualizar tienda (' + rc + ' oro)"' + (P.gold < rc ? ' disabled' : '') + '>' + REFRESH_SVG + '</button><span class="rlabel">Actualizar · ' + rc + ' oro</span><button class="freezebtn' + (P.frozen ? ' on' : '') + '" data-act="freeze" title="' + (P.frozen ? 'Ofertas fijadas: en la próxima tienda saldrán las que no compres. Pulsa para soltarlas' : 'Fijar las ofertas: en la próxima tienda saldrán las que dejes sin comprar') + '">' + ic('candado') + ' ' + (P.frozen ? 'Fijadas' : 'Fijar') + '</button></div></div>';
       h += '</div>';

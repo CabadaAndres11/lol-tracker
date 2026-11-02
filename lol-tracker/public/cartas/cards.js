@@ -644,7 +644,7 @@ var D={
    "hp": 15,
    "rarity": "Épica",
    "type": "tropa",
-   "size": 1
+   "size": 2
   },
   {
    "id": "aitorlg-maomao",
@@ -658,7 +658,7 @@ var D={
    "hp": 18,
    "rarity": "Legendaria",
    "type": "tropa",
-   "size": 1
+   "size": 2
   },
   {
    "id": "javihi-smiley",

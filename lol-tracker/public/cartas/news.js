@@ -1,6 +1,10 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-02', tag: 'Novedad', title: 'Nuevo pack de victoria y derrota: Hechizo arcano',
+      items: ['Nuevo pack «Hechizo arcano» (50 monedas), con el mismo toque mágico del despliegue arcano. Victoria: un círculo mágico se enciende tras un banner violeta, las letras se materializan y suben destellos violetas y celestes.',
+        'Derrota: el círculo se apaga entre parpadeos, las letras caen titilando, el banner se agrieta y caen motas de energía.',
+        'Lo encuentras en la tienda (Efectos → Victoria y derrota) y puedes probarlo y equiparlo en Colección → Efectos.'] },
     { date: '2026-11-02', tag: 'Corrección', title: 'Efectos de despliegue y probabilidades de la tienda',
       items: ['Corregido un fallo introducido con las probabilidades de las cajas que rompía la tienda de la partida (se mostraba el cuadro de las cajas en lugar de las probabilidades de la tienda) y podía impedir que se vieran los efectos de despliegue al jugar.'] },
     { date: '2026-11-02', tag: 'Novedad', title: 'Nuevo despliegue: Perro mensajero',

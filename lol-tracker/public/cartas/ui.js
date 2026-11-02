@@ -1053,17 +1053,18 @@
   // ---------- Efectos de victoria y derrota (cada pack trae los dos) ----------
   var FIN_LIST = [
     { id: 'default', name: 'Por defecto', desc: 'Victoria: trofeo y lluvia de confeti. Derrota: corazón roto y aviso sobrio.', price: 0 },
-    { id: 'eclipse', name: 'Eclipse', desc: 'Victoria: banner de oro con rayos de sol, ondas de luz y lluvia dorada. Derrota: banner carmesí que se agrieta, con ceniza y brasas flotando.', price: 50 }
+    { id: 'eclipse', name: 'Eclipse', desc: 'Victoria: banner de oro con rayos de sol, ondas de luz y lluvia dorada. Derrota: banner carmesí que se agrieta, con ceniza y brasas flotando.', price: 50 },
+    { id: 'hechizo', name: 'Hechizo arcano', desc: 'Victoria: un círculo mágico se enciende tras un banner violeta y las letras se materializan entre destellos que suben. Derrota: el círculo se apaga entre parpadeos y el banner se agrieta mientras caen motas de energía.', price: 50 }
   ];
   function finId() { var id = ui.acct && ui.acct.fx && ui.acct.fx.finish; return id && FIN_LIST.some(function (e) { return e.id === id; }) && fxHas(id) ? id : 'default'; }
   function finOverlay(id, win, title, sub, rw, btns, extra) {
-    if (id === 'eclipse') {
-      var fx = '<div class="finfx"><div class="finrays"></div><i class="ring"></i><i class="ring r2"></i>', n = win ? 34 : 30;
+    if (id === 'eclipse' || id === 'hechizo') {
+      var arc = id === 'hechizo', fx = '<div class="finfx">' + (arc ? '<div class="arcw"><i class="arc a"></i><i class="arc b"></i></div><i class="ring"></i><i class="ring r2"></i>' : '<div class="finrays"></div><i class="ring"></i><i class="ring r2"></i>'), n = win ? 34 : 30;
       for (var q = 0; q < n; q++) fx += '<i class="fp" style="--x:' + ((q * 29 + (q % 4) * 7) % 100) + '%;--d:' + (((q * 37) % 100) / 100 * 3).toFixed(2) + 's;--t:' + (3.6 + ((q * 13) % 10) / 4).toFixed(2) + 's;--s:' + (5 + (q % 5) * 2) + 'px;--w:' + ((q % 2 ? 1 : -1) * (14 + (q % 4) * 9)) + 'px"></i>';
       fx += '</div>';
       var letters = title.replace(/[¡!]/g, '').toUpperCase().split('').map(function (ch, k) { return '<span style="--i:' + k + '">' + (ch === ' ' ? '&nbsp;' : esc(ch)) + '</span>'; }).join('');
       var crack = win ? '' : '<svg class="fincrack" viewBox="0 0 1000 120" preserveAspectRatio="none"><path d="M0 60 L120 40 L210 78 L330 30 L430 70 L520 22 L610 80 L720 36 L820 74 L920 44 L1000 62" /><path d="M520 22 L540 -10 M430 70 L410 130 M720 36 L750 -10"/></svg>';
-      return '<div class="overlay fin fin-eclipse ' + (win ? 'owin' : 'olose') + (extra ? ' finprev' : '') + '">' + fx + '<div class="finband"><div class="finbandin"><span class="finico">' + ic(win ? 'trofeo' : 'corazonroto') + '</span><div class="fintxt">' + letters + '</div><span class="finico">' + ic(win ? 'trofeo' : 'corazonroto') + '</span></div>' + crack + '</div><p class="finsub">' + sub + '</p><div class="finpanel">' + rw + '<div class="finbtns">' + btns + '</div></div></div>';
+      return '<div class="overlay fin fin-' + (arc ? 'arcano' : 'eclipse') + ' ' + (win ? 'owin' : 'olose') + (extra ? ' finprev' : '') + '">' + fx + '<div class="finband"><div class="finbandin"><span class="finico">' + ic(win ? 'trofeo' : 'corazonroto') + '</span><div class="fintxt">' + letters + '</div><span class="finico">' + ic(win ? 'trofeo' : 'corazonroto') + '</span></div>' + crack + '</div><p class="finsub">' + sub + '</p><div class="finpanel">' + rw + '<div class="finbtns">' + btns + '</div></div></div>';
     }
     var conf = ''; if (win) for (var q2 = 0; q2 < 36; q2++) conf += '<i style="left:' + (q2 * 2.8 + (q2 % 3)) + '%;--d:' + ((q2 * 37) % 100) / 100 * 1.2 + 's;--c:' + ['#ffc533', '#ff6b8b', '#4f9dff', '#38d39f', '#a78bfa'][q2 % 5] + '"></i>';
     return '<div class="overlay ' + (win ? 'owin' : 'olose') + (extra ? ' finprev' : '') + '">' + (win ? '<div class="confetti">' + conf + '</div>' : '') + '<div class="panel over"><div class="obig">' + ic(win ? 'trofeo' : 'corazonroto') + '</div><h2>' + title + '</h2><p class="mut">' + sub + '</p>' + rw + btns + '</div></div>';

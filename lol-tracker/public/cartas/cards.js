@@ -387,8 +387,7 @@ var D={
    "name": "Mertens Gambler",
    "person": "Mertens",
    "themes": [
-    "Gambling",
-    "NINI"
+    "Gambling"
    ],
    "cost": 4,
    "atk": 5,
@@ -406,8 +405,7 @@ var D={
    "name": "Pampert Gambler",
    "person": "Pampert",
    "themes": [
-    "Gambling",
-    "Informático"
+    "Gambling"
    ],
    "cost": 5,
    "atk": 6,

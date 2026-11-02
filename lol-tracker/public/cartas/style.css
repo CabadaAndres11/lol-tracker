@@ -1737,3 +1737,7 @@ body.tutmode .freezebtn { pointer-events: none; opacity: .35; }
 .fxarc.b{border-color:rgba(120,220,255,.9);box-shadow:0 0 18px rgba(80,190,255,.8),inset 0 0 18px rgba(80,190,255,.5)}
 .fxpillar{position:fixed;z-index:7989;border-radius:50% / 8%;pointer-events:none;height:150vh;background:linear-gradient(180deg,transparent,rgba(180,130,255,.45) 40%,rgba(120,200,255,.5) 60%,transparent)}
 .fxspark.vio{background:radial-gradient(circle,#fff,#c9a0ff 55%,rgba(150,90,255,0));box-shadow:0 0 10px #a46bff}
+
+.fxdog{position:fixed;z-index:8001;pointer-events:none;background:url(img/dog.webp) 0 0 / calc(4 * var(--dw)) 100% no-repeat;animation:dogrun .34s steps(4) infinite;filter:drop-shadow(0 6px 4px rgba(0,0,0,.35))}
+@keyframes dogrun{to{background-position:calc(-4 * var(--dw)) 0}}
+.fxcord{position:absolute;height:3px;border-radius:2px;background:#8a5a2b;box-shadow:0 1px 0 rgba(0,0,0,.4)}

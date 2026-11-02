@@ -1,6 +1,9 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-02', tag: 'Novedad', title: 'Nuevo despliegue: Perro mensajero',
+      items: ['Nuevo efecto de despliegue «Perro mensajero» (30 monedas): un perro cruza la pantalla corriendo y arrastra la carta con una cuerda hasta su hueco; ahí la suelta y la carta se levanta de un salto con una onda de luz mientras el perro sigue su camino.',
+        'Disponible en la tienda (Efectos → Despliegues) y se equipa en Colección → Efectos.'] },
     { date: '2026-11-02', tag: 'Novedad', title: 'Nuevo despliegue: Aparición arcana',
       items: ['Nuevo efecto de despliegue «Aparición arcana» (30 monedas): un círculo mágico se enciende en el aire, un pilar de luz y destellos violetas suben y la carta se materializa antes de posarse en su hueco con una onda de choque.',
         'Lo encuentras en la tienda (Efectos → Despliegues) y puedes probarlo y equiparlo en Colección → Efectos.'] },

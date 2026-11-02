@@ -1041,8 +1041,10 @@
   var DEPLOY_LIST = [
     { id: 'default', name: 'Por defecto', desc: 'La carta aparece grande en mitad de la pantalla, da un par de vueltas y vuela hasta su hueco.', price: 0, ms: 2000, gap: 450 },
     { id: 'meteoro', name: 'Meteoro dorado', desc: 'La carta cae como un meteoro envuelta en luz dorada, gira en el aire y se estrella en su hueco con una onda de choque y chispas.', price: 30, ms: 2900, gap: 600 },
-    { id: 'arcano', name: 'Aparición arcana', desc: 'Un círculo mágico se enciende en el aire y la carta se materializa entre destellos violetas antes de posarse en su hueco.', price: 30, ms: 2800, gap: 550 }
+    { id: 'arcano', name: 'Aparición arcana', desc: 'Un círculo mágico se enciende en el aire y la carta se materializa entre destellos violetas antes de posarse en su hueco.', price: 30, ms: 2800, gap: 550 },
+    { id: 'perro', name: 'Perro mensajero', desc: 'Un perro cruza la pantalla corriendo y arrastra la carta con una cuerda hasta su hueco; ahí la suelta y la carta se levanta de un salto.', price: 30, ms: 3300, gap: 700 }
   ];
+  try { new Image().src = 'img/dog.webp'; } catch (e) {}
   var SLEEVE_LIST = [
     { id: 'sin', name: 'Sin funda', desc: 'Tus cartas se ven tal cual, con el borde de su rareza y el reverso de cristal.', price: 0 },
     { id: 'oro', name: 'Oro real', desc: 'Borde de pan de oro bruñido y reverso azul noche con celosía dorada. Elegante y sobrio.', price: 40 },
@@ -1130,6 +1132,28 @@
         { transform: T(0, 4, .94), filter: G(.8), opacity: 1, offset: .9, easing: 'cubic-bezier(.2,.9,.3,1)' },
         { transform: T(0, 0, 1), filter: G(0), opacity: 1, offset: 1 }
       ], { duration: dur, delay: delay, fill: 'both' });
+    },
+    'perro': function (wrap, r, delay, dur) {
+      var W = window.innerWidth, w = r.width, h = r.height, sx = r.left + w / 2;
+      var dh = Math.max(80, w * 1.05), dw = dh * 424 / 412, cordL = h * .22, rump = dw * .86, half = h * .49;
+      var tx0 = W - sx + half + cordL + rump, txE = -dw - sx + half + cordL + rump, ts = tx0 / (tx0 - txE), ty0 = h / 2 - w / 2 - 2;
+      var dog = document.createElement('div'); dog.className = 'fxdog';
+      dog.style.cssText = '--dw:' + dw + 'px;width:' + dw + 'px;height:' + dh + 'px;left:' + (sx - half - cordL - rump) + 'px;top:' + (r.bottom - dh + dh * .04) + 'px';
+      var cord = document.createElement('i'); cord.className = 'fxcord'; cord.style.cssText = 'left:' + (rump - 4) + 'px;top:' + (dh * .46) + 'px;width:' + (cordL + 6) + 'px'; dog.appendChild(cord); document.body.appendChild(dog);
+      var da = dog.animate([{ transform: 'translateX(' + tx0 + 'px)' }, { transform: 'translateX(' + txE + 'px)' }], { duration: dur, delay: delay, fill: 'both' });
+      da.onfinish = function () { dog.remove(); };
+      cord.animate([{ opacity: 1, offset: 0 }, { opacity: 1, offset: Math.max(0, ts - .02) }, { opacity: 0, offset: Math.min(1, ts + .03) }, { opacity: 0, offset: 1 }], { duration: dur, delay: delay, fill: 'both' });
+      var ks = [], n = 14, i, rot;
+      for (i = 0; i <= n; i++) { // arrastrada: avanza al mismo ritmo que el perro y va dando botes
+        rot = -82 + (i % 2 ? 4 : -3);
+        ks.push({ transform: 'translate(' + (tx0 * (1 - i / n)) + 'px,' + (ty0 - (i % 2 ? 5 : 0)) + 'px) rotate(' + rot + 'deg)', offset: ts * i / n });
+      }
+      ks.push({ transform: 'translate(0,' + (ty0 - h * .32) + 'px) rotate(-30deg) scale(1.08)', offset: Math.min(.98, ts + .07), easing: 'ease-out' });
+      ks.push({ transform: 'translate(0,' + (-h * .08) + 'px) rotate(0deg) scale(1.04)', offset: Math.min(.99, ts + .14), easing: 'ease-in' });
+      ks.push({ transform: 'translate(0,0) rotate(0deg) scale(1)', offset: Math.min(1, ts + .2) });
+      ks.push({ transform: 'translate(0,0) rotate(0deg) scale(1)', offset: 1 });
+      impact(sx, r.top + h / 2, delay + dur * (ts + .14));
+      return wrap.animate(ks, { duration: dur, delay: delay, fill: 'both' });
     },
     'default': function (wrap, r, delay, dur) {
       var cx = window.innerWidth / 2 - (r.left + r.width / 2), cy = window.innerHeight / 2 - (r.top + r.height / 2) - 10, sc = Math.max(1.4, Math.min(3, Math.min(300, window.innerWidth * .62, window.innerHeight * .5 * 5 / 7) / r.width));

@@ -137,6 +137,66 @@
     document.addEventListener('keydown', introKey);
   }
 
+
+  // ---------- Pop-up de bienvenida de la versión 1.2 (Gambling) ----------
+  function intro12Off() { try { return localStorage.getItem(lk('intro-v12')) === '1'; } catch (e) { return false; } }
+  function maybeIntro12() {
+    if (ui.intro12Seen || !ui.acct || intro12Off() || introEl) return;
+    ui.intro12Seen = true;
+    setTimeout(function () { if (ui.screen === 'home' && !introEl) openIntro12(); }, 700);
+  }
+  function openIntro12() {
+    closeIntro();
+    var chipsBg = '', q;
+    for (q = 0; q < 10; q++) chipsBg += '<i class="i12chip" style="left:' + (4 + q * 10) + '%;--d:' + ((q * 7) % 10) * .55 + 's;--cc:' + ['#dc2626', '#111827', '#2563eb', '#16a34a', '#7c3aed'][q % 5] + '"></i>';
+    var orbsHud = '', k;
+    for (k = 0; k < 5; k++) orbsHud += '<span class="i12o" style="--i:' + k + '"><em>R' + (k + 1) + '</em></span>';
+    var pile = ''; for (k = 0; k < 7; k++) pile += '<i class="i12chip f" style="left:' + (8 + k * 13) + '%;--d:' + (k * .45) + 's;--cc:' + ['#dc2626', '#2563eb', '#16a34a', '#7c3aed', '#111827'][k % 5] + '"></i>';
+    var h = '<div class="intropanel"><div class="introst i12" data-sc="0"><div class="ibg i12bg">' + chipsBg + '</div>' +
+      '<div class="ititle"><small>¡Ya está aquí la versión 1.2!</small><b>GAMBLING</b></div><span class="iver">v1.2</span>' +
+      '<div class="c12 m">' + cardHtml(CARD['mertens-gambler'], { lv: 1 }) + '</div><div class="c12 p">' + cardHtml(CARD['pampert-gambler'], { lv: 1 }) + '</div>' +
+      '<div class="i12s s1"><div class="i12hud"><span class="gl">' + ic('dado') + ' Orbes Gambling</span><div class="i12orbs">' + orbsHud + '</div><span class="i12n">una orbe por ronda sin daño directo</span></div></div>' +
+      '<div class="i12s s2"><div class="i12w"><div class="rscene"><div class="rtilt"><div class="rrim"></div><div class="rwheel"></div><div class="rball"><i></i></div><div class="rpin"></div></div></div></div>' +
+      '<div class="i12res"><b>+6</b><span>/+6</span></div><div class="i12cs"><span class="c2">+2</span><span class="c1">+1</span><span class="c3">+3</span></div></div>' +
+      '<div class="i12b b1"><b>' + ic('dado') + ' Mala Racha <small>Épica</small></b><span>Si termina la ronda viva y tienes más de 10 orbes, se abre la mitad y sigues acumulando.</span></div>' +
+      '<div class="i12b b2"><b>' + ic('dado') + ' Jackpot <small>Legendaria</small></b><span>Con 20 orbes o más y viva al final de la ronda: daño directo al rival y abre todas.</span></div>' +
+      '<div class="i12s s4"><div class="i12int"><div class="i12gold">' + orb('gold', 10, 0, 'Tu oro') + '<i class="gint i12badge">+2 interés</i></div><div class="i12rows"><div><b>5</b> de oro <em>→ +1</em></div><div><b>10</b> de oro <em>→ +2</em></div><div><b>15+</b> de oro <em>→ +3</em></div><span>cobrado al empezar la siguiente ronda</span></div></div></div>' +
+      '<div class="i12s s5"><div class="i12t t1"><div class="i12tv"><div class="i12cc">' + cardHtml(CARD['lihone-viego'], { lv: 1 }) + '</div>' + pile + '</div><b>Reparto de casino</b><span>Despliegue</span></div>' +
+      '<div class="i12t t2"><div class="i12tv"><div class="i12cc">' + cardHtml(CARD['lihone-viego'], { lv: 1, slv: 'casino' }) + '</div></div><b>Casino</b><span>Funda</span></div>' +
+      '<div class="i12t t3"><div class="i12tv"><div class="i12ban"><span>VICTORIA</span></div>' + pile + '</div><b>Mano ganadora</b><span>Victoria y derrota</span></div></div>' +
+      '<div class="icap"><span></span></div></div>' +
+      '<label class="ibtns inever"><input type="checkbox" data-i="never12"' + (intro12Off() ? ' checked' : '') + '> No mostrar más</label><p class="zhint">Pulsa fuera de la animación para cerrarla</p></div>';
+    introEl = document.createElement('div'); introEl.className = 'introov'; introEl.innerHTML = h;
+    document.body.appendChild(introEl);
+    var st = introEl.querySelector('.introst'), cap = st.querySelector('.icap span');
+    var CAPS = ['', 'Nueva sinergia Gambling: ganas una orbe por cada ronda sin recibir daño directo', 'Al recibir daño directo se abren todas las orbes en la ruleta y mejoran a tus Gambling', 'Dos nuevas Gambling con pasiva propia: Mertens Gambler y Pampert Gambler', 'Nuevo sistema de interés: ahorra oro y cobra un extra cada ronda', 'Nuevos efectos de casino en la tienda'];
+    function spin() { // ruleta de la escena 2: misma animación que en partida, más corta
+      var N = 24, win = 5 + Math.floor(Math.random() * 14), step = 360 / N, D = REDUCED ? 0 : 3600, w = st.querySelector('.rwheel'), b = st.querySelector('.rball'), bi = b.querySelector('i');
+      w.innerHTML = gamWheelSvg(win, 6); st.style.setProperty('--k', (st.clientWidth / 780 * .78).toFixed(3));
+      var wf = 360 * 3 - win * step;
+      if (!D || !w.animate) { w.style.transform = 'rotate(' + wf + 'deg)'; st.classList.add('rdone'); return; }
+      w.animate([{ transform: 'rotate(0deg)' }, { transform: 'rotate(' + wf + 'deg)' }], { duration: D, fill: 'forwards', easing: 'cubic-bezier(.2,.55,.25,1)' });
+      b.animate([{ transform: 'rotate(0deg)' }, { transform: 'rotate(-2160deg)' }], { duration: D - 250, fill: 'forwards', easing: 'cubic-bezier(.25,.5,.3,1)' });
+      bi.animate([{ transform: 'translateY(-178px)', offset: 0 }, { transform: 'translateY(-178px)', offset: .55 }, { transform: 'translateY(-158px)', offset: .8 }, { transform: 'translateY(-149px)', offset: .9 }, { transform: 'translateY(-156px)', offset: .95 }, { transform: 'translateY(-154px)', offset: 1 }], { duration: D - 250, fill: 'forwards' });
+      introT.push(setTimeout(function () { st.classList.add('rdone'); var pk = st.querySelector('path[data-k="' + win + '"]'); if (pk) pk.setAttribute('class', 'rwin'); }, D));
+    }
+    function go(n) { st.dataset.sc = n; cap.textContent = CAPS[n] || ''; cap.parentNode.classList.toggle('on', !!CAPS[n]); if (n === 2) spin(); }
+    function run() {
+      introT.forEach(clearTimeout); introT = [];
+      st.classList.add('reset'); st.classList.remove('rdone'); go(0);
+      introT.push(setTimeout(function () { st.classList.remove('reset'); go(1); }, 80));
+      [[3000, 2], [8500, 3], [15000, 4], [20500, 5]].forEach(function (x) { introT.push(setTimeout(function () { go(x[1]); }, x[0] + 80)); });
+      introT.push(setTimeout(run, 27500));
+    }
+    run();
+    introEl.addEventListener('change', function (e) {
+      if (e.target.dataset.i !== 'never12') return;
+      try { if (e.target.checked) localStorage.setItem(lk('intro-v12'), '1'); else localStorage.removeItem(lk('intro-v12')); } catch (er) {}
+    });
+    introEl.addEventListener('click', function (e) { if (e.target === introEl || e.target.classList.contains('intropanel')) closeIntro(); });
+    document.addEventListener('keydown', introKey);
+  }
+
   // ---------- Carta ampliada en 3D (pantalla Mazo) ----------
   var zoomEl = null;
   function closeZoom() { if (zoomEl) { zoomEl.remove(); zoomEl = null; } document.removeEventListener('keydown', zoomKey); }
@@ -393,9 +453,11 @@
       ].map(function (m) { return '<button class="ricon" data-act="nav" data-to="' + m[0] + '"><span class="rii">' + m[1] + '</span><b>' + m[2] + '</b><span class="mut">' + m[3] + '</span></button>'; }).join('') + '</div>' + homeNews() + '</div>';
     h += '<p class="mut" style="text-align:center">' + D.cards.length + ' tropas · ' + D.actions.length + ' acciones</p></div>';
     app.innerHTML = h;
+    maybeIntro12();
   }
   // Animaciones de versiones anteriores: se pueden volver a ver desde el perfil
   var ANIM_LIST = [
+    { id: 'v12', ver: 'v1.2', name: 'Bienvenida a la 1.2: Gambling', desc: 'Pop-up de la versión 1.2: sinergia Gambling, nuevas cartas, ruleta de orbes, interés por ahorrar y nuevos efectos de casino.' },
     { id: 'correa', ver: 'v1.1', name: 'Sinergia Correa', desc: 'Pop-up de la versión 1.1: las cartas entran en juego, recibes a las 4 novias y una ocupa el hueco 5.' }
   ];
   function animPanel() {
@@ -1659,7 +1721,7 @@
     if (act === 'sfxtest') { var tc = el.dataset.cat; snd(tc === 'ui' ? 'buy' : tc === 'combat' ? 'heavy' : tc === 'pack' ? 'rev-Épica' : 'win'); return; }
     if (ui.finPrev && act !== 'finprev' && act !== 'finflip' && act !== 'finclose') ui.finPrev = null;
     if (ui.dedit) { var ne = document.getElementById('de-name'); if (ne) ui.dedit.name = ne.value; }
-    if (act === 'playanim') { if (el.dataset.id === 'correa') openIntro(); return; }
+    if (act === 'playanim') { if (el.dataset.id === 'correa') openIntro(); else if (el.dataset.id === 'v12') openIntro12(); return; }
     if (act === 'avedit') { ui.avEdit = !ui.avEdit; return render(); }
     if (act === 'acctmenu') { var w = el.closest('.acctw'); if (w) w.classList.toggle('open'); return; }
     if (act === 'logout') return logout();

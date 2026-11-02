@@ -1,6 +1,9 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-02', tag: 'Novedad', title: 'Pop-up de bienvenida de la versión 1.2',
+      items: ['Al abrir el menú aparece una animación que presenta la 1.2: la sinergia Gambling, Mertens Gambler y Pampert Gambler, la ruleta de orbes, el interés por ahorrar oro y los nuevos efectos de casino. Se cierra pulsando fuera y puedes marcar «No mostrar más».',
+        'Puedes volver a verla en Perfil → Animaciones.'] },
     { date: '2026-11-02', tag: 'Cambio', title: 'Nuevo apartado «Animaciones» en el perfil',
       items: ['En Perfil → Animaciones podrás volver a ver las animaciones de presentación de versiones anteriores. Por ahora está el pop-up de la versión 1.1 con la sinergia Correa.',
         'Ese pop-up ya no aparece solo al abrir el menú.'] },

@@ -1,6 +1,10 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-02', tag: 'Novedad', title: 'Sonido en el juego',
+      items: ['El juego estrena sonidos: navegación y clics, compras y ventas en la tienda, colocar cartas, golpes, bajas, curas y habilidades en combate, inicio y fin de ronda, despliegues, victoria y derrota, apertura de sobres y cajas (con un sonido distinto según la rareza) y recoger recompensas de misiones y rangos.',
+        'Nuevo panel «Sonido» en Mi perfil: volumen general, volumen por tipo (Interfaz, Combate, Sobres y cajas, Eventos y efectos) con botón de prueba, silenciar con la pestaña en segundo plano y restablecer. También puedes silenciar todo desde el menú de tu cuenta.',
+        'Los ajustes se guardan en el dispositivo. Todos los sonidos se generan en el navegador, sin descargas.'] },
     { date: '2026-11-02', tag: 'Corrección', title: 'Pedir refuerzos en partidas online',
       items: ['Corregido un fallo que impedía lanzar «Pedir refuerzos» en el Versus de 4 y en partidas online: la acción daba error en tu pantalla y la partida se quedaba como congelada hasta la siguiente actualización. Ahora se juega con normalidad y la carta que consigues la decide el servidor.'] },
     { date: '2026-11-02', tag: 'Novedad', title: 'Nuevo pack de victoria y derrota: Hechizo arcano',

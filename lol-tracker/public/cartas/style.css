@@ -1777,3 +1777,11 @@ body.tutmode .freezebtn { pointer-events: none; opacity: .35; }
 .fin-arcano.olose .finsub { color: #a99cc8; }
 .fin-arcano .fincrack path { stroke: rgba(180,160,255,.85); }
 @media (prefers-reduced-motion: reduce) { .fin-arcano .arc, .fin-arcano .arcw { animation: none !important; } }
+
+/* ---------- Ajustes de sonido (perfil) ---------- */
+.sfxpanel .sfxrow { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; padding: .55rem 0; border-top: 1px solid rgba(255,255,255,.06); }
+.sfxpanel .sfxrow.main { border-top: 0; }
+.sfxlb { display: grid; min-width: 210px; flex: 1; } .sfxlb span { font-size: .8rem; }
+.sfxsl { display: flex; align-items: center; gap: .7rem; flex: 1; min-width: 240px; } .sfxsl span { min-width: 120px; }
+.sfxsl input[type=range] { flex: 1; accent-color: #d9b25a; } .sfxsl b { min-width: 3ch; text-align: right; color: #f0d58a; }
+.sfxchk { display: flex; align-items: center; gap: .6rem; padding: .6rem 0 .2rem; color: #c8cfe4; cursor: pointer; } .sfxchk input { accent-color: #d9b25a; width: 18px; height: 18px; }

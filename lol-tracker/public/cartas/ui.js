@@ -205,9 +205,20 @@
     var id = ui.acct && ui.acct.avatar, ok = artOk(id);
     return '<span class="avt ' + (cls || '') + (ok ? ' has' : '') + '"' + (ok ? ' style="background-image:url(/cartas/art/' + id + '.webp)"' : '') + '>' + (ok ? '' : ic('usuario')) + '</span>';
   }
+  function snd(n, d) { try { if (window.CartasSfx) window.CartasSfx.play(n, d); } catch (e) {} }
+  var SND_ACT = { nav: 'nav', menu: 'back', finclose: 'back', boxclose: '', packbg: '', refresh: 'refresh', freeze: 'freeze', endshop: 'confirm', fight: 'confirm', next: 'confirm', hand: 'pick', slot: '', buy: '', sell: '', msclaim: '', rkclaim: '', boxopen: '', openpack: '', flipcard: '', flipall: '', sfxtest: '', surrender: 'click' };
+  function sfxPanel() {
+    var S = window.CartasSfx; if (!S) return '';
+    var c = S.get();
+    return '<div class="panel sfxpanel"><h2>' + ic('altavoz') + ' Sonido</h2><p class="mut">Los sonidos se generan en tu navegador. Los ajustes se guardan en este dispositivo.</p>' +
+      '<div class="sfxrow main"><button class="btn sec" data-act="sfxmute">' + (c.mute ? 'Activar sonido' : 'Silenciar todo') + '</button><label class="sfxsl"><span>Volumen general</span><input type="range" min="0" max="100" value="' + c.master + '" data-sfx="master"><b>' + c.master + '%</b></label></div>' +
+      S.CATS.map(function (k) { return '<div class="sfxrow"><div class="sfxlb"><b>' + k[1] + '</b><span class="mut">' + k[2] + '</span></div><label class="sfxsl"><input type="range" min="0" max="100" value="' + c.vol[k[0]] + '" data-sfx="vol" data-cat="' + k[0] + '"><b>' + c.vol[k[0]] + '%</b></label><button class="btn sec" data-act="sfxtest" data-cat="' + k[0] + '">Probar</button></div>'; }).join('') +
+      '<label class="sfxchk"><input type="checkbox" data-act="sfxbg"' + (c.bg ? ' checked' : '') + '> Silenciar cuando la pestaña está en segundo plano</label>' +
+      '<div class="sfxrow"><button class="btn sec" data-act="sfxreset">Restablecer ajustes de sonido</button></div></div>';
+  }
   function navHtml(cur) {
     var home = cur === 'home';
-    var acct = ui.acct ? '<button class="navb coinpill" data-act="nav" data-to="packs" title="Tus monedas">' + ic('moneda') + ' ' + ui.acct.coins + '</button><button class="navb avtb' + (cur === 'profile' ? ' on' : '') + '" data-act="nav" data-to="profile" title="Tu perfil">' + avatarHtml('sm') + '</button><span class="acctw"><button class="navb who" data-act="acctmenu" title="Tu cuenta">' + esc(ui.acct.name) + ' ▾</button><div class="acctmenu"><div class="am-name">Sesión de <b>' + esc(ui.acct.name) + '</b></div><button class="am-prof" data-act="nav" data-to="profile">' + ic('usuario') + ' Mi perfil</button><button data-act="logout">' + ic('puerta') + ' Cerrar sesión</button></div></span>' : '';
+    var acct = ui.acct ? '<button class="navb coinpill" data-act="nav" data-to="packs" title="Tus monedas">' + ic('moneda') + ' ' + ui.acct.coins + '</button><button class="navb avtb' + (cur === 'profile' ? ' on' : '') + '" data-act="nav" data-to="profile" title="Tu perfil">' + avatarHtml('sm') + '</button><span class="acctw"><button class="navb who" data-act="acctmenu" title="Tu cuenta">' + esc(ui.acct.name) + ' ▾</button><div class="acctmenu"><div class="am-name">Sesión de <b>' + esc(ui.acct.name) + '</b></div><button class="am-prof" data-act="nav" data-to="profile">' + ic('usuario') + ' Mi perfil</button><button data-act="sfxmute">' + ic('altavoz') + ' Sonido: ' + (window.CartasSfx && window.CartasSfx.get().mute ? 'desactivado' : 'activado') + '</button><button data-act="logout">' + ic('puerta') + ' Cerrar sesión</button></div></span>' : '';
     return '<nav class="nav' + (home ? ' navhome' : '') + '">' + (home ? '<span class="navlogo"><img src="/cartas/logo-icon.png" alt="">TCG Arena</span>' : NAV.map(function (n) { var bd = n[0] === 'missions' && claimableCount() ? '<i class="nbadge">' + claimableCount() + '</i>' : ''; return '<button class="navb' + (n[0] === cur ? ' on' : '') + '" data-act="nav" data-to="' + n[0] + '">' + ic(n[1]) + ' ' + n[2] + bd + '</button>'; }).join('')) +
       '<span class="navsp"></span>' + acct + '</nav><a class="hubback" href="/" title="Volver al inicio">← Juegos</a>';
   }
@@ -393,6 +404,7 @@
     var a = ui.acct, mySkins = (window.CARTAS_SKINS || []).filter(function (k) { return (a.skins || []).indexOf(k.id) >= 0; }), cur = a.avatar || '', own = D.cards.filter(function (c) { return ARTS[c.id] && ui.ownedSet && ui.ownedSet[c.id]; }).sort(function (x, y) { return RARS.indexOf(y.rarity) - RARS.indexOf(x.rarity) || x.name.localeCompare(y.name); });
     app.innerHTML = head('profile', '' + ic('usuario') + ' Mi perfil') + (ui.msg ? '<p class="err">' + esc(ui.msg) + '</p>' : '') +
       '<div class="panel profhead">' + avatarHtml('xl') + '<div><h2>' + esc(a.name) + '</h2><p class="mut">' + a.pts + ' puntos de clasificación · ' + a.coins + ' ' + ic('moneda') + ' · ' + a.owned.length + ' cartas desbloqueadas</p><div class="btnrow"><button class="btn sec" data-act="logout">' + ic('puerta') + ' Cerrar sesión</button></div></div></div>' +
+      sfxPanel() +
       '<div class="panel"><h2>Foto de perfil</h2><p class="mut">Elige la ilustración de una de tus cartas desbloqueadas o de una de tus skins. Cuantas más consigas, más opciones tendrás.</p>' +
       '<div class="avgrid"><button class="avopt none' + (cur ? '' : ' on') + '" data-act="setavatar" data-card="" title="Sin foto"><span class="avt">' + ic('usuario') + '</span><b>Ninguna</b></button>' + own.map(function (c) {
         return '<button class="avopt' + (cur === c.id ? ' on' : '') + '" data-act="setavatar" data-card="' + c.id + '" title="' + esc(c.name) + '"><span class="avt has" style="background-image:url(/cartas/art/' + c.id + '.webp)"></span><b>' + esc(c.name) + '</b></button>';
@@ -1009,8 +1021,10 @@
     h += '<div class="foesyn">' + (s.shopOpen ? '<div class="synside panel foe locked"><h2>' + ic('aviso') + ' Sinergias del RIVAL</h2><p class="mut">' + ic('candado') + ' Ocultas durante la tienda. Se revelan cuando empieza el combate.</p></div>' : synergyHtml(R, true)) + '</div>';
     var shown = s.log.slice(-14);
     h += '<div class="panel logp"><h2>Registro</h2><div class="log" id="log">' + shown.map(function (l, n) { return '<div' + (n === shown.length - 1 ? ' class="cur"' : '') + '>' + esc(l.text) + '</div>'; }).join('') + '</div></div></aside></div>';
+    if (s.phase !== 'over') ui.endSnd = 0;
     if (s.phase === 'over' && !ui.playing) {
       var win = s.winner === 0;
+      if (!ui.endSnd) { ui.endSnd = 1; snd(win ? 'win' : 'lose', 350); }
       if (!s.rep && PV.on) s.rep = 1;
       if (!s.rep) {
         s.rep = 1; ui.reward = null;
@@ -1079,6 +1093,7 @@
   function fxHas(id) { return !!(ui.acct && ((ui.acct.fxOwned || ['default']).indexOf(id) >= 0 || ui.acct.admin)); }
   // destello al aterrizar: onda de choque y chispas
   function impact(x, y, at) {
+    snd('land', at);
     var ring = document.createElement('div'); ring.className = 'fxring'; ring.style.cssText = 'left:' + x + 'px;top:' + y + 'px'; document.body.appendChild(ring);
     ring.animate([{ transform: 'translate(-50%,-50%) scale(.1)', opacity: 0, offset: 0 }, { transform: 'translate(-50%,-50%) scale(.4)', opacity: .95, offset: .12 }, { transform: 'translate(-50%,-50%) scale(3.4)', opacity: 0, offset: 1 }], { duration: 850, delay: at, fill: 'both', easing: 'ease-out' }).onfinish = function () { ring.remove(); };
     for (var i = 0; i < 16; i++) {
@@ -1217,6 +1232,7 @@
       var wrap = document.createElement('div'); wrap.className = 'flyc'; wrap.style.cssText = 'left:' + r.left + 'px;top:' + r.top + 'px;width:' + r.width + 'px;height:' + r.height + 'px';
       var cl = t.cloneNode(true); cl.classList.remove('dealwait', 'sel', 'tgtable'); ['data-cuid', 'data-act', 'data-side'].forEach(function (a) { cl.removeAttribute(a); });
       wrap.appendChild(cl); wrap.style.visibility = 'hidden'; document.body.appendChild(wrap);
+      snd('deploy', f.delay);
       var anim = (DEPLOY_FX[deployId()] || DEPLOY_FX.default)(wrap, r, f.delay, deployMeta().ms);
       anim.onfinish = function () {
         wrap.remove();
@@ -1456,7 +1472,7 @@
     var el = document.getElementById('splash');
     if (!el) { el = document.createElement('div'); el.id = 'splash'; document.body.appendChild(el); }
     el.className = 'splash k-' + o.kind; el.innerHTML = '<div class="band"><div class="st">' + o.title + '</div><div class="ss">' + (o.sub || '') + '</div></div>';
-    void el.offsetWidth; el.classList.add('show'); ui.splashUntil = Date.now() + 1500;
+    void el.offsetWidth; el.classList.add('show'); ui.splashUntil = Date.now() + 1500; snd(o.kind === 'end' ? 'end' : 'round');
   }
   function announce() {
     var s = ui.s; ui.anm = null; if (!s || s.over) { ui.deadline = null; return; }
@@ -1481,10 +1497,17 @@
     ui.frames = ui.s.frames.slice(); ui.shown = 0; ui.playing = true; ui.sel = null;
     clearTimeout(timer); ui.floats = []; step();
   }
+  function combatSnd(prev, f) {
+    var hl = f.hl; if (!hl) return;
+    if (hl.fx) snd(hl.fx.type === 'heal' ? 'heal' : 'magic');
+    if (hl.dmg > 0) snd(hl.dmg >= 6 ? 'heavy' : 'hit'); else if (hl.att && hl.tgt && hl.dmg === 0) snd('miss');
+    if (ui.floats.some(function (x) { return x.cls === 'pos'; })) snd('buff', 150);
+    if (prev) { var cnt = function (v) { var n = 0; v.mesa.forEach(function (row) { row.forEach(function (c) { if (c) n++; }); }); return n; }; if (cnt(f.view) < cnt(prev)) snd('death', 140); }
+  }
   function step() {
     if (ui.shown >= ui.frames.length) { stopPlay(); return; }
     var f = ui.frames[ui.shown++], prev = ui.view || (ui.frames[0] && ui.frames[0].view);
-    ui.floats = diffFloats(prev, f);
+    ui.floats = diffFloats(prev, f); combatSnd(prev, f);
     ui.view = f.view; ui.hl = f.hl; render();
     var fxk = f.hl && f.hl.fx; timer = setTimeout(step, fxk ? (fxk.type === 'pokemon' ? 1700 : 1250) : 780);
     var lg = document.getElementById('log');
@@ -1512,7 +1535,15 @@
   }
 
   // ---------- Eventos ----------
-  app.addEventListener('input', function (e) { if (e.target.id === 'slot-name') ui.slotName = e.target.value; });
+  app.addEventListener('input', function (e) {
+    if (e.target.id === 'slot-name') ui.slotName = e.target.value;
+    var d = e.target.dataset && e.target.dataset.sfx;
+    if (d && window.CartasSfx) { window.CartasSfx.set(d, e.target.value, e.target.dataset.cat); var b = e.target.parentNode.querySelector('b'); if (b) b.textContent = e.target.value + '%'; }
+  });
+  app.addEventListener('change', function (e) {
+    var d = e.target.dataset && e.target.dataset.sfx;
+    if (d && window.CartasSfx) snd(e.target.dataset.cat === 'combat' ? 'hit' : e.target.dataset.cat === 'pack' ? 'rev-Rara' : e.target.dataset.cat === 'event' ? 'round' : 'confirm');
+  });
   app.addEventListener('change', function (e) { if (e.target.id === 'slot-to') ui.slotTo = +e.target.value; });
   var noClick = 0;
   function nextPending() { ui.sel = null; } // el objetivo siempre se elige a mano
@@ -1520,6 +1551,13 @@
     if (Date.now() - noClick < 350 || ui.busy) return;
     var el = e.target.closest('[data-act]'); if (!el) return;
     var act = el.dataset.act, s = ui.s, P = s && s.p[0];
+    if (act !== 'sfxbg') snd(SND_ACT.hasOwnProperty(act) ? SND_ACT[act] : 'click');
+    if (act === 'buy' && P) { var g0 = P.gold; setTimeout(function () { snd(P.gold < g0 ? 'buy' : 'error'); }, 60); }
+    if (act === 'sell' && P) { var n0 = P.hand.length + P.mesa.filter(Boolean).length; setTimeout(function () { snd(P.hand.length + P.mesa.filter(Boolean).length < n0 ? 'sell' : 'error'); }, 60); }
+    if (act === 'sfxmute') { window.CartasSfx.toggleMute(); snd('confirm'); return render(); }
+    if (act === 'sfxbg') { window.CartasSfx.set('bg', el.checked); return; }
+    if (act === 'sfxreset') { window.CartasSfx.reset(); snd('confirm'); return render(); }
+    if (act === 'sfxtest') { var tc = el.dataset.cat; snd(tc === 'ui' ? 'buy' : tc === 'combat' ? 'heavy' : tc === 'pack' ? 'rev-Épica' : 'win'); return; }
     if (ui.finPrev && act !== 'finprev' && act !== 'finflip' && act !== 'finclose') ui.finPrev = null;
     if (ui.dedit) { var ne = document.getElementById('de-name'); if (ne) ui.dedit.name = ne.value; }
     if (act === 'acctmenu') { var w = el.closest('.acctw'); if (w) w.classList.toggle('open'); return; }
@@ -1557,20 +1595,20 @@
     if (act === 'skinequip') return api('skinEquip', { id: el.dataset.skin, card: el.dataset.card }).then(function (r) { if (r.data && r.data.user) setAcct(r.data.user); render(); });
     if (act === 'daily') { return api('daily').then(function (r) { if (r.data && r.data.user) setAcct(r.data.user); ui.msg = r.ok ? '' : (r.data.error || ''); render(); }); }
     if (act === 'openpack') {
-      if (ui.pack) return; ui.msg = ''; ui.pack = { cards: null, rev: [] }; render();
+      if (ui.pack) return; ui.msg = ''; ui.pack = { cards: null, rev: [] }; render(); snd('shake');
       var t0 = Date.now(), pk0 = ui.pack;
       return api('open').then(function (r) {
         var wait = Math.max(0, 1300 - (Date.now() - t0));
         setTimeout(function () {
           if (ui.pack !== pk0) return;
           if (!r.ok) { ui.pack = null; ui.msg = (r.data && r.data.error) || 'No se pudo abrir.'; if (r.data && r.data.user) setAcct(r.data.user); return render(); }
-          pk0.cards = r.data.cards; pk0.rev = r.data.cards.map(function () { return false; }); pk0.stage = 'rip'; setAcct(r.data.user); render();
+          pk0.cards = r.data.cards; pk0.rev = r.data.cards.map(function () { return false; }); pk0.stage = 'rip'; setAcct(r.data.user); render(); snd('rip');
           setTimeout(function () { if (ui.pack === pk0) { pk0.stage = 'reveal'; render(); } }, RIP_MS(pk0));
         }, wait);
       });
     }
-    if (act === 'flipcard') { var fi = +el.dataset.i; if (ui.pack && ui.pack.cards) { ui.pack.rev[fi] = true; el.classList.add('flipped'); packHint(); } return; }
-    if (act === 'flipall') { if (ui.pack && ui.pack.cards) { ui.pack.rev = ui.pack.rev.map(function () { return true; }); app.querySelectorAll('.pcard').forEach(function (n, k) { setTimeout(function () { n.classList.add('flipped'); }, k * 140); }); packHint(); } return; }
+    if (act === 'flipcard') { var fi = +el.dataset.i; if (ui.pack && ui.pack.cards) { if (!ui.pack.rev[fi]) { var fc = CARD[ui.pack.cards[fi].id || ui.pack.cards[fi]]; snd('flip'); if (fc) snd('rev-' + fc.rarity, 120); } ui.pack.rev[fi] = true; el.classList.add('flipped'); packHint(); } return; }
+    if (act === 'flipall') { if (ui.pack && ui.pack.cards) { ui.pack.rev = ui.pack.rev.map(function () { return true; }); app.querySelectorAll('.pcard').forEach(function (n, k) { setTimeout(function () { n.classList.add('flipped'); snd('flip'); }, k * 140); }); packHint(); } return; }
     if (act === 'packbg') { if (ui.pack && ui.pack.cards && ui.pack.stage === 'reveal' && ui.pack.rev.every(Boolean)) { ui.pack = null; render(); } return; }
     if (act === 'shoptab') { ui.shopTab = el.dataset.t; ui.msg = ''; return render(); }
     if (act === 'shopsel') { ui.shopSel = +el.dataset.i; ui.shopTab = 'feat'; return render(); }
@@ -1581,21 +1619,21 @@
     if (act === 'tutstart') return startTutorial();
     if (act === 'tutexit') { tutExit(); return; }
     if (ui.tut && (act === 'refresh' || act === 'freeze')) return;
-    if (act === 'msclaim') { return api('missionClaim', { id: el.dataset.id }).then(function (r) { if (r.data && r.data.user) setAcct(r.data.user); ui.msg = r.ok ? '' : (r.data.error || ''); render(); }); }
-    if (act === 'rkclaim') { return api('rankClaim', { id: el.dataset.id }).then(function (r) { if (r.data && r.data.user) setAcct(r.data.user); ui.msg = r.ok ? '' : (r.data.error || ''); render(); }); }
+    if (act === 'msclaim') { return api('missionClaim', { id: el.dataset.id }).then(function (r) { if (r.data && r.data.user) setAcct(r.data.user); if (r.ok) snd('claim'); ui.msg = r.ok ? '' : (r.data.error || ''); render(); }); }
+    if (act === 'rkclaim') { return api('rankClaim', { id: el.dataset.id }).then(function (r) { if (r.data && r.data.user) setAcct(r.data.user); if (r.ok) snd('claim'); ui.msg = r.ok ? '' : (r.data.error || ''); render(); }); }
     if (act === 'goinv') { ui.screen = 'deck'; ui.colTab = 'inv'; ui.dedit = null; window.scrollTo(0, 0); return render(); }
     if (act === 'boxinfo') { ui.boxInfo = !ui.boxInfo; return renderDeck(); }
     if (act === 'boxclose') { ui.box = null; return renderDeck(); }
     if (act === 'boxopen') {
       if (ui.box || !ui.acct || !ui.acct.boxes) return;
-      var bx = ui.box = { stage: 'shake' }, t0 = Date.now(); ui.msg = ''; renderDeck();
+      var bx = ui.box = { stage: 'shake' }, t0 = Date.now(); ui.msg = ''; renderDeck(); snd('shake');
       return api('boxOpen').then(function (r) {
         setTimeout(function () {
           if (ui.box !== bx) return;
           var show = function () { if (ui.screen === 'deck' && (ui.colTab || '') === 'inv') renderDeck(); };
           if (!r.ok) { ui.box = null; ui.msg = (r.data && r.data.error) || 'No se pudo abrir la caja.'; if (r.data && r.data.user) setAcct(r.data.user); return show(); }
-          bx.reward = r.data.reward; setAcct(r.data.user); bx.stage = 'burst'; show();
-          setTimeout(function () { if (ui.box === bx) { bx.stage = 'reveal'; show(); } }, REDUCED ? 300 : 1900);
+          bx.reward = r.data.reward; setAcct(r.data.user); bx.stage = 'burst'; show(); snd('lid');
+          setTimeout(function () { if (ui.box === bx) { bx.stage = 'reveal'; show(); snd('rev-' + rewardInfo(bx.reward).best); } }, REDUCED ? 300 : 1900);
         }, Math.max(0, (REDUCED ? 200 : 1700) - (Date.now() - t0)));
       });
     }
@@ -1620,8 +1658,8 @@
     if (act === 'coltab') { ui.colTab = el.dataset.t; ui.dedit = null; ui.msg = ''; ui.delAsk = null; window.scrollTo(0, 0); return render(); }
     if (act === 'shopfxsec') { ui.shopFxSec = el.dataset.t; ui.slvPrev = null; return render(); }
     if (act === 'fxsec') { ui.fxSec = el.dataset.t; ui.slvPrev = null; return renderDeck(); }
-    if (act === 'finprev') { ui.finPrev = { id: el.dataset.id, win: true }; return ui.screen === 'packs' ? render() : renderDeck(); }
-    if (act === 'finflip') { if (ui.finPrev) ui.finPrev.win = !ui.finPrev.win; return ui.screen === 'packs' ? render() : renderDeck(); }
+    if (act === 'finprev') { ui.finPrev = { id: el.dataset.id, win: true }; snd('win', 300); return ui.screen === 'packs' ? render() : renderDeck(); }
+    if (act === 'finflip') { if (ui.finPrev) { ui.finPrev.win = !ui.finPrev.win; snd(ui.finPrev.win ? 'win' : 'lose', 300); } return ui.screen === 'packs' ? render() : renderDeck(); }
     if (act === 'finclose') { ui.finPrev = null; return ui.screen === 'packs' ? render() : renderDeck(); }
     if (act === 'slvprev') { ui.slvPrev = el.dataset.id; return ui.screen === 'packs' ? render() : renderDeck(); }
     if (act === 'fxgoshop') { ui.screen = 'packs'; ui.shopTab = 'fx'; window.scrollTo(0, 0); return render(); }
@@ -1741,13 +1779,13 @@
     if (act === 'novia') {
       var nk = -1; (s.p[0].nvs || []).forEach(function (n, q) { if (n.id === el.dataset.id) nk = q; });
       if (nk < 0) return; // ya está en el hueco 5
-      if (E.place(s, 0, -1 - nk, 4)) { ui.landed = s.p[0].mesa[4].uid; pvs('place', [-1 - nk, 4]); ui.hint = ''; } else ui.hint = 'No se puede colocar ahora.';
+      if (E.place(s, 0, -1 - nk, 4)) { ui.landed = s.p[0].mesa[4].uid; snd('place'); pvs('place', [-1 - nk, 4]); ui.hint = ''; } else ui.hint = 'No se puede colocar ahora.';
       ui.sel = null; if (!s.shopOpen) nextPending(s);
       return render();
     }
     if (act === 'slot') {
       ui.hint = '';
-      if (ui.sel && ui.sel.k === 'hand') { var sl2 = +el.dataset.i; if (E.place(s, 0, ui.sel.i, sl2)) { ui.landed = s.p[0].mesa[sl2].uid; pvs('place', [ui.sel.i, sl2]); } else if (E.dupBlock(s, 0, ui.sel.i)) ui.hint = 'Ya tienes esa carta en la mesa: los duplicados solo van en la mano.'; }
+      if (ui.sel && ui.sel.k === 'hand') { var sl2 = +el.dataset.i; if (E.place(s, 0, ui.sel.i, sl2)) { ui.landed = s.p[0].mesa[sl2].uid; snd('place'); pvs('place', [ui.sel.i, sl2]); } else if (E.dupBlock(s, 0, ui.sel.i)) ui.hint = 'Ya tienes esa carta en la mesa: los duplicados solo van en la mano.'; }
       ui.sel = null;
       if (!s.shopOpen) nextPending(s);
       return render();
@@ -1823,7 +1861,7 @@
     if (t && inst0) {
       if (c.type === 'tropa') {
         var slotEl = t.closest('.slot.free'), onBoard = t.closest('#board'), idx = slotEl ? +slotEl.dataset.i : (onBoard ? P.mesa.slice(0, 4).indexOf(null) : -1);
-        if (idx >= 0 && E.place(s, 0, drag.i, idx)) { ok = true; ui.landed = P.mesa[idx].uid; pvs('place', [drag.i, idx]); }
+        if (idx >= 0 && E.place(s, 0, drag.i, idx)) { ok = true; ui.landed = P.mesa[idx].uid; snd('place'); pvs('place', [drag.i, idx]); }
       } else if (c.target === 'none') { if (t.closest('#board')) { ok = E.playAction(s, 0, drag.i, null); if (ok) pvs('action', [drag.i, null]); } }
       else { var cd = t.closest('[data-cuid]'); if (cd && cd.dataset.side === (c.target === 'ally' ? '0' : '1')) { ok = E.playAction(s, 0, drag.i, +cd.dataset.cuid); if (ok) pvs('action', [drag.i, +cd.dataset.cuid]); } }
     }

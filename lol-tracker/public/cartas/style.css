@@ -1958,3 +1958,7 @@ body.tutmode .freezebtn { pointer-events: none; opacity: .35; }
 .i12ban { width: 130%; padding: .7rem 0; text-align: center; border-block: 2px solid #facc15; background: linear-gradient(90deg, rgba(6,40,22,0), rgba(14,100,56,.95) 18%, rgba(22,135,76,.95) 50%, rgba(14,100,56,.95) 82%, rgba(6,40,22,0)); font: 700 clamp(.7rem, 2.6vw, 1.4rem)/1 Georgia, serif; letter-spacing: .12em; color: #fff7cc; text-shadow: 0 0 12px rgba(250,204,21,.85); }
 .i12 .iq, .i12 .islot { display: none; }
 @media (prefers-reduced-motion: reduce) { .i12bg .i12chip, .i12tv .i12chip { animation: none; } .i12o { transform: scale(1); } }
+
+/* Genkidama (sinergia Anime) */
+.genw { display: inline-flex; align-items: center; gap: .3rem; padding: .3rem .6rem; border-radius: 3px; border: 1px solid rgba(244,114,182,.5); background: rgba(244,114,182,.12); color: #f9a8d4; font-weight: 800; }
+.genw svg { width: 1rem; height: 1rem; }

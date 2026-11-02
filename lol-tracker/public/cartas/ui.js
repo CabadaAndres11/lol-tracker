@@ -56,7 +56,7 @@
   function tagHtml(t) { return '<span class="tag" style="--tc:' + D.themes[t].color + '">' + tic(t) + esc(t) + '</span>'; }
   function pips(n) { var h = ''; for (var k = 0; k < 3; k++) h += '<i' + (k < n ? ' class="on"' : '') + '></i>'; return h; }
   var AICON = { entrenamiento: 'espadas', arenga: 'megafono', armadura: 'escudo', banquete: 'carne', intimidacion: 'enfado', 'mal-de-ojo': 'ojo', 'golpe-certero': 'diana', lluvia: 'arco',
-    'bola-extra': 'beisbol', 'segundo-aliento': 'viento', 'cambio-de-linea': 'cambio', parche: 'disquete', 'horas-extra': 'maletin', 'segunda-temporada': 'trofeo', 'campeones-de-europa': 'trofeo', 'remate-doble': 'voley', 'cita-sorpresa': 'corazon', 'rabia-contenida': 'enfado', 'fiesta-del-pueblo': 'fiesta', 'hermano-del-alma': 'duo', 'sofa-compartido': 'sofa', 'golpe-de-suerte': 'dado', madrugon: 'reloj' };
+    'bola-extra': 'beisbol', 'segundo-aliento': 'viento', 'cambio-de-linea': 'cambio', parche: 'disquete', 'horas-extra': 'maletin', 'segunda-temporada': 'trofeo', 'campeones-de-europa': 'trofeo', 'remate-doble': 'voley', 'cita-sorpresa': 'corazon', 'rabia-contenida': 'enfado', 'fiesta-del-pueblo': 'fiesta', 'hermano-del-alma': 'duo', 'sofa-compartido': 'sofa', 'golpe-de-suerte': 'dado', genkidama: 'fuego', madrugon: 'reloj' };
   var ARTS = {"aitorlg-maomao":1,"chipy-goku":1,"dashlight-sun-jin-woo":1,"javihi-smiley":1,"lihone-rudeus":1,"mertens-meliodas":1,"pampert-asta":1,"eriko":1,"helena":1,"lucia":1,"ari":1,"aitorlg-friki":1,"aitorlg-koisito":1,"aitorlg-regla":1,"aitorlg-renata":1,"chipy-correa":1,"chipy-lloron":1,"computer-chipy":1,"computer-dashlight":1,"computer-hellbramn":1,"computer-lihone":1,"computer-petea":1,"dashlight-akali":1,"dashlight-correa":1,"haikyuu-lihone":1,"hellbramn":1,"javihi":1,"javihi-duo":1,"javihi-friki":1,"javihi-koisito":1,"javihi-prime":1,"lihone":1,"lihone-correa":1,"lihone-viego":1,"mertens":1,"mertens-gambler":1,"pampert-gambler":1,"mertens-prime":1,"pampert":1,"pampert-friki":1,"pampert-koisito":1,"petea-koisito":1,"petea-pokemaniaco":1,"potango":1,"sech":1,"sech-duo":1,"sech-koisito":1,"sech-thresh":1};
   // Nivel de carta por repetidas: 2 copias = ★2, 4 copias = ★3
   function lvOf(id) { var n = 1 + ((ui.acct && ui.acct.dups && ui.acct.dups[id]) || 0); return n >= 4 ? 3 : n >= 2 ? 2 : 1; }
@@ -906,24 +906,6 @@
     if (newRound && !ns.over) { ui.sel = null; ui.hint = d.hint || ''; announce(); ui.deadline = d.dl ? Date.now() + d.dl : null; }
     render();
   }
-  // Ventana central de Anime: elegir quién cede, quién recibe y qué cede
-  function animeModal(P) {
-    var an = P.mesa.filter(function (i) { return i && !i.dead && E.has(i, 'Anime'); }), A = ui.anm = ui.anm || { from: null, to: null };
-    if (!an.some(function (i) { return i.uid === A.from; })) A.from = null;
-    if (!an.some(function (i) { return i.uid === A.to; })) A.to = null;
-    function row(role) {
-      return '<div class="anc">' + an.map(function (i) {
-        return '<div class="amc' + (A[role] === i.uid ? ' sel' : '') + (A[role === 'from' ? 'to' : 'from'] === i.uid ? ' dim' : '') + '" data-act="anpick" data-role="' + role + '" data-uid="' + i.uid + '">' + cardHtml(CARD[i.id], { lv: lvG(0, i.id), skin: skG(0, i.id), atk: E.atk(i), hp: i.hp, max: E.maxHp(i) }) + '</div>';
-      }).join('') + '</div>';
-    }
-    var keepOne = P.hand.some(function (i) { return i && i.id === 'chipy-correa'; });
-    var dbl = P.fl && P.fl.anime ? ' <b>(duplicado por Capítulo especial)</b>' : '', ready = A.from != null && A.to != null;
-    return '<div class="overlay animeov"><div class="panel animed"><h2>' + ic('tele') + ' Anime · ceder estadísticas</h2><p class="mut">Te quedan <b>' + P.anime + '</b> cesiones esta ronda' + dbl + '. Elige quién cede y quién recibe.</p>' +
-      '<div class="anrow"><div><h3>Cede</h3>' + row('from') + '</div><span class="anarrow">→</span><div><h3>Recibe</h3>' + row('to') + '</div></div>' +
-      '<div class="btnrow"><button class="btn big" data-act="cede" data-stat="atk"' + (ready ? '' : ' disabled') + '>Ceder todo el ataque</button><button class="btn big" data-act="cede" data-stat="hp"' + (ready ? '' : ' disabled') + '>Ceder la vida (' + (keepOne ? 'se queda con 1' : 'cae') + ')</button></div>' +
-      '<p class="mut sm">' + (ready ? (keepOne ? 'Chipy Correa en tu mano: el que cede se queda con 1 de ataque o 1 de vida.' : 'Ataque: el que cede se queda a 0 de ataque. Vida: el que cede cae y el otro gana la mitad de su vida máxima.') : 'Pulsa una carta en cada columna.') + '</p>' +
-      '<button class="btn sec" data-act="next">Continuar sin ceder ▶</button></div></div>';
-  }
   function boardHtml(s) {
     if (!s.board) return '';
     return '<div class="synside panel vs4b"><h2>' + ic('grupo') + ' La mesa</h2>' + s.board.map(function (b) {
@@ -1077,9 +1059,9 @@
       var msg = ui.hint || (s.rest ? 'Descansas esta ronda: prepara tu mesa.' : !P.mesa.some(Boolean) ? 'Coloca tropas de tu mano en la mesa.' : pend ? 'Pulsa una tropa tuya y después la rival a la que atacará.' : 'Todos los objetivos elegidos.');
       if (pend && P.mesa.some(Boolean)) msg = (ui.hint ? ui.hint + ' · ' : '') + 'Faltan ' + pend + ' por elegir objetivo.';
       acts = '<div class="hint">' + esc(msg) + '</div><div class="btnrow"><button class="btn big" data-act="fight"' + (pend || (!P.mesa.some(Boolean) && E.mesaTroops(R).length) ? ' disabled' : '') + '>' + ic('espadas') + (s.rest ? ' ¡Listo!' : ' ¡Combatir!') + '</button><button class="btn sec sm" data-act="undo"' + (hasT ? '' : ' disabled') + ' title="Quitar todos los objetivos elegidos">' + ic('deshacer') + ' Deshacer</button></div>';
-    } else if (s.phase === 'post') acts = ui.busy ? '' : '<div class="hint">Puedes ceder estadísticas Anime antes de seguir.</div><button class="btn big" data-act="next">Continuar ▶</button>';
+    } else if (s.phase === 'post') acts = ui.busy ? '' : '<button class="btn big" data-act="next">Continuar ▶</button>';
     if (PV.on && PV.rdy[1] && !PV.rdy[0] && (shop || prep || s.phase === 'post')) acts = '<div class="hint rivrdy">' + ic('aviso') + ' El rival ya está listo.</div>' + acts;
-    h += '<div class="hud bottom">' + orb('life', view.life[0], ML, s.spec && ui.playing ? esc(s.spec[0]) : 'Tu vida', 0) + '<div class="goldw">' + orb('gold', P.gold, 0, 'Tu oro') + (E.interest(P) ? '<i class="gint" title="Interés: ganas +' + E.interest(P) + ' de oro extra al empezar la próxima ronda si conservas este oro">+' + E.interest(P) + ' interés</i>' : '') + '</div>' + gamOrbs(P, 0) + '<div class="acts">' + acts + '</div></div></div>';
+    h += '<div class="hud bottom">' + orb('life', view.life[0], ML, s.spec && ui.playing ? esc(s.spec[0]) : 'Tu vida', 0) + (E.genStored(P) > 0 ? '<div class="genw" title="Genkidama: daño almacenado, se libera con la carta Genkidama">' + ic('fuego') + '<b>' + E.genStored(P) + '</b></div>' : '') + '<div class="goldw">' + orb('gold', P.gold, 0, 'Tu oro') + (E.interest(P) ? '<i class="gint" title="Interés: ganas +' + E.interest(P) + ' de oro extra al empezar la próxima ronda si conservas este oro">+' + E.interest(P) + ' interés</i>' : '') + '</div>' + gamOrbs(P, 0) + '<div class="acts">' + acts + '</div></div></div>';
 
     // Mano
     h += '<div class="handwrap' + (ui.dragMesa ? ' dropzone' : '') + '"><div class="hl">Tu mano ' + P.hand.length + (s.mode === 'revive' ? '' : '/' + CFG.handMax) + '</div><div class="hand">';
@@ -1127,7 +1109,6 @@
       h += finOverlay(finId(), win, win ? '¡Victoria!' : (s.vs4 ? 'Eliminado · puesto ' + s.place + 'º de 4' : 'Derrota'), esc(s.reason) + ' · ronda ' + s.round, rw, btns, '');
     }
     if (ui.confirmSurr && !s.over) h += '<div class="overlay surro"><div class="panel surrp"><h2>' + ic('aviso') + ' ¿Seguro que quieres rendirte?</h2><p class="mut">Darás la partida por perdida' + (s.vs4 ? ' y quedarás eliminado.' : '.') + ' Esta acción no se puede deshacer.</p><div class="btnrow"><button class="btn" data-act="surrender-yes">Sí, rendirme</button><button class="btn sec" data-act="surrender-no">Cancelar</button></div></div></div>';
-    if (s.phase === 'post' && !s.over && !ui.playing && !ui.busy && P.anime > 0 && !(PV.on && PV.rdy[0])) h += animeModal(P);
     h += '</div>';
     app.innerHTML = h;
     document.body.classList.toggle('shopbg', !!shopMode);
@@ -1918,14 +1899,6 @@
     if (act === 'fight') { if (E.fight(s) === false) return; ui.deadline = null; ui.sel = null; ui.hint = ''; return play(); }
     if (act === 'endshop') { E.endShop(s); ui.sel = null; ui.hint = ''; announce(); return render(); }
     if (act === 'next') { E.nextRound(s); ui.sel = null; ui.hint = ''; announce(); return render(); }
-    if (act === 'anpick') { var A1 = ui.anm = ui.anm || { from: null, to: null }, ro = el.dataset.role, uu = +el.dataset.uid, other = ro === 'from' ? 'to' : 'from'; A1[ro] = A1[ro] === uu ? null : uu; if (A1[other] === uu) A1[other] = null; return render(); }
-    if (act === 'cede') {
-      var A0 = ui.anm || {}, cf = A0.from, ct = A0.to; if (cf == null || ct == null) return;
-      var ok = E.cede(s, cf, ct, el.dataset.stat);
-      if (ok) pvs('cede', [cf, ct, el.dataset.stat]);
-      if (ok) ui.anm = null;
-      ui.hint = ok ? '' : 'Elige dos tropas Anime distintas.'; return render();
-    }
     if (act === 'buy') { var bi = +el.dataset.i, bc = CARD[P.offers[bi]]; if (!E.buy(s, 0, bi)) ui.hint = bc && P.gold < bc.cost ? 'No tienes oro suficiente.' : 'Tu mano está llena.'; else { ui.hint = ''; pvs('buy', [bi]); } return render(); }
     if (act === 'undo') { E.clearTargets(s, 0); pvs('clear'); ui.hint = ''; nextPending(s); return render(); }
     if (act === 'freeze') { if (PV.on) { pvpSend('freeze'); } else E.freeze(s, 0); return render(); }

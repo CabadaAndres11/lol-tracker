@@ -18,7 +18,7 @@
     comebacker: { atk: [1, 2, 2], others: [0, 0, 1], cap: 8 },
     lol: { atk: [1, 1, 2], hp: [0, 1, 2], cap: [4, 6, 8] },
     trabajo: { shop: [0, 0, 2] },
-    anime: { cede: [1, 2, 3] },
+    anime: { half: 2 }, // Genkidama: se almacena 1/2 del daño que reciben las Anime
     koi: { atk: [1, 1, 2], cap: 5, heir: [0.5, 0.75, 1] }, // mejora al caer (tope por tropa) + herencia: % del ataque de la KOI caída pasa a una KOI viva al azar (sin tope)
     voley: { atk: [1, 2, 3], red: [1, 1, 2], cap: 8 },
     novias: { eriko: [2, 3, 4], eCap: [10, 15, 20], helena: [0, 2, 4], lucia: [3, 4, 5], ari: [0.5, 0.6, 0.7] }, // por nivel de Correa // novias del hueco 5 (sinergia Correa)
@@ -31,7 +31,7 @@
   };
 
   var CARD = {};
-  DATA.cards.concat(DATA.actions, DATA.novias || []).forEach(function (c) { CARD[c.id] = c; });
+  DATA.cards.concat(DATA.actions, DATA.novias || [], DATA.tokens || []).forEach(function (c) { CARD[c.id] = c; });
 
   function mulberry32(a) {
     return function () {
@@ -133,7 +133,7 @@
   }
 
   function newPlayer(deck) {
-    return { life: CFG.life, gold: CFG.gold, deck: deck.slice(), hand: [], mesa: [null, null, null, null, null], nvs: [], novGiven: false, grave: [], target: {}, voley: {}, fl: {}, offers: [], refreshes: 0, pickUsed: false, anime: 0, lost: false };
+    return { life: CFG.life, gold: CFG.gold, deck: deck.slice(), hand: [], mesa: [null, null, null, null, null], nvs: [], novGiven: false, grave: [], target: {}, voley: {}, fl: {}, offers: [], refreshes: 0, pickUsed: false, anime: 0, gen: 0, lost: false };
   }
 
   function newGame(deckA, deckB, seed, opts) {
@@ -190,6 +190,7 @@
       if (!s.pvp && s.aiLv) aiBonus(s, p);
       if (p === 0 || s.pvp) say(s, pv(s, p, 'Ronda ' + s.round + ': +' + got + ' de oro' + (s.p[p].lastInt ? ' (incluye +' + s.p[p].lastInt + ' de interés por ahorrar)' : '') + '.', 'El rival cobra +' + got + ' de oro.'));
       s.p[p].target = {}; s.p[p].anime = 0; s.p[p].fl = {};
+      genGive(s, p);
     });
     if (s.round % CFG.shopEvery === 1) {
       s.shops++;
@@ -418,8 +419,9 @@
     banquete: { run: function (s, p) { var n = sc(s, 2); mesaTroops(s.p[p]).forEach(function (i) { grow(i, 'hp', n); }); return '+' + n + ' vida máxima permanente a todas'; } },
     intimidacion: { run: function (s, p, t) { var n = sc(s, 3); t.perm.atk -= n; return '-' + n + ' ataque permanente'; } },
     'mal-de-ojo': { ok: function (s, p) { return targetable(s.p[1 - p]).length ? '' : 'El rival no tiene tropas.'; }, run: function (s, p) { var n = sc(s, 1); targetable(s.p[1 - p]).forEach(function (i) { i.perm.atk -= n; }); return '-' + n + ' ataque permanente a todas las rivales'; } },
-    'golpe-certero': { run: function (s, p, t) { var n = sc(s, 6); t.hp -= n; if (t.hp <= 0) dropDead(s, 1 - p, t); return n + ' de daño'; } },
-    lluvia: { ok: function (s, p) { return targetable(s.p[1 - p]).length ? '' : 'El rival no tiene tropas.'; }, run: function (s, p) { var n = sc(s, 2); targetable(s.p[1 - p]).forEach(function (i) { i.hp -= n; if (i.hp <= 0) dropDead(s, 1 - p, i); }); return n + ' de daño a todas las rivales'; } },
+    genkidama: { ok: function (s, p) { return genStored(s.p[p]) > 0 ? '' : 'La Genkidama está vacía: tus Anime aún no han recibido daño.'; }, run: function (s, p, t) { var P = s.p[p], n = genStored(P); P.gen = 0; t.hp -= n; if (t.hp <= 0) dropDead(s, 1 - p, t); return n + ' de daño de Genkidama'; } },
+    'golpe-certero': { run: function (s, p, t) { var n = sc(s, 6); genCharge(s, t, Math.min(n, Math.max(0, t.hp))); t.hp -= n; if (t.hp <= 0) dropDead(s, 1 - p, t); return n + ' de daño'; } },
+    lluvia: { ok: function (s, p) { return targetable(s.p[1 - p]).length ? '' : 'El rival no tiene tropas.'; }, run: function (s, p) { var n = sc(s, 2); targetable(s.p[1 - p]).forEach(function (i) { genCharge(s, i, Math.min(n, Math.max(0, i.hp))); i.hp -= n; if (i.hp <= 0) dropDead(s, 1 - p, i); }); return n + ' de daño a todas las rivales'; } },
     'bola-extra': { ok: function (s, p) { return (tiers(s.p[p])['Pokémon'] || 0) >= 1 ? '' : 'Necesitas el nivel 1 de Pokémon (2 cartas distintas).'; }, run: function (s, p) { s.p[p].fl.pk = (s.p[p].fl.pk || 0) + 1; return 'bola extra esta ronda'; } },
     'segundo-aliento': {
       ok: function (s, p) { return mesaTroops(s.p[p]).some(function (i) { return has(i, 'Comebacker') && i.hp < maxHp(i); }) ? '' : 'Ninguna Comebacker en mesa está herida.'; },
@@ -581,7 +583,7 @@
       var i = P.hand[k];
       if (!i || isTroop(i)) continue; // (una acción anterior pudo fusionar cartas y acortar la mano)
       var c = card(i), allies = mesaTroops(P), foes = targetable(s.p[1 - p]);
-      if (c.id === 'cambio-de-linea') continue; // la IA no la usa
+      if (c.id === 'cambio-de-linea' || (c.id === 'genkidama' && genStored(P) < 3)) continue; // la IA no la usa
       var tgt = null;
       if (c.target === 'ally') { allies.sort(function (a, b) { return atk(b) - atk(a); }); tgt = allies[0]; if (c.id === 'armadura') tgt = allies.slice().sort(function (a, b) { return maxHp(b) - maxHp(a); })[0]; }
       else if (c.target === 'enemy') {
@@ -825,6 +827,7 @@
   // Daño de pasiva a una tropa (sin contraataque). Devuelve texto de registro.
   function passiveHit(s, v, n, depth) {
     if (!v || v.dead || n <= 0 || immune(v)) return '';
+    genCharge(s, v, Math.min(n, Math.max(0, v.hp)));
     v.hp -= n;
     var tv = s.tiers[v.owner];
     if (has(v, 'Tilt') && tv && tv['Tilt']) gainCap(v, 'tilt', 'atk', FX.tilt.hit[tv['Tilt'] - 1], FX.tilt.cap);
@@ -921,6 +924,7 @@
       if (tgt.tmp.cap1) real = Math.min(real, 1);
       var ariSave = false;
       if (real > 0 && mesaTroops(s.p[tgt.owner]).some(function (x) { return x.id === 'ari'; }) && s.rng() < FX.novias.ari[Math.max(0, (s.tiers[tgt.owner]['Correa'] || 1) - 1)]) { real = 0; ariSave = true; }
+      genCharge(s, tgt, Math.min(real, Math.max(0, tgt.hp)));
       tgt.hp -= real;
       var line = card(a).name + (retarget ? ' (su objetivo ya cayó) ataca a ' : ' ataca a ') + card(tgt).name + ': ' + real + ' de daño' + (tgt.tmp.red && real < dmg ? ' (reducido)' : '') + (ariSave ? ' (¡Ari lo evita!)' : '') + '.';
       if (real > 0) {
@@ -978,7 +982,7 @@
         rec = Math.max(0, atk(tgt) - a.tmp.red);
         if (a.tmp.cap1) rec = Math.min(rec, 1);
         if (rec > 0) {
-          if (!a.dead) a.hp -= rec; line += ' Contraataque: ' + card(a).name + ' recibe ' + rec + '.';
+          if (!a.dead) { genCharge(s, a, Math.min(rec, Math.max(0, a.hp))); a.hp -= rec; } line += ' Contraataque: ' + card(a).name + ' recibe ' + rec + '.';
           var ta2 = s.tiers[a.owner];
           if (has(a, 'Tilt') && ta2['Tilt']) gainCap(a, 'tilt', 'atk', FX.tilt.hit[ta2['Tilt'] - 1], FX.tilt.cap);
           if (a.hp <= 0 && !a.dead && wardSave(s, a)) { line += ' (aguanta a 0 de vida)'; }
@@ -1060,12 +1064,6 @@
       cleanup(s);
       frame(s, 'Fin de la ronda ' + s.round + '.', null);
       s.phase = 'post';
-      [0, 1].forEach(function (p) {
-        if (p === 1 && !s.pvp) return;
-        var t0 = tiers(s.p[p]);
-        var an = t0['Anime'] ? FX.anime.cede[t0['Anime'] - 1] : 0;
-        s.p[p].anime = mesaTroops(s.p[p]).filter(function (i) { return has(i, 'Anime'); }).length >= 2 ? an : 0;
-      });
     } else {
       frame(s, pv(s, s.winner, '¡Has ganado!', 'Has perdido.'), null);
     }
@@ -1085,32 +1083,21 @@
     });
   }
 
-  // ---------- Anime: ceder estadísticas al final de la ronda ----------
-  function cede(s, from, to, stat, seat) {
-    var P = s.p[seat || 0];
-    if (s.phase !== 'post' || P.anime <= 0 || from === to) return false;
-    var a = P.mesa.filter(function (i) { return i && i.uid === from && has(i, 'Anime'); })[0];
-    var b = P.mesa.filter(function (i) { return i && i.uid === to && has(i, 'Anime'); })[0];
-    if (!a || !b) return false;
-    var keep = P.hand.some(function (i) { return i && i.id === 'chipy-correa'; }) ? 1 : 0; // Chipy Correa en la mano: nadie se queda a 0
-    if (stat === 'atk') {
-      var v = atk(a) - keep;
-      if (v <= 0) return false;
-      var mul = P.fl.anime ? 2 : 1;
-      a.perm.atk -= v; b.perm.atk += v * mul;
-      say(s, card(a).name + ' cede ' + v * mul + ' de ataque a ' + card(b).name + '.');
-    } else {
-      var mul2 = P.fl.anime ? 2 : 1, m = maxHp(a), g = Math.floor(m / 2) * mul2;
-      if (keep && m <= 1) return false;
-      b.perm.hp += g; b.hp += g;
-      if (keep) { a.perm.hp -= m - 1; a.hp = 1; say(s, card(a).name + ' cede su vida y se queda con 1; ' + card(b).name + ' gana +' + g + ' de vida máxima.'); }
-      else {
-        P.mesa[P.mesa.indexOf(a)] = null; P.grave.push(a);
-        say(s, card(a).name + ' cede su vida y cae; ' + card(b).name + ' gana +' + g + ' de vida máxima.');
-      }
-    }
-    P.anime--;
-    return true;
+  // ---------- Anime: Genkidama ----------
+  // Las Anime almacenan la mitad del daño que reciben (sin contar el sobrante al caer) mientras la sinergia está activa.
+  function genCharge(s, v, n) {
+    if (!v || n <= 0 || !has(v, 'Anime')) return;
+    var t = s.tiers && s.tiers[v.owner];
+    if (!t || !t['Anime']) return;
+    var P = s.p[v.owner]; P.gen = (P.gen || 0) + n;
+  }
+  function genStored(P) { return Math.floor((P.gen || 0) / FX.anime.half); }
+  // Cada ronda con la sinergia activa se entrega una carta Genkidama (si no tienes ya una y hay hueco en la mano)
+  function genGive(s, p) {
+    var P = s.p[p];
+    if ((tiers(P)['Anime'] || 0) < 1 || P.hand.length >= CFG.handMax || P.hand.some(function (i) { return i && i.id === 'genkidama'; })) return;
+    P.hand.push(mk(s, 'genkidama', p));
+    if (p === 0 || s.pvp) say(s, pv(s, p, 'Sinergia Anime: recibes una Genkidama.', 'El rival recibe una Genkidama.'));
   }
 
   function endShop(s) {
@@ -1180,7 +1167,7 @@
     newGame: newGame, randomDeck: randomDeck, deckSize: deckSize, mulberry32: mulberry32,
     place: place, playAction: playAction, setTarget: setTarget, clearTargets: clearTargets, forfeit: forfeit, setVoley: setVoley, actionBlock: actionBlock, validTarget: validTarget,
     sell: sell, sellValue: sellValue, handCap: handCap, dupBlock: dupBlock, buy: buy, mergeCheck: mergeCheck, willMerge: willMerge, shopOdds: shopOdds, refresh: refresh, refreshCost: refreshCost, pickFromDeck: pickFromDeck, retire: retire,
-    aiDeck: aiDeck, aiBonus: aiBonus, aiLv: aiLv, aiShop: aiShop, aiPrep: aiPrep, aiTargets: aiTargets, fight: fight, endShop: endShop, pendingTargets: pendingTargets, freeze: freeze, cede: cede, nextRound: nextRound,
+    aiDeck: aiDeck, genGive: genGive, genStored: genStored, aiBonus: aiBonus, aiLv: aiLv, aiShop: aiShop, aiPrep: aiPrep, aiTargets: aiTargets, fight: fight, endShop: endShop, pendingTargets: pendingTargets, freeze: freeze, nextRound: nextRound,
     interest: interest, isNov: isNov, immune: immune, targetable: targetable, novSync: novSync, themeCounts: themeCounts, tiers: tiers, tierOf: tierOf, atk: atk, maxHp: maxHp, card: card, isTroop: isTroop, has: has, mesaTroops: mesaTroops, viewOf: viewOf,
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.CartasEngine = API;

@@ -1050,6 +1050,21 @@ var D={
    "theme": "Gambling"
   }
  ],
+ "tokens": [
+  {
+   "id": "genkidama",
+   "name": "Genkidama",
+   "cost": 0,
+   "rarity": "Legendaria",
+   "type": "accion",
+   "size": 1,
+   "target": "enemy",
+   "text": "Libera sobre una tropa rival el daño almacenado: la mitad del daño que han recibido tus Anime. Te la da la sinergia Anime cada ronda.",
+   "theme": "Anime",
+   "foe": true,
+   "token": true
+  }
+ ],
  "themes": {
   "Gambling": {
    "th": [
@@ -1137,9 +1152,9 @@ var D={
    ],
    "color": "#f472b6",
    "tx": [
-    "Al final de ronda, 1 Anime puede ceder su ataque o su vida máxima a otra.",
-    "2 Anime pueden ceder.",
-    "3 Anime pueden ceder."
+    "Cada ronda recibes una Genkidama. Tus Anime almacenan la mitad del daño que reciben; al jugarla se libera sobre una tropa rival.",
+    "Por definir.",
+    "Por definir."
    ]
   },
   "KOI": {

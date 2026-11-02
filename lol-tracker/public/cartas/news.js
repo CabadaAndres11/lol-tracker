@@ -8,6 +8,8 @@
         'Nueva mecánica Anime: la Genkidama. Mientras tengas la sinergia, cada ronda recibes una carta Genkidama (no sale en sobres). Tus Anime almacenan el 50% (nivel 1), 75% (nivel 2) o 100% (nivel 3) del daño que reciben, sin contar el sobrante al caer, y al jugar la carta se libera sobre una tropa rival. Ya no se ceden estadísticas.',
         'Nueva acción «Kamehameha» (Anime, coste 2): reparte a partes iguales entre todas las tropas rivales el daño almacenado en la Genkidama.',
         'Chipy Correa baja a Rara (coste 3, 4/11) y pierde su pasiva.',
+        'Correa en modo clásico: si una novia cae en combate, queda eliminada y ya no se puede elegir en esa partida (en Resurrección no cambia).',
+        'El Regalo de Correa ahora mejora el hueco 5: el +3/+3 pasa a la novia que lo ocupe, aunque cambies de novia o caiga la anterior.',
         'Mejora visual: la tropa que protege la Prórroga de AitoRLG Renata ahora se marca en la mesa con un aura dorada y un escudo (más intenso cuando aguanta a 0 de vida).',
         'Dificultad de la IA: en Difícil todas sus cartas están a nivel 2 y en Experto a nivel 3 (nivel de copias fuera de la partida: +1/+1 por nivel a las tropas y acciones más fuertes).',
         'Nerfeo de Dúo Inseparable: Javihi Dúo y Sech Dúo pasan de Legendaria a Épica (coste 4, 5/14, ocupan 2 en el mazo en vez de 3). Hermano del alma sube a coste 3 y solo se puede usar una vez entre tiendas.',

@@ -86,9 +86,13 @@
       (DATA.novias || []).forEach(function (n) { if (!P.nvs.some(function (x) { return x.id === n.id; }) && !(P.mesa[4] && P.mesa[4].id === n.id)) P.nvs.push(mk(s, n.id, p)); });
       say(s, pv(s, p, '¡Sinergia Correa! Se desbloquea el hueco 5 y recibes a las 4 novias.', 'El rival desbloquea el hueco 5 y sus novias.'));
     }
-    if (c < 1 && P.mesa[4] && !P.mesa[4].shadow) { P.nvs.push(P.mesa[4]); delete P.target[P.mesa[4].uid]; P.mesa[4] = null; } // sin la sinergia, la novia vuelve a la reserva
+    if (c < 1 && P.mesa[4] && !P.mesa[4].shadow) { s5out(P, P.mesa[4]); P.nvs.push(P.mesa[4]); delete P.target[P.mesa[4].uid]; P.mesa[4] = null; } // sin la sinergia, la novia vuelve a la reserva
   }
-  function novBack(P, i) { i.dead = false; i.tmp = { atk: 0, hp: 0, red: 0 }; i.hp = Math.max(1, card(i).hp + i.perm.hp); P.nvs.push(i); delete P.target[i.uid]; }
+  // Mejora del hueco 5 (acción Regalo): la tiene el hueco, no la novia. Se aplica a la novia que lo ocupe y se retira al salir.
+  function s5in(P, i) { var b = P.s5; if (!b || !i) return; i.perm.atk += b.atk; i.perm.hp += b.hp; i.hp += b.hp; }
+  function s5out(P, i) { var b = P.s5; if (!b || !i) return; i.perm.atk -= b.atk; i.perm.hp -= b.hp; i.hp = Math.max(1, i.hp - b.hp); }
+  // Novia que cae: en clásico queda eliminada para el resto de la partida (ya no se puede elegir); la mejora del hueco 5 se queda en el hueco.
+  function novLose(P, i) { i.dead = true; i.hp = 0; delete P.target[i.uid]; P.novDead = (P.novDead || []).concat([i.id]); }
 
   // ---------- Temáticas ----------
   function tierOf(theme, n) {
@@ -376,7 +380,7 @@
   }
   function retire(s, p, slot) {
     var P = s.p[p], i = P.mesa[slot];
-    if (slot === 4 && i && !i.shadow && s.phase === 'prep') { P.mesa[4] = null; P.nvs.push(i); delete P.target[i.uid]; return true; } // la novia vuelve a la reserva
+    if (slot === 4 && i && !i.shadow && s.phase === 'prep') { s5out(P, i); P.mesa[4] = null; P.nvs.push(i); delete P.target[i.uid]; return true; } // la novia vuelve a la reserva
     if (!s.shopOpen || s.phase !== 'prep' || !i || i.dead) return false;
     if (has(i, 'Lol')) return false;
     if (P.hand.length >= handCap(s)) return false;
@@ -394,8 +398,8 @@
       if (s.phase !== 'prep' || slot !== 4 || !n || (tiers(P)['Correa'] || 0) < 1) return false;
       if (P.mesa[4] && P.mesa[4].shadow) return false;
       P.nvs.splice(k, 1);
-      if (P.mesa[4]) { P.nvs.push(P.mesa[4]); delete P.target[P.mesa[4].uid]; }
-      P.mesa[4] = n;
+      if (P.mesa[4]) { s5out(P, P.mesa[4]); P.nvs.push(P.mesa[4]); delete P.target[P.mesa[4].uid]; }
+      s5in(P, n); P.mesa[4] = n;
       return true;
     }
     var i = P.hand[handIdx];
@@ -409,7 +413,7 @@
   function dropDead(s, p, i) {
     var P = s.p[p], k = P.mesa.indexOf(i);
     if (s.mode === 'revive') { i.hp = Math.max(1, i.hp); return; } // Resurrección: las acciones no matan, la dejan a 1
-    if (isNov(i)) { if (k >= 0) P.mesa[k] = null; novBack(P, i); return; } // las novias vuelven a la reserva
+    if (isNov(i)) { if (k >= 0) P.mesa[k] = null; novLose(P, i); return; } // en clásico, la novia caída queda eliminada
     i.dead = true; i.hp = 0;
     if (k >= 0) P.mesa[k] = null;
     if (!i.shadow) P.grave.push(i);
@@ -454,7 +458,7 @@
     'remate-doble': { ok: function (s, p) { return (tiers(s.p[p])['Voley'] || 0) >= 1 ? '' : 'Necesitas el nivel 1 de Voley (2 cartas distintas).'; }, run: function (s, p) { s.p[p].fl.vol = true; return 'tus Voley: ataque doble o defensa total'; } },
     'cita-sorpresa': {
       ok: function (s, p) { var n = s.p[p].mesa[4]; return (tiers(s.p[p])['Correa'] || 0) >= 1 && n && !n.dead ? '' : 'Necesitas el nivel 1 de Correa y una novia en el hueco 5.'; },
-      run: function (s, p) { var n = s.p[p].mesa[4], g = sc(s, 3); grow(n, 'atk', g); grow(n, 'hp', g); return card(n).name + ' recibe un regalo: +' + g + '/+' + g + ' permanente'; } },
+      run: function (s, p) { var n = s.p[p].mesa[4], g = sc(s, 3); var P5 = s.p[p].s5 || (s.p[p].s5 = { atk: 0, hp: 0 }); P5.atk += g; P5.hp += g; grow(n, 'atk', g); grow(n, 'hp', g); return 'el hueco 5 mejora +' + g + '/+' + g + ' permanente (' + card(n).name + ' lo recibe ahora y la siguiente novia también)'; } },
     'rabia-contenida': { run: function (s, p) { var n = sc(s, 1); s.p[p].fl.tilt = n; return 'si ganas esta ronda: +' + n + ' ataque a las Tilt'; } },
     'fiesta-del-pueblo': { ok: function (s, p) { return (tiers(s.p[p])['Pueblo'] || 0) >= 1 ? '' : 'Necesitas el nivel 1 de Pueblo (2 cartas distintas).'; }, run: function (s, p) { s.p[p].fl.pueblo = true; return 'el crecimiento del pueblo se duplica'; } },
     'hermano-del-alma': {
@@ -1085,7 +1089,7 @@
       P.mesa.forEach(function (i, k) {
         if (!i) return;
         if (i.shadow && (i.dead || i.hp <= 0)) { P.mesa[k] = null; delete P.target[i.uid]; return; } // el soldado de sombra caído desaparece (tampoco revive)
-        if (isNov(i) && s.mode !== 'revive' && (i.dead || i.hp <= 0)) { P.mesa[k] = null; novBack(P, i); return; } // la novia caída vuelve a la reserva con su vida
+        if (isNov(i) && s.mode !== 'revive' && (i.dead || i.hp <= 0)) { P.mesa[k] = null; novLose(P, i); return; } // en clásico, la novia caída queda eliminada
         if (s.mode === 'revive') { i.dead = false; i.tmp = { atk: 0, hp: 0, red: 0 }; i.hp = maxHp(i); return; } // Resurrección: todas vuelven con la vida completa
         if (i.dead || i.hp <= 0) { P.grave.push(i); P.mesa[k] = null; delete P.target[i.uid]; return; }
         i.tmp = { atk: 0, hp: 0, red: 0 }; i.hp = Math.min(i.hp, maxHp(i)); // sin curación entre rondas

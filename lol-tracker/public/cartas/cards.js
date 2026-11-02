@@ -996,7 +996,7 @@ var D={
    "type": "accion",
    "size": 1,
    "target": "none",
-   "text": "La novia del hueco 5 recibe +3/+3 permanente y lo conserva aunque vuelva a la reserva (necesitas el nivel 1 de Correa y una novia en el hueco 5).",
+   "text": "Mejora el hueco 5 con +3/+3 permanente: lo recibe la novia que lo ocupe y se mantiene aunque la cambies o caiga (necesitas el nivel 1 de Correa y una novia en el hueco 5).",
    "theme": "Correa"
   },
   {

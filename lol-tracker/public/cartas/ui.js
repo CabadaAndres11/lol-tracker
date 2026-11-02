@@ -1114,7 +1114,7 @@
       if (k === 4 && !has5) return;
       if (!v) {
         if (k === 4 && jin && (E.tiers(P).Correa || 0) < 1) { h += '<div class="cw"><div class="slot nov">' + ic('humo') + ' Hueco 5<br><small>Soldado de Sombra</small></div></div>'; return; }
-        if (k === 4) { h += '<div class="cw"><div class="slot nov">' + ic('corazon') + ' Hueco 5<br><small>' + (mine ? 'Elige una novia' : 'Novia') + '</small></div>' + (mine ? novSwitch(s) : '') + '</div>'; return; }
+        if (k === 4) { h += '<div class="cw"><div class="slot nov">' + ic('corazon') + ' Hueco 5<br><small>' + (mine ? ((P.nvs || []).length ? 'Elige una novia' : 'Sin novias') : 'Novia') + '</small></div>' + (mine ? novSwitch(s) : '') + '</div>'; return; }
         var free = mine && s.phase === 'prep' && !ui.playing && sel && sel.k === 'hand' && E.isTroop(P.hand[sel.i]);
         h += '<div class="cw"><div class="slot' + (free ? ' free' : '') + '"' + (free ? ' data-act="slot" data-i="' + k + '"' : '') + '>' + (free ? 'Colocar aquí' : 'Hueco') + '</div></div>';
         return;

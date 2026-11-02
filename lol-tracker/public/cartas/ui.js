@@ -705,6 +705,13 @@
     }
     return h;
   }
+  function synInfo(t) {
+    var T = D.themes[t]; if (!T) return '';
+    return '<div class="synguide" style="--tc:' + T.color + '"><h3>' + tic(t) + esc(t) + '</h3><ul>' + T.tx.map(function (x, k) { return '<li><span class="gn">' + T.th[k] + '</span><p><b>' + T.th[k] + ' cartas distintas</b> ' + esc(x) + '</p></li>'; }).join('') + '</ul></div>';
+  }
+  function synGuide() {
+    return '<div class="synall">' + Object.keys(D.themes).map(synInfo).join('') + '</div>';
+  }
   function deckEditor() {
     var d = ui.dedit, used = E.deckSize(d.ids), err = deckErrFor(d.ids), troops = d.ids.filter(function (id) { return CARD[id].type === 'tropa'; }).length;
     var segs = ''; for (var k = 0; k < CFG.deckBudget; k++) segs += '<i' + (k < used ? ' class="on"' : '') + '></i>';
@@ -719,9 +726,10 @@
     var th = d.theme, chips = '<div class="chips filt">' + Object.keys(D.themes).map(function (t) { var n = themeCards(t).filter(function (c) { return owns(c.id); }).length; return '<button class="chip' + (th === t ? ' on' : '') + '" style="--tc:' + D.themes[t].color + '" data-act="dethm" data-t="' + esc(t) + '">' + tic(t) + esc(t) + ' ' + n + '</button>'; }).join('') +
       '<button class="chip' + (th === '__gen' ? ' on' : '') + '" data-act="dethm" data-t="__gen">Acciones generales</button></div>';
     var list = !th ? null : (th === '__gen' ? D.actions.filter(function (a) { return !a.theme; }) : themeCards(th)).filter(function (c) { return owns(c.id); });
-    var grid = !th ? '<p class="mut">Elige una sinergia para ver tus cartas de esa sinergia y añadirlas al mazo.</p>' : !list.length ? '<p class="mut">No tienes ninguna carta de esta sinergia todavía.</p>' :
+    var guide = '<div class="bar synbar"><button class="btn sec sm' + (ui.synAll ? ' on' : '') + '" data-act="synall">' + ic('libro') + ' ' + (ui.synAll ? 'Ocultar guía de sinergias' : 'Guía de todas las sinergias') + '</button></div>' + (ui.synAll ? synGuide() : (th && th !== '__gen' ? synInfo(th) : ''));
+    var grid = ui.synAll ? '' : !th ? '<p class="mut">Elige una sinergia para ver qué hace y tus cartas de esa sinergia, y añadirlas al mazo.</p>' : !list.length ? '<p class="mut">No tienes ninguna carta de esta sinergia todavía.</p>' :
       '<div class="deckgrid">' + byLv(list).map(function (c) { return cardHtml(c, { lv: lvOf(c.id), size: true, cls: d.ids.indexOf(c.id) >= 0 ? 'in' : '', attrs: 'data-act="detoggle" data-id="' + c.id + '"', tag: 'button', extra: '<span class="eyeb" data-act="zoom" data-id="' + c.id + '" title="Ver ampliada en 3D">' + ic('ojo') + '</span>' }); }).join('') + '</div>';
-    return '<div class="dedlayout">' + left + '<div class="dedright"><h2 class="dedh">' + (ui.slots[d.i] ? 'Editando' : 'Nuevo mazo') + ' · hueco ' + (d.i + 1) + '</h2>' + chips + grid + '</div></div>';
+    return '<div class="dedlayout">' + left + '<div class="dedright"><h2 class="dedh">' + (ui.slots[d.i] ? 'Editando' : 'Nuevo mazo') + ' · hueco ' + (d.i + 1) + '</h2>' + chips + guide + grid + '</div></div>';
   }
   function renderDeck() {
     var tab = ui.dedit ? 'decks' : (ui.colTab || 'cards');
@@ -1692,7 +1700,8 @@
     if (act === 'dkdel') { ui.delAsk = +el.dataset.i; return renderDeck(); }
     if (act === 'dkdelno') { ui.delAsk = null; return renderDeck(); }
     if (act === 'dkdelyes') { var di = +el.dataset.i; ui.slots[di] = null; saveSlots(); ui.delAsk = null; ui.deckOpen = null; ui.msg = 'Mazo eliminado.'; return renderDeck(); }
-    if (act === 'dethm') { ui.dedit.theme = ui.dedit.theme === el.dataset.t ? '' : el.dataset.t; var yt = window.scrollY; renderDeck(); window.scrollTo(0, yt); return; }
+    if (act === 'synall') { ui.synAll = !ui.synAll; var ys = window.scrollY; renderDeck(); window.scrollTo(0, ys); return; }
+    if (act === 'dethm') { ui.synAll = false; ui.dedit.theme = ui.dedit.theme === el.dataset.t ? '' : el.dataset.t; var yt = window.scrollY; renderDeck(); window.scrollTo(0, yt); return; }
     if (act === 'detoggle') {
       var d0 = ui.dedit, id = el.dataset.id, k = d0.ids.indexOf(id); ui.msg = '';
       if (!owns(id)) ui.msg = 'Aún no tienes esta carta: consíguela en la tienda.';

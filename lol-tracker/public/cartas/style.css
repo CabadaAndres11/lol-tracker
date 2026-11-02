@@ -1816,3 +1816,12 @@ body.tutmode .freezebtn { pointer-events: none; opacity: .35; }
 @media (prefers-reduced-motion: reduce) { .gorb, #gambov .gtot { opacity: 1; animation: none; } }
 /* Con la miniatura de la novia, las etiquetas de sinergia suben para no taparse */
 .card:has(.novt) .tags { bottom: 25.5cqw; }
+/* Guía de sinergias en el editor de mazos */
+.synbar { margin: .2rem 0 .8rem; } .synbar .btn.on { border-color: #d9b25a; color: #f0d58a; }
+.synguide { margin: 0 0 1rem; padding: .9rem 1.1rem; border-radius: 12px; border: 1px solid color-mix(in srgb, var(--tc) 55%, transparent); background: linear-gradient(180deg, color-mix(in srgb, var(--tc) 14%, #0e1a33), #0b1428); }
+.synguide h3 { display: flex; align-items: center; gap: .5rem; margin: 0 0 .5rem; color: var(--tc); font-family: var(--serif); letter-spacing: .06em; } .synguide h3 .ic { width: 1.3em; height: 1.3em; }
+.synguide ul { list-style: none; margin: 0; padding: 0; display: grid; gap: .45rem; }
+.synguide li { display: grid; grid-template-columns: 1.7rem 1fr; gap: .6rem; align-items: start; }
+.synguide li p { margin: 0; color: #cdd4e8; font-size: .92rem; line-height: 1.4; } .synguide li p b { color: #fff; }
+.synguide .gn { display: grid; place-items: center; width: 1.7rem; height: 1.7rem; border-radius: 50%; background: var(--tc); color: #0b1428; font-weight: 800; font-size: .85rem; }
+.synall { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: .8rem; } .synall .synguide { margin: 0; }

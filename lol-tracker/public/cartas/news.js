@@ -1,6 +1,8 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-02', tag: 'Novedad', title: 'Guía de sinergias en el editor de mazos',
+      items: ['Al montar un mazo en Colección → Mazos, al elegir una sinergia verás qué hace en cada nivel (2, 3 o 4 cartas distintas). El botón «Guía de todas las sinergias» las muestra todas juntas.'] },
     { date: '2026-11-02', tag: 'Novedad', title: 'Versión 1.2 · Nueva sinergia: Gambling',
       items: ['Nueva sinergia «Gambling» (2 / 3 / 4 cartas distintas): ganas orbes por cada ronda en la que no recibes daño directo en tu vida. Cuantas más Gambling tengas, más orbes por ronda: 1, 2 o 3.',
         'Cuando recibes daño directo por primera vez, se abren todas las orbes con una ruleta 3D: cada una da +1/+1, +2/+2 o +3/+3 permanente a tus Gambling (en mesa y en mano), sin tope. A partir de ese momento ya no ganas más orbes.',

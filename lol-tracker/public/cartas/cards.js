@@ -393,9 +393,13 @@ var D={
    "cost": 3,
    "atk": 4,
    "hp": 11,
-   "rarity": "Rara",
+   "rarity": "Épica",
    "type": "tropa",
-   "size": 1
+   "size": 1,
+   "pas": {
+    "n": "Mala Racha",
+    "t": "Si termina la ronda viva y tienes más de 10 orbes Gambling acumuladas, se abre la mitad de ellas (su mejora va a tus Gambling) y sigues acumulando."
+   }
   },
   {
    "id": "dashlight-gambler",
@@ -408,9 +412,13 @@ var D={
    "cost": 3,
    "atk": 4,
    "hp": 10,
-   "rarity": "Rara",
+   "rarity": "Legendaria",
    "type": "tropa",
-   "size": 1
+   "size": 1,
+   "pas": {
+    "n": "Colega de los Desarrolladores",
+    "t": "Si tienes 20 orbes Gambling o más y termina la ronda viva, inflige a la vida del jugador rival la mitad de las orbes que tengas como daño directo y abre todas: ya no se consiguen más orbes."
+   }
   },
 
   {

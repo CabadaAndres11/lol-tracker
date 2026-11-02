@@ -593,13 +593,17 @@
   function gamHit(s, q) {
     var P = s.p[q], g = gamState(P); g.hit = true;
     var t = (s.tiers && s.tiers[q] && s.tiers[q]['Gambling']) || tiers(P)['Gambling']; if (!t || g.done || P.life <= 0) return; // nivel con el que empezó el combate: quien recibe daño directo suele haberse quedado sin tropas en mesa
-    var pr = FX.gambling.probs[t - 1], res = [], total = 0, k;
-    for (k = 0; k < g.orbs; k++) { var r = s.rng() * 100, v = r < pr[0] ? 1 : (r < pr[0] + pr[1] ? 2 : 3); res.push(v); total += v; }
-    // Reciben la mejora todas las Gambling en mesa (en Resurrección también las caídas, que vuelven) y en la mano
+    gamOpen(s, q, g.orbs, t, 'Rival · ');
+  }
+  // Abre n orbes: tira cada una, mejora a las Gambling (mesa y mano; en Resurrección también las caídas) y emite la ruleta.
+  // all = true cierra la sinergia (ya no se ganan más orbes); si no, el resto sigue acumulándose.
+  function gamOpen(s, q, n, t, pre, keep) {
+    var P = s.p[q], g = gamState(P), pr = FX.gambling.probs[(t || 1) - 1], res = [], total = 0, k;
+    for (k = 0; k < n; k++) { var r = s.rng() * 100, v = r < pr[0] ? 1 : (r < pr[0] + pr[1] ? 2 : 3); res.push(v); total += v; }
     var gm = P.mesa.concat(P.hand).filter(function (i) { return i && isTroop(i) && !isNov(i) && has(i, 'Gambling') && (!i.dead || s.mode === 'revive'); });
     if (total > 0) gm.forEach(function (i) { grow(i, 'atk', total); grow(i, 'hp', total); });
-    g.done = true; g.orbs = 0; g.res = res;
-    frame(s, pv(s, q, '', 'Rival · ') + 'Gambling: ' + (res.length ? 'se abren ' + res.length + (res.length === 1 ? ' orbe' : ' orbes') + ' (' + res.map(function (v) { return '+' + v; }).join(' ') + '): +' + total + '/+' + total + ' permanente a las Gambling.' : 'no había orbes que abrir.'),
+    g.orbs -= n; if (!keep) { g.done = true; g.orbs = 0; } g.res = res;
+    frame(s, pv(s, q, '', pre) + 'Gambling: ' + (res.length ? 'se abren ' + res.length + (res.length === 1 ? ' orbe' : ' orbes') + ' (' + res.map(function (v) { return '+' + v; }).join(' ') + '): +' + total + '/+' + total + ' permanente a las Gambling.' : 'no había orbes que abrir.'),
       { fx: { type: 'gambling', side: q, title: 'Gambling', sub: res.length ? '+' + total + '/+' + total + ' permanente' : 'sin orbes', uids: gm.map(function (i) { return i.uid; }), orbs: res, total: total } });
   }
   // Ganancia permanente con tope por tropa y temática. stat: 'atk' | 'hp' | 'both'. Devuelve lo realmente ganado.
@@ -749,7 +753,7 @@
 
   // Efectos al caer una tropa (KOI, Dúo Inseparable). Devuelve texto de registro y animación.
   // ---------- Pasivas de legendarias ----------
-  var PAS = { 'javihi-duo': 'duo', 'sech-duo': 'duo', 'javihi-prime': 'remate', 'sech': 'embargo', 'potango': 'aliento', 'mertens-prime': 'pereza', 'chipy-lloron': 'llanto', 'lihone-viego': 'racha', 'aitorlg-renata': 'prorroga', 'haikyuu-lihone': 'saque', 'lihone': 'captura', 'chipy-correa': 'consuelo', 'pampert-koisito': 'cabezon', 'aitorlg-koisito': 'heredero' };
+  var PAS = { 'javihi-duo': 'duo', 'sech-duo': 'duo', 'javihi-prime': 'remate', 'sech': 'embargo', 'potango': 'aliento', 'mertens-prime': 'pereza', 'chipy-lloron': 'llanto', 'lihone-viego': 'racha', 'aitorlg-renata': 'prorroga', 'haikyuu-lihone': 'saque', 'lihone': 'captura', 'chipy-correa': 'consuelo', 'pampert-koisito': 'cabezon', 'aitorlg-koisito': 'heredero', 'mertens-gambler': 'malaracha', 'dashlight-gambler': 'colega' };
   function pas(i) { return PAS[i.id] || ''; }
   function duoLinked(s, i) { var o = i.id === 'javihi-duo' ? 'sech-duo' : 'javihi-duo'; return mesaTroops(s.p[i.owner]).some(function (x) { return x.id === o; }); }
   // Prórroga (AitoRLG Renata): la tropa a su derecha no cae a 0 de vida hasta que haya atacado
@@ -972,6 +976,29 @@
         var n = FX.gambling.orbs[t - 1]; g.orbs += n;
         fxFrame(s, p, 'gorb', 'Gambling', '+' + n + (n === 1 ? ' orbe' : ' orbes') + ' (' + g.orbs + ' acumuladas)', mesaTroops(P).filter(function (i) { return has(i, 'Gambling'); }).map(function (i) { return i.uid; }));
       });
+      [0, 1].forEach(function (p) { // Gambling legendaria/épica: pasivas de Dashlight y Mertens Gambler (si terminan la ronda vivas)
+        if (s.over) return;
+        var P = s.p[p], g = gamState(P);
+        if (g.done) return;
+        var t = (s.tiers && s.tiers[p] && s.tiers[p]['Gambling']) || tiers(P)['Gambling'] || 1;
+        var alive = function (id) { return mesaTroops(P).filter(function (i) { return pas(i) === id; }); };
+        var dl = alive('colega');
+        if (dl.length && g.orbs >= 20) {
+          var dm = Math.floor(g.orbs / 2), E = s.p[1 - p];
+          E.life -= dm;
+          frame(s, pv(s, p, '', 'Rival · ') + 'Colega de los Desarrolladores: ' + dm + ' de daño directo a ' + pv(s, p, 'la vida del rival', 'tu vida') + '.', { life: 1 - p, dmg: dm, fx: { type: 'colega', side: p, title: 'Colega de los Desarrolladores', sub: dm + ' de daño directo', uids: dl.map(function (i) { return i.uid; }), neg: false } });
+          if (E.life <= 0) { s.over = true; s.phase = 'over'; s.winner = p; s.reason = 'Vida a cero.'; return; }
+          gamOpen(s, p, g.orbs, t, 'Rival · ');
+          gamHit(s, 1 - p); gamState(s.p[1 - p]).hit = false; // este golpe llega tras repartir las orbes de la ronda: no debe castigar la siguiente
+          return;
+        }
+        var mr = alive('malaracha');
+        if (mr.length && g.orbs > 10) {
+          fxFrame(s, p, 'malaracha', 'Mala Racha', 'se abre la mitad de las orbes', mr.map(function (i) { return i.uid; }));
+          gamOpen(s, p, Math.floor(g.orbs / 2), t, 'Rival · ', true);
+        }
+      });
+      if (s.over) { frame(s, pv(s, s.winner, '¡Has ganado!', 'Has perdido.'), null); return; }
       cleanup(s);
       frame(s, 'Fin de la ronda ' + s.round + '.', null);
       s.phase = 'post';

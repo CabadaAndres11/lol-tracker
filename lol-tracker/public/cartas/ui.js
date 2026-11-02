@@ -892,7 +892,7 @@
       if (PV.busy || PV.q.length) return pvpSchedule(600);
       call = api(PV.px + 'Poll', { id: PV.id, v: PV.v });
     } else if (ui.screen === 'pvp' && PV.wait) {
-      call = PV.wait.kind === 'search' ? api(PV.px + 'Search', { deck: ui.deck, mode: PV.mode }) : api(PV.px + 'Poll', {});
+      call = PV.wait.kind === 'search' ? api(PV.px + 'Search', { deck: ui.deck, mode: PV.mode, cover: curCover() }) : api(PV.px + 'Poll', {});
     } else return;
     call.then(pvpGot);
   }
@@ -924,6 +924,7 @@
     if (d.wait) {
       if (!PV.wait) PV.wait = { kind: d.code ? 'code' : 'search' };
       if (d.players && JSON.stringify(d.players) !== JSON.stringify(PV.wait.players)) { PV.wait.players = d.players; if (ui.screen === 'pvp') render(); }
+      if (d.host && PV.wait.host !== d.host) { PV.wait.host = d.host; if (ui.screen === 'pvp') render(); }
       if (d.code && PV.wait.code !== d.code) { PV.wait.code = d.code; if (ui.screen === 'pvp') render(); }
       return pvpSchedule(PV.wait.kind === 'search' ? 2000 : 1500);
     }
@@ -970,13 +971,29 @@
         (b.out ? 'eliminado' : b.me ? 'tú' : b.opp ? 'tu rival' : b.rest ? 'descansa' : '') + (!b.out && b.rdy ? ' ' + ic('check') : '') + '</span></div>';
     }).join('') + '</div>';
   }
+  // Portada del mazo que vas a jugar (la del hueco de mazo que coincide con el actual, o la mejor tropa)
+  function curCover() {
+    var key = ui.deck.join(','), sl = ui.slots.filter(function (x) { return x && x.ids && x.ids.join(',') === key; })[0];
+    return deckCoverId(sl || { ids: ui.deck, cover: '' });
+  }
+  function v4Slots(w) {
+    var me = ui.acct ? ui.acct.name.toLowerCase() : '', host = w.kind === 'code' && w.host && w.host === me, pl = (w.players && w.players.length ? w.players : (ui.acct ? [{ name: ui.acct.name, avatar: ui.acct.avatar, cover: curCover() }] : [])), h = '<div class="v4slots">';
+    for (var k = 0; k < 4; k++) {
+      var x = pl[k];
+      if (!x) { h += '<div class="v4s empty"><span class="v4plus">+</span>' + (host ? '<button class="btn sm" data-act="v4addbot">' + ic('robot') + ' Añadir bot</button>' : '<small>Esperando jugador…</small>') + '</div>'; continue; }
+      var av = x.bot ? '<span class="avt v4av">' + ic('robot') + '</span>' : '<span class="avt v4av' + (artOk(x.avatar) ? ' has' : '') + '"' + (artOk(x.avatar) ? ' style="background-image:url(/cartas/art/' + x.avatar + '.webp)"' : '') + '>' + (artOk(x.avatar) ? '' : ic('usuario')) + '</span>';
+      var cv = x.cover && CARD[x.cover] && ARTS[x.cover] ? ' style="background-image:url(/cartas/art/' + x.cover + '.webp)"' : '';
+      h += '<div class="v4s' + (x.bot ? ' bot' : '') + (x.name.toLowerCase() === me ? ' me' : '') + '">' + (x.bot && host ? '<button class="v4rm" data-act="v4rmbot" data-name="' + esc(x.name) + '" title="Quitar bot" aria-label="Quitar bot">×</button>' : '') + av + '<b class="v4n">' + esc(x.name) + '</b><span class="v4sel">Mazo</span><span class="v4dk"' + cv + '>' + (cv ? '' : ic('cartas')) + '</span>' + (x.bot ? '<small>IA · Normal</small>' : '') + '</div>';
+    }
+    return h + '</div>';
+  }
   function renderPvp() {
     var w = PV.wait, v4 = ui.lobby === 'vs4', h = head('play', v4 ? '' + ic('grupo') + (PV.mode === 'revive' ? ' Resurrección · Versus de 4' : ' Versus de 4') : '' + ic('espadas') + (PV.mode === 'revive' ? ' Resurrección · 1 vs 1' : ' Jugador contra jugador'));
     if (w) {
-      h += '<div class="panel pvpwait">' + (w.kind === 'code'
-        ? '<h2>' + (v4 ? 'Sala de 4' : 'Sala creada') + '</h2><p class="mut">' + (v4 ? 'Pasa este código a 3 jugadores más. Cuando estéis los 4, empieza sola.' : 'Pásale este código a tu rival. Cuando lo escriba, la partida empieza sola.') + '</p><div class="pvpcode">' + esc(w.code || '·····') + '</div>'
+      h += '<div class="panel pvpwait' + (v4 ? ' v4w' : '') + '">' + (w.kind === 'code'
+        ? '<h2>' + (v4 ? 'Sala de 4' : 'Sala creada') + '</h2><p class="mut">' + (v4 ? 'Pasa este código a 3 jugadores más o añade bots en los huecos vacíos. Cuando estéis los 4, empieza sola.' : 'Pásale este código a tu rival. Cuando lo escriba, la partida empieza sola.') + '</p><div class="pvpcode">' + esc(w.code || '·····') + '</div>'
         : '<h2>' + (v4 ? 'Buscando jugadores…' : 'Buscando rival…') + '</h2><p class="mut">' + (v4 ? 'Empieza al juntarse 4 jugadores buscando partida.' : 'Te emparejaremos con el primero que busque partida.') + '</p>') +
-        (v4 && w.players ? '<div class="v4list"><b>' + w.players.length + '/4</b> ' + w.players.map(function (n) { return '<span>' + esc(n) + '</span>'; }).join('') + '</div>' : '') +
+        (v4 ? v4Slots(w) : '') +
         '<div class="waitdots"><i></i><i></i><i></i></div><button class="btn sec" data-act="pvpcancel">Cancelar</button></div></div>';
       app.innerHTML = h; return;
     }
@@ -2119,7 +2136,7 @@
       saveDeck(); if (PV.on) pvpLeaveGame(); ui.msg = ''; PV.wait = null; PV.px = 'vs4'; ui.lobby = 'vs4';
       return api('vs4Poll', {}).then(function (r) {
         if (r.ok && r.data.s && !r.data.s.over) return pvpBegin(r.data);
-        if (r.ok && r.data.wait) { PV.wait = { kind: 'code', code: r.data.code, players: r.data.players }; ui.screen = 'pvp'; render(); return pvpSchedule(1500); }
+        if (r.ok && r.data.wait) { PV.wait = { kind: 'code', code: r.data.code, players: r.data.players, host: r.data.host }; ui.screen = 'pvp'; render(); return pvpSchedule(1500); }
         ui.screen = 'pvp'; window.scrollTo(0, 0); render();
       });
     }
@@ -2128,9 +2145,11 @@
       saveDeck(); if (PV.on) pvpLeaveGame(); ui.msg = ''; PV.wait = null; PV.px = 'vs4'; ui.lobby = 'vs4'; PV.mode = act === 'startrevvs4b' ? 'revive' : ''; ui.botGame = true;
       return api('vs4Bots', { deck: ui.deck, mode: PV.mode, diff: curDiff() }).then(pvpGot);
     }
-    if (act === 'pvpsearch') { PV.wait = { kind: 'search' }; ui.msg = ''; render(); return api(PV.px + 'Search', { deck: ui.deck, mode: PV.mode }).then(pvpGot); }
-    if (act === 'pvpcreate') { PV.wait = { kind: 'code', code: '' }; ui.msg = ''; render(); return api(PV.px + 'Create', { deck: ui.deck, mode: PV.mode }).then(pvpGot); }
-    if (act === 'pvpjoin') { var jc = (document.getElementById('pvp-code').value || '').trim(); if (jc.length !== 5) { ui.msg = 'El código tiene 5 letras.'; return render(); } ui.msg = ''; return api(PV.px + 'Join', { deck: ui.deck, code: jc }).then(pvpGot); }
+    if (act === 'pvpsearch') { PV.wait = { kind: 'search' }; ui.msg = ''; render(); return api(PV.px + 'Search', { deck: ui.deck, mode: PV.mode, cover: curCover() }).then(pvpGot); }
+    if (act === 'pvpcreate') { PV.wait = { kind: 'code', code: '' }; ui.msg = ''; render(); return api(PV.px + 'Create', { deck: ui.deck, mode: PV.mode, cover: curCover() }).then(pvpGot); }
+    if (act === 'pvpjoin') { var jc = (document.getElementById('pvp-code').value || '').trim(); if (jc.length !== 5) { ui.msg = 'El código tiene 5 letras.'; return render(); } ui.msg = ''; return api(PV.px + 'Join', { deck: ui.deck, code: jc, cover: curCover() }).then(pvpGot); }
+    if (act === 'v4addbot') { return api('vs4AddBot', { deck: ui.deck, mode: PV.mode, cover: curCover() }).then(pvpGot); }
+    if (act === 'v4rmbot') { return api('vs4RmBot', { deck: ui.deck, mode: PV.mode, name: el.dataset.name }).then(pvpGot); }
     if (act === 'pvpcancel') { pvpCancelWait(); return render(); }
     if (act === 'startai' || act === 'startrev') { if (deckError()) { ui.screen = 'deck'; return render(); } saveDeck(); ui.mode = act === 'startrev' ? 'revive' : ''; return startGame(); }
     if (act === 'play') { if (deckError()) { ui.screen = 'deck'; return render(); } saveDeck(); return startGame(); }

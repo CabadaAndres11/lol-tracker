@@ -8,6 +8,7 @@
         'Nueva mecánica Anime: la Genkidama. Mientras tengas la sinergia, cada ronda recibes una carta Genkidama (no sale en sobres). Tus Anime almacenan el 50% (nivel 1), 75% (nivel 2) o 100% (nivel 3) del daño que reciben, sin contar el sobrante al caer, y al jugar la carta se libera sobre una tropa rival. Ya no se ceden estadísticas.',
         'Nueva acción «Kamehameha» (Anime, coste 2): reparte a partes iguales entre todas las tropas rivales el daño almacenado en la Genkidama.',
         'Chipy Correa baja a Rara (coste 3, 4/11) y pierde su pasiva.',
+        'Nueva sala del Versus de 4: cuatro huecos con el nombre, la foto de perfil y la portada del mazo de cada jugador. Quien crea la sala puede pulsar «Añadir bot» en los huecos vacíos para jugar con 3 jugadores y 1 IA o 2 y 2 (las IAs son siempre de dificultad Normal) y quitarlos con la ×.',
         'Correa en modo clásico: si una novia cae en combate, queda eliminada y ya no se puede elegir en esa partida (en Resurrección no cambia).',
         'El Regalo de Correa ahora mejora el hueco 5: el +3/+3 pasa a la novia que lo ocupe, aunque cambies de novia o caiga la anterior.',
         'Mejora visual: la tropa que protege la Prórroga de AitoRLG Renata ahora se marca en la mesa con un aura dorada y un escudo (más intenso cuando aguanta a 0 de vida).',

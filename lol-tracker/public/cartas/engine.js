@@ -450,6 +450,9 @@
     'sofa-compartido': {
       ok: function (s, p) { var P = s.p[p]; return mesaTroops(P).some(function (i) { return has(i, 'NINI'); }) && P.hand.some(function (i) { return isTroop(i) && has(i, 'NINI'); }) ? '' : 'Necesitas una NINI en la mesa y otra en la mano.'; },
       run: function (s, p) { var P = s.p[p], n = sc(s, 2); mesaTroops(P).concat(P.hand.filter(isTroop)).filter(function (i) { return has(i, 'NINI'); }).forEach(function (i) { grow(i, 'atk', n); grow(i, 'hp', n); }); return '+' + n + '/+' + n + ' permanente a las NINI'; } },
+    'golpe-de-suerte': {
+      ok: function (s, p) { var g = gamState(s.p[p]); return g.done ? 'Tus orbes ya se han canjeado: no se ganan más.' : (tiers(s.p[p])['Gambling'] || 0) >= 1 ? '' : 'Necesitas el nivel 1 de Gambling (2 cartas distintas).'; },
+      run: function (s, p) { var g = gamState(s.p[p]), win = (typeof s.rng === 'function' ? s.rng() : Math.random()) < .5; if (win) { g.orbs += 2; return '¡Suerte! Ganas 2 orbes (' + g.orbs + (g.orbs === 1 ? ' acumulada)' : ' acumuladas)'); } var lost = Math.min(2, g.orbs); g.orbs -= lost; return 'Mala suerte: pierdes ' + lost + (lost === 1 ? ' orbe' : ' orbes') + ' (' + g.orbs + (g.orbs === 1 ? ' acumulada)' : ' acumuladas)'); } },
     madrugon: { ok: function (s, p) { return mesaTroops(s.p[p]).some(function (i) { return has(i, 'Pelayos'); }) ? '' : 'Necesitas una Pelayos en la mesa.'; }, run: function (s, p) { s.p[p].fl.pel = true; return 'tus Pelayos atacan primero'; } },
   };
   function graveKoi(P) {

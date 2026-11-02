@@ -1,6 +1,10 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-02', tag: 'Novedad', title: 'Gambling: nueva acción y cartas a la venta',
+      art: ['mertens-gambler'],
+      items: ['Nueva acción «Golpe de Suerte» (Gambling, coste 2): 50% de ganar 2 orbes y 50% de perder 2 (mínimo 0). Necesitas el nivel 1 de Gambling y no haber canjeado ya tus orbes.',
+        'Ya puedes comprar en la tienda (pestaña Cartas) a Mertens Gambler (100 monedas), Pampert Gambler (150) y Golpe de Suerte (50).'] },
     { date: '2026-11-02', tag: 'Novedad', title: '¡Ya está aquí la versión 1.2! Nueva sinergia: Gambling',
       art: ['pampert-gambler'],
       items: ['Nueva sinergia «Gambling» (2 / 3 / 4 cartas distintas): ganas orbes por cada ronda en la que no recibes daño directo en tu vida. Cuantas más Gambling tengas, más orbes por ronda: 1, 2 o 3. Las orbes se ganan según la sinergia con la que empezaste el combate, aunque tus Gambling caigan durante la ronda.',

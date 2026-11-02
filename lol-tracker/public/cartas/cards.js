@@ -951,6 +951,17 @@ var D={
    "target": "none",
    "text": "Esta ronda tus Pelayos en mesa atacan los primeros.",
    "theme": "Pelayos"
+  },
+  {
+   "id": "golpe-de-suerte",
+   "name": "Golpe de Suerte",
+   "cost": 2,
+   "rarity": "Rara",
+   "type": "accion",
+   "size": 1,
+   "target": "none",
+   "text": "50%: ganas 2 orbes Gambling. 50%: pierdes 2 orbes (mínimo 0).",
+   "theme": "Gambling"
   }
  ],
  "themes": {
@@ -1143,6 +1154,18 @@ var D={
   },
   {
    "id": "campeones-de-europa",
+   "price": 50
+  },
+  {
+   "id": "mertens-gambler",
+   "price": 100
+  },
+  {
+   "id": "pampert-gambler",
+   "price": 150
+  },
+  {
+   "id": "golpe-de-suerte",
    "price": 50
   }
  ]

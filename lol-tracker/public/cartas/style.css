@@ -2562,3 +2562,26 @@ body.soc-open #app { margin-right: 286px; }
 @keyframes i20gp { 50% { transform: scale(1.1); } }
 .i20gk b { margin: 0; font: 900 3.6cqw/1 Inter, sans-serif; color: #ef4444; text-shadow: 0 0 1cqw #fff, 0 0 2cqw #dc2626; animation: i20bl .8s steps(1) infinite; } @keyframes i20bl { 50% { opacity: .15; } }
 .i20chips span:nth-child(2), .i20pf .gs div:nth-child(2) { --i: 1; } .i20chips span:nth-child(3), .i20pf .gs div:nth-child(3) { --i: 2; } .i20pf .gs div:nth-child(4) { --i: 3; }
+
+/* ---------- Noticia «Charla con los Desarrolladores» ---------- */
+.ntag.nt-Avance { background: #7c3aed; }
+.rnmain.chatnews { background: radial-gradient(120% 100% at 80% 20%, #3b2a7a 0%, #1a1238 55%, #0b0716 100%); min-height: 300px; align-items: center; overflow: hidden; }
+.rnmain.chatnews::before, .rnmain.chatnews::after { display: none; }
+.rnmain.chatnews .cnc { position: absolute; bottom: -4%; height: 92%; width: auto; filter: drop-shadow(0 6px 14px rgba(0,0,0,.6)); pointer-events: none; }
+.rnmain.chatnews .cnc.c1 { right: 24%; } .rnmain.chatnews .cnc.c2 { right: 3%; }
+.cnplay { margin-top: .6rem; padding: .7rem 1.6rem; font-size: 1.05rem; background: linear-gradient(180deg, #a78bfa, #7c3aed); border-color: #ddd6fe; color: #fff; box-shadow: 0 0 18px rgba(167,139,250,.6); animation: cnpulse 1.8s ease-in-out infinite; }
+@keyframes cnpulse { 50% { box-shadow: 0 0 30px rgba(167,139,250,.95); transform: scale(1.04); } }
+.devchat { position: fixed; inset: 0; z-index: 500; display: grid; place-items: center; background: rgba(5,3,14,.88); backdrop-filter: blur(5px); padding: .8rem; cursor: pointer; animation: zin .25s ease-out; }
+.dcbox { position: relative; width: min(96vw, 860px); aspect-ratio: 16 / 10; border-radius: 18px; border: 2px solid rgba(167,139,250,.7); background: radial-gradient(120% 90% at 50% 0%, #3b2a7a 0%, #1a1238 55%, #0b0716 100%); box-shadow: 0 20px 60px rgba(0,0,0,.7), 0 0 40px rgba(124,58,237,.35); overflow: hidden; container-type: inline-size; }
+.dcx { position: absolute; top: 1.6cqw; right: 1.6cqw; z-index: 5; width: 4.4cqw; height: 4.4cqw; min-width: 28px; min-height: 28px; border-radius: 50%; border: 1px solid rgba(255,255,255,.4); background: rgba(0,0,0,.45); color: #fff; cursor: pointer; font-size: 2cqw; }
+.dcc { position: absolute; bottom: 20%; height: 78%; width: auto; transition: filter .3s, transform .3s, opacity .3s; filter: brightness(.45) saturate(.6); transform: scale(.94); pointer-events: none; }
+.dcc.l { left: 4%; } .dcc.r { right: 4%; }
+.devchat[data-w="g"] .dcc.l, .devchat[data-w="d"] .dcc.r { filter: drop-shadow(0 0 14px rgba(167,139,250,.7)); transform: scale(1); }
+.dcbub { position: absolute; left: 4cqw; right: 4cqw; bottom: 3cqw; min-height: 17cqw; padding: 1.8cqw 2.4cqw; border-radius: 2cqw; background: #f6efdc; color: #241a0e; border: .45cqw solid #241a0e; box-shadow: 0 8px 28px rgba(0,0,0,.55); }
+.dcbub.pop { animation: dcpop .25s ease-out; } @keyframes dcpop { from { opacity: .4; transform: translateY(8px); } }
+.dcname { position: absolute; top: -2.6cqw; left: 2cqw; padding: .4cqw 1.6cqw; border-radius: 99px; background: #7c3aed; color: #fff; border: .35cqw solid #241a0e; font: 800 1.9cqw/1.2 Inter, sans-serif; letter-spacing: .08em; text-transform: uppercase; }
+.devchat[data-w="d"] .dcname { left: auto; right: 2cqw; background: #db2777; }
+.dctx { margin: 0; font: 600 2.3cqw/1.4 Inter, sans-serif; }
+.dcgo { position: absolute; right: 2.4cqw; bottom: .9cqw; font: 700 1.5cqw/1 Inter, sans-serif; color: #7c3aed; opacity: 0; } .devchat.done .dcgo { opacity: 1; animation: dcgo 1s ease-in-out infinite; } @keyframes dcgo { 50% { transform: translateX(4px); } }
+.dcn { position: absolute; left: 2.4cqw; bottom: .9cqw; font: 600 1.4cqw/1 Inter, sans-serif; color: #7a6a52; }
+@media (max-width: 700px) { .rnmain.chatnews .cnc { height: 60%; opacity: .5; } .dctx { font-size: 3.1cqw; } .dcgo, .dcn { font-size: 2cqw; } .dcname { font-size: 2.6cqw; top: -3.4cqw; } .dcbub { min-height: 24cqw; } }

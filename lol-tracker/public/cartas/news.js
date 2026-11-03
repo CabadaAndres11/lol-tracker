@@ -1,6 +1,31 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-03', tag: 'Avance', title: 'Charla con los Desarrolladores',
+      items: ['Charla con los desarrolladores sobre lo que puede llegar en las próximas versiones: sinergias que se retiran, cartas que cambian por completo, nuevas sinergias y objetivos del juego.'],
+      chat: [
+        { w: 'g', t: '¡Hola! Soy el guía de siempre. Hoy no vengo a enseñarte a jugar: vengo acompañado de alguien del equipo de desarrollo.' },
+        { w: 'd', t: '¡Buenas! Ahora que la <b>2.0</b> ya está aquí, queríamos contaros por dónde pensamos llevar el juego en las próximas versiones.' },
+        { w: 'g', t: 'Un momento: ¿esto es oficial? ¿Va a pasar todo lo que nos cuentes?' },
+        { w: 'd', t: 'Son planes, no promesas. Todo puede cambiar por el camino, pero nos gusta enseñaros lo que tenemos en la cabeza.' },
+        { w: 'g', t: 'Pues empieza por lo que más duele… ¿qué se va?' },
+        { w: 'd', t: 'Vamos a retirar cinco sinergias: <b>Tilt</b>, <b>Pueblo</b>, <b>NINI</b>, <b>Pelayos</b> y <b>Dúo Inseparable</b>.' },
+        { w: 'g', p: 'e', t: '¡¿Cinco?! ¿Y por qué tantas a la vez?' },
+        { w: 'd', t: 'Queremos hacer sitio. Preferimos rehacer el juego alrededor de sinergias que den de verdad mucho juego antes que arrastrar algunas que se han quedado atrás. Aún estamos decidiendo qué pasa con cada carta; os iremos contando.' },
+        { w: 'g', t: 'Vale, vale… ¿Y las cartas que se quedan? ¿Siguen igual?' },
+        { w: 'd', t: 'No todas. Hay cartas que van a <b>cambiar por completo</b>, no solo de números: <b>Javihi Dúo</b>, <b>Sech Dúo</b>, <b>PotAnGo</b>, <b>Chipy Llorón</b>, <b>Mertens Prime</b> y <b>Javihi Prime</b>.' },
+        { w: 'g', t: 'Eso da un poco de vértigo… ¿Y qué llega para compensar?' },
+        { w: 'd', t: '¡Sinergias nuevas! Las dos primeras serán <b>Goblins</b> y <b>Fantasía</b>.' },
+        { w: 'g', t: '¡Goblins y Fantasía! ¿Y habrá más?' },
+        { w: 'd', t: 'Estamos a la espera de más… De momento no podemos adelantar nada: aún no hay nada decidido.' },
+        { w: 'g', t: 'Y a largo plazo, ¿cuáles son vuestros objetivos?' },
+        { w: 'd', t: 'Cuatro. El primero: que <b>todas las cartas tengan 2 rarezas</b>.' },
+        { w: 'd', t: 'El segundo: <b>más sobres y más cartas</b> para coleccionar.' },
+        { w: 'd', t: 'El tercero: <b>más efectos disponibles</b> para personalizar tus partidas.' },
+        { w: 'd', t: 'Y el cuarto: <b>mejoras visuales en los lobbys y en la partida</b>.' },
+        { w: 'g', t: 'Eso suena muy bien. ¡Me muero por verlo!' },
+        { w: 'd', t: 'Gracias por charlar con nosotros. Os seguiremos informando versión a versión. ¡Nos vemos en la partida!' },
+        { w: 'g', t: '¡Nos vemos! Y si necesitas repasar lo básico, aquí sigo con el tutorial.' }] },
     { date: '2026-11-03', tag: 'Novedad', title: '¡Ya está aquí la versión 2.0! Amigos, Pase de batalla y Royal Rumble', art: ['dashlight-kingambit'],
       items: [
         'Versión 2.0: la mayor actualización hasta ahora. Las novedades están agrupadas en las noticias de abajo para que las encuentres fácil.',

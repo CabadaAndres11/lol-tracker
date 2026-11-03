@@ -622,17 +622,55 @@
   function newsSummary(n) {
     return n.items.slice(0, 2).map(function (t) { t = t.replace('{{intro}}', '').trim(); return t.length > 230 ? t.slice(0, 227).replace(/\s+\S*$/, '') + '…' : t; });
   }
+  // ---------- Noticia «Charla con los Desarrolladores»: conversación que avanza con cada clic ----------
+  function chatNewsMain(n) {
+    return '<div class="rnmain chatnews"><img class="cnc c1" src="/cartas/tutor/guia.webp" alt=""><img class="cnc c2" src="/cartas/tutor/dev.webp" alt="">' +
+      '<div class="rnbody"><span class="ntag nt-' + esc(n.tag) + '">' + esc(n.tag) + '</span><h2>' + esc(n.title) + '</h2>' +
+      '<button class="btn cnplay" data-act="devchat">▶ Reproducir charla</button></div></div>';
+  }
+  var chatEl = null, chatS = null;
+  function closeChat() { if (chatS && chatS.t) clearInterval(chatS.t); chatS = null; if (chatEl) { chatEl.remove(); chatEl = null; } document.removeEventListener('keydown', chatKey); }
+  function chatKey(e) { if (e.key === 'Escape') closeChat(); else if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowRight') { e.preventDefault(); chatNext(); } }
+  function openChat() {
+    var n = (window.CARTAS_NEWS || []).filter(function (x) { return x.chat; })[0]; if (!n) return;
+    closeChat(); chatS = { l: n.chat, i: -1, t: null, full: '', pos: 0 };
+    chatEl = document.createElement('div'); chatEl.className = 'devchat';
+    chatEl.innerHTML = '<div class="dcbox"><button class="dcx" data-dc="close" title="Cerrar">✕</button><img class="dcc l" src="/cartas/tutor/guia.webp" alt=""><img class="dcc r" src="/cartas/tutor/dev.webp" alt="">' +
+      '<div class="dcbub"><span class="dcname"></span><p class="dctx"></p><span class="dcgo">Pulsa para continuar ▸</span><span class="dcn"></span></div></div>';
+    document.body.appendChild(chatEl);
+    chatEl.addEventListener('click', function (e) { if (e.target.closest('[data-dc="close"]') || e.target === chatEl) return closeChat(); chatNext(); });
+    document.addEventListener('keydown', chatKey);
+    chatNext();
+  }
+  function chatNext() {
+    var s = chatS; if (!s) return;
+    var tx = chatEl.querySelector('.dctx');
+    if (s.pos < s.full.length) { clearInterval(s.t); s.pos = s.full.length; tx.innerHTML = s.full; chatEl.classList.add('done'); return; } // primer clic: completa el texto
+    if (s.i >= s.l.length - 1) return closeChat();
+    s.i++; var L = s.l[s.i]; s.full = L.t; s.pos = 0; chatEl.classList.remove('done');
+    chatEl.dataset.w = L.w; chatEl.dataset.p = L.p || '';
+    chatEl.querySelector('.dcname').textContent = L.w === 'd' ? 'Dev' : 'Guía';
+    chatEl.querySelector('.dcn').textContent = (s.i + 1) + ' / ' + s.l.length;
+    chatEl.querySelector('.dcgo').textContent = s.i === s.l.length - 1 ? 'Pulsa para cerrar ✕' : 'Pulsa para continuar ▸';
+    var g = chatEl.querySelector('.dcc.l'); g.src = '/cartas/tutor/' + (L.p === 'e' ? 'guia-enfadado' : 'guia') + '.webp';
+    var bub = chatEl.querySelector('.dcbub'); bub.classList.remove('pop'); void bub.offsetWidth; bub.classList.add('pop');
+    if (REDUCED) { s.pos = s.full.length; tx.innerHTML = s.full; chatEl.classList.add('done'); return; }
+    tx.innerHTML = '';
+    var plain = s.full.replace(/<[^>]+>/g, ''), k = 0;
+    s.t = setInterval(function () { k += 2; if (k >= plain.length) { clearInterval(s.t); s.pos = s.full.length; tx.innerHTML = s.full; chatEl.classList.add('done'); } else tx.textContent = plain.slice(0, k); }, 24);
+  }
   function homeNews() {
     var N = window.CARTAS_NEWS || [];
     if (!N.length) return '';
     var sel = Math.min(ui.newsSel || 0, N.length - 1), n = N[sel], arts = newsArts(n);
+    var isChat = !!n.chat;
     return '<div class="rnews"><ul class="rnl">' + N.map(function (x, k) {
       return '<li><button class="' + (k === sel ? 'on' : '') + '" data-act="newssel" data-i="' + k + '"><span class="ntag nt-' + esc(x.tag) + '">' + esc(x.tag) + '</span><b>' + esc(x.title) + '</b><i>' + esc(x.date.split('-').reverse().join('/')) + '</i></button></li>';
-    }).join('') + '</ul><div class="rnmain' + (arts.length ? '' : ' nologo') + (ui.newsFull && newsNeedsFull(n) ? ' full' : '') + '" style="' + (arts.length ? '--rart:url(/cartas/art/' + arts[0] + '.webp)' : '') + '">' +
+    }).join('') + '</ul>' + (isChat ? chatNewsMain(n) : '<div class="rnmain' + (arts.length ? '' : ' nologo') + (ui.newsFull && newsNeedsFull(n) ? ' full' : '') + '" style="' + (arts.length ? '--rart:url(/cartas/art/' + arts[0] + '.webp)' : '') + '">' +
       (arts.length ? '' : '<img class="rnlogo" src="/cartas/logo.webp" alt="">') +
       '<div class="rnbody"><span class="ntag nt-' + esc(n.tag) + '">' + esc(n.tag) + '</span><h2>' + esc(n.title) + '</h2><ul>' + (ui.newsFull && newsNeedsFull(n) ? n.items.map(function (t) { return '<li>' + (t.indexOf('{{intro}}') >= 0 ? esc(t.replace('{{intro}}', '')) + '<a href="#" class="newslink" data-act="introplay">▶ Ver la animación</a>' : esc(t)) + '</li>'; }) : newsSummary(n).map(function (t) { return '<li>' + esc(t) + '</li>'; })).join('') + '</ul>' +
       (newsNeedsFull(n) ? '<button class="btn sec sm" data-act="newsmore">' + (ui.newsFull ? 'Mostrar menos ▴' : 'Leer la noticia completa ▾') + '</button>' : '') +
-      (arts.length > 1 ? '<div class="rnthumbs">' + arts.map(function (id) { return '<span style="background-image:url(/cartas/art/' + id + '.webp)" title="' + esc(CARD[id] ? CARD[id].name : id.replace(/-/g, ' ')) + '"></span>'; }).join('') + '</div>' : '') + '</div></div></div>';
+      (arts.length > 1 ? '<div class="rnthumbs">' + arts.map(function (id) { return '<span style="background-image:url(/cartas/art/' + id + '.webp)" title="' + esc(CARD[id] ? CARD[id].name : id.replace(/-/g, ' ')) + '"></span>'; }).join('') + '</div>' : '') + '</div></div>') + '</div>';
   }
   // Cambia solo el panel de noticias (así la lista conserva su scroll)
   function refreshNews() {
@@ -2456,6 +2494,7 @@
     if (act === 'shoptab') { ui.shopTab = el.dataset.t; ui.msg = ''; return render(); }
     if (act === 'shopsel') { ui.shopSel = +el.dataset.i; ui.shopTab = 'feat'; return render(); }
     if (act === 'newssel') { ui.newsSel = +el.dataset.i; ui.newsFull = false; return refreshNews(); }
+    if (act === 'devchat') return openChat();
     if (act === 'newsmore') { ui.newsFull = !ui.newsFull; return refreshNews(); }
     if (act === 'setavatar') { return api('avatarSet', { card: el.dataset.card }).then(function (r) { if (r.ok) { setAcct(r.data.user); ui.msg = ''; ui.avEdit = false; } else ui.msg = (r.data && r.data.error) || 'No se pudo cambiar la foto.'; render(); }); }
     if (PLAYACTS[act]) { if (!ui.picked) return askDeck(act); ui.picked = false; }

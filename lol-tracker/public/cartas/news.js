@@ -1,6 +1,8 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-03', tag: 'Cambio', title: 'Royal Rumble: siempre contra la IA Normal',
+      items: ['En Royal Rumble ya no se puede elegir la dificultad de la IA: siempre es Normal. Así tanto tú como la IA empezáis con todas las cartas sin niveles y la partida es igual de justa para los dos. Se aplica también al Versus de 4 contra bots, y las recompensas son las de la dificultad Normal.'] },
     { date: '2026-11-03', tag: 'Novedad', title: 'Aviso de nueva versión',
       items: ['El juego comprueba cada pocos minutos si hay una versión más reciente. Cuando la hay, aparece un aviso para actualizar el navegador y no quedarte con una versión antigua. Si estás en una partida, te pide confirmación antes de recargar.'] },
     { date: '2026-11-03', tag: 'Corrección', title: 'Aviso de cajas de rango en Clasificación',

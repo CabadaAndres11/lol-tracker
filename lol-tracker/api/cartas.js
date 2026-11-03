@@ -583,7 +583,7 @@ async function vs4Handle(cfg, act, body, u) {
     const cov = String(body.cover || '').replace(/[^a-z0-9-]/g, '').slice(0, 40);
     const mine = { name: me, deck: body.deck, lv: vrr ? {} : levelsOf(u, body.deck), sk: skinsOf(u, body.deck), avatar: u.avatar || '', cover: E.CARD[cov] ? cov : '' };
     if (act === 'vs4Bots') { // partida contra 3 IAs, cada una con un mazo de una temática distinta
-      const diff = Math.max(0, Math.min(2, body.diff | 0));
+      const diff = vrr ? 0 : Math.max(0, Math.min(2, body.diff | 0)); // Royal Rumble: siempre IA Normal
       const lv = ALL_THEMES.slice().sort(() => crypto.randomInt(0, 2) - 0.5).slice(0, 3);
       const rng = E.mulberry32(crypto.randomInt(1, 2 ** 30));
       const bots = lv.map((lead) => {
@@ -949,7 +949,7 @@ module.exports = async function handler(req, res) {
       const rounds = Number(body.rounds) || 0;
       const valid = u.startedAt && secs >= MIN_GAME_SECONDS && rounds >= MIN_GAME_ROUNDS;
       u.startedAt = 0;
-      const diff = u.gameDiff | 0; u.gameDiff = 0;
+      const diff = body.mode === 'rumble' ? 0 : u.gameDiff | 0; u.gameDiff = 0; // Royal Rumble: siempre IA Normal
       if (u.rewardDay !== today()) { u.rewardDay = today(); u.rewardCount = 0; }
       if (valid) recordGame(u, { won: !!body.won, kind: 'ia', mode: normMode(body.mode), cards: body.cards });
       let gained = 0, pts = 0;

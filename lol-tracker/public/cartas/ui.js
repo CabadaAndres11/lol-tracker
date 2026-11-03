@@ -965,6 +965,7 @@
   }
   var DIFFS = [{ n: 'Normal', d: 'La IA de siempre.', r: 'Monedas ×1' }, { n: 'Difícil', d: 'Mazos coherentes, mejor tienda, +1 de oro en rondas de tienda y cartas a nivel 2.', r: 'Monedas ×1,5' }, { n: 'Experto', d: 'Lo anterior, cartas a nivel 3, +2 de oro en tienda, se cura 2 de vida y fusiona copias.', r: 'Monedas ×2 y +10 puntos si ganas' }];
   function curDiff() { if (ui.diff == null) { try { ui.diff = Math.max(0, Math.min(2, +localStorage.getItem('tcg_diff') || 0)); } catch (e) { ui.diff = 0; } } return ui.diff; }
+  function diffFor(mode) { return mode === 'rumble' ? 0 : curDiff(); } // Royal Rumble siempre se juega contra la IA Normal
   function diffHtml() {
     var d = curDiff();
     return '<div class="qdiff"><span class="qdl">Dificultad de la IA</span><div class="qdbtns">' + DIFFS.map(function (x, i) { return '<button class="' + (i === d ? 'on' : '') + '" data-act="qdiff" data-v="' + i + '">' + x.n + '</button>'; }).join('') + '</div><span class="qdd">' + DIFFS[d].d + ' <b>' + DIFFS[d].r + '</b></span></div>';
@@ -979,7 +980,7 @@
       '<div class="qmodes">' + QMODES.map(function (m) { return '<button class="qmode' + (m === qm ? ' on' : '') + '" data-act="qmode" data-v="' + m.id + '"><span class="qframe">' + ic(m.icon) + '</span><b>' + m.name + '</b><span class="qsub">' + m.sub + '</span></button>'; }).join('') + '</div>' +
       '<div class="qbody" style="--qart:url(/cartas/art/' + QART[qt][qm.id][qo] + '.webp)"><div class="qleft"><p class="qdesc">' + qm.desc + '</p><p class="qdeck">' + (qm.nodeck ? 'No necesitas mazo: empiezas con la tienda y construyes tu composición sobre la marcha.' : 'Antes de jugar elegirás uno de tus mazos guardados.') + '</p>' +
       '<div class="qopts">' + opts.map(function (o) { return '<button class="qopt' + (o === cur ? ' on' : '') + '" data-act="qopt" data-v="' + o.id + '"><i class="qdia"></i><span class="qot"><b>' + ic(o.icon) + ' ' + o.name + '</b><span>' + (qm.nodeck ? o.sub.replace(' con tu mazo', '').replace(', cada una con un mazo distinto', '') : o.sub) + '</span></span></button>'; }).join('') + '</div>' +
-      (qt === 'ia' ? diffHtml() : '') + '<p class="qnote ' + (qt === 'ia' ? 'ia' : 'pl') + '">' + (qt === 'ia' ? 'Contra IA: menos monedas y sin puntos de clasificación (salvo al vencer al Experto).' : 'Contra jugadores: puntúan en la clasificación.') + '</p></div><div class="qart" aria-hidden="true"></div></div>' +
+      (qt === 'ia' ? (qm.id === 'rumble' ? '<div class="qdiff"><span class="qdl">Dificultad de la IA</span><span class="qdd">Royal Rumble se juega siempre contra la IA <b>Normal</b>: todas las cartas, las tuyas y las de la IA, empiezan sin niveles.</span></div>' : diffHtml()) : '') + '<p class="qnote ' + (qt === 'ia' ? 'ia' : 'pl') + '">' + (qt === 'ia' ? 'Contra IA: menos monedas y sin puntos de clasificación (salvo al vencer al Experto).' : 'Contra jugadores: puntúan en la clasificación.') + '</p></div><div class="qart" aria-hidden="true"></div></div>' +
       '<div class="qconfirm"><button class="qgo" data-act="' + cur.act[qm.id] + '"><span class="qx">' + ic('avance') + '</span><span class="qgot">Confirmar</span></button></div></div>' + (ui.pick ? pickHtml() : '');
   }
   function themeCards(t) { return D.cards.filter(function (c) { return c.themes.indexOf(t) >= 0; }).concat(D.actions.filter(function (a) { return a.theme === t; })); }
@@ -1454,8 +1455,8 @@
     var rr = ui.mode === 'rumble', ids = rr ? E.rumbleDeck() : ui.deck;
     var mylv = {}; if (!rr) ui.deck.forEach(function (id) { var l = lvOf(id); if (l > 1) mylv[id] = l; });
     var mysk = {}; ids.forEach(function (id) { var k = ui.acct && ui.acct.skinSel && ui.acct.skinSel[id]; if (k && ui.acct.skins.indexOf(k) >= 0) mysk[id] = k; });
-    ui.s = E.newGame(ui.deck, E.aiDeck(r, null, curDiff()), seed, { lv: [mylv, {}], sk: [mysk, {}], mode: ui.mode, ai: curDiff() });
-    ui.reward = null; api('gameStart', { diff: curDiff() });
+    ui.s = E.newGame(ui.deck, E.aiDeck(r, null, diffFor(ui.mode)), seed, { lv: [mylv, {}], sk: [mysk, {}], mode: ui.mode, ai: diffFor(ui.mode) });
+    ui.reward = null; api('gameStart', { diff: diffFor(ui.mode) });
     ui.screen = 'game'; ui.sel = null; ui.view = null; ui.playing = false; ui.hint = ''; ui.landed = null; ui.busy = false; ui.seenKey = null;
     announce(); render();
   }
@@ -2656,7 +2657,7 @@
     if (act === 'startvs4b' || act === 'startrevvs4b' || act === 'startrrvs4b') {
       if (act !== 'startrrvs4b' && deckError()) { ui.screen = 'deck'; return render(); }
       saveDeck(); if (PV.on) pvpLeaveGame(); ui.msg = ''; PV.wait = null; PV.px = 'vs4'; ui.lobby = 'vs4'; PV.mode = act === 'startrrvs4b' ? 'rumble' : act === 'startrevvs4b' ? 'revive' : ''; ui.botGame = true;
-      return api('vs4Bots', { deck: ui.deck, mode: PV.mode, diff: curDiff() }).then(pvpGot);
+      return api('vs4Bots', { deck: ui.deck, mode: PV.mode, diff: diffFor(PV.mode) }).then(pvpGot);
     }
     if (act === 'pvpsearch') { PV.wait = { kind: 'search' }; ui.msg = ''; render(); return api(PV.px + 'Search', { deck: ui.deck, mode: PV.mode, cover: curCover() }).then(pvpGot); }
     if (act === 'pvpcreate') { PV.wait = { kind: 'code', code: '' }; ui.msg = ''; render(); return api(PV.px + 'Create', { deck: ui.deck, mode: PV.mode, cover: curCover() }).then(pvpGot); }

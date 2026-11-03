@@ -693,19 +693,20 @@
   var QMODES = [
     { id: 'classic', name: 'Clásico', icon: 'escudo', sub: 'Las tropas que caen se pierden', desc: 'Las tropas que caen se pierden. Gana quien se queda con tropas en pie y deja sin vida al rival.' },
     { id: 'revive', name: 'Resurrección', icon: 'cambio', sub: 'Las tropas reviven cada ronda', desc: 'Las tropas reviven cada ronda y al atacar también recibes el ataque de la carta atacada.' },
+    { id: 'rumble', name: 'Royal Rumble', icon: 'fuego', sub: 'Sin mazo: sale todo el juego', desc: 'Reglas de Resurrección, pero sin mazo: en la tienda puede salir cualquier carta del juego. Salen muchas más tropas y muy pocas acciones, y es más fácil encontrar copias para subir de nivel y cartas de tus temáticas. Construye tu composición sobre la marcha.', nodeck: 1 },
   ];
   var QART = {
-    ia: { classic: { '1v1': 'dashlight-akali', vs4: 'aitorlg-koisito' }, revive: { '1v1': 'chipy-lloron', vs4: 'potango' } },
-    pl: { classic: { '1v1': 'hellbramn', vs4: 'pampert-friki' }, revive: { '1v1': 'haikyuu-lihone', vs4: 'mertens-prime' } },
+    ia: { classic: { '1v1': 'dashlight-akali', vs4: 'aitorlg-koisito' }, revive: { '1v1': 'chipy-lloron', vs4: 'potango' }, rumble: { '1v1': 'javihi-prime', vs4: 'mertens-meliodas' } },
+    pl: { classic: { '1v1': 'hellbramn', vs4: 'pampert-friki' }, revive: { '1v1': 'haikyuu-lihone', vs4: 'mertens-prime' }, rumble: { '1v1': 'lihone-rudeus', vs4: 'javihi-friki-volibear' } },
   };
   var QOPTS = {
     ia: [
-      { id: '1v1', icon: 'espadas', name: '1 contra 1', sub: 'Duelo contra una IA con tu mazo.', act: { classic: 'startai', revive: 'startrev' } },
-      { id: 'vs4', icon: 'grupo', name: 'Versus de 4', sub: 'Tú contra 3 IAs, cada una con un mazo distinto. Duelos rotando hasta que quede uno.', act: { classic: 'startvs4b', revive: 'startrevvs4b' } },
+      { id: '1v1', icon: 'espadas', name: '1 contra 1', sub: 'Duelo contra una IA con tu mazo.', act: { classic: 'startai', revive: 'startrev', rumble: 'startrr' } },
+      { id: 'vs4', icon: 'grupo', name: 'Versus de 4', sub: 'Tú contra 3 IAs, cada una con un mazo distinto. Duelos rotando hasta que quede uno.', act: { classic: 'startvs4b', revive: 'startrevvs4b', rumble: 'startrrvs4b' } },
     ],
     pl: [
-      { id: '1v1', icon: 'espadas', name: '1 contra 1', sub: 'Reta a otro jugador. Sala con código o búsqueda automática.', act: { classic: 'openpvp', revive: 'openrevpvp' } },
-      { id: 'vs4', icon: 'grupo', name: 'Versus de 4', sub: 'Cuatro jugadores, duelos rotando hasta que quede uno. Sala con código o búsqueda.', act: { classic: 'openvs4', revive: 'openrevvs4' } },
+      { id: '1v1', icon: 'espadas', name: '1 contra 1', sub: 'Reta a otro jugador. Sala con código o búsqueda automática.', act: { classic: 'openpvp', revive: 'openrevpvp', rumble: 'openrrpvp' } },
+      { id: 'vs4', icon: 'grupo', name: 'Versus de 4', sub: 'Cuatro jugadores, duelos rotando hasta que quede uno. Sala con código o búsqueda.', act: { classic: 'openvs4', revive: 'openrevvs4', rumble: 'openrrvs4' } },
     ],
   };
   function tutDone() { try { return localStorage.getItem('tcg_tut') === '1'; } catch (e) { return false; } }
@@ -726,8 +727,8 @@
       tutStrip() + '<div class="qsel' + (fx ? ' fx-' + fx : '') + '">' +
       '<div class="qtypes"><button class="' + (qt === 'ia' ? 'on' : '') + '" data-act="qtype" data-v="ia">' + ic('robot') + ' Contra IA</button><button class="' + (qt === 'pl' ? 'on' : '') + '" data-act="qtype" data-v="pl">' + ic('grupo') + ' Contra jugadores</button></div>' +
       '<div class="qmodes">' + QMODES.map(function (m) { return '<button class="qmode' + (m === qm ? ' on' : '') + '" data-act="qmode" data-v="' + m.id + '"><span class="qframe">' + ic(m.icon) + '</span><b>' + m.name + '</b><span class="qsub">' + m.sub + '</span></button>'; }).join('') + '</div>' +
-      '<div class="qbody" style="--qart:url(/cartas/art/' + QART[qt][qm.id][qo] + '.webp)"><div class="qleft"><p class="qdesc">' + qm.desc + '</p><p class="qdeck">Antes de jugar elegirás uno de tus mazos guardados.</p>' +
-      '<div class="qopts">' + opts.map(function (o) { return '<button class="qopt' + (o === cur ? ' on' : '') + '" data-act="qopt" data-v="' + o.id + '"><i class="qdia"></i><span class="qot"><b>' + ic(o.icon) + ' ' + o.name + '</b><span>' + o.sub + '</span></span></button>'; }).join('') + '</div>' +
+      '<div class="qbody" style="--qart:url(/cartas/art/' + QART[qt][qm.id][qo] + '.webp)"><div class="qleft"><p class="qdesc">' + qm.desc + '</p><p class="qdeck">' + (qm.nodeck ? 'No necesitas mazo: empiezas con la tienda y construyes tu composición sobre la marcha.' : 'Antes de jugar elegirás uno de tus mazos guardados.') + '</p>' +
+      '<div class="qopts">' + opts.map(function (o) { return '<button class="qopt' + (o === cur ? ' on' : '') + '" data-act="qopt" data-v="' + o.id + '"><i class="qdia"></i><span class="qot"><b>' + ic(o.icon) + ' ' + o.name + '</b><span>' + (qm.nodeck ? o.sub.replace(' con tu mazo', '').replace(', cada una con un mazo distinto', '') : o.sub) + '</span></span></button>'; }).join('') + '</div>' +
       (qt === 'ia' ? diffHtml() : '') + '<p class="qnote ' + (qt === 'ia' ? 'ia' : 'pl') + '">' + (qt === 'ia' ? 'Contra IA: menos monedas y sin puntos de clasificación (salvo al vencer al Experto).' : 'Contra jugadores: puntúan en la clasificación.') + '</p></div><div class="qart" aria-hidden="true"></div></div>' +
       '<div class="qconfirm"><button class="qgo" data-act="' + cur.act[qm.id] + '"><span class="qx">' + ic('avance') + '</span><span class="qgot">Confirmar</span></button></div></div>' + (ui.pick ? pickHtml() : '');
   }
@@ -1001,7 +1002,7 @@
     return h + '</div>';
   }
   function renderPvp() {
-    var w = PV.wait, v4 = ui.lobby === 'vs4', h = head('play', v4 ? '' + ic('grupo') + (PV.mode === 'revive' ? ' Resurrección · Versus de 4' : ' Versus de 4') : '' + ic('espadas') + (PV.mode === 'revive' ? ' Resurrección · 1 vs 1' : ' Jugador contra jugador'));
+    var w = PV.wait, v4 = ui.lobby === 'vs4', h = head('play', v4 ? '' + ic('grupo') + (PV.mode === 'rumble' ? ' Royal Rumble · Versus de 4' : PV.mode === 'revive' ? ' Resurrección · Versus de 4' : ' Versus de 4') : '' + ic('espadas') + (PV.mode === 'rumble' ? ' Royal Rumble · 1 vs 1' : PV.mode === 'revive' ? ' Resurrección · 1 vs 1' : ' Jugador contra jugador'));
     if (w) {
       h += '<div class="panel pvpwait' + (v4 ? ' v4w' : '') + '">' + (w.kind === 'code'
         ? '<h2>' + (v4 ? 'Sala de 4' : 'Sala creada') + '</h2><p class="mut">' + (v4 ? 'Pasa este código a 3 jugadores más o añade bots en los huecos vacíos. Cuando estéis los 4, empieza sola.' : 'Pásale este código a tu rival. Cuando lo escriba, la partida empieza sola.') + '</p><div class="pvpcode">' + esc(w.code || '·····') + '</div>'
@@ -1010,7 +1011,7 @@
         '<div class="waitdots"><i></i><i></i><i></i></div><button class="btn sec" data-act="pvpcancel">Cancelar</button></div></div>';
       app.innerHTML = h; return;
     }
-    h += '<p class="mut">Usarás tu mazo actual (' + deckSize() + '/' + CFG.deckBudget + '). ' + (v4 ? 'Empiezas con <b>' + (PV.mode === 'revive' ? 40 : 30) + ' de vida</b> y <b>14 de oro</b> (+3 por ronda). Ganas <b>+15</b> monedas por jugar y hasta <b>+45</b> más según tu puesto (1º +45, 2º +20, 3º +5). ' : 'Ganas <b>+15</b> monedas por partida y <b>+40</b> más si ganas. ') + 'Si abandonas o pierdes la conexión más de 60 s, quedas eliminado.</p>' +
+    h += '<p class="mut">' + (PV.mode === 'rumble' ? 'Royal Rumble: no usas mazo, puede salir cualquier carta. ' : 'Usarás tu mazo actual (' + deckSize() + '/' + CFG.deckBudget + '). ') + (v4 ? 'Empiezas con <b>' + (PV.mode === 'revive' || PV.mode === 'rumble' ? 40 : 30) + ' de vida</b> y <b>14 de oro</b> (+3 por ronda). Ganas <b>+15</b> monedas por jugar y hasta <b>+45</b> más según tu puesto (1º +45, 2º +20, 3º +5). ' : 'Ganas <b>+15</b> monedas por partida y <b>+40</b> más si ganas. ') + 'Si abandonas o pierdes la conexión más de 60 s, quedas eliminado.</p>' +
       (ui.msg ? '<p class="err">' + esc(ui.msg) + '</p>' : '') + '<div class="pvpgrid">' +
       '<div class="panel"><h2>' + ic('dado') + ' Buscar rival</h2><p class="mut">' + (v4 ? 'Emparejamiento automático: empieza al juntarse 4 jugadores.' : 'Emparejamiento automático con cualquier jugador que esté buscando.') + '</p><button class="btn big" data-act="pvpsearch">Buscar partida</button></div>' +
       '<div class="panel"><h2>' + ic('espadas') + ' Crear sala</h2><p class="mut">' + (v4 ? 'Te damos un código para que se unan otros 3 jugadores.' : 'Te damos un código para que tu amigo se una.') + '</p><button class="btn big" data-act="pvpcreate">Crear sala</button></div>' +
@@ -1083,8 +1084,9 @@
   function inst(P, uid) { return P.mesa.filter(function (i) { return i && i.uid === uid; })[0]; }
   function startGame() {
     var seed = Math.floor(Math.random() * 1e9), r = E.mulberry32(seed + 7);
-    var mylv = {}; ui.deck.forEach(function (id) { var l = lvOf(id); if (l > 1) mylv[id] = l; });
-    var mysk = {}; ui.deck.forEach(function (id) { var k = ui.acct && ui.acct.skinSel && ui.acct.skinSel[id]; if (k && ui.acct.skins.indexOf(k) >= 0) mysk[id] = k; });
+    var rr = ui.mode === 'rumble', ids = rr ? E.rumbleDeck() : ui.deck;
+    var mylv = {}; if (!rr) ui.deck.forEach(function (id) { var l = lvOf(id); if (l > 1) mylv[id] = l; });
+    var mysk = {}; ids.forEach(function (id) { var k = ui.acct && ui.acct.skinSel && ui.acct.skinSel[id]; if (k && ui.acct.skins.indexOf(k) >= 0) mysk[id] = k; });
     ui.s = E.newGame(ui.deck, E.aiDeck(r, null, curDiff()), seed, { lv: [mylv, {}], sk: [mysk, {}], mode: ui.mode, ai: curDiff() });
     ui.reward = null; api('gameStart', { diff: curDiff() });
     ui.screen = 'game'; ui.sel = null; ui.view = null; ui.playing = false; ui.hint = ''; ui.landed = null; ui.busy = false; ui.seenKey = null;
@@ -1256,7 +1258,7 @@
       }
       var pt = ui.reward && ui.reward.pts ? '<p class="' + (ui.reward.pts > 0 ? 'reward' : 'mut') + '">' + (ui.reward.pts > 0 ? '+' : '') + ui.reward.pts + ' puntos de clasificación</p>' : '';
       var rw = pt + (ui.reward ? (ui.reward.gained > 0 ? '<p class="reward">+' + ui.reward.gained + ' ' + ic('moneda') + ' monedas</p>' : '<p class="mut">Sin monedas esta vez (partida muy corta o límite diario alcanzado).</p>') : '<p class="mut">Calculando recompensa…</p>');
-      var btns = '<button class="btn big" data-act="' + (PV.on ? (PV.px === 'vs4' ? (ui.botGame ? (PV.mode === 'revive' ? 'startrevvs4b' : 'startvs4b') : 'openvs4') : 'openpvp') : 'play') + '">' + (PV.on ? 'Otra partida' : 'Jugar otra vez') + '</button> <button class="btn sec" data-act="menu" data-to="deck">Cambiar mazo</button> <button class="btn sec" data-act="menu" data-to="home">Menú</button>';
+      var btns = '<button class="btn big" data-act="' + (PV.on ? (PV.px === 'vs4' ? (ui.botGame ? (PV.mode === 'rumble' ? 'startrrvs4b' : PV.mode === 'revive' ? 'startrevvs4b' : 'startvs4b') : 'openvs4') : 'openpvp') : 'play') + '">' + (PV.on ? 'Otra partida' : 'Jugar otra vez') + '</button> <button class="btn sec" data-act="menu" data-to="deck">Cambiar mazo</button> <button class="btn sec" data-act="menu" data-to="home">Menú</button>';
       h += finOverlay(finId(), win, win ? '¡Victoria!' : (s.vs4 ? 'Eliminado · puesto ' + s.place + 'º de 4' : 'Derrota'), esc(s.reason) + ' · ronda ' + s.round, rw, btns, '');
     }
     if (ui.confirmSurr && !s.over) h += '<div class="overlay surro"><div class="panel surrp"><h2>' + ic('aviso') + ' ¿Seguro que quieres rendirte?</h2><p class="mut">Darás la partida por perdida' + (s.vs4 ? ' y quedarás eliminado.' : '.') + ' Esta acción no se puede deshacer.</p><div class="btnrow"><button class="btn" data-act="surrender-yes">Sí, rendirme</button><button class="btn sec" data-act="surrender-no">Cancelar</button></div></div></div>';
@@ -2138,15 +2140,15 @@
       var fb = document.createElement('button'); fb.dataset.act = pa; app.appendChild(fb); fb.click(); fb.remove(); ui.picked = false; return;
     }
     if (act === 'menu') { if (PV.on) { if (s && !s.over && !window.confirm('Si sales ahora pierdes la partida. ¿Salir?')) return; pvpLeaveGame(); } clearTimeout(timer); ui.playing = false; ui.screen = el.dataset.to || 'home'; return render(); }
-    if (act === 'openpvp' || act === 'openrevpvp') {
+    if (act === 'openpvp' || act === 'openrevpvp' || act === 'openrrpvp') {
       ui.botGame = false;
-      if (deckError()) { ui.screen = 'deck'; return render(); }
-      saveDeck(); if (PV.on) pvpLeaveGame(); ui.msg = ''; PV.wait = null; PV.px = 'pvp'; ui.lobby = 'pvp'; PV.mode = act === 'openrevpvp' ? 'revive' : '';
+      if (act !== 'openrrpvp' && deckError()) { ui.screen = 'deck'; return render(); }
+      saveDeck(); if (PV.on) pvpLeaveGame(); ui.msg = ''; PV.wait = null; PV.px = 'pvp'; ui.lobby = 'pvp'; PV.mode = act === 'openrrpvp' ? 'rumble' : act === 'openrevpvp' ? 'revive' : '';
       return api('pvpPoll', {}).then(function (r) { if (r.ok && r.data.s && !r.data.s.over) return pvpBegin(r.data); ui.screen = 'pvp'; window.scrollTo(0, 0); render(); });
     }
-    if (act === 'openvs4' || act === 'openrevvs4') {
-      ui.botGame = false; PV.mode = act === 'openrevvs4' ? 'revive' : '';
-      if (deckError()) { ui.screen = 'deck'; return render(); }
+    if (act === 'openvs4' || act === 'openrevvs4' || act === 'openrrvs4') {
+      ui.botGame = false; PV.mode = act === 'openrrvs4' ? 'rumble' : act === 'openrevvs4' ? 'revive' : '';
+      if (act !== 'openrrvs4' && deckError()) { ui.screen = 'deck'; return render(); }
       saveDeck(); if (PV.on) pvpLeaveGame(); ui.msg = ''; PV.wait = null; PV.px = 'vs4'; ui.lobby = 'vs4';
       return api('vs4Poll', {}).then(function (r) {
         if (r.ok && r.data.s && !r.data.s.over) return pvpBegin(r.data);
@@ -2154,19 +2156,20 @@
         ui.screen = 'pvp'; window.scrollTo(0, 0); render();
       });
     }
-    if (act === 'startvs4b' || act === 'startrevvs4b') {
-      if (deckError()) { ui.screen = 'deck'; return render(); }
-      saveDeck(); if (PV.on) pvpLeaveGame(); ui.msg = ''; PV.wait = null; PV.px = 'vs4'; ui.lobby = 'vs4'; PV.mode = act === 'startrevvs4b' ? 'revive' : ''; ui.botGame = true;
+    if (act === 'startvs4b' || act === 'startrevvs4b' || act === 'startrrvs4b') {
+      if (act !== 'startrrvs4b' && deckError()) { ui.screen = 'deck'; return render(); }
+      saveDeck(); if (PV.on) pvpLeaveGame(); ui.msg = ''; PV.wait = null; PV.px = 'vs4'; ui.lobby = 'vs4'; PV.mode = act === 'startrrvs4b' ? 'rumble' : act === 'startrevvs4b' ? 'revive' : ''; ui.botGame = true;
       return api('vs4Bots', { deck: ui.deck, mode: PV.mode, diff: curDiff() }).then(pvpGot);
     }
     if (act === 'pvpsearch') { PV.wait = { kind: 'search' }; ui.msg = ''; render(); return api(PV.px + 'Search', { deck: ui.deck, mode: PV.mode, cover: curCover() }).then(pvpGot); }
     if (act === 'pvpcreate') { PV.wait = { kind: 'code', code: '' }; ui.msg = ''; render(); return api(PV.px + 'Create', { deck: ui.deck, mode: PV.mode, cover: curCover() }).then(pvpGot); }
-    if (act === 'pvpjoin') { var jc = (document.getElementById('pvp-code').value || '').trim(); if (jc.length !== 5) { ui.msg = 'El código tiene 5 letras.'; return render(); } ui.msg = ''; return api(PV.px + 'Join', { deck: ui.deck, code: jc, cover: curCover() }).then(pvpGot); }
+    if (act === 'pvpjoin') { var jc = (document.getElementById('pvp-code').value || '').trim(); if (jc.length !== 5) { ui.msg = 'El código tiene 5 letras.'; return render(); } ui.msg = ''; return api(PV.px + 'Join', { deck: ui.deck, code: jc, mode: PV.mode, cover: curCover() }).then(pvpGot); }
     if (act === 'v4addbot') { return api('vs4AddBot', { deck: ui.deck, mode: PV.mode, cover: curCover() }).then(pvpGot); }
     if (act === 'v4rmbot') { return api('vs4RmBot', { deck: ui.deck, mode: PV.mode, name: el.dataset.name }).then(pvpGot); }
     if (act === 'pvpcancel') { pvpCancelWait(); return render(); }
     if (act === 'startai' || act === 'startrev') { if (deckError()) { ui.screen = 'deck'; return render(); } saveDeck(); ui.mode = act === 'startrev' ? 'revive' : ''; return startGame(); }
-    if (act === 'play') { if (deckError()) { ui.screen = 'deck'; return render(); } saveDeck(); return startGame(); }
+    if (act === 'startrr') { ui.mode = 'rumble'; return startGame(); }
+    if (act === 'play') { if (ui.mode !== 'rumble' && deckError()) { ui.screen = 'deck'; return render(); } saveDeck(); return startGame(); }
     if (act === 'skip') { clearTimeout(timer); ui.shown = ui.frames.length; return stopPlay(); }
     if (act === 'surrender') { if (s && !s.over) { ui.confirmSurr = true; render(); } return; }
     if (act === 'surrender-no') { ui.confirmSurr = false; return render(); }
@@ -2316,11 +2319,11 @@
   };
   ui.socJoin = function (inv) { // unirse a la sala de una invitación
     if (PV.on || ui.screen === 'game') return 'Termina la partida antes de unirte.';
-    if (deckError()) { ui.screen = 'deck'; render(); return 'Tu mazo no es válido todavía.'; }
+    if (inv.mode !== 'rumble' && deckError()) { ui.screen = 'deck'; render(); return 'Tu mazo no es válido todavía.'; }
     saveDeck();
     var pre = PV.wait ? api(PV.px + 'Cancel') : Promise.resolve(); // si estabas en otra sala o buscando, sales antes de entrar
     clearTimeout(PV.tm); PV.wait = null; ui.botGame = false; PV.mode = inv.mode || ''; PV.px = inv.kind === 'vs4' ? 'vs4' : 'pvp'; ui.lobby = PV.px; ui.msg = ''; ui.screen = 'pvp'; render();
-    pre.then(function () { return api(PV.px + 'Join', { deck: ui.deck, code: inv.code, cover: curCover() }); }).then(pvpGot);
+    pre.then(function () { return api(PV.px + 'Join', { deck: ui.deck, code: inv.code, mode: PV.mode, cover: curCover() }); }).then(pvpGot);
     return '';
   };
   window.CartasUI = ui; window.CartasRender = render; // depuración

@@ -169,6 +169,8 @@ const gKey = (id) => `cartas:pvp:g:${id}`;
 const pKey = (n) => `cartas:pvp:user:${n.toLowerCase()}`;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
+// Modos de partida: '' clásico, 'revive' Resurrección, 'rumble' Royal Rumble (sin mazo: sale todo el juego)
+const normMode = (m) => (m === 'rumble' ? 'rumble' : m === 'revive' ? 'revive' : '');
 function checkDeck(u, deck) {
   if (!Array.isArray(deck) || deck.length < 3 || deck.length > 40) return 'Tu mazo no es válido.';
   const seen = new Set();
@@ -207,7 +209,7 @@ function deadlineFor(g) {
 async function newPvpGame(cfg, a, b, mode) { // a, b: { name, deck }
   if (crypto.randomInt(0, 2)) { const t = a; a = b; b = t; }
   const id = crypto.randomBytes(8).toString('hex');
-  const s = E.newGame(a.deck, b.deck, crypto.randomInt(1, 2 ** 30), { pvp: true, mode: mode === 'revive' ? 'revive' : '', lv: [a.lv || {}, b.lv || {}], sk: [a.sk || {}, b.sk || {}] });
+  const s = E.newGame(a.deck, b.deck, crypto.randomInt(1, 2 ** 30), { pvp: true, mode: normMode(mode), lv: [a.lv || {}, b.lv || {}], sk: [a.sk || {}, b.sk || {}] });
   const now = Date.now();
   const g = { id, names: [a.name, b.name], s, v: 1, hb: [now, now], t0: now, paid: false, rew: [null, null], ab: -1 };
   deadlineFor(g);
@@ -290,9 +292,15 @@ async function pvpHandle(cfg, act, body, u) {
   if (act === 'pvpCreate' || act === 'pvpJoin' || act === 'pvpSearch') {
     const cur = await redis(cfg, ['GET', pKey(me)]);
     if (cur) { const g = await loadGame(cfg, cur); if (g && !g.s.over) return viewFor(g, g.names.indexOf(me)); }
-    const err = checkDeck(u, body.deck); if (err) return { status: 400, error: err };
-    const mode = body.mode === 'revive' ? 'revive' : '', qk = mode ? 'cartas:pvp:q:rv' : 'cartas:pvp:q';
-    const mine = { name: me, deck: body.deck, lv: levelsOf(u, body.deck), sk: skinsOf(u, body.deck), mode };
+    let mode = normMode(body.mode);
+    if (act === 'pvpJoin') { // al unirse a una sala de Royal Rumble no hace falta mazo
+      const jc = String(body.code || '').toUpperCase().replace(/[^A-Z0-9]/g, ''), jr = jc.length === 5 ? await redis(cfg, ['GET', `cartas:pvp:room:${jc}`]) : null;
+      if (jr && JSON.parse(jr).mode === 'rumble') mode = 'rumble';
+    }
+    const rr = mode === 'rumble', qk = rr ? 'cartas:pvp:q:rr' : mode ? 'cartas:pvp:q:rv' : 'cartas:pvp:q';
+    if (rr) body.deck = E.rumbleDeck(); // Royal Rumble: no se entra con mazo
+    const err = rr ? '' : checkDeck(u, body.deck); if (err) return { status: 400, error: err };
+    const mine = { name: me, deck: body.deck, lv: rr ? {} : levelsOf(u, body.deck), sk: skinsOf(u, body.deck), mode };
     if (act === 'pvpCreate') {
       const old = await redis(cfg, ['GET', `cartas:pvp:host:${me.toLowerCase()}`]);
       if (old) await redis(cfg, ['DEL', `cartas:pvp:room:${old}`]);
@@ -404,7 +412,7 @@ async function newV4Game(cfg, players, mode, diff) {
   const order = players.slice().sort(() => crypto.randomInt(0, 2) - 0.5);
   const id = crypto.randomBytes(8).toString('hex'), now = Date.now();
   const bots = order.map((p) => !!p.bot), hasBots = bots.some(Boolean);
-  const T = V4.newTable(order.map((p) => p.deck), order.map((p) => p.name), crypto.randomInt(1, 2 ** 30), order.map((p) => p.lv || {}), order.map((p) => p.sk || {}), mode === 'revive' ? 'revive' : '', hasBots ? bots : null, order.map((p) => (p.bot ? p.diff | 0 : 0)));
+  const T = V4.newTable(order.map((p) => p.deck), order.map((p) => p.name), crypto.randomInt(1, 2 ** 30), order.map((p) => p.lv || {}), order.map((p) => p.sk || {}), normMode(mode), hasBots ? bots : null, order.map((p) => (p.bot ? p.diff | 0 : 0)));
   const g = { id, names: order.map((p) => p.name), T, v: 1, hb: [now, now, now, now], t0: now, paid: [false, false, false, false], rew: [null, null, null, null], bots: hasBots ? bots : null, diff: hasBots ? diff | 0 : 0 };
   v4Deadline(g);
   await saveV4(cfg, g);
@@ -491,7 +499,7 @@ async function vs4Handle(cfg, act, body, u) {
             else await redis(cfg, ['SET', `cartas:vs4:room:${where}`, JSON.stringify(room), 'EX', 900]);
           }
         }
-        for (const qk of ['cartas:vs4:q', 'cartas:vs4:q:rv']) {
+        for (const qk of ['cartas:vs4:q', 'cartas:vs4:q:rv', 'cartas:vs4:q:rr']) {
           const q = JSON.parse((await redis(cfg, ['GET', qk])) || '[]').filter((e) => e.name.toLowerCase() !== lme);
           await redis(cfg, ['SET', qk, JSON.stringify(q), 'EX', 30]);
         }
@@ -499,10 +507,16 @@ async function vs4Handle(cfg, act, body, u) {
       await redis(cfg, ['DEL', v4In(me)]);
       return { ok: true };
     }
-    const err = checkDeck(u, body.deck); if (err) return { status: 400, error: err };
-    const vmode = body.mode === 'revive' ? 'revive' : '', vqk = vmode ? 'cartas:vs4:q:rv' : 'cartas:vs4:q';
+    let vmode = normMode(body.mode);
+    if (act === 'vs4Join' || act === 'vs4AddBot') {
+      const jc = act === 'vs4Join' ? String(body.code || '').toUpperCase().replace(/[^A-Z0-9]/g, '') : await redis(cfg, ['GET', v4In(me)]), jr = jc && jc.length === 5 ? await redis(cfg, ['GET', `cartas:vs4:room:${jc}`]) : null;
+      if (jr && JSON.parse(jr).mode === 'rumble') vmode = 'rumble';
+    }
+    const vrr = vmode === 'rumble', vqk = vrr ? 'cartas:vs4:q:rr' : vmode ? 'cartas:vs4:q:rv' : 'cartas:vs4:q';
+    if (vrr) body.deck = E.rumbleDeck(); // Royal Rumble: no se entra con mazo
+    const err = vrr ? '' : checkDeck(u, body.deck); if (err) return { status: 400, error: err };
     const cov = String(body.cover || '').replace(/[^a-z0-9-]/g, '').slice(0, 40);
-    const mine = { name: me, deck: body.deck, lv: levelsOf(u, body.deck), sk: skinsOf(u, body.deck), avatar: u.avatar || '', cover: E.CARD[cov] ? cov : '' };
+    const mine = { name: me, deck: body.deck, lv: vrr ? {} : levelsOf(u, body.deck), sk: skinsOf(u, body.deck), avatar: u.avatar || '', cover: E.CARD[cov] ? cov : '' };
     if (act === 'vs4Bots') { // partida contra 3 IAs, cada una con un mazo de una temática distinta
       const diff = Math.max(0, Math.min(2, body.diff | 0));
       const lv = ALL_THEMES.slice().sort(() => crypto.randomInt(0, 2) - 0.5).slice(0, 3);
@@ -840,7 +854,7 @@ module.exports = async function handler(req, res) {
       u.startedAt = 0;
       const diff = u.gameDiff | 0; u.gameDiff = 0;
       if (u.rewardDay !== today()) { u.rewardDay = today(); u.rewardCount = 0; }
-      if (valid) recordGame(u, { won: !!body.won, kind: 'ia', mode: body.mode === 'revive' ? 'revive' : '', cards: body.cards });
+      if (valid) recordGame(u, { won: !!body.won, kind: 'ia', mode: body.mode === 'revive' || body.mode === 'rumble' ? 'revive' : '', cards: body.cards });
       let gained = 0, pts = 0;
       if (valid && u.rewardCount < MAX_GAME_REWARDS_PER_DAY) {
         gained = Math.round((GAME_COINS.played + (body.won ? GAME_COINS.win : 0)) * DIFF_MULT[diff]);

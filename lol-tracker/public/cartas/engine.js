@@ -10,6 +10,7 @@
     interest: { per: 5, max: 3 }, // interés (estilo TFT): +1 de oro por cada 'per' de oro que conserves al terminar la ronda, hasta 'max'
     reviveLife: 20, // modo Resurrección: vida inicial (la vida solo se pierde con golpes directos; la carta que ataca recibe el ataque de la atacada)
     merge: [1, 2, 4], // fusión de 3 copias iguales (estilo TFT): multiplicador de las estadísticas base por estrella
+    rumble: { act: .18, copy: 2.5, theme: 1.5 }, // Royal Rumble: multiplicadores de la tienda (acciones, copia que ya tienes, temática que ya llevas)
     rarityWeight: { 'Común': 50, 'Rara': 30, 'Épica': 15, 'Legendaria': 5 },
     rarityRamp: { 'Común': -8, 'Rara': 2, 'Épica': 5, 'Legendaria': 3 }, // cambio de peso por cada tienda tras la primera (mín. 10, máx. 40)
   };
@@ -141,6 +142,9 @@
     return deck;
   }
 
+  // Royal Rumble: el "mazo" es todo el juego (tropas y acciones)
+  function rumbleDeck() { return DATA.cards.concat(DATA.actions).map(function (c) { return c.id; }); }
+
   function newPlayer(deck) {
     return { life: CFG.life, gold: CFG.gold, deck: deck.slice(), hand: [], mesa: [null, null, null, null, null], nvs: [], novGiven: false, grave: [], target: {}, voley: {}, fl: {}, offers: [], refreshes: 0, pickUsed: false, anime: 0, gen: 0, lost: false };
   }
@@ -150,6 +154,10 @@
     bindRng(s);
     if (opts && opts.pvp) s.pvp = true;
     if (opts && opts.ai) s.aiLv = [(opts.aiA | 0), opts.ai | 0]; // dificultad de la IA por jugador: 0 Normal, 1 Difícil, 2 Experto
+    if (opts && opts.mode === 'rumble') { // Royal Rumble: Resurrección sin mazo (sale todo el juego, más tropas y menos acciones)
+      s.rumble = true; opts = Object.assign({}, opts, { mode: 'revive' });
+      s.p.forEach(function (P) { P.deck = rumbleDeck(); });
+    }
     if (opts && opts.mode === 'revive') { s.mode = 'revive'; s.maxLife = CFG.reviveLife; s.p.forEach(function (P) { P.life = CFG.reviveLife; }); }
     if (opts && opts.lv) s.lv = opts.lv;
     if (opts && opts.sk) s.sk = opts.sk;
@@ -233,9 +241,18 @@
       var cm = pool.filter(function (id) { return CARD[id].type === 'accion' || (CARD[id].type === 'tropa' && CARD[id].rarity === 'Común'); });
       if (cm.some(function (id) { return CARD[id].type === 'tropa'; })) elig = cm;
     }
+    var owned = {}, hc = {};
+    if (s.rumble) P.mesa.concat(P.hand).forEach(function (i) { if (i && isTroop(i) && !i.dead) { owned[i.id] = 1; card(i).themes.forEach(function (th) { hc[th] = 1; }); } });
     return elig.map(function (id) {
       var rr = CARD[id].rarity, w = (CFG.rarityWeight[rr] || 10) + (CFG.rarityRamp[rr] || 0) * Math.max(0, s.shops - 1);
       w = Math.max(rr === 'Común' ? 10 : 1, Math.min(40, w));
+      if (s.rumble) { // Royal Rumble: pocas acciones; más probabilidad de repetidas (subir de nivel) y de cartas de tus temáticas
+        if (CARD[id].type === 'accion') w *= CFG.rumble.act;
+        else {
+          if (owned[id]) w *= CFG.rumble.copy;
+          else if (CARD[id].themes.some(function (th) { return hc[th]; })) w *= CFG.rumble.theme;
+        }
+      }
       return { id: id, w: w };
     });
   }
@@ -1210,7 +1227,7 @@
     newGame: newGame, randomDeck: randomDeck, deckSize: deckSize, mulberry32: mulberry32,
     place: place, playAction: playAction, setTarget: setTarget, clearTargets: clearTargets, forfeit: forfeit, setVoley: setVoley, actionBlock: actionBlock, validTarget: validTarget,
     sell: sell, sellValue: sellValue, handCap: handCap, dupBlock: dupBlock, buy: buy, mergeCheck: mergeCheck, willMerge: willMerge, shopOdds: shopOdds, refresh: refresh, refreshCost: refreshCost, pickFromDeck: pickFromDeck, retire: retire,
-    aiDeck: aiDeck, genGive: genGive, shopStart: shopStart, genStored: genStored, aiBonus: aiBonus, aiLv: aiLv, aiShop: aiShop, aiPrep: aiPrep, aiTargets: aiTargets, fight: fight, endShop: endShop, pendingTargets: pendingTargets, freeze: freeze, nextRound: nextRound,
+    aiDeck: aiDeck, rumbleDeck: rumbleDeck, genGive: genGive, shopStart: shopStart, genStored: genStored, aiBonus: aiBonus, aiLv: aiLv, aiShop: aiShop, aiPrep: aiPrep, aiTargets: aiTargets, fight: fight, endShop: endShop, pendingTargets: pendingTargets, freeze: freeze, nextRound: nextRound,
     interest: interest, isNov: isNov, immune: immune, targetable: targetable, novSync: novSync, themeCounts: themeCounts, tiers: tiers, tierOf: tierOf, atk: atk, maxHp: maxHp, card: card, isTroop: isTroop, has: has, mesaTroops: mesaTroops, viewOf: viewOf,
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.CartasEngine = API;

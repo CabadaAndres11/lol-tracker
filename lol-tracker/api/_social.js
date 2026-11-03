@@ -135,7 +135,7 @@ async function socialHandle(cfg, act, body, u) {
     if (code.length !== 5 || !(await redis(cfg, ['GET', `cartas:${kind === 'vs4' ? 'vs4' : 'pvp'}:room:${code}`]))) return { status: 404, error: 'La sala ya no existe.' };
     return lock(cfg, async () => {
       const now = Date.now(), list = parse(await redis(cfg, ['GET', invKey(to)]), []).filter((i) => now - i.t < INV_TTL * 1000 && !(lc(i.from) === lc(me) && i.code === code));
-      list.push({ id: crypto.randomBytes(5).toString('hex'), from: me, kind, code, mode: body.mode === 'revive' ? 'revive' : '', t: now });
+      list.push({ id: crypto.randomBytes(5).toString('hex'), from: me, kind, code, mode: body.mode === 'rumble' ? 'rumble' : body.mode === 'revive' ? 'revive' : '', t: now });
       await redis(cfg, ['SET', invKey(to), JSON.stringify(list.slice(-10)), 'EX', String(INV_TTL)]);
       return { ok: true, msg: `Invitación enviada a ${to}.` };
     });

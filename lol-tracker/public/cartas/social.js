@@ -72,7 +72,7 @@
     if (!SOC.loaded) h = '<p class="sempty">Cargando…</p>';
     root.querySelector('.slist').innerHTML = h;
     root.querySelector('.sinv').innerHTML = SOC.invs.map(function (i) {
-      return '<div class="sinvc"><b>' + esc(i.from) + '</b> te invita a ' + (i.kind === 'vs4' ? 'un Versus de 4' : 'una partida 1 contra 1') + (i.mode === 'revive' ? ' (Resurrección)' : '') + '<div><button class="sbtn go" data-soc="invyes" data-id="' + esc(i.id) + '">Aceptar</button><button class="sbtn" data-soc="invno" data-id="' + esc(i.id) + '">Rechazar</button></div></div>';
+      return '<div class="sinvc"><b>' + esc(i.from) + '</b> te invita a ' + (i.kind === 'vs4' ? 'un Versus de 4' : 'una partida 1 contra 1') + (i.mode === 'rumble' ? ' (Royal Rumble)' : i.mode === 'revive' ? ' (Resurrección)' : '') + '<div><button class="sbtn go" data-soc="invyes" data-id="' + esc(i.id) + '">Aceptar</button><button class="sbtn" data-soc="invno" data-id="' + esc(i.id) + '">Rechazar</button></div></div>';
     }).join('');
     root.querySelector('.stoast').textContent = SOC.toast; root.querySelector('.stoast').classList.toggle('on', !!SOC.toast);
     drawTab();

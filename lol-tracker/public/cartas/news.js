@@ -1,6 +1,11 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-03', tag: 'Novedad', title: 'Nuevo modo: Royal Rumble',
+      art: ['javihi-prime', 'mertens-meliodas'],
+      items: ['Nuevo modo de juego «Royal Rumble»: funciona como Resurrección, pero se entra sin mazo. En la tienda puede salir cualquier carta del juego y vas construyendo tu composición sobre la marcha.',
+        'Salen muchas más tropas y muy pocas cartas de acción. Además, las copias de tropas que ya tienes (para subir de nivel) y las cartas de tus temáticas activas tienen más probabilidad de aparecer.',
+        'Disponible contra la IA y contra jugadores, en 1 contra 1 y en Versus de 4 (también con salas, bots e invitaciones de amigos). Las cartas empiezan a nivel 1: aquí no cuentan los niveles de tu colección.'] },
     { date: '2026-11-03', tag: 'Novedad', title: 'Amigos: lista, estado, chat e invitaciones',
       items: ['Nueva lista de amigos a la derecha de la pantalla. Pulsa «+» para buscar a un jugador por su nombre y enviarle una solicitud; cuando la acepte, sois amigos.',
         'Ves quién está en línea, quién está jugando una partida y quién está desconectado.',

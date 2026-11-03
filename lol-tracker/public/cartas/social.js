@@ -4,7 +4,7 @@
   var ui = window.CartasUI;
   if (!ui) return;
   var esc = ui.esc, ic = ui.ic;
-  var SOC = { friends: [], inc: [], out: [], invs: [], loaded: false, chat: '', msgs: [], q: '', res: null, add: false, invMenu: '', toast: '', toastT: null, tm: null, searchT: null, openPref: null, openGame: false, polling: false, seen: {} };
+  var SOC = { friends: [], inc: [], out: [], invs: [], loaded: false, chat: '', msgs: [], q: '', res: null, add: false, invMenu: '', invKind: '', toast: '', toastT: null, tm: null, searchT: null, openPref: null, openGame: false, polling: false, seen: {} };
   var root, tab, chatEl;
 
   function pref() { try { var v = localStorage.getItem('cartas_soc_open'); return v === null ? null : v === '1'; } catch (e) { return null; } }
@@ -55,7 +55,8 @@
       (f.unread ? '<span class="fbadge">' + (f.unread > 9 ? '9+' : f.unread) + '</span>' : '') +
       '<div class="fact"><button class="sbtn" data-soc="prof" data-n="' + esc(f.name) + '" title="Ver perfil" aria-label="Ver perfil">' + ic('usuario') + '</button>' + (online ? '<button class="sbtn" data-soc="invite" data-n="' + esc(f.name) + '" title="Invitar a partida" aria-label="Invitar a partida">' + ic('espadas') + '</button>' : '') +
       '<button class="sbtn" data-soc="remove" data-n="' + esc(f.name) + '" title="Eliminar amigo" aria-label="Eliminar amigo">' + ic('papelera') + '</button></div>' +
-      (menu ? '<div class="fmenu"><span>Invitar a:</span><button class="sbtn go" data-soc="invk" data-k="pvp" data-n="' + esc(f.name) + '">1 contra 1</button><button class="sbtn go" data-soc="invk" data-k="vs4" data-n="' + esc(f.name) + '">Versus de 4</button></div>' : '') + '</div>';
+      (menu ? (SOC.invKind ? '<div class="fmenu"><span>' + (SOC.invKind === 'vs4' ? 'Versus de 4' : '1 contra 1') + ' · modo:</span><button class="sbtn go" data-soc="invm" data-m="" data-n="' + esc(f.name) + '">Clásico</button><button class="sbtn go" data-soc="invm" data-m="revive" data-n="' + esc(f.name) + '">Resurrección</button><button class="sbtn go" data-soc="invm" data-m="rumble" data-n="' + esc(f.name) + '">Royal Rumble</button><button class="sbtn" data-soc="invback" data-n="' + esc(f.name) + '">‹ Atrás</button></div>'
+        : '<div class="fmenu"><span>Invitar a:</span><button class="sbtn go" data-soc="invk" data-k="pvp" data-n="' + esc(f.name) + '">1 contra 1</button><button class="sbtn go" data-soc="invk" data-k="vs4" data-n="' + esc(f.name) + '">Versus de 4</button></div>') : '') + '</div>';
   }
   function section(title, n, body, cls) { return n || body ? '<div class="ssec ' + (cls || '') + '"><h4>' + title + (n != null ? ' <i>' + n + '</i>' : '') + '</h4>' + body + '</div>' : ''; }
   function draw() {
@@ -170,11 +171,13 @@
     if (a === 'invite') {
       var room = ui.socInRoom();
       if (room) return sendInvite(n, room);
-      SOC.invMenu = SOC.invMenu === n ? '' : n; draw(); return;
+      SOC.invKind = ''; SOC.invMenu = SOC.invMenu === n ? '' : n; draw(); return;
     }
-    if (a === 'invk') {
-      SOC.invMenu = ''; draw();
-      return ui.socCreateRoom(t.dataset.k, '').then(function (res) { if (res && res.err) return toast(res.err); if (res) return sendInvite(n, res); });
+    if (a === 'invk') { SOC.invKind = t.dataset.k; draw(); return; }
+    if (a === 'invback') { SOC.invKind = ''; draw(); return; }
+    if (a === 'invm') {
+      var kind = SOC.invKind || 'pvp'; SOC.invMenu = ''; SOC.invKind = ''; draw();
+      return ui.socCreateRoom(kind, t.dataset.m || '').then(function (res) { if (res && res.err) return toast(res.err); if (res) return sendInvite(n, res); });
     }
     if (a === 'invyes' || a === 'invno') {
       var id = t.dataset.id, yes = a === 'invyes';

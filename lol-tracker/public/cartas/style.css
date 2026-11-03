@@ -1,4 +1,4 @@
-html { background: #0d0a18; }
+html { background: #0d0a18; scrollbar-gutter: stable; }
 * { box-sizing: border-box; }
 :root { --bg: #0d0a18; --panel: #17132a; --line: rgba(255,255,255,.14); --ink: #f1ecff; --mut: #9d93c0; --acc: #a78bfa; --gold: #fbbf24; --bad: #f87171; --ok: #4ade80; }
 body { margin: 0; background: radial-gradient(ellipse 80% 50% at 50% 0, #2a1f52 0, var(--bg) 70%) fixed; color: var(--ink); font: 15px/1.4 'Inter', system-ui, sans-serif; min-height: 100vh; }
@@ -1821,7 +1821,8 @@ body.tutmode .freezebtn { pointer-events: none; opacity: .35; }
 #gambov .gtot { color: #fdf4ff; font-size: 1.25rem; font-weight: 700; letter-spacing: .04em; opacity: 0; animation: gorbin .5s 2.5s ease-out both; }
 @media (prefers-reduced-motion: reduce) { .gorb, #gambov .gtot { opacity: 1; animation: none; } }
 /* Con la miniatura de la novia, las etiquetas de sinergia suben para no taparse */
-.card:has(.novt) .tags { bottom: 25.5cqw; }
+.card:has(.novt) .tags { bottom: 25.5cqw; left: 3cqw; right: 3cqw; }
+.card:has(.novt) .pasn { bottom: 38.5cqw; }
 /* Guía de sinergias en el editor de mazos */
 .synbar { margin: .2rem 0 .8rem; } .synbar .btn.on { border-color: #d9b25a; color: #f0d58a; }
 .synguide { margin: 0 0 1rem; padding: .9rem 1.1rem; border-radius: 12px; border: 1px solid color-mix(in srgb, var(--tc) 55%, transparent); background: linear-gradient(180deg, color-mix(in srgb, var(--tc) 14%, #0e1a33), #0b1428); }

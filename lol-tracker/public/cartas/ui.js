@@ -2293,7 +2293,16 @@
     clearTimeout(timer); ui.playing = false;
     ui.screen = sc; ui.msg = ''; window.scrollTo(0, 0); render();
   }
+  // Re-pinta la colección sin que los filtros se muevan: conserva la altura de la página y el scroll
+  function keepFlow(fn) {
+    var H0 = document.documentElement.scrollHeight, y0 = window.scrollY;
+    app.style.minHeight = ''; fn();
+    var d = H0 - document.documentElement.scrollHeight;
+    if (d > 0) app.style.minHeight = (app.offsetHeight + d) + 'px';
+    window.scrollTo(0, y0);
+  }
   function render() {
+    app.style.minHeight = '';
     if (ui.genfx) return; // la animación de la Genkidama pinta el resultado al terminar
     document.body.classList.remove('shopbg');
     if (PV.wait && ui.screen !== 'pvp') pvpCancelWait();
@@ -2554,12 +2563,12 @@
       if (el.dataset.to === 'play') { ui.screen = 'modes'; window.scrollTo(0, 0); return render(); }
       ui.screen = el.dataset.to; ui.msg = ''; ui.avEdit = false; window.scrollTo(0, 0); return render();
     }
-    if (act === 'filter') { var t = el.dataset.t, k0 = ui.filters.indexOf(t); if (k0 >= 0) ui.filters.splice(k0, 1); else ui.filters.push(t); ui.screen = 'deck'; var y0 = window.scrollY; renderDeck(); window.scrollTo(0, y0); return; }
-    if (act === 'filterset') { ui.filters = el.dataset.t ? [el.dataset.t] : []; ui.screen = 'deck'; window.scrollTo(0, 0); return render(); }
-    if (act === 'fmode') { ui.fmode = el.dataset.m; return renderDeck(); }
+    if (act === 'filter') { var t = el.dataset.t, k0 = ui.filters.indexOf(t); if (k0 >= 0) ui.filters.splice(k0, 1); else ui.filters.push(t); ui.screen = 'deck'; return keepFlow(renderDeck); }
+    if (act === 'filterset') { ui.filters = el.dataset.t ? [el.dataset.t] : []; ui.screen = 'deck'; return keepFlow(renderDeck); }
+    if (act === 'fmode') { ui.fmode = el.dataset.m; return keepFlow(renderDeck); }
     if (act === 'group') { ui.group = el.checked; if (ui.group) ui.groupRar = false; return render(); }
     if (act === 'groupr') { ui.groupRar = el.checked; if (ui.groupRar) ui.group = false; return render(); }
-    if (act === 'rarfilter') { var rr = el.dataset.r, ri = ui.rar.indexOf(rr); if (ri >= 0) ui.rar.splice(ri, 1); else ui.rar.push(rr); var y1 = window.scrollY; renderDeck(); window.scrollTo(0, y1); return; }
+    if (act === 'rarfilter') { var rr = el.dataset.r, ri = ui.rar.indexOf(rr); if (ri >= 0) ui.rar.splice(ri, 1); else ui.rar.push(rr); return keepFlow(renderDeck); }
     if (act === 'onlyowned') { ui.onlyOwned = el.checked; return render(); }
     if (act === 'sortlv') { ui.sortLv = el.checked; return render(); }
     if (act === 'introplay') { e.preventDefault(); openIntro(); return; }
@@ -2798,7 +2807,7 @@
   ui.socInRoom = function () { return PV.wait && PV.wait.kind === 'code' && PV.wait.code ? { kind: PV.px === 'vs4' ? 'vs4' : 'pvp', code: PV.wait.code, mode: PV.mode || '' } : null; };
   ui.socCreateRoom = function (kind, mode) { // crea una sala con tu mazo actual y devuelve {kind, code, mode}
     if (PV.on || ui.screen === 'game') return Promise.resolve({ err: 'Termina la partida antes de invitar.' });
-    if (deckError()) { ui.screen = 'deck'; render(); return Promise.resolve({ err: 'Tu mazo no es válido todavía.' }); }
+    if (mode !== 'rumble' && deckError()) { ui.screen = 'deck'; render(); return Promise.resolve({ err: 'Tu mazo no es válido todavía.' }); }
     saveDeck(); ui.botGame = false; PV.mode = mode || ''; PV.wait = { kind: 'code', code: '' }; PV.px = kind === 'vs4' ? 'vs4' : 'pvp'; ui.lobby = PV.px; ui.msg = ''; ui.screen = 'pvp'; render();
     return api(PV.px + 'Create', { deck: ui.deck, mode: PV.mode, cover: curCover() }).then(function (r) { pvpGot(r); return r.ok && r.data.code ? { kind: PV.px, code: r.data.code, mode: PV.mode } : { err: (r.data && r.data.error) || 'No se pudo crear la sala.' }; });
   };
@@ -2811,7 +2820,7 @@
     pre.then(function () { return api(PV.px + 'Join', { deck: ui.deck, code: inv.code, mode: PV.mode, cover: curCover() }); }).then(pvpGot);
     return '';
   };
-  window.CartasUI = ui; window.CartasRender = render; // depuración
+  ui.cardHtml = cardHtml; window.CartasUI = ui; window.CartasRender = render; // depuración
   document.addEventListener('click', function (e) { if (!e.target.closest || !e.target.closest('.acctw')) { var o = document.querySelector('.acctw.open'); if (o) o.classList.remove('open'); } });
   app.addEventListener('keydown', function (e) { if (e.key === 'Enter' && ui.screen === 'login' && e.target.id && e.target.id.indexOf('lg-') === 0) { var b = app.querySelector('[data-act=login],[data-act=register]'); if (b) b.click(); } });
   render();

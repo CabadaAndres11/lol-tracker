@@ -2182,11 +2182,11 @@ body.tutmode .freezebtn { pointer-events: none; opacity: .35; }
 .dsyn .syn-row:hover { filter: brightness(1.15); }
 
 /* ---------- Amigos (lista a la derecha, chat e invitaciones) ---------- */
-#soc { position: fixed; top: 0; right: 0; bottom: 0; width: 270px; z-index: 300; display: none; flex-direction: column; background: linear-gradient(180deg, #0c1626, #070d18); border-left: 1px solid rgba(200,170,110,.45); box-shadow: -8px 0 24px rgba(0,0,0,.4); font-family: 'Inter', system-ui, sans-serif; }
+#soc { --soc-top: 12.9rem; --soc-h: min(36rem, calc(100vh - 14rem)); position: fixed; top: var(--soc-top); right: 1rem; height: var(--soc-h); width: 270px; z-index: 300; display: none; flex-direction: column; overflow: hidden; background: linear-gradient(180deg, #0c1626, #070d18); border: 1px solid rgba(200,170,110,.5); border-radius: 12px; box-shadow: 0 8px 28px rgba(0,0,0,.5); font-family: 'Inter', system-ui, sans-serif; }
 #soc.open { display: flex; }
 #soc[hidden] { display: none !important; }
-body.soc-open #app { margin-right: 270px; }
-@media (max-width: 1000px) { body.soc-open #app { margin-right: 0; } #soc { width: min(300px, 88vw); } }
+body.soc-open #app { margin-right: 286px; }
+@media (max-width: 1000px) { body.soc-open #app { margin-right: 0; } #soc { width: min(300px, 88vw); right: .5rem; } }
 #soc .shead { display: flex; align-items: center; gap: .3rem; padding: .7rem .7rem .5rem; border-bottom: 1px solid rgba(200,170,110,.25); }
 #soc .shead b { font: 700 .8rem/1 Cinzel, serif; letter-spacing: .2em; text-transform: uppercase; color: #cdbd8f; }
 .sgrow { flex: 1; }
@@ -2224,14 +2224,14 @@ body.soc-open #app { margin-right: 270px; }
 .sempty { margin: .6rem .8rem; font-size: .82rem; color: #8b93a3; }
 .stoast { position: absolute; left: .6rem; right: .6rem; bottom: .6rem; padding: .5rem .7rem; border-radius: 8px; background: rgba(8,18,32,.96); border: 1px solid var(--gold); color: #f3e6c4; font-size: .82rem; opacity: 0; pointer-events: none; transform: translateY(8px); transition: opacity .2s, transform .2s; }
 .stoast.on { opacity: 1; transform: none; }
-#soctab { position: fixed; right: 0; top: 7.5rem; z-index: 299; display: flex; align-items: center; gap: .35rem; padding: .55rem .6rem; border-radius: 10px 0 0 10px; border: 1px solid rgba(200,170,110,.55); border-right: 0; background: linear-gradient(180deg, #0f1c31, #080f1c); color: #e8dcc0; cursor: pointer; font: 700 .85rem/1 Inter, sans-serif; box-shadow: -4px 4px 14px rgba(0,0,0,.4); }
+#soctab { position: fixed; right: 0; top: 12.9rem; z-index: 299; display: flex; align-items: center; gap: .35rem; padding: .55rem .6rem; border-radius: 10px 0 0 10px; border: 1px solid rgba(200,170,110,.55); border-right: 0; background: linear-gradient(180deg, #0f1c31, #080f1c); color: #e8dcc0; cursor: pointer; font: 700 .85rem/1 Inter, sans-serif; box-shadow: -4px 4px 14px rgba(0,0,0,.4); }
 #soctab[hidden] { display: none; }
 #soctab .ic { width: 1.2rem; height: 1.2rem; margin: 0; }
 #soctab .fbadge { position: absolute; left: -.5rem; top: -.5rem; }
 /* chat */
-#socchat { position: fixed; right: 278px; bottom: 0; z-index: 301; width: 300px; height: 380px; display: flex; flex-direction: column; background: linear-gradient(180deg, #0c1626, #070d18); border: 1px solid rgba(200,170,110,.5); border-bottom: 0; border-radius: 10px 10px 0 0; box-shadow: 0 0 24px rgba(0,0,0,.5); }
+#socchat { position: fixed; right: calc(1rem + 270px + .6rem); bottom: calc(100vh - 12.9rem - min(36rem, calc(100vh - 14rem))); z-index: 301; width: 300px; height: min(380px, calc(100vh - 14rem)); display: flex; flex-direction: column; overflow: hidden; background: linear-gradient(180deg, #0c1626, #070d18); border: 1px solid rgba(200,170,110,.5); border-radius: 12px; box-shadow: 0 0 24px rgba(0,0,0,.5); }
 #socchat[hidden] { display: none !important; }
-@media (max-width: 1000px) { #socchat { right: 0; width: min(320px, 92vw); bottom: 0; } }
+@media (max-width: 1000px) { #socchat { right: .5rem; width: min(320px, 92vw); } }
 #socchat .chead { display: flex; align-items: center; gap: .55rem; padding: .5rem .7rem; border-bottom: 1px solid rgba(200,170,110,.25); }
 #socchat .cmsgs { flex: 1; overflow-y: auto; padding: .6rem; display: flex; flex-direction: column; gap: .35rem; }
 .cm { max-width: 82%; display: flex; flex-direction: column; gap: .1rem; }

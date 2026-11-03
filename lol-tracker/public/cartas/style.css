@@ -2585,3 +2585,43 @@ body.soc-open #app { margin-right: 286px; }
 .dcgo { position: absolute; right: 2.4cqw; bottom: .9cqw; font: 700 1.5cqw/1 Inter, sans-serif; color: #7c3aed; opacity: 0; } .devchat.done .dcgo { opacity: 1; animation: dcgo 1s ease-in-out infinite; } @keyframes dcgo { 50% { transform: translateX(4px); } }
 .dcn { position: absolute; left: 2.4cqw; bottom: .9cqw; font: 600 1.4cqw/1 Inter, sans-serif; color: #7a6a52; }
 @media (max-width: 700px) { .rnmain.chatnews .cnc { height: 60%; opacity: .5; } .dctx { font-size: 3.1cqw; } .dcgo, .dcn { font-size: 2cqw; } .dcname { font-size: 2.6cqw; top: -3.4cqw; } .dcbub { min-height: 24cqw; } }
+
+/* Efectos de la charla: sinergias que se van, cartas que cambian, spoilers */
+.dcfx { position: absolute; left: 31cqw; right: 31cqw; top: 3cqw; height: 29cqw; z-index: 3; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 1.2cqw; pointer-events: none; }
+.dcfx.on { display: flex; animation: dcfxin .4s ease-out; } @keyframes dcfxin { from { opacity: 0; transform: scale(.9); } }
+.dcfx .fxrow { display: flex; justify-content: center; gap: .9cqw; }
+.dcfx .fxlab { padding: .5cqw 1.6cqw; border-radius: 99px; font: 800 1.35cqw/1 Inter, sans-serif; letter-spacing: .1em; text-transform: uppercase; color: #fff; border: 1px solid; background: rgba(0,0,0,.5); }
+.dcfx .fxlab.bad { border-color: #f87171; color: #fecaca; } .dcfx .fxlab.warn { border-color: #fbbf24; color: #fde68a; } .dcfx .fxlab.new { border-color: #86efac; color: #dcfce7; }
+.dcfx .fxspoil { position: absolute; top: -.4cqw; right: -1cqw; padding: .4cqw 1.2cqw; border-radius: 6px; background: #dc2626; color: #fff; font: 900 1.3cqw/1 Inter, sans-serif; letter-spacing: .16em; text-transform: uppercase; transform: rotate(6deg); animation: dcblink 1s steps(1) infinite; } @keyframes dcblink { 50% { opacity: .55; } }
+/* sinergias que se retiran: aparecen y se tachan */
+.dcfx .sy { display: flex; flex-direction: column; align-items: center; gap: .6cqw; width: 6.2cqw; opacity: 0; animation: i20pop .45s cubic-bezier(.2,1.5,.4,1) calc(.2s + var(--i) * .25s) both; }
+.dcfx .sic { position: relative; display: grid; place-items: center; width: 5.6cqw; aspect-ratio: 1; border-radius: 50%; background: rgba(255,255,255,.12); border: .25cqw solid rgba(255,255,255,.5); animation: dcgray .5s ease-out calc(1.7s + var(--i) * .3s) both; }
+.dcfx .sic svg, .dcfx .sic img { width: 68%; height: 68%; object-fit: contain; }
+.dcfx .slash { position: absolute; left: -12%; right: -12%; top: 46%; height: .7cqw; border-radius: 9px; background: #ef4444; box-shadow: 0 0 1.4cqw #ef4444; transform: rotate(-35deg) scaleX(0); animation: dcslash .3s cubic-bezier(.3,1.4,.5,1) calc(1.7s + var(--i) * .3s) both; }
+@keyframes dcslash { to { transform: rotate(-35deg) scaleX(1); } } @keyframes dcgray { 60% { transform: translateX(.5cqw); } to { filter: grayscale(1) brightness(.7); } }
+.dcfx .sy b { font: 700 1.1cqw/1.1 Inter, sans-serif; color: #fff; text-align: center; }
+/* cartas que cambian */
+.dcfx .fxgrid { display: grid; grid-template-columns: repeat(3, 9cqw); gap: 1.1cqw; }
+.dcfx .ct { position: relative; text-align: center; opacity: 0; animation: i20pop .45s cubic-bezier(.2,1.5,.4,1) calc(.2s + var(--i) * .2s) both; }
+.dcfx .ctp { display: block; height: 8.6cqw; border-radius: 1cqw; background: #1e293b center 15% / cover; border: .25cqw solid #fbbf24; animation: dchue 2.4s ease-in-out calc(1.4s + var(--i) * .25s) infinite; }
+@keyframes dchue { 0%, 100% { filter: none; } 50% { filter: hue-rotate(90deg) saturate(1.8) brightness(1.2); } }
+.dcfx .cts { position: absolute; right: -.7cqw; top: -.7cqw; width: 2.6cqw; aspect-ratio: 1; display: grid; place-items: center; border-radius: 50%; background: #f59e0b; color: #fff; font: 900 1.8cqw/1 Inter, sans-serif; box-shadow: 0 0 1.2cqw #f59e0b; animation: i20spin 2s linear infinite; font-style: normal; }
+.dcfx .ct b { display: block; margin-top: .4cqw; font: 700 1.05cqw/1.1 Inter, sans-serif; color: #fff; }
+/* spoiler de ilustraciones */
+.dcfx .fxrow.art { gap: 1.4cqw; }
+.dcfx .ct.q { width: 8cqw; height: 10.4cqw; border-radius: 1cqw; background: linear-gradient(160deg, #1e1b4b, #4c1d95); border: .25cqw dashed #c4b5fd; overflow: hidden; display: grid; place-items: center; }
+.dcfx .ctq { font: 900 5cqw/1 Inter, sans-serif; color: #ddd6fe; text-shadow: 0 0 1.6cqw #a78bfa; animation: dcblink 1.2s steps(1) infinite; }
+.dcfx .brush { position: absolute; top: -20%; bottom: -20%; width: 40%; left: -60%; background: linear-gradient(100deg, transparent, rgba(255,255,255,.55), transparent); transform: skewX(-20deg); animation: dcbr 2s ease-in-out calc(.6s + var(--i) * .3s) infinite; } @keyframes dcbr { to { left: 130%; } }
+/* sinergias nuevas */
+.dcfx .nsy { display: flex; flex-direction: column; align-items: center; gap: .7cqw; opacity: 0; animation: i20pop .5s cubic-bezier(.2,1.5,.4,1) calc(.2s + var(--i) * .3s) both; }
+.dcfx .nsy span { display: grid; place-items: center; width: 8.4cqw; aspect-ratio: 1; border-radius: 2cqw; background: radial-gradient(circle at 35% 30%, var(--a), var(--b)); border: .3cqw solid var(--a); box-shadow: 0 0 2.4cqw var(--a); font: 900 4.8cqw/1 Inter, sans-serif; color: #fff; animation: dcpulse 1.8s ease-in-out infinite; }
+@keyframes dcpulse { 50% { transform: scale(1.08); } }
+.dcfx .nsy b { font: 800 1.5cqw/1 Inter, sans-serif; color: #fff; letter-spacing: .06em; }
+.dcfx .nsy.g { --a: #4ade80; --b: #14532d; } .dcfx .nsy.f { --a: #e879f9; --b: #581c87; } .dcfx .nsy.n { --a: #94a3b8; --b: #1e293b; }
+/* spoiler de Goblins: escalera de rarezas */
+.dcfx .fxrar { position: relative; display: flex; align-items: flex-end; gap: 1.2cqw; height: 15cqw; }
+.dcfx .rr { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; width: 7cqw; opacity: 0; animation: i20pop .5s cubic-bezier(.2,1.4,.4,1) calc(.2s + var(--i) * .45s) both; }
+.dcfx .rr i { display: block; width: 100%; height: calc(4cqw + var(--i) * 2.6cqw); border-radius: 1cqw 1cqw .3cqw .3cqw; background: linear-gradient(180deg, var(--c), rgba(0,0,0,.4)); border: .25cqw solid var(--c); box-shadow: 0 0 1.8cqw var(--c); }
+.dcfx .rr b { margin-top: .5cqw; font: 800 1.2cqw/1 Inter, sans-serif; color: #fff; }
+.dcfx .rup { position: absolute; left: 4cqw; top: 1cqw; font: 900 3cqw/1 Inter, sans-serif; color: #4ade80; text-shadow: 0 0 1.4cqw #22c55e; animation: dcup 1.2s ease-in-out 1.4s infinite; font-style: normal; } @keyframes dcup { 50% { transform: translate(21cqw, -3cqw); opacity: .4; } }
+@media (max-width: 700px) { .dcfx { left: 24cqw; right: 24cqw; } }

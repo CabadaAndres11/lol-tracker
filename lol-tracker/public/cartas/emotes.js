@@ -3,8 +3,8 @@
  * Los sets se consiguen como recompensa (p. ej. en el pase de batalla); cualquiera puede ver los de los demás. */
 (function (root) {
   var SETS = [
-    { id: 'camo', name: 'Set Camuflaje', ratio: 1.5, emotes: ['Serio', 'Enfadado', 'Flipado', 'Vergüenza', 'Guiño', 'Alegría', 'Llorando', 'Zzz', 'Enamorado', 'Mareado', 'Dudando', 'Deprimido', 'Aura verde', 'Gafas', 'Furia', 'Rabieta'] },
-    { id: 'gorra', name: 'Set Gorra', ratio: 1.2, emotes: ['Sonrisa', 'Enfadado', 'Flipado', 'Vergüenza', 'Guiño', 'Gafas', 'Risa', 'Llorando', 'Dudando', 'Zzz', 'Enamorado', 'Mareado', 'Cabreado', 'Satisfecho', 'Cansado', 'Aura morada', 'Ánimo', 'Furia roja', 'Pánico', 'Idea'] }
+    { id: 'camo', name: 'Set Dashlight Akali', ratio: 1.5, emotes: ['Serio', 'Enfadado', 'Flipado', 'Vergüenza', 'Guiño', 'Alegría', 'Llorando', 'Zzz', 'Enamorado', 'Mareado', 'Dudando', 'Deprimido', 'Aura verde', 'Gafas', 'Furia', 'Rabieta'] },
+    { id: 'gorra', name: 'Set Lihone', ratio: 1.2, emotes: ['Sonrisa', 'Enfadado', 'Flipado', 'Vergüenza', 'Guiño', 'Gafas', 'Risa', 'Llorando', 'Dudando', 'Zzz', 'Enamorado', 'Mareado', 'Cabreado', 'Satisfecho', 'Cansado', 'Aura morada', 'Ánimo', 'Furia roja', 'Pánico', 'Idea'] }
   ];
   function setOf(id) { for (var i = 0; i < SETS.length; i++) if (SETS[i].id === id) return SETS[i]; return null; }
   // «camo-3» -> { set, n, name } o null si no es válido

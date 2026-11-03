@@ -25,7 +25,7 @@
   var R = [
     { kind: 'coins', n: 30 }, { kind: 'pack', n: 1 }, { kind: 'coins', n: 40 }, { kind: 'box', n: 1 }, { kind: 'fx', fx: 'sleeve', id: 'pokeball' },
     { kind: 'coins', n: 50 }, { kind: 'pack', n: 1 }, { kind: 'emotes', id: 'camo' }, { kind: 'coins', n: 60 }, { kind: 'skin', id: 'pampert-oikawa' },
-    { kind: 'coins', n: 70 }, { kind: 'pack', n: 2 }, { kind: 'fx', fx: 'deploy', id: 'arcano' }, { kind: 'box', n: 1 }, { kind: 'coins', n: 80 },
+    { kind: 'coins', n: 70 }, { kind: 'pack', n: 2 }, { kind: 'fx', fx: 'deploy', id: 'grieta' }, { kind: 'box', n: 1 }, { kind: 'coins', n: 80 },
     { kind: 'emotes', id: 'gorra' }, { kind: 'fx', fx: 'finish', id: 'hechizo' }, { kind: 'coins', n: 100 }, { kind: 'box', n: 2 }, { kind: 'skin', id: 'dashlight-kingambit' }
   ];
   var LEVELS = R.map(function (r, k) { return { lv: k + 1, reward: r }; });

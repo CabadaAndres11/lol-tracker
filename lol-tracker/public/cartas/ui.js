@@ -416,7 +416,7 @@
     if (r.kind === 'skin') { var sk = (window.CARTAS_SKINS || []).filter(function (k) { return k.id === r.id; })[0]; return { k: 'Skin', t: sk ? sk.name : r.id, v: '<div class="rwv art"><span style="background-image:url(/cartas/art/' + r.id + '.webp)"></span></div>' }; }
     var fk = FXKIND[r.fx] || FXKIND.deploy, e = fk[2]().filter(function (z) { return z.id === r.id; })[0] || { name: r.id };
     if (r.fx === 'sleeve') return { k: 'Efecto · ' + fk[0], t: e.name, v: '<div class="rwv slvp slv-' + r.id + '"><div class="slvback"><span></span></div></div>' };
-    return { k: 'Efecto · ' + fk[0], t: e.name, v: '<div class="rwv fx">' + ic(fk[1]) + '</div>' };
+    return { k: 'Efecto · ' + fk[0], t: e.name, v: '<div class="rwv fx">' + ic(fk[1]) + '</div>', play: r.fx === 'deploy' ? '<button class="rwplay" data-act="passplay" data-id="' + r.id + '" title="Ver el efecto"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>' : '' };
   }
   function seasonHead() {
     var d = seData(), S = SS.SEASON, lv = seLevel(), max = S.levels.length, into = lv >= max ? S.xpPerLevel : d.xp - lv * S.xpPerLevel;
@@ -453,7 +453,7 @@
     }).join('');
     app.innerHTML = head('pass', ic('estrella') + ' Pase de batalla') + (ui.msg ? '<p class="err">' + esc(ui.msg) + '</p>' : '') +
       '<div class="pass"><div class="phd"><b>' + esc(S.name) + '</b>' + (left == null ? '' : '<span class="pchip">' + ic('reloj') + ' ' + (d.active ? left + ' d' : 'Terminada') + '</span>') + '</div>' +
-      '<div class="phero"><div class="pring"></div><div class="pvis">' + info.v + '</div><div class="pinfo"><span class="pk">' + esc(info.k) + '</span><h2>' + esc(info.t) + '</h2>' + (info.sub ? '<span class="psub">' + esc(info.sub) + '</span>' : '') + state + (ui.passNote ? '<span class="pnote">' + esc(ui.passNote) + '</span>' : '') + '</div></div>' +
+      '<div class="phero"><div class="pring"></div><div class="pvis">' + info.v + (info.play || '') + '</div><div class="pinfo"><span class="pk">' + esc(info.k) + '</span><h2>' + esc(info.t) + '</h2>' + (info.sub ? '<span class="psub">' + esc(info.sub) + '</span>' : '') + state + (ui.passNote ? '<span class="pnote">' + esc(ui.passNote) + '</span>' : '') + '</div></div>' +
       '<div class="ptrackw"><button class="parrow l" data-act="passscroll" data-d="-1" aria-label="Anterior">‹</button><div class="ptrack" id="ptrack">' + track + '</div><button class="parrow r" data-act="passscroll" data-d="1" aria-label="Siguiente">›</button></div>' +
       '<div class="pbot"><div class="plv"><b>' + lv + '</b></div><div class="pxp"><div class="sexp"><i style="width:' + Math.round(into / S.xpPerLevel * 100) + '%"></i></div><span>' + (lv >= max ? '¡Pase completado!' : into + ' / ' + S.xpPerLevel + ' XP para el nivel ' + (lv + 1)) + ' · XP total ' + d.xp + '</span></div>' +
       '<div class="pact">' + (ready.length > 1 ? '<button class="btn sec" data-act="slclaimall">Reclamar todo (' + ready.length + ')</button>' : '') + '<button class="btn cta" data-act="slclaim" data-lv="' + sel.lv + '"' + (selOk && !selCl && d.active ? '' : ' disabled') + '>Reclamar</button></div></div></div></div>';
@@ -1463,7 +1463,8 @@
     { id: 'fichas', name: 'Reparto de casino', desc: 'Una carta sale lanzada girando como en un reparto de póker, cae sobre una lluvia de fichas, se da la vuelta y vuela a su hueco levantando fichas al aterrizar.', price: 30, ms: 3000, gap: 600 },
     { id: 'sombras', name: 'Soldados de sombra', desc: 'Un charco de sombras moradas se abre en el suelo, la carta se va formando como una silueta de humo con ojos brillantes y, al completarse, vuela a su hueco.', price: 30, ms: 3200, gap: 650 },
     { id: 'kame', name: 'Kamehameha', desc: 'Un guerrero carga su energía, dispara un Kamehameha que cruza la pantalla y el rayo deja la carta en su hueco.', price: 30, ms: 3300, gap: 700 },
-    { id: 'grimorio', name: 'Grimorio de cinco hojas', desc: 'Un grimorio negro con un trébol de cinco hojas flota entre humo, se abre con un destello y de sus páginas sale la carta, que vuela a su hueco.', price: 30, ms: 3400, gap: 700 }
+    { id: 'grimorio', name: 'Grimorio de cinco hojas', desc: 'Un grimorio negro con un trébol de cinco hojas flota entre humo, se abre con un destello y de sus páginas sale la carta, que vuela a su hueco.', price: 30, ms: 3400, gap: 700 },
+    { id: 'grieta', name: 'Grieta dimensional', desc: 'La pantalla se resquebraja desde el centro, la grieta se abre en un resplandor y la carta surge de ella antes de volar a su hueco.', price: 30, ms: 3300, gap: 700 }
   ];
   try { new Image().src = 'img/dog.webp'; } catch (e) {}
   var SLEEVE_LIST = [
@@ -1750,6 +1751,63 @@
       impact(sx, r.top + h / 2, delay + dur * (ts + .14));
       return wrap.animate(ks, { duration: dur, delay: delay, fill: 'both' });
     },
+    'grieta': function (wrap, r, delay, dur) {
+      var W = window.innerWidth, H = window.innerHeight, cx = W / 2 - (r.left + r.width / 2), cy = H / 2 - (r.top + r.height / 2) - 10;
+      var sc = Math.max(1.4, Math.min(3, Math.min(300, W * .62, H * .5 * 5 / 7) / r.width)) * 1.02, mx = r.left + r.width / 2 + cx, my = r.top + r.height / 2 + cy;
+      var T = function (x, y, z) { return 'perspective(1100px) translate(' + x + 'px,' + y + 'px) scale(' + z + ')'; };
+      var G = function (a) { return 'drop-shadow(0 0 ' + Math.round(6 + a * 28) + 'px rgba(150,200,255,' + (.2 + a * .8).toFixed(2) + ')) drop-shadow(0 18px 24px rgba(0,0,0,.5))'; };
+      var NS = 'http://www.w3.org/2000/svg', cw = sc * r.width, ch = sc * r.height, i, k;
+      var svg = document.createElementNS(NS, 'svg'); svg.setAttribute('class', 'fxcrk'); svg.setAttribute('width', W); svg.setAttribute('height', H); svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+      var gid = 'crg' + Math.floor(Math.random() * 1e6);
+      svg.innerHTML = '<defs><radialGradient id="' + gid + '"><stop offset="0" stop-color="#ffffff"/><stop offset=".35" stop-color="#bfe3ff"/><stop offset=".7" stop-color="#6d4bd8"/><stop offset="1" stop-color="#150a3a"/></radialGradient></defs>';
+      document.body.appendChild(svg);
+      var gr = document.createElementNS(NS, 'g'); svg.appendChild(gr);
+      // la brecha: un polígono irregular que se abre en el centro
+      var pts = [], n = 20, rx = cw * .66, ry = ch * .62;
+      for (i = 0; i < n; i++) { var a = i / n * Math.PI * 2, f = i % 2 ? .62 + Math.random() * .2 : .95 + Math.random() * .25; pts.push((mx + Math.cos(a) * rx * f).toFixed(1) + ',' + (my + Math.sin(a) * ry * f).toFixed(1)); }
+      var rift = document.createElementNS(NS, 'polygon'); rift.setAttribute('points', pts.join(' ')); rift.setAttribute('fill', 'url(#' + gid + ')'); rift.setAttribute('class', 'fxcrkr'); rift.style.transformOrigin = mx + 'px ' + my + 'px'; gr.appendChild(rift);
+      // grietas que se ramifican desde el centro
+      var paths = [];
+      var branch = function (x, y, ang, len, depth) {
+        var d = 'M' + x.toFixed(1) + ' ' + y.toFixed(1), run = 0;
+        while (run < len) {
+          var seg = 26 + Math.random() * 46; ang += (Math.random() - .5) * .9; x += Math.cos(ang) * seg; y += Math.sin(ang) * seg; run += seg; d += 'L' + x.toFixed(1) + ' ' + y.toFixed(1);
+          if (depth > 0 && run > 60 && Math.random() < .42) branch(x, y, ang + (Math.random() < .5 ? -1 : 1) * (.5 + Math.random() * .7), (len - run) * (.5 + Math.random() * .4), depth - 1);
+        }
+        paths.push({ d: d, depth: depth });
+      };
+      var big = Math.hypot(W, H) * .62;
+      for (i = 0; i < 9; i++) branch(mx, my, i / 9 * Math.PI * 2 + Math.random() * .5, big * (.45 + Math.random() * .55), 2);
+      paths.forEach(function (p, j) {
+        var e = document.createElementNS(NS, 'path'); e.setAttribute('d', p.d); e.setAttribute('pathLength', '1'); e.setAttribute('class', 'fxcrkp d' + p.depth); e.style.strokeDasharray = '1'; e.style.strokeDashoffset = '1'; gr.appendChild(e);
+        e.animate([{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }], { duration: dur * (.1 + p.depth * -.02 + Math.random() * .04), delay: delay + dur * (.02 + (2 - p.depth) * .035), fill: 'both', easing: 'cubic-bezier(.2,.8,.3,1)' });
+      });
+      // la brecha se abre con un resplandor
+      rift.animate([{ transform: 'scale(.05)', opacity: 0, offset: 0 }, { transform: 'scale(.05)', opacity: 0, offset: .14 }, { transform: 'scale(1.08)', opacity: 1, offset: .3, easing: 'cubic-bezier(.2,.9,.3,1)' }, { transform: 'scale(1)', opacity: 1, offset: .7 }, { transform: 'scale(.9)', opacity: 0, offset: .88 }, { opacity: 0, offset: 1 }], { duration: dur, delay: delay, fill: 'both' });
+      var fade = gr.animate([{ opacity: 1, offset: 0 }, { opacity: 1, offset: .72 }, { opacity: 0, offset: .92 }, { opacity: 0, offset: 1 }], { duration: dur, delay: delay, fill: 'both' });
+      var fl = document.createElement('i'); fl.className = 'fxcrf'; fl.style.background = 'radial-gradient(circle at ' + mx + 'px ' + my + 'px, rgba(220,240,255,.95), rgba(130,160,255,.4) 35%, transparent 62%)'; document.body.appendChild(fl);
+      fl.animate([{ opacity: 0, offset: 0 }, { opacity: 0, offset: .13 }, { opacity: 1, offset: .2 }, { opacity: 0, offset: .38 }, { opacity: 0, offset: 1 }], { duration: dur, delay: delay, fill: 'both' });
+      fade.onfinish = function () { svg.remove(); fl.remove(); };
+      if (!REDUCED) app.animate([{ transform: 'translate(0,0)' }, { transform: 'translate(-7px,4px)' }, { transform: 'translate(6px,-5px)' }, { transform: 'translate(-4px,-3px)' }, { transform: 'translate(3px,4px)' }, { transform: 'translate(0,0)' }], { duration: dur * .16, delay: delay + dur * .02 });
+      if (!REDUCED) app.animate([{ transform: 'translate(0,0)' }, { transform: 'translate(-10px,6px)' }, { transform: 'translate(9px,-7px)' }, { transform: 'translate(-6px,-4px)' }, { transform: 'translate(0,0)' }], { duration: dur * .14, delay: delay + dur * .17 });
+      // esquirlas que salen despedidas al abrirse
+      for (k = 0; k < 18; k++) {
+        var aa = (k / 18) * Math.PI * 2 + Math.random() * .3, dist = 80 + Math.random() * 160, sp = document.createElement('i');
+        sp.className = 'fxspark vio'; sp.style.cssText = 'left:' + mx + 'px;top:' + my + 'px'; document.body.appendChild(sp);
+        sp.animate([{ transform: 'translate(-50%,-50%) scale(1)', opacity: 0, offset: 0 }, { transform: 'translate(-50%,-50%) scale(1)', opacity: 1, offset: .08 }, { transform: 'translate(' + (Math.cos(aa) * dist) + 'px,' + (Math.sin(aa) * dist) + 'px) scale(.1)', opacity: 0, offset: 1 }], { duration: 750, delay: delay + dur * (.2 + Math.random() * .06), fill: 'both' }).onfinish = (function (e) { return function () { e.remove(); }; })(sp);
+      }
+      snd('hit', delay + dur * .02); snd('hit', delay + dur * .17); snd('magic', delay + dur * .3);
+      impact(r.left + r.width / 2, r.top + r.height / 2, delay + dur * .9);
+      return wrap.animate([
+        { transform: T(cx, cy, .2), filter: G(1) + ' brightness(3)', opacity: 0, offset: 0 },
+        { transform: T(cx, cy, .2), filter: G(1) + ' brightness(3)', opacity: 0, offset: .24 },
+        { transform: T(cx, cy, .5), filter: G(1) + ' brightness(2.4)', opacity: 1, offset: .34, easing: 'ease-out' },
+        { transform: T(cx, cy, sc), filter: G(1) + ' brightness(1.3)', opacity: 1, offset: .52, easing: 'ease-in-out' },
+        { transform: T(cx, cy - 16, sc * 1.03), filter: G(.7), opacity: 1, offset: .72, easing: 'cubic-bezier(.5,0,.8,.4)' },
+        { transform: T(0, 5, .94), filter: G(.8), opacity: 1, offset: .9, easing: 'cubic-bezier(.2,.9,.3,1)' },
+        { transform: T(0, 0, 1), filter: G(0), opacity: 1, offset: 1 }
+      ], { duration: dur, delay: delay, fill: 'both' });
+    },
     'default': function (wrap, r, delay, dur) {
       var cx = window.innerWidth / 2 - (r.left + r.width / 2), cy = window.innerHeight / 2 - (r.top + r.height / 2) - 10, sc = Math.max(1.4, Math.min(3, Math.min(300, window.innerWidth * .62, window.innerHeight * .5 * 5 / 7) / r.width));
       var T = function (x, y, z, ry) { return 'perspective(1100px) translate(' + x + 'px,' + y + 'px) scale(' + z + ') rotateY(' + ry + 'deg)'; };
@@ -1764,13 +1822,23 @@
   };
   function deployId() { var id = ui.acct && ui.acct.fx && ui.acct.fx.deploy; return DEPLOY_FX[id] && fxHas(id) ? id : 'default'; }
   // Vista previa en Colección → Efectos: la carta de muestra vuela desde el centro hasta su hueco
-  function previewDeploy(id) {
-    var t = app.querySelector('.fxdemo .card'); if (!t || ui.fxBusy) return;
+  function previewDeploy(id, root, done) {
+    var t = (root || app).querySelector('.fxdemo .card'); if (!t || ui.fxBusy) return;
     var r = t.getBoundingClientRect(); ui.fxBusy = true;
     var wrap = document.createElement('div'); wrap.className = 'flyc'; wrap.style.cssText = 'left:' + r.left + 'px;top:' + r.top + 'px;width:' + r.width + 'px;height:' + r.height + 'px';
     wrap.appendChild(t.cloneNode(true)); document.body.appendChild(wrap); t.style.visibility = 'hidden';
     var an = (DEPLOY_FX[id] || DEPLOY_FX.default)(wrap, r, 0, deployMeta(id).ms);
-    an.onfinish = function () { wrap.remove(); t.style.visibility = ''; ui.fxBusy = false; };
+    an.onfinish = function () { wrap.remove(); t.style.visibility = ''; ui.fxBusy = false; if (done) done(); };
+  }
+  // Vista previa desde el pase: una carta de muestra en un hueco flotante sobre la pantalla atenuada
+  function passPlay(id) {
+    if (ui.fxBusy) return;
+    var sample = D.cards.filter(function (c) { return owns(c.id) && ARTS[c.id]; })[0] || D.cards[0];
+    var bg = document.createElement('div'); bg.className = 'fxtmpbg';
+    var box = document.createElement('div'); box.className = 'fxdemo fxtmp'; box.innerHTML = '<div class="fxslot"></div><div class="fxcard">' + cardHtml(sample, { lv: 1, skin: '' }) + '</div>';
+    document.body.appendChild(bg); document.body.appendChild(box);
+    bg.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 250, fill: 'both' });
+    setTimeout(function () { previewDeploy(id, box, function () { box.remove(); bg.remove(); }); }, 280);
   }
   function fxDemo() {
     var sample = D.cards.filter(function (c) { return owns(c.id) && ARTS[c.id]; })[0] || D.cards[0];
@@ -2300,6 +2368,7 @@
     if (act === 'fxgoshop') { ui.screen = 'packs'; ui.shopTab = 'fx'; window.scrollTo(0, 0); return render(); }
     if (act === 'fxbuy') { return api('fxBuy', { id: el.dataset.id }).then(function (r) { if (r.data && r.data.user) setAcct(r.data.user); ui.msg = r.ok ? '' : (r.data.error || ''); render(); }); }
     if (act === 'fxprev') return previewDeploy(el.dataset.id);
+    if (act === 'passplay') return passPlay(el.dataset.id);
     if (act === 'fxequip') { return api('fxEquip', { kind: el.dataset.kind || 'deploy', id: el.dataset.id }).then(function (r) { if (r.ok) setAcct(r.data.user); ui.msg = ''; renderDeck(); }); }
     if (act === 'dkopen') { var oi = +el.dataset.i; ui.deckOpen = ui.deckOpen === oi ? null : oi; ui.delAsk = null; ui.msg = ''; return renderDeck(); }
     if (act === 'dkedit') { var ei = +el.dataset.i, esl = ui.slots[ei]; ui.dedit = { i: ei, name: esl ? esl.name : 'Mazo ' + (ei + 1), ids: esl ? esl.ids.slice() : [], cover: esl ? esl.cover || '' : '', theme: '' }; ui.colTab = 'decks'; ui.msg = ''; window.scrollTo(0, 0); return render(); }

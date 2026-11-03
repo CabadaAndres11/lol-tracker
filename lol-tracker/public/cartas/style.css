@@ -2353,3 +2353,13 @@ body.soc-open #app { margin-right: 286px; }
 .slv-pokeball .slvback { box-shadow: 0 0 0 1px #f8fafc, 0 12px 24px rgba(0,0,0,.55), 0 0 18px rgba(239,68,68,.5); }
 .slv-pokeball .slvback span, .slv-pokeball .pback span { visibility: hidden; }
 .rwv.slvp .slvback { width: 46px; height: 64px; aspect-ratio: auto; border-width: 2px; border-radius: 6px; box-shadow: 0 3px 8px rgba(0,0,0,.5); } .rwv.slvp .slvback span { display: none; }
+.fxcrk{position:fixed;inset:0;z-index:7990;pointer-events:none;overflow:visible}
+.fxcrkp{fill:none;stroke:#fff;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 4px #9ec5ff) drop-shadow(0 0 10px #7c5cff)}
+.fxcrkp.d2{stroke-width:4}.fxcrkp.d1{stroke-width:2.6}.fxcrkp.d0{stroke-width:1.6}
+.fxcrkr{filter:drop-shadow(0 0 18px #8fb8ff) drop-shadow(0 0 40px #6d4bd8)}
+.fxcrf{position:fixed;inset:0;z-index:7985;pointer-events:none;opacity:0}
+.fxtmpbg{position:fixed;inset:0;z-index:7900;background:rgba(3,6,16,.78);pointer-events:none}
+.fxdemo.fxtmp{position:fixed;z-index:7950;left:50%;top:60%;width:130px;margin:0;transform:translateX(-50%);pointer-events:none}
+.rwplay{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:58px;height:58px;border-radius:50%;border:2px solid #e8c777;background:rgba(10,16,40,.78);color:#f4e2b0;display:grid;place-items:center;cursor:pointer;box-shadow:0 0 18px rgba(232,199,119,.45);z-index:3;transition:transform .15s,background .15s}
+.rwplay svg{width:26px;height:26px;fill:currentColor;margin-left:3px}
+.rwplay:hover{transform:translate(-50%,-50%) scale(1.1);background:rgba(30,40,80,.9)}

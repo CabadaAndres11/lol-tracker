@@ -1,6 +1,9 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-03', tag: 'Novedad', title: 'Nuevo despliegue: Grieta dimensional',
+      items: ['Nuevo efecto de despliegue «Grieta dimensional»: la pantalla se resquebraja desde el centro, la grieta se abre en un resplandor y la carta surge de ella antes de volar a su hueco. Está en la tienda (30 monedas) y es la recompensa del nivel 13 del pase (de prueba por ahora; sustituye a «Aparición arcana», que sigue en la tienda).',
+        'En el pase, los efectos de despliegue tienen un botón de play sobre su icono para verlos en acción antes de conseguirlos.'] },
     { date: '2026-11-03', tag: 'Novedad', title: 'Nueva funda: Pokéball',
       items: ['Nueva funda «Pokéball»: borde negro y blanco y reverso rojo con una Pokéball en el centro. Está en la tienda (40 monedas) y es la recompensa del nivel 5 del pase de batalla (de prueba por ahora; sustituye a la funda Neón, que sigue en la tienda).'] },
     { date: '2026-11-03', tag: 'Novedad', title: 'Nueva skin exclusiva del pase: Dashlight Kingambit',

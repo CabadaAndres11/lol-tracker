@@ -186,18 +186,17 @@ function resolveCombat(T) {
   T.phase = 'post';
   T.rdy = [0, 1, 2, 3].map((p) => T.out[p] || !fought[p] || !!(T.bots && T.bots[p])); // los que no han peleado no esperan
 }
-function advance(T, maxRounds) {
-  if (T.round >= maxRounds) { finish(T); return; }
+function advance(T) {
   startRound(T);
 }
 // Resuelve la fase actual cuando todos están listos (o por tiempo, forced). Devuelve true si algo cambió.
-function resolve(T, forced, maxRounds) {
+function resolve(T, forced) {
   if (T.over) return false;
   const waiting = aliveSeats(T).filter((p) => !T.rdy[p]);
   if (waiting.length && !forced) return false;
-  if (T.phase === 'prep' && T.shopOpen) advance(T, maxRounds);
+  if (T.phase === 'prep' && T.shopOpen) advance(T);
   else if (T.phase === 'prep') resolveCombat(T);
-  else if (T.phase === 'post') advance(T, maxRounds);
+  else if (T.phase === 'post') advance(T);
   else return false;
   return true;
 }

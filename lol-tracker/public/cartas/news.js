@@ -1,6 +1,8 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-03', tag: 'Cambio', title: 'Sin límite de rondas',
+      items: ['Se elimina la ronda máxima (antes 40): las partidas pueden alargarse indefinidamente, tanto en 1 vs 1 como en Versus de 4, hasta que solo quede un ganador.'] },
     { date: '2026-11-03', tag: 'Cambio', title: 'Huecos extra independientes',
       items: ['Cada sinergia o pasiva con un espacio especial crea ahora su propio hueco extra, ya no es siempre el «hueco 5»: Correa crea el hueco extra de la novia y Dashlight Sun Jin-Woo, el del Soldado de Sombra.',
         'Así la novia y el soldado ya no se pisan: puedes tener las dos cosas a la vez, y se muestran en la mesa como huecos extra a continuación de los 4 normales. Los huecos extra no se ocupan a mano con tropas.'] },

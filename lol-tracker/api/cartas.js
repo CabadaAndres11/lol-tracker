@@ -519,8 +519,8 @@ async function v4Tick(cfg, g, seat) {
     for (let o = 0; o < 4; o++) {
       if (o !== seat && !T.out[o] && !(g.bots && g.bots[o]) && now - g.hb[o] > PVP_DC_MS) { V4.eliminate(T, o, 'Te desconectaste: eliminado.', true); g.v++; }
     }
-    if (!T.over && g.dl && now > g.dl && V4.resolve(T, true, E.CFG.maxRounds)) { v4Deadline(g); g.v++; }
-    if (!T.over && V4.aliveSeats(T).length && V4.aliveSeats(T).every((p) => T.rdy[p]) && V4.resolve(T, false, E.CFG.maxRounds)) { v4Deadline(g); g.v++; }    if (g.bots && !T.over && !V4.aliveSeats(T).some((p) => !g.bots[p])) { V4.finish(T); g.v++; } // solo quedan IAs: se acaba
+    if (!T.over && g.dl && now > g.dl && V4.resolve(T, true)) { v4Deadline(g); g.v++; }
+    if (!T.over && V4.aliveSeats(T).length && V4.aliveSeats(T).every((p) => T.rdy[p]) && V4.resolve(T, false)) { v4Deadline(g); g.v++; }    if (g.bots && !T.over && !V4.aliveSeats(T).some((p) => !g.bots[p])) { V4.finish(T); g.v++; } // solo quedan IAs: se acaba
   }
   await payV4(cfg, g);
 }
@@ -671,7 +671,7 @@ async function vs4Handle(cfg, act, body, u) {
         const pend = T.phase === 'prep' && !T.shopOpen && opp >= 0 ? E.pendingTargets(V4.duelState(T, seat, opp), 0).length : 0;
         if (T.rdy[seat]) { /* ya estaba */ }
         else if (pend) hint = 'Elige objetivo para todas tus tropas.';
-        else { T.rdy[seat] = true; g.v++; if (V4.resolve(T, false, E.CFG.maxRounds)) v4Deadline(g); }
+        else { T.rdy[seat] = true; g.v++; if (V4.resolve(T, false)) v4Deadline(g); }
       } else if (op === 'unready') {
         if (T.rdy[seat]) { T.rdy[seat] = false; g.v++; }
       } else if (!T.rdy[seat]) {

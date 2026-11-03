@@ -2424,7 +2424,8 @@ body.soc-open #app { margin-right: 286px; }
 @media (max-width: 700px) { .packs-grid.two { grid-template-columns: 1fr; } }
 .bpk.anime { width: 177px; }
 .bpk.anime .bpk-lid, .bpk.anime .bpk-main { background: url(img/pack-anime.webp) 0 0 / 177px 266px no-repeat; }
-.bpk.anime .bpk-main { background-position: 0 -30px; }
+.bpk.anime .bpk-main { top: 0; clip-path: none; background-position: 0 0; }
+.bpk.anime .bpk-lid { clip-path: polygon(0 0, 100% 0, 100% 88%, 91.7% 76%, 83.3% 100%, 75% 84%, 66.7% 92%, 58.3% 92%, 50% 88%, 41.7% 100%, 33.3% 100%, 25% 100%, 16.7% 92%, 8.3% 70%, 0 76%); }
 .bpk.anime .bpk-lid::after, .bpk.anime .bpk-main::after { display: none; }
 .bpk.anime { filter: drop-shadow(0 14px 18px rgba(120,40,200,.55)); }
 .bpk.anime.rip, .bpk.anime.shake { filter: none; }

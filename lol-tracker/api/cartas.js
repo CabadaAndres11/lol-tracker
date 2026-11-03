@@ -6,6 +6,7 @@ const { redisConfig, redis } = require('./_redis');
 const DATA = require('../public/cartas/cards.js');
 const SKINS = require('../public/cartas/skins.js');
 const MS = require('../public/cartas/missions.js');
+const SS = require('../public/cartas/season.js');
 const SKIN_BY_ID = {}; SKINS.forEach((s) => { SKIN_BY_ID[s.id] = s; });
 
 const START_COINS = 150;
@@ -73,6 +74,37 @@ function recordGame(u, o) {
   if (o.mode === 'rumble') st.rumble = (st.rumble || 0) + 1;
   if (o.kind === 'pvp') st.mp = (st.mp || 0) + 1;
   if (o.kind === 'v4') st.v4 = (st.v4 || 0) + 1;
+  seasonGame(u, o);
+}
+// ---------- Temporada y pase de batalla ----------
+const seasonActive = () => !SS.SEASON.end || Date.now() < Date.parse(SS.SEASON.end);
+function ensureSeason(u) { // el progreso de temporada se reinicia al cambiar de temporada
+  if (!u.se || u.se.id !== SS.SEASON.id) u.se = { id: SS.SEASON.id, xp: 0, st: {}, streak: 0, mc: [], lc: [] };
+  return u.se;
+}
+function seasonBump(u, key, n) { if (!seasonActive()) return; const se = ensureSeason(u); se.st[key] = (se.st[key] || 0) + (n || 1); }
+function seasonGame(u, o) {
+  if (!seasonActive()) return;
+  const se = ensureSeason(u);
+  seasonBump(u, 'games');
+  if (o.won) { seasonBump(u, 'wins'); se.streak = (se.streak || 0) + 1; se.st.bestStreak = Math.max(se.st.bestStreak || 0, se.streak); } else se.streak = 0;
+  seasonBump(u, 'cards', Math.max(0, Math.min(60, Number(o.cards) || 0)));
+  if (o.mode === 'revive' || o.mode === 'rumble') seasonBump(u, 'revive');
+  if (o.mode === 'rumble') seasonBump(u, 'rumble');
+  if (o.kind === 'pvp') seasonBump(u, 'mp');
+  if (o.kind === 'v4') seasonBump(u, 'v4');
+}
+function seasonPublic(u) {
+  const se = ensureSeason(u);
+  return { id: se.id, xp: se.xp, st: se.st, mc: se.mc, lc: se.lc, active: seasonActive() };
+}
+// Entrega la recompensa de un nivel del pase
+function grantReward(u, r) {
+  if (r.kind === 'coins') u.coins += r.n | 0;
+  else if (r.kind === 'box') u.boxes = (u.boxes || 0) + (r.n | 0);
+  else if (r.kind === 'card') { if (!(u.owned || []).includes(r.id)) u.owned.push(r.id); else { u.dups = u.dups || {}; u.dups[r.id] = (u.dups[r.id] || 0) + 1; } }
+  else if (r.kind === 'skin') { u.skins = u.skins || []; if (!u.skins.includes(r.id)) u.skins.push(r.id); else u.coins += 50; }
+  else if (r.kind === 'fx') { if (!fxOwned(u).includes(r.id)) u.fxOwned = [...(u.fxOwned || []), r.id]; else u.coins += 30; }
 }
 function missionStats(u) {
   const st = u.st || {};
@@ -109,7 +141,7 @@ function rollBox(u) {
 }
 function publicUser(u) {
   return {
-    name: u.name, pts: u.pts || 0, coins: u.coins, owned: u.owned, dups: u.dups || {}, skins: u.skins || [], skinSel: u.skinSel || {}, decks: u.decks || null, avatar: u.avatar || '', fx: { deploy: fxSel(u, 'deploy'), sleeve: fxSel(u, 'sleeve'), finish: fxSel(u, 'finish') }, fxOwned: fxOwned(u), boxes: u.boxes || 0, ms: { stats: missionStats(u), claimed: u.msClaimed || [] }, rkClaimed: u.rkClaimed || [], ptsMax: rankReached(u),
+    name: u.name, pts: u.pts || 0, coins: u.coins, owned: u.owned, dups: u.dups || {}, skins: u.skins || [], skinSel: u.skinSel || {}, decks: u.decks || null, avatar: u.avatar || '', fx: { deploy: fxSel(u, 'deploy'), sleeve: fxSel(u, 'sleeve'), finish: fxSel(u, 'finish') }, fxOwned: fxOwned(u), boxes: u.boxes || 0, ms: { stats: missionStats(u), claimed: u.msClaimed || [] }, rkClaimed: u.rkClaimed || [], season: seasonPublic(u), ptsMax: rankReached(u),
     dailyAvailable: u.lastDaily !== today(),
     gamesToday: u.rewardDay === today() ? u.rewardCount : 0,
     maxGamesToday: MAX_GAME_REWARDS_PER_DAY,
@@ -814,7 +846,7 @@ module.exports = async function handler(req, res) {
         if (!isNew) copies = 1 + u.dups[id]; else lvl = 1;
         return { id, isNew, dupCoins: 0, lvl, lvlUp, copies };
       });
-      u.st = u.st || {}; u.st.packs = (u.st.packs || 0) + 1;
+      u.st = u.st || {}; u.st.packs = (u.st.packs || 0) + 1; seasonBump(u, 'packs');
       await saveUser(cfg, u);
       res.status(200).json({ cards, user: publicUser(u) }); return;
     }
@@ -828,6 +860,27 @@ module.exports = async function handler(req, res) {
       u.msClaimed.push(m.id); u.boxes = (u.boxes || 0) + 1;
       await saveUser(cfg, u);
       res.status(200).json({ user: publicUser(u) }); return;
+    }
+    if (act === 'seasonMissionClaim') { // recoger el XP de una misión de temporada completada
+      const m = SS.SEASON.missions.find((x) => x.id === String(body.id || ''));
+      if (!m) { res.status(400).json({ error: 'Esa misión no existe.' }); return; }
+      if (!seasonActive()) { res.status(403).json({ error: 'La temporada ha terminado.', user: publicUser(u) }); return; }
+      const se = ensureSeason(u);
+      if (se.mc.includes(m.id)) { res.status(409).json({ error: 'Ya has recogido esa misión.', user: publicUser(u) }); return; }
+      if ((se.st[m.stat] || 0) < m.goal) { res.status(403).json({ error: 'Aún no has completado esa misión.', user: publicUser(u) }); return; }
+      se.mc.push(m.id); se.xp += m.xp;
+      await saveUser(cfg, u);
+      res.status(200).json({ user: publicUser(u) }); return;
+    }
+    if (act === 'seasonLevelClaim') { // recoger la recompensa de un nivel del pase
+      const L = SS.SEASON.levels.find((x) => x.lv === (body.lv | 0));
+      if (!L) { res.status(400).json({ error: 'Ese nivel no existe.' }); return; }
+      const se = ensureSeason(u);
+      if (se.lc.includes(L.lv)) { res.status(409).json({ error: 'Ya has recogido esa recompensa.', user: publicUser(u) }); return; }
+      if (SS.levelOf(se.xp) < L.lv) { res.status(403).json({ error: 'Aún no has llegado a ese nivel.', user: publicUser(u) }); return; }
+      se.lc.push(L.lv); grantReward(u, L.reward);
+      await saveUser(cfg, u);
+      res.status(200).json({ reward: L.reward, user: publicUser(u) }); return;
     }
     if (act === 'rankClaim') { // recoger la caja de un rango alcanzado
       const rk = MS.RANK_BOXES.find((x) => x.id === String(body.id || ''));

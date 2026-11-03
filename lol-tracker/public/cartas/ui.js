@@ -376,6 +376,7 @@
   }
   // ---------- Misiones, cajas e inventario ----------
   var MSN = window.CARTAS_MISSIONS || { MISSIONS: [], RANK_BOXES: [] };
+  var SS = window.CARTAS_SEASON || { SEASON: { id: '', name: '', xpPerLevel: 1, levels: [], missions: [] }, levelOf: function () { return 0; } };
   function msProg(m) { var st = (ui.acct && ui.acct.ms && ui.acct.ms.stats) || {}; return Math.min(m.goal, st[m.stat] || 0); }
   function msDone(m) { return msProg(m) >= m.goal; }
   function msClaimed(m) { return ((ui.acct && ui.acct.ms && ui.acct.ms.claimed) || []).indexOf(m.id) >= 0; }
@@ -383,7 +384,7 @@
   function rkClaimed(rb) { return ((ui.acct && ui.acct.rkClaimed) || []).indexOf(rb.id) >= 0; }
   function claimableCount() {
     if (!ui.acct) return 0;
-    return MSN.MISSIONS.filter(function (m) { return msDone(m) && !msClaimed(m); }).length + MSN.RANK_BOXES.filter(function (r) { return rkReached(r) && !rkClaimed(r); }).length;
+    return MSN.MISSIONS.filter(function (m) { return msDone(m) && !msClaimed(m); }).length + MSN.RANK_BOXES.filter(function (r) { return rkReached(r) && !rkClaimed(r); }).length + seasonReady('season') + seasonReady('pass');
   }
   function boxImg(cls) { return '<img class="bximg ' + (cls || '') + '" src="/cartas/img/box.webp" alt="Caja">'; }
   function rankBoxBtn(r) {
@@ -393,6 +394,48 @@
     return '<span class="rkboxl" title="Alcanza este rango para ganar una caja">' + ic('caja') + '</span>';
   }
   function refreshAcct(then) { api('me').then(function (r) { if (r.ok) { setAcct(r.data.user); if (then) then(); } }); }
+  // ---------- Temporada y pase de batalla ----------
+  function seData() { var s = (ui.acct && ui.acct.season) || {}; return { xp: s.xp || 0, st: s.st || {}, mc: s.mc || [], lc: s.lc || [], active: s.active !== false }; }
+  function seLevel() { return SS.levelOf(seData().xp); }
+  // avisos de la pestaña: misiones listas para recoger / niveles con recompensa por recoger
+  function seasonReady(tab) {
+    var d = seData(), n = 0;
+    if (tab === 'season') SS.SEASON.missions.forEach(function (m) { if (d.mc.indexOf(m.id) < 0 && (d.st[m.stat] || 0) >= m.goal) n++; });
+    else SS.SEASON.levels.forEach(function (L) { if (d.lc.indexOf(L.lv) < 0 && seLevel() >= L.lv) n++; });
+    return n;
+  }
+  function seasonRewardInfo(r) {
+    if (r.kind === 'coins') return { i: ic('moneda'), t: r.n + ' monedas' };
+    if (r.kind === 'box') return { i: ic('caja'), t: (r.n > 1 ? r.n + ' cajas' : 'Una caja') };
+    if (r.kind === 'card') return { i: ic('cartas'), t: CARD[r.id] ? CARD[r.id].name : r.id };
+    if (r.kind === 'skin') { var sk = (window.CARTAS_SKINS || []).filter(function (k) { return k.id === r.id; })[0]; return { i: ic('estrella'), t: 'Skin: ' + (sk ? sk.name : r.id) }; }
+    return { i: ic('brillo'), t: 'Efecto: ' + r.id };
+  }
+  function seasonHead() {
+    var d = seData(), S = SS.SEASON, lv = seLevel(), max = S.levels.length, into = lv >= max ? S.xpPerLevel : d.xp - lv * S.xpPerLevel;
+    var left = S.end ? Math.max(0, Math.ceil((Date.parse(S.end) - Date.now()) / 86400000)) : null;
+    return '<div class="panel sehead"><div class="selv"><b>' + lv + '</b><span>Nivel</span></div><div class="sebar"><h2>' + esc(S.name) + '</h2><div class="sexp"><i style="width:' + Math.round(into / S.xpPerLevel * 100) + '%"></i></div><p class="mut">' + (lv >= max ? '¡Has completado el pase!' : into + ' / ' + S.xpPerLevel + ' XP para el nivel ' + (lv + 1)) + ' · XP total: ' + d.xp + (left == null ? '' : ' · ' + (d.active ? 'quedan ' + left + (left === 1 ? ' día' : ' días') : 'temporada terminada')) + '</p></div></div>';
+  }
+  function seasonMissions() {
+    var d = seData(), list = SS.SEASON.missions.slice().sort(function (x, y) {
+      var f = function (m) { return d.mc.indexOf(m.id) >= 0 ? 2 : (d.st[m.stat] || 0) >= m.goal ? 0 : 1; }; return f(x) - f(y);
+    });
+    if (!list.length) return '<div class="panel"><p class="mut">Todavía no hay misiones de temporada.</p></div>';
+    return '<ul class="mslist">' + list.map(function (m) {
+      var p = Math.min(m.goal, d.st[m.stat] || 0), cl = d.mc.indexOf(m.id) >= 0, ok = p >= m.goal;
+      var btn = cl ? '<span class="msd">' + ic('check') + ' Recogida</span>' : ok && d.active ? '<button class="btn sm cta" data-act="smclaim" data-id="' + m.id + '">Recoger +' + m.xp + ' XP</button>' : '<span class="msxp">+' + m.xp + ' XP</span>';
+      return '<li class="msn' + (cl ? ' done' : ok ? ' ready' : '') + '"><div class="msi">' + ic('mision') + '</div><div class="msb"><b>' + esc(m.t) + '</b><span class="mut">' + esc(m.d) + '</span><div class="meter msm"><i class="on" style="width:' + Math.round(p / m.goal * 100) + '%"></i></div></div><span class="msp">' + p + ' / ' + m.goal + '</span>' + btn + '</li>';
+    }).join('') + '</ul>';
+  }
+  function seasonPass() {
+    var d = seData(), lv = seLevel();
+    if (!SS.SEASON.levels.length) return '<div class="panel"><p class="mut">El pase de batalla aún no tiene niveles.</p></div>';
+    return '<div class="sepass">' + SS.SEASON.levels.map(function (L) {
+      var cl = d.lc.indexOf(L.lv) >= 0, ok = lv >= L.lv, r = seasonRewardInfo(L.reward);
+      var btn = cl ? '<span class="msd">' + ic('check') + '</span>' : ok && d.active ? '<button class="btn sm cta" data-act="slclaim" data-lv="' + L.lv + '">Recoger</button>' : '<span class="selock">' + ic('candado') + '</span>';
+      return '<div class="sel' + (cl ? ' done' : ok ? ' ready' : '') + '"><span class="sen">Nivel ' + L.lv + '</span><span class="sei">' + r.i + '</span><b>' + esc(r.t) + '</b>' + btn + '</div>';
+    }).join('') + '</div>';
+  }
   function renderMissions() {
     var a = ui.acct, all = MSN.MISSIONS.slice().sort(function (x, y) {
       var kx = msClaimed(x) ? 2 : msDone(x) ? 0 : 1, ky = msClaimed(y) ? 2 : msDone(y) ? 0 : 1; return kx - ky;
@@ -402,7 +445,10 @@
       var p = msProg(m), cl = msClaimed(m), ok = msDone(m), btn = cl ? '<span class="msd">' + ic('check') + ' Recogida</span>' : ok ? '<button class="btn sm cta" data-act="msclaim" data-id="' + m.id + '">' + ic('caja') + ' Recoger caja</button>' : '<span class="msbox" title="Recompensa: una caja">' + ic('caja') + '</span>';
       return '<li class="msn' + (cl ? ' done' : ok ? ' ready' : '') + '"><div class="msi">' + ic('mision') + '</div><div class="msb"><b>' + esc(m.t) + '</b><span class="mut">' + esc(m.d) + '</span><div class="meter msm"><i class="on" style="width:' + Math.round(p / m.goal * 100) + '%"></i></div></div><span class="msp">' + p + ' / ' + m.goal + '</span>' + btn + '</li>';
     }).join('');
-    app.innerHTML = head('missions', ic('mision') + ' Misiones') + (ui.msg ? '<p class="err">' + esc(ui.msg) + '</p>' : '') +
+    var tab = ui.msTab === 'season' || ui.msTab === 'pass' ? ui.msTab : 'ms';
+    var tabs = '<div class="mstabs">' + [['ms', 'Misiones'], ['season', 'Misiones de temporada'], ['pass', 'Pase de batalla']].map(function (x) { return '<button class="' + (tab === x[0] ? 'on' : '') + '" data-act="mstab" data-v="' + x[0] + '">' + x[1] + (x[0] !== 'ms' && seasonReady(x[0]) ? ' <i class="nbadge">' + seasonReady(x[0]) + '</i>' : '') + '</button>'; }).join('') + '</div>';
+    if (tab !== 'ms') { app.innerHTML = head('missions', ic('mision') + ' Misiones') + (ui.msg ? '<p class="err">' + esc(ui.msg) + '</p>' : '') + tabs + seasonHead() + (tab === 'season' ? seasonMissions() : seasonPass()) + '</div>'; return; }
+    app.innerHTML = head('missions', ic('mision') + ' Misiones') + (ui.msg ? '<p class="err">' + esc(ui.msg) + '</p>' : '') + tabs +
       '<div class="panel msbar">' + boxImg('sm') + '<div><h2>' + (a.boxes || 0) + ' ' + ((a.boxes || 0) === 1 ? 'caja' : 'cajas') + ' en tu inventario</h2><p class="mut">Cada misión te da una caja con una carta, una skin o un efecto que aún no tengas. Las cajas no se abren al recogerlas: las guardas en tu inventario. Misiones completadas: ' + done + ' / ' + MSN.MISSIONS.length + '.</p></div><button class="btn sec" data-act="goinv">' + ic('cartas') + ' Ir al inventario</button></div>' +
       '<ul class="mslist">' + items + '</ul></div>';
   }
@@ -2100,6 +2146,9 @@
     if (act === 'tutexit') { tutExit(); return; }
     if (ui.tut && (act === 'refresh' || act === 'freeze')) return;
     if (act === 'msclaim') { return api('missionClaim', { id: el.dataset.id }).then(function (r) { if (r.data && r.data.user) setAcct(r.data.user); if (r.ok) snd('claim'); ui.msg = r.ok ? '' : (r.data.error || ''); render(); }); }
+    if (act === 'mstab') { ui.msTab = el.dataset.v; return render(); }
+    if (act === 'smclaim') { return api('seasonMissionClaim', { id: el.dataset.id }).then(function (r) { if (r.data && r.data.user) setAcct(r.data.user); if (r.ok) snd('claim'); ui.msg = r.ok ? '' : (r.data.error || ''); render(); }); }
+    if (act === 'slclaim') { return api('seasonLevelClaim', { lv: +el.dataset.lv }).then(function (r) { if (r.data && r.data.user) setAcct(r.data.user); if (r.ok) snd('claim'); ui.msg = r.ok ? '' : (r.data.error || ''); render(); }); }
     if (act === 'rkclaim') { return api('rankClaim', { id: el.dataset.id }).then(function (r) { if (r.data && r.data.user) setAcct(r.data.user); if (r.ok) snd('claim'); ui.msg = r.ok ? '' : (r.data.error || ''); render(); }); }
     if (act === 'goinv') { ui.screen = 'deck'; ui.colTab = 'inv'; ui.dedit = null; window.scrollTo(0, 0); return render(); }
     if (act === 'boxinfo') { ui.boxInfo = !ui.boxInfo; return renderDeck(); }

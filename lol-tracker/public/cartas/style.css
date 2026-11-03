@@ -2263,3 +2263,23 @@ body.soc-open #app { margin-right: 286px; }
 .fpp .profhead { margin-bottom: .8rem; } .fpp .pstats { margin: 0; border: 0; padding: 0; background: none; }
 .fpx { position: absolute; top: .5rem; right: .7rem; width: 2rem; height: 2rem; border-radius: 50%; border: 1px solid var(--line); background: rgba(255,255,255,.05); color: var(--ink); font-size: 1.2rem; cursor: pointer; z-index: 2; }
 .fpp .fst.on { color: #4ade80; } .fpp .fst.play { color: #fbbf24; }
+
+/* Misiones: pestañas, temporada y pase de batalla */
+.mstabs { display: flex; gap: .4rem; flex-wrap: wrap; margin-bottom: .8rem; border-bottom: 1px solid var(--line); }
+.mstabs button { background: transparent; border: 0; border-bottom: 3px solid transparent; color: var(--mut); padding: .6rem 1rem; font: inherit; font-weight: 600; letter-spacing: .04em; cursor: pointer; }
+.mstabs button:hover { color: var(--ink); } .mstabs button.on { color: var(--gold); border-bottom-color: var(--gold); }
+.mstabs .nbadge { position: static; display: inline-grid; margin-left: .3rem; }
+.sehead { display: flex; align-items: center; gap: 1.2rem; }
+.selv { display: grid; place-items: center; width: 84px; height: 84px; flex: none; border-radius: 50%; border: 3px solid var(--gold); background: radial-gradient(circle, #123049, #08121f); }
+.selv b { font-family: var(--serif); font-size: 2rem; color: var(--gold); line-height: 1; } .selv span { font-size: .65rem; text-transform: uppercase; letter-spacing: .1em; color: var(--mut); margin-top: -1.2rem; }
+.sebar { flex: 1; min-width: 0; } .sebar h2 { margin: 0 0 .4rem; }
+.sepass { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: .6rem; margin-bottom: 1rem; }
+.sel { display: flex; flex-direction: column; align-items: center; gap: .35rem; padding: .8rem .5rem; border: 1px solid var(--line); border-radius: 12px; background: rgba(255,255,255,.03); text-align: center; }
+.sel .sen { font-size: .72rem; text-transform: uppercase; letter-spacing: .1em; color: var(--mut); } .sel .sei { font-size: 1.8rem; color: var(--gold); } .sel .sei .ic { width: 1em; height: 1em; margin: 0; }
+.sel b { font-size: .85rem; } .sel.ready { border-color: var(--gold); box-shadow: 0 0 0 1px rgba(251,191,36,.3), 0 0 18px rgba(251,191,36,.18); } .sel.done { opacity: .55; }
+.selock { color: var(--mut); } .selock .ic { width: 1.1em; height: 1.1em; margin: 0; }
+@media (max-width: 640px) { .sehead { flex-direction: column; text-align: center; } }
+.sexp { height: 12px; border-radius: 99px; background: rgba(255,255,255,.1); overflow: hidden; margin: .2rem 0 .5rem; } .sexp i { display: block; height: 100%; border-radius: 99px; background: linear-gradient(90deg, #0ac8b9, #c8aa6e); }
+.sel .btn.sm { width: 100%; margin-top: auto; padding: .35rem .5rem; }
+.msm { display: block; background: rgba(255,255,255,.1); border-radius: 99px; overflow: hidden; } .msm i { display: block; height: 100%; border-radius: 99px; }
+.msxp { color: rgba(200,170,110,.85); font-size: .85rem; white-space: nowrap; font-weight: 600; }

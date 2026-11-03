@@ -1487,7 +1487,7 @@
     { id: 'dball', name: 'Kamehameha final', desc: 'Victoria: banner naranja y azul con rayos de energía, chispas de ki que suben y el emblema de la Tortuga. Derrota: el banner se agrieta en gris azulado y cae ceniza de combate.', price: 50 },
     { id: 'trebol', name: 'Grimorio del trébol', desc: 'Victoria: banner de cuero y cobre con tréboles de cinco hojas dorados que caen como polvo de magia. Derrota: el grimorio se oscurece y tréboles negros se desmoronan en ceniza.', price: 50 },
     { id: 'petalos', name: 'Jardín de la boticaria', desc: 'Victoria: banner rosa y verde bajo una lluvia de pétalos y hojas. Derrota: los pétalos se marchitan y el banner se agrieta entre hojas secas.', price: 50 },
-    { pass: true, id: 'neon', name: 'Máscara de neón', desc: 'Sin banner: una explosión de neón da paso a una máscara de tubos luminosos. Victoria: sonrisa cosida en azul eléctrico. Derrota: ceño y lágrimas en rojo parpadeante.', price: 50 }
+    { pass: true, id: 'mascara', name: 'Máscara de neón', desc: 'Sin banner: una explosión de neón da paso a una máscara de tubos luminosos. Victoria: sonrisa cosida en azul eléctrico. Derrota: ceño y lágrimas en rojo parpadeante.', price: 50 }
   ];
   var FIN_THEME = { eclipse: 'eclipse', hechizo: 'arcano', poker: 'poker', dball: 'dball', trebol: 'trebol', petalos: 'petalos' };
   var FIN_ICO = { dball: '<img class="finimg" src="img/sleeve-goku.webp" alt="">', trebol: '<svg class="finsvg" viewBox="-50 -50 100 100">' + [0, 72, 144, 216, 288].map(function (a) { return '<path transform="rotate(' + a + ')" d="M0 -3 C-19 -10 -24 -34 -10 -39 C-4 -41 0 -35 0 -31 C0 -35 4 -41 10 -39 C24 -34 19 -10 0 -3Z" fill="currentColor"/>'; }).join('') + '</svg>', petalos: '<svg class="finsvg" viewBox="-50 -50 100 100">' + [0, 72, 144, 216, 288].map(function (a, k) { return '<ellipse cx="0" cy="-24" rx="13" ry="22" transform="rotate(' + a + ')" fill="' + (k % 2 ? '#f472b6' : '#f9a8d4') + '"/>'; }).join('') + '<circle r="9" fill="#fde68a"/></svg>' };
@@ -1516,7 +1516,7 @@
     return '<div class="overlay fin fin-neon ' + (win ? 'owin' : 'olose') + (extra ? ' finprev' : '') + '">' + fx + face + '<div class="nxtitle">' + esc(title.replace(/[¡!]/g, '').toUpperCase()) + '</div><p class="finsub">' + sub + '</p><div class="finpanel">' + rw + '<div class="finbtns">' + btns + '</div></div></div>';
   }
   function finOverlay(id, win, title, sub, rw, btns, extra) {
-    if (id === 'neon') return neonFin(win, title, sub, rw, btns, extra);
+    if (id === 'mascara') return neonFin(win, title, sub, rw, btns, extra);
     if (FIN_THEME[id]) {
       var arc = id === 'hechizo', pok = id === 'poker', nw = id === 'dball' || id === 'trebol' || id === 'petalos', fx = '<div class="finfx">' + (nw && id === 'dball' ? '<div class="finrays"></div><i class="ring"></i><i class="ring r2"></i>' : nw ? '<i class="ring"></i><i class="ring r2"></i>' : pok ? '<i class="ring"></i><i class="ring r2"></i>' : arc ? '<div class="arcw"><i class="arc a"></i><i class="arc b"></i></div><i class="ring"></i><i class="ring r2"></i>' : '<div class="finrays"></div><i class="ring"></i><i class="ring r2"></i>'), n = win ? 34 : 30;
       for (var q = 0; q < n; q++) fx += '<i class="fp" style="--x:' + ((q * 29 + (q % 4) * 7) % 100) + '%;--d:' + (((q * 37) % 100) / 100 * 3).toFixed(2) + 's;--t:' + (3.6 + ((q * 13) % 10) / 4).toFixed(2) + 's;--s:' + (5 + (q % 5) * 2) + 'px;--w:' + ((q % 2 ? 1 : -1) * (14 + (q % 4) * 9)) + 'px"></i>';

@@ -73,8 +73,8 @@ function drawCard(minRarity) {
   return pool[crypto.randomInt(0, pool.length)].id;
 }
 // Efectos cosméticos disponibles (por ahora todos son de todos los jugadores)
-const FX_KINDS = { deploy: { default: 0, meteoro: 30, arcano: 30, perro: 30, fichas: 30, sombras: 30, kame: 30, grimorio: 30, grieta: 30 }, sleeve: { sin: 0, oro: 40, neon: 30, casino: 40, dragonball: 40, trebol: 40, petalos: 40, pokeball: 40 }, finish: { default: 0, eclipse: 50, hechizo: 50, poker: 50, dball: 50, trebol: 50, petalos: 50, neon: 50 } }; // precio en monedas de cada efecto, por tipo
-const FX_PASS = ['grieta', 'pokeball', 'neon']; // efectos exclusivos del pase de batalla (no se venden ni salen en sobres)
+const FX_KINDS = { deploy: { default: 0, meteoro: 30, arcano: 30, perro: 30, fichas: 30, sombras: 30, kame: 30, grimorio: 30, grieta: 30 }, sleeve: { sin: 0, oro: 40, neon: 30, casino: 40, dragonball: 40, trebol: 40, petalos: 40, pokeball: 40 }, finish: { default: 0, eclipse: 50, hechizo: 50, poker: 50, dball: 50, trebol: 50, petalos: 50, mascara: 50 } }; // precio en monedas de cada efecto, por tipo
+const FX_PASS = ['grieta', 'pokeball', 'mascara']; // efectos exclusivos del pase de batalla (no se venden ni salen en sobres)
 const FX_PRICE = Object.assign({}, FX_KINDS.deploy, FX_KINDS.sleeve, FX_KINDS.finish);
 const FX_DEFAULT = { deploy: 'default', sleeve: 'sin', finish: 'default' };
 const FX_DEPLOY = Object.keys(FX_PRICE);

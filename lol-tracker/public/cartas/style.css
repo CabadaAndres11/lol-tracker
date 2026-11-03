@@ -2402,3 +2402,14 @@ body.soc-open #app { margin-right: 286px; }
 .nxhead { display: none; }
 .nxray:nth-child(even), .nxsp:nth-child(even), .nxring.r2 { --c: var(--c2); --g: var(--g2); }
 .fin-neon .nxtitle { text-shadow: 0 0 6px var(--c), 0 0 18px var(--c), 0 0 38px var(--c2), 0 0 70px var(--g2); }
+
+/* Genkidama: esfera de energía con el daño acumulado parpadeando en rojo */
+.genw { position: relative; display: grid; place-items: center; width: 74px; height: 74px; padding: 0; border: 0; background: none; border-radius: 50%; color: inherit; flex: none; }
+.genw .gk-aura { position: absolute; inset: -12px; border-radius: 50%; background: radial-gradient(circle, rgba(120,200,255,.55) 0 45%, rgba(80,150,255,.25) 62%, transparent 72%); animation: gkpulse 1.6s ease-in-out infinite; }
+.genw .gk-orb { position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle at 36% 30%, #ffffff 0, #d8f1ff 18%, #7cc8ff 45%, #2f7bff 75%, #1a3fc4 100%); box-shadow: 0 0 14px #7cc8ff, 0 0 30px rgba(70,140,255,.8), inset 0 0 14px rgba(255,255,255,.6); animation: gkspin 6s linear infinite; }
+.genw .gk-orb::after { content: ''; position: absolute; inset: 4px; border-radius: 50%; background: conic-gradient(from 0deg, transparent 0 20%, rgba(255,255,255,.55) 28%, transparent 38% 60%, rgba(255,255,255,.4) 70%, transparent 80%); filter: blur(2px); }
+.genw b { position: relative; z-index: 2; font-size: 1.7rem; font-weight: 900; color: #ff2a2a; text-shadow: 0 0 3px #fff, 0 0 8px #fff, 0 2px 0 rgba(90,0,0,.6); animation: gkblink 1s steps(1) infinite; }
+@keyframes gkblink { 0%, 55% { opacity: 1; } 56%, 100% { opacity: .15; } }
+@keyframes gkpulse { 0%, 100% { transform: scale(.92); opacity: .8; } 50% { transform: scale(1.12); opacity: 1; } }
+@keyframes gkspin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .genw .gk-aura, .genw .gk-orb, .genw b { animation: none; } }

@@ -377,7 +377,7 @@
   // ---------- Misiones, cajas e inventario ----------
   var MSN = window.CARTAS_MISSIONS || { MISSIONS: [], RANK_BOXES: [] };
   var SS = window.CARTAS_SEASON || { SEASON: { id: '', name: '', xpPerLevel: 1, levels: [], missions: [] }, levelOf: function () { return 0; } };
-  function msProg(m) { var st = (ui.acct && ui.acct.ms && ui.acct.ms.stats) || {}; return Math.min(m.goal, st[m.stat] || 0); }
+  function msProg(m) { var st = (ui.acct && ui.acct.ms && ui.acct.ms.stats) || {}; return st['hit_' + m.id] ? m.goal : Math.min(m.goal, st[m.stat] || 0); }
   function msDone(m) { return msProg(m) >= m.goal; }
   function msClaimed(m) { return ((ui.acct && ui.acct.ms && ui.acct.ms.claimed) || []).indexOf(m.id) >= 0; }
   function rkReached(rb) { return ui.acct && (ui.acct.ptsMax || ui.acct.pts || 0) >= rb.min; }
@@ -400,7 +400,7 @@
   // avisos de la pestaña: misiones listas para recoger / niveles con recompensa por recoger
   function seasonReady(tab) {
     var d = seData(), n = 0;
-    if (tab === 'season') SS.SEASON.missions.forEach(function (m) { if (d.mc.indexOf(m.id) < 0 && (d.st[m.stat] || 0) >= m.goal) n++; });
+    if (tab === 'season') SS.SEASON.missions.forEach(function (m) { if (d.mc.indexOf(m.id) < 0 && seProg(d, m) >= m.goal) n++; });
     else SS.SEASON.levels.forEach(function (L) { if (d.lc.indexOf(L.lv) < 0 && seLevel() >= L.lv) n++; });
     return n;
   }
@@ -423,13 +423,14 @@
     var left = S.end ? Math.max(0, Math.ceil((Date.parse(S.end) - Date.now()) / 86400000)) : null;
     return '<div class="panel sehead"><div class="selv"><b>' + lv + '</b><span>Nivel</span></div><div class="sebar"><h2>' + esc(S.name) + '</h2><div class="sexp"><i style="width:' + Math.round(into / S.xpPerLevel * 100) + '%"></i></div><p class="mut">' + (lv >= max ? '¡Has completado el pase!' : into + ' / ' + S.xpPerLevel + ' XP para el nivel ' + (lv + 1)) + ' · XP total: ' + d.xp + (left == null ? '' : ' · ' + (d.active ? 'quedan ' + left + (left === 1 ? ' día' : ' días') : 'temporada terminada')) + '</p></div></div>';
   }
+  function seProg(d, m) { return d.st['hit_' + m.id] ? m.goal : Math.min(m.goal, d.st[m.stat] || 0); }
   function seasonMissions() {
     var d = seData(), list = SS.SEASON.missions.slice().sort(function (x, y) {
-      var f = function (m) { return d.mc.indexOf(m.id) >= 0 ? 2 : (d.st[m.stat] || 0) >= m.goal ? 0 : 1; }; return f(x) - f(y);
+      var f = function (m) { return d.mc.indexOf(m.id) >= 0 ? 2 : seProg(d, m) >= m.goal ? 0 : 1; }; return f(x) - f(y);
     });
     if (!list.length) return '<div class="panel"><p class="mut">Todavía no hay misiones de temporada.</p></div>';
     return '<ul class="mslist">' + list.map(function (m) {
-      var p = Math.min(m.goal, d.st[m.stat] || 0), cl = d.mc.indexOf(m.id) >= 0, ok = p >= m.goal;
+      var p = seProg(d, m), cl = d.mc.indexOf(m.id) >= 0, ok = p >= m.goal;
       var btn = cl ? '<span class="msd">' + ic('check') + ' Recogida</span>' : ok && d.active ? '<button class="btn sm cta" data-act="smclaim" data-id="' + m.id + '">Recoger +' + m.xp + ' XP</button>' : '<span class="msxp">+' + m.xp + ' XP</span>';
       return '<li class="msn' + (cl ? ' done' : ok ? ' ready' : '') + '"><div class="msi">' + ic('mision') + '</div><div class="msb"><b>' + esc(m.t) + '</b><span class="mut">' + esc(m.d) + '</span><div class="meter msm"><i class="on" style="width:' + Math.round(p / m.goal * 100) + '%"></i></div></div><span class="msp">' + p + ' / ' + m.goal + '</span>' + btn + '</li>';
     }).join('') + '</ul>';
@@ -1396,7 +1397,7 @@
       acts = '<div class="hint">' + esc(msg) + '</div><div class="btnrow"><button class="btn big" data-act="fight"' + (pend || (!P.mesa.some(Boolean) && E.mesaTroops(R).length) ? ' disabled' : '') + '>' + ic('espadas') + (s.rest ? ' ¡Listo!' : ' ¡Combatir!') + '</button><button class="btn sec sm" data-act="undo"' + (hasT ? '' : ' disabled') + ' title="Quitar todos los objetivos elegidos">' + ic('deshacer') + ' Deshacer</button></div>';
     } else if (s.phase === 'post') acts = ui.busy ? '' : '<button class="btn big" data-act="next">Continuar ▶</button>';
     if (PV.on && PV.rdy[1] && !PV.rdy[0] && (shop || prep || s.phase === 'post')) acts = '<div class="hint rivrdy">' + ic('aviso') + ' El rival ya está listo.</div>' + acts;
-    h += '<div class="hud bottom">' + orb('life', view.life[0], ML, s.spec && ui.playing ? esc(s.spec[0]) : 'Tu vida', 0) + (E.genStored(P) > 0 ? '<div class="genw" title="Genkidama: daño almacenado, se libera con la carta Genkidama">' + ic('fuego') + '<b>' + E.genStored(P) + '</b></div>' : '') + '<div class="goldw">' + orb('gold', P.gold, 0, 'Tu oro') + (E.interest(P) ? '<i class="gint" title="Interés: ganas +' + E.interest(P) + ' de oro extra al empezar la próxima ronda si conservas este oro">+' + E.interest(P) + ' interés</i>' : '') + '</div>' + gamOrbs(P, 0) + '<div class="acts">' + acts + '</div></div></div>';
+    h += '<div class="hud bottom">' + orb('life', view.life[0], ML, s.spec && ui.playing ? esc(s.spec[0]) : 'Tu vida', 0) + (E.genStored(P) > 0 ? '<div class="genw" title="Genkidama: daño almacenado, se libera con la carta Genkidama"><i class="gk-aura"></i><i class="gk-orb"></i><b>' + E.genStored(P) + '</b></div>' : '') + '<div class="goldw">' + orb('gold', P.gold, 0, 'Tu oro') + (E.interest(P) ? '<i class="gint" title="Interés: ganas +' + E.interest(P) + ' de oro extra al empezar la próxima ronda si conservas este oro">+' + E.interest(P) + ' interés</i>' : '') + '</div>' + gamOrbs(P, 0) + '<div class="acts">' + acts + '</div></div></div>';
 
     // Mano
     h += '<div class="handwrap' + (ui.dragMesa ? ' dropzone' : '') + '"><div class="hl">Tu mano ' + P.hand.length + (s.mode === 'revive' ? '' : '/' + CFG.handMax) + '</div><div class="hand">';

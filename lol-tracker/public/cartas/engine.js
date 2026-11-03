@@ -235,6 +235,10 @@
 
   // ---------- Tienda ----------
   function shopsEff(s) { return s.rumble ? Math.ceil(s.shops * 2 / 3) : s.shops; } // en Rumble hay más tiendas por combate: la progresión de rarezas se ajusta
+  function maxedIds(P) {
+    var o = {}; P.mesa.concat(P.hand).forEach(function (i) { if (i && isTroop(i) && (i.gl || 1) >= CFG.merge.length) o[i.id] = 1; });
+    return o;
+  }
   function offerPool(s, p) {
     var P = s.p[p], t = tiers(P);
     var pool = P.deck.filter(function (id) { return CARD[id].type === 'tropa' || true; });
@@ -244,6 +248,9 @@
       var cm = pool.filter(function (id) { return CARD[id].type === 'accion' || (CARD[id].type === 'tropa' && CARD[id].rarity === 'Común'); });
       if (cm.some(function (id) { return CARD[id].type === 'tropa'; })) elig = cm;
     }
+    var top = maxedIds(P); // las cartas que ya están al máximo (★3 por copias) dejan de salir en la tienda
+    var noTop = elig.filter(function (id) { return !top[id]; });
+    if (noTop.length) elig = noTop;
     var owned = {}, hc = {};
     if (s.rumble) P.mesa.concat(P.hand).forEach(function (i) { if (i && isTroop(i) && !i.dead) { owned[i.id] = 1; card(i).themes.forEach(function (th) { hc[th] = 1; }); } });
     return elig.map(function (id) {
@@ -298,7 +305,7 @@
   }
   function openShop(s, p) {
     var P = s.p[p], t = tiers(P);
-    var kept = P.frozen ? P.offers.filter(Boolean).slice(0, CFG.shopOffers) : []; // ofertas fijadas: se conservan las que no compraste
+    var mx = maxedIds(P), kept = P.frozen ? P.offers.filter(function (id) { return id && !mx[id]; }).slice(0, CFG.shopOffers) : []; // ofertas fijadas: se conservan las que no compraste
     P.frozen = false; P.refreshes = 0; P.pickUsed = false; P.offers = kept;
     while (P.offers.length < CFG.shopOffers) P.offers.push(drawOffer(s, p));
     fixFirstShop(s, p);
@@ -394,6 +401,10 @@
         keep.gl = from + 1;
         keep.perm.atk += Math.round(c.atk * d); keep.perm.hp += Math.round(c.hp * d); keep.hp += Math.round(c.hp * d);
         say(s, pv(s, p, 'Fusión: 3 × ' + c.name + ' → ★' + keep.gl + ' (' + atk(keep) + '/' + maxHp(keep) + ').', 'El rival fusiona 3 × ' + c.name + ' → ★' + keep.gl + '.'));
+        if (keep.gl >= CFG.merge.length && s.shopOpen) { // alcanzó el máximo: se retiran sus copias de la tienda actual
+          var kid = keep.id;
+          for (var oi = 0; oi < P.offers.length; oi++) if (P.offers[oi] === kid) { var nid = drawOffer(s, p), gg = 0; while (nid === kid && gg++ < 20) nid = drawOffer(s, p); P.offers[oi] = nid; }
+        }
         again = true; break;
       }
     }

@@ -1,6 +1,11 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-03', tag: 'Corrección', title: 'Misiones de racha y tienda con cartas al máximo',
+      items: ['Las misiones de victorias seguidas (de Misiones y de temporada) ahora muestran tu racha actual como progreso, no la mejor que hayas logrado. Si completas una, queda cumplida aunque luego pierdas y puedes recogerla igualmente.',
+        'En partida, cuando una carta llega a ★3 por copias, dejan de salir más copias suyas en la tienda (también se retiran las que ya estaban a la venta).'] },
+    { date: '2026-11-03', tag: 'Cambio', title: 'Nueva Genkidama en pantalla',
+      items: ['El daño acumulado de la sinergia Anime se muestra ahora como una Genkidama: una esfera de energía azul con el número parpadeando en rojo.'] },
     { date: '2026-11-03', tag: 'Novedad', title: 'Nuevo efecto de victoria y derrota: Máscara de neón',
       items: ['Nuevo efecto «Máscara de neón», distinto a los demás: sin banner, una explosión de neón da paso a una máscara de tubos luminosos. Victoria: sonrisa cosida en azul eléctrico. Derrota: ceño, lágrimas y parpadeo en rojo. Las luces alternan azul y rosa en la victoria, y rojo y blanco en la derrota. Es exclusivo del pase de batalla (no se vende ni sale en sobres): recompensa del nivel 18, de prueba por ahora. En el pase tiene un botón de play para verla.'] },
     { date: '2026-11-03', tag: 'Novedad', title: 'Nuevo despliegue: Grieta dimensional',

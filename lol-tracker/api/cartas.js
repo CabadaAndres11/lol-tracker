@@ -86,6 +86,7 @@ function recordGame(u, o) {
   const st = (u.st = u.st || {});
   st.games = (st.games || 0) + 1;
   if (o.won) { st.wins = (st.wins || 0) + 1; st.streak = (st.streak || 0) + 1; st.bestStreak = Math.max(st.bestStreak || 0, st.streak); } else st.streak = 0;
+  MS.MISSIONS.forEach((m) => { if (m.stat === 'streak' && st.streak >= m.goal) st['hit_' + m.id] = 1; }); // la misión de racha queda cumplida aunque luego se corte
   st.cards = (st.cards || 0) + Math.max(0, Math.min(60, Number(o.cards) || 0));
   if (o.mode === 'revive' || o.mode === 'rumble') st.revive = (st.revive || 0) + 1;
   if (o.mode === 'rumble') st.rumble = (st.rumble || 0) + 1;
@@ -105,6 +106,8 @@ function seasonGame(u, o) {
   const se = ensureSeason(u);
   seasonBump(u, 'games');
   if (o.won) { seasonBump(u, 'wins'); se.streak = (se.streak || 0) + 1; se.st.bestStreak = Math.max(se.st.bestStreak || 0, se.streak); } else se.streak = 0;
+  se.st.streak = se.streak;
+  SS.SEASON.missions.forEach((m) => { if (m.stat === 'streak' && se.streak >= m.goal) se.st['hit_' + m.id] = 1; });
   seasonBump(u, 'cards', Math.max(0, Math.min(60, Number(o.cards) || 0)));
   if (o.mode === 'revive' || o.mode === 'rumble') seasonBump(u, 'revive');
   if (o.mode === 'rumble') seasonBump(u, 'rumble');
@@ -129,7 +132,7 @@ function missionStats(u) {
   const st = u.st || {};
   const fxCount = fxOwned(u).filter((x) => FX_PRICE[x] > 0).length;
   return {
-    games: st.games || 0, wins: st.wins || 0, bestStreak: st.bestStreak || 0, cards: st.cards || 0, revive: st.revive || 0, rumble: st.rumble || 0, mp: st.mp || 0, v4: st.v4 || 0, packs: st.packs || 0,
+    games: st.games || 0, wins: st.wins || 0, bestStreak: st.bestStreak || 0, streak: st.streak || 0, ...Object.fromEntries(Object.keys(st).filter((k) => k.startsWith('hit_')).map((k) => [k, 1])), cards: st.cards || 0, revive: st.revive || 0, rumble: st.rumble || 0, mp: st.mp || 0, v4: st.v4 || 0, packs: st.packs || 0,
     lv3: Object.keys(u.dups || {}).filter((id) => (u.dups[id] || 0) >= 3).length, owned: (u.owned || []).length, skins: (u.skins || []).length, fx: fxCount,
   };
 }
@@ -889,7 +892,7 @@ module.exports = async function handler(req, res) {
       if (!m) { res.status(400).json({ error: 'Esa misión no existe.' }); return; }
       u.msClaimed = u.msClaimed || [];
       if (u.msClaimed.includes(m.id)) { res.status(409).json({ error: 'Ya has recogido esa caja.', user: publicUser(u) }); return; }
-      if ((missionStats(u)[m.stat] || 0) < m.goal) { res.status(403).json({ error: 'Aún no has completado esa misión.', user: publicUser(u) }); return; }
+      { const ms2 = missionStats(u); if ((ms2[m.stat] || 0) < m.goal && !ms2['hit_' + m.id]) { res.status(403).json({ error: 'Aún no has completado esa misión.', user: publicUser(u) }); return; } }
       u.msClaimed.push(m.id); u.boxes = (u.boxes || 0) + 1;
       await saveUser(cfg, u);
       res.status(200).json({ user: publicUser(u) }); return;
@@ -900,7 +903,7 @@ module.exports = async function handler(req, res) {
       if (!seasonActive()) { res.status(403).json({ error: 'La temporada ha terminado.', user: publicUser(u) }); return; }
       const se = ensureSeason(u);
       if (se.mc.includes(m.id)) { res.status(409).json({ error: 'Ya has recogido esa misión.', user: publicUser(u) }); return; }
-      if ((se.st[m.stat] || 0) < m.goal) { res.status(403).json({ error: 'Aún no has completado esa misión.', user: publicUser(u) }); return; }
+      if ((se.st[m.stat] || 0) < m.goal && !se.st['hit_' + m.id]) { res.status(403).json({ error: 'Aún no has completado esa misión.', user: publicUser(u) }); return; }
       se.mc.push(m.id); se.xp += m.xp;
       await saveUser(cfg, u);
       res.status(200).json({ user: publicUser(u) }); return;

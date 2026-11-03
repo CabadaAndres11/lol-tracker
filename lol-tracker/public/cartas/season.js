@@ -2,7 +2,7 @@
  * Cada misión de temporada da XP; cada nivel del pase se desbloquea con XP y entrega su recompensa.
  * ATENCIÓN: las misiones y recompensas de abajo son DE PRUEBA, se definirán más adelante. Para una temporada nueva
  * cambia el `id` (el progreso de cada cuenta empieza de cero al cambiar de temporada).
- *   stat: games | wins | bestStreak | cards | revive | rumble | mp | v4 | packs   (se cuentan desde que empieza la temporada)
+ *   stat: games | wins | streak (racha actual) | cards | revive | rumble | mp | v4 | packs   (se cuentan desde que empieza la temporada)
  *   reward: { kind: 'coins', n } | { kind: 'pack', n } | { kind: 'box', n } | { kind: 'emotes', id: <set de emoticonos> } | { kind: 'card', id } | { kind: 'skin', id } | { kind: 'fx', fx: 'deploy'|'sleeve'|'finish', id } */
 (function (root) {
   var MISSIONS = [
@@ -12,7 +12,7 @@
     { id: 'w3', stat: 'wins', goal: 3, xp: 40, t: 'A por todas', d: 'Gana 3 partidas.' },
     { id: 'w10', stat: 'wins', goal: 10, xp: 80, t: 'Dominio', d: 'Gana 10 partidas.' },
     { id: 'w25', stat: 'wins', goal: 25, xp: 120, t: 'Campeón de temporada', d: 'Gana 25 partidas.' },
-    { id: 's3', stat: 'bestStreak', goal: 3, xp: 60, t: 'Racha de temporada', d: 'Gana 3 partidas seguidas.' },
+    { id: 's3', stat: 'streak', goal: 3, xp: 60, t: 'Racha de temporada', d: 'Gana 3 partidas seguidas.' },
     { id: 'c100', stat: 'cards', goal: 100, xp: 60, t: 'Mazo en movimiento', d: 'Usa 100 cartas en partida.' },
     { id: 'rev3', stat: 'revive', goal: 3, xp: 50, t: 'Resurrecciones', d: 'Juega 3 partidas en modo Resurrección o Royal Rumble.' },
     { id: 'rr2', stat: 'rumble', goal: 2, xp: 50, t: 'Royal Rumble', d: 'Juega 2 partidas de Royal Rumble.' },

@@ -197,6 +197,73 @@
     document.addEventListener('keydown', introKey);
   }
 
+  // ---------- Pop-up de bienvenida de la versión 2.0 ----------
+  function intro20Off() { try { return localStorage.getItem(lk('intro-v20')) === '1'; } catch (e) { return false; } }
+  function maybeIntro20() {
+    if (ui.intro20Seen || !ui.acct || intro20Off() || introEl) return;
+    ui.intro20Seen = true;
+    setTimeout(function () { if (ui.screen === 'home' && !introEl) openIntro20(); }, 700);
+  }
+  function openIntro20() {
+    closeIntro();
+    var k, bg = '<i class="bgimg"></i><i class="aur a1"></i><i class="aur a2"></i><i class="aur a3"></i><i class="gr"></i><i class="sw"></i>';
+    for (k = 0; k < 22; k++) bg += '<i class="pt" style="left:' + (2 + k * 4.5) + '%;--d:' + ((k * 7) % 13) * .5 + 's;--c:' + ['#22d3ee', '#e879f9', '#a3e635', '#fb7185'][k % 4] + '"></i>';
+    var tk = 'AMIGOS ✦ PASE DE BATALLA ✦ ROYAL RUMBLE ✦ SOBRE ANIME ✦ MONTAJE AUTOMÁTICO ✦ EMOTICONOS ✦ PERFIL ✦ ';
+    var title = '<div class="i20s st" data-s="0,6"><i class="i20flash"></i><i class="i20ring"></i><i class="i20ring r2"></i><div class="i20ti"><small>¡Ya está aquí la versión!</small><b data-t="2.0">2.0</b></div><div class="i20tk"><span>' + tk + tk + '</span></div></div>';
+    var FR = [['dashlight-akali', 'Dashlight', 'on', 'En línea'], ['lihone', 'Lihone', 'play', 'En partida'], ['pampert', 'Pampert', 'on', 'En línea'], ['mertens', 'Mertens', 'off', 'Desconectado']];
+    var s1 = '<div class="i20s" data-s="1"><div class="i20h" style="--hc:#22d3ee">Amigos</div>' +
+      '<div class="i20chat glass"><div class="i20ch"><span class="av" style="background-image:url(art/lihone.webp)"></span><b>Lihone</b><em>En línea</em></div><div class="i20bs">' +
+      '<div class="b b1">¿Una partida de Versus de 4?</div><div class="b b2 me">¡Vamos! Te invito a mi sala</div><div class="b b3">Invitación aceptada ✔</div></div></div>' +
+      '<div class="i20inv glass"><span class="ii">' + ic('espadas') + '</span><div><small>Invitación de partida</small><b>Lihone te invita a un Versus de 4</b></div><em>Aceptar</em></div>' +
+      '<div class="i20fl glass"><h5>Amigos <small>2 en línea</small></h5>' + FR.map(function (f, i) {
+        return '<div class="r" style="--i:' + i + '"><span class="av" style="background-image:url(art/' + f[0] + '.webp)"><i class="sd ' + f[2] + '"></i></span><b>' + f[1] + '</b><em class="' + f[2] + '">' + f[3] + '</em></div>';
+      }).join('') + '</div></div>';
+    var s2 = '<div class="i20s" data-s="2"><div class="i20h" style="--hc:#e879f9">Perfil y emoticonos</div>' +
+      '<div class="i20pf glass"><div class="top"><span class="av" style="background-image:url(art/dashlight-akali.webp)"></span><div><b>Tu perfil</b><small>Rango y progreso al siguiente</small></div></div>' +
+      '<div class="rk"><i></i></div><div class="gs"><div><b>128</b><span>Partidas</span></div><div><b>64%</b><span>Victorias</span></div><div><b>9</b><span>Mejor racha</span></div><div><b>14</b><span>Cartas ★3</span></div></div></div>' +
+      '<div class="i20em">' + ['camo-3', 'gorra-3', 'camo-9', 'gorra-12'].map(function (e, i) { return '<span class="e" style="--i:' + i + '"><img src="emo/' + e + '.webp" alt=""></span>'; }).join('') + '<div class="tags"><i>Set Dashlight Akali</i><i>Set Lihone</i></div></div></div>';
+    var RW = ['img/coins-pile.webp', 'img/pack-set1.webp', 'img/box.webp', 'art/pampert-oikawa.webp', 'emo/camo-3.webp', 'img/pack-anime.webp', 'art/dashlight-kingambit.webp'], LV = [1, 4, 9, 10, 8, 12, 20];
+    var s3 = '<div class="i20s" data-s="3"><div class="i20h" style="--hc:#fbbf24">Pase de batalla</div><div class="i20trk">' + RW.map(function (u, i) {
+      return '<div class="n' + (i === 6 ? ' fin' : '') + '" style="--i:' + i + '"><small>Nivel ' + LV[i] + '</small><span class="rw' + (u.indexOf('art/') === 0 ? ' art' : '') + '" style="background-image:url(' + u + ')"></span><i class="ck">✔</i></div>';
+    }).join('') + '</div><div class="i20xp"><span>XP de temporada</span><div><i></i></div></div>' +
+      '<div class="i20ms"><span style="--i:0">Gana 3 partidas <b>+40 XP</b></span><span style="--i:1">Abre 3 sobres <b>+40 XP</b></span><span style="--i:2">Juega Royal Rumble <b>+50 XP</b></span></div></div>';
+    var ids = ['mertens-gambler', 'chipy-goku', 'lihone-viego', 'dashlight-sun-jin-woo', 'aitorlg-maomao'], fl = [['-90cqw', '-30cqw', '-40deg'], ['-40cqw', '50cqw', '35deg'], ['0', '-60cqw', '-15deg'], ['50cqw', '50cqw', '-30deg'], ['90cqw', '-30cqw', '40deg']];
+    var orb = ['pampert', 'lihone', 'mertens', 'javihi', 'chipy-goku', 'sech', 'hellbramn', 'petea-pokemaniaco', 'eriko', 'lucia'].map(function (a, i) { return '<i style="--a:' + (i * 36) + 'deg;background-image:url(art/' + a + '.webp)"></i>'; }).join('');
+    var s4 = '<div class="i20s" data-s="4"><div class="i20orb"><div>' + orb + '</div></div><div class="i20h" style="--hc:#fb7185">Royal Rumble</div>' +
+      '<div class="i20chips"><span>Sin mazo</span><span>Cualquier carta en la tienda</span><span>1 contra 1 · Versus de 4</span></div><div class="i20row">' +
+      ids.map(function (id, i) { return '<div class="c" style="--i:' + i + ';--fx:' + fl[i][0] + ';--fy:' + fl[i][1] + ';--fr:' + fl[i][2] + '">' + cardHtml(CARD[id], { lv: 1 }) + '</div>'; }).join('') + '</div></div>';
+    var s5 = '<div class="i20s" data-s="5"><div class="i20h" style="--hc:#a3e635">Y mucho más</div><div class="i20tg">' +
+      '<div class="t" style="--i:0"><div class="v"><img src="img/pack-anime.webp" alt=""><i class="shn"></i></div><div><b>Sobre Anime</b><span>Solo cartas de Anime. En la tienda y en el pase</span></div></div>' +
+      '<div class="t" style="--i:1"><div class="v am"><span style="background-image:url(art/pampert.webp)"></span><span style="background-image:url(art/lihone.webp)"></span><span style="background-image:url(art/mertens.webp)"></span><i>✦</i></div><div><b>Montaje automático</b><span>Elige hasta 3 sinergias y monta tu mazo</span></div></div>' +
+      '<div class="t" style="--i:2"><div class="v"><div class="i20mk"><i class="e1"></i><i class="e2"></i><i class="m"></i></div></div><div><b>Efectos exclusivos</b><span>Grieta, funda Pokéball y Máscara de neón</span></div></div>' +
+      '<div class="t" style="--i:3"><div class="v"><div class="i20gk"><b>-36</b></div></div><div><b>Nueva Genkidama</b><span>El daño acumulado, con número parpadeando</span></div></div></div></div>';
+    var h = '<div class="intropanel"><div class="introst i20" data-sc="0"><div class="i20bg">' + bg + '</div>' + title + s1 + s2 + s3 + s4 + s5 +
+      '<div class="icap"><span></span></div></div>' +
+      '<label class="ibtns inever"><input type="checkbox" data-i="never20"' + (intro20Off() ? ' checked' : '') + '> No mostrar más</label><p class="zhint">Pulsa fuera de la animación para cerrarla</p></div>';
+    introEl = document.createElement('div'); introEl.className = 'introov'; introEl.innerHTML = h;
+    document.body.appendChild(introEl);
+    var st = introEl.querySelector('.introst'), cap = st.querySelector('.icap span'), scs = st.querySelectorAll('.i20s');
+    var CAPS = ['', 'Amigos: estado en línea, chat e invitaciones directas a tus partidas', 'Perfil con rango y estadísticas, y emoticonos para chat y partidas', 'Pase de batalla: misiones de temporada y recompensas exclusivas', 'Royal Rumble: sin mazo y con cualquier carta en la tienda', 'Sobre Anime, montaje automático, efectos exclusivos y nueva Genkidama', ''];
+    function go(n) {
+      st.dataset.sc = n; cap.textContent = CAPS[n] || ''; cap.parentNode.classList.toggle('on', !!CAPS[n]);
+      Array.prototype.forEach.call(scs, function (el) { el.classList.toggle('on', el.dataset.s.split(',').indexOf(String(n)) >= 0); });
+    }
+    function run() {
+      introT.forEach(clearTimeout); introT = [];
+      st.classList.add('reset'); go(0);
+      introT.push(setTimeout(function () { st.classList.remove('reset'); go(0); }, 80));
+      [[3800, 1], [11200, 2], [17400, 3], [25800, 4], [33000, 5], [41000, 6]].forEach(function (x) { introT.push(setTimeout(function () { go(x[1]); }, x[0])); });
+      introT.push(setTimeout(run, 46000));
+    }
+    run();
+    introEl.addEventListener('change', function (e) {
+      if (e.target.dataset.i !== 'never20') return;
+      try { if (e.target.checked) localStorage.setItem(lk('intro-v20'), '1'); else localStorage.removeItem(lk('intro-v20')); } catch (er) {}
+    });
+    introEl.addEventListener('click', function (e) { if (e.target === introEl || e.target.classList.contains('intropanel')) closeIntro(); });
+    document.addEventListener('keydown', introKey);
+  }
+
   // ---------- Pop-up de bienvenida de la versión 1.3 (Anime) ----------
   function intro13Off() { try { return localStorage.getItem(lk('intro-v13')) === '1'; } catch (e) { return false; } }
   function maybeIntro13() {
@@ -586,10 +653,11 @@
       ].map(function (m) { return '<button class="ricon" data-act="nav" data-to="' + m[0] + '"><span class="rii">' + m[1] + '</span><b>' + m[2] + '</b><span class="mut">' + m[3] + '</span></button>'; }).join('') + '</div>' + homeNews() + '</div>';
     h += '<p class="mut" style="text-align:center">' + D.cards.length + ' tropas · ' + D.actions.length + ' acciones</p></div>';
     app.innerHTML = h;
-    maybeIntro13();
+    maybeIntro20();
   }
   // Animaciones de versiones anteriores: se pueden volver a ver desde el perfil
   var ANIM_LIST = [
+    { id: 'v20', ver: 'v2.0', name: 'Bienvenida a la 2.0: Amigos y Pase de batalla', desc: 'Pop-up de la versión 2.0: amigos y chat, perfil y emoticonos, pase de batalla, Royal Rumble, Sobre Anime, montaje automático y nuevos efectos.' },
     { id: 'v13', ver: 'v1.3', name: 'Bienvenida a la 1.3: Anime', desc: 'Pop-up de la versión 1.3: cartas nuevas de Anime, la Genkidama, el Soldado de Sombra y los nuevos efectos de despliegue, funda y victoria/derrota.' },
     { id: 'v12', ver: 'v1.2', name: 'Bienvenida a la 1.2: Gambling', desc: 'Pop-up de la versión 1.2: sinergia Gambling, nuevas cartas, ruleta de orbes, interés por ahorrar y nuevos efectos de casino.' },
     { id: 'correa', ver: 'v1.1', name: 'Sinergia Correa', desc: 'Pop-up de la versión 1.1: las cartas entran en juego, recibes a las 4 novias y una ocupa el hueco 5.' }
@@ -2331,7 +2399,7 @@
     if (act === 'sfxtest') { var tc = el.dataset.cat; snd(tc === 'ui' ? 'buy' : tc === 'combat' ? 'heavy' : tc === 'pack' ? 'rev-Épica' : 'win'); return; }
     if (ui.finPrev && act !== 'finprev' && act !== 'passfin' && act !== 'finflip' && act !== 'finclose') ui.finPrev = null;
     if (ui.dedit) { var ne = document.getElementById('de-name'); if (ne) ui.dedit.name = ne.value; }
-    if (act === 'playanim') { if (el.dataset.id === 'correa') openIntro(); else if (el.dataset.id === 'v12') openIntro12(); else if (el.dataset.id === 'v13') openIntro13(); return; }
+    if (act === 'playanim') { if (el.dataset.id === 'correa') openIntro(); else if (el.dataset.id === 'v12') openIntro12(); else if (el.dataset.id === 'v13') openIntro13(); else if (el.dataset.id === 'v20') openIntro20(); return; }
     if (act === 'avedit') { ui.avEdit = !ui.avEdit; return render(); }
     if (act === 'acctmenu') { var w = el.closest('.acctw'); if (w) w.classList.toggle('open'); return; }
     if (act === 'logout') return logout();

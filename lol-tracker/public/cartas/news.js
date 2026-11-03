@@ -1,7 +1,7 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
-    { date: '2026-11-03', tag: 'Novedad', title: '¡Ya está aquí la versión 2.0! Amigos, Pase de batalla y Royal Rumble', art: ['pampert-oikawa', 'dashlight-kingambit', 'javihi-prime'],
+    { date: '2026-11-03', tag: 'Novedad', title: '¡Ya está aquí la versión 2.0! Amigos, Pase de batalla y Royal Rumble', art: ['dashlight-sun-jin-woo', 'pampert-asta', 'javihi-prime'],
       items: [
         'Versión 2.0: la mayor actualización hasta ahora. Las novedades están agrupadas en las noticias de abajo para que las encuentres fácil.',
         'Social: lista de amigos con estado, chat e invitaciones, perfil con estadísticas (también el de tus amigos), emoticonos y una pantalla de Ajustes.',

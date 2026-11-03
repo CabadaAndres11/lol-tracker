@@ -1154,7 +1154,7 @@
         P.bot = 0;
         var ML = s.maxLife || CFG.life;
         if (P.life < ML) { P.life = ML; out.push('Boticaria: tu vida se rellena al máximo.'); }
-        else if (P.hand.length < CFG.handMax) { P.hand.push(mk(s, 'remedio', p)); out.push('Boticaria: tu vida está al máximo, recibes un Remedio.'); }
+        else if (P.hand.length < handCap(s)) { P.hand.push(mk(s, 'remedio', p)); out.push('Boticaria: tu vida está al máximo, recibes un Remedio.'); }
         else out.push('Boticaria: tu mano está llena, no recibes el Remedio.');
       }
     }
@@ -1172,7 +1172,7 @@
   // Cada ronda con la sinergia activa se entrega una carta Genkidama (si no tienes ya una y hay hueco en la mano)
   function genGive(s, p) {
     var P = s.p[p];
-    if ((tiers(P)['Anime'] || 0) < 1 || P.hand.length >= CFG.handMax || P.hand.some(function (i) { return i && i.id === 'genkidama'; })) return;
+    if ((tiers(P)['Anime'] || 0) < 1 || P.hand.length >= handCap(s) || P.hand.some(function (i) { return i && i.id === 'genkidama'; })) return;
     P.hand.push(mk(s, 'genkidama', p));
     if (p === 0 || s.pvp) say(s, pv(s, p, 'Sinergia Anime: recibes una Genkidama.', 'El rival recibe una Genkidama.'));
   }

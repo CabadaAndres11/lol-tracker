@@ -1,6 +1,8 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-03', tag: 'Corrección', title: 'Genkidama y Remedio con la mano llena',
+      items: ['En Resurrección y Royal Rumble la mano no tiene límite, pero el juego creía que seguía siendo de 5 cartas: con 5 o más en la mano no te entregaba la Genkidama de la sinergia Anime (ni el Remedio de la Boticaria de AitoRLG MaoMao). Ahora las recibes siempre. En el resto de modos sigue el límite de 5 cartas.'] },
     { date: '2026-11-03', tag: 'Equilibrio', title: 'Soldado de Sombra en Royal Rumble',
       items: ['Dashlight Sun Jin-Woo — Soldado de Sombra: en Royal Rumble el soldado ahora dura 2 tiendas en vez de una. Como en este modo hay una tienda antes de cada combate, así se mantiene durante los mismos 2 combates que en el modo normal.'] },
     { date: '2026-11-03', tag: 'Avance', title: 'Charla con los Desarrolladores',

@@ -74,6 +74,7 @@ function drawCard(minRarity) {
 }
 // Efectos cosméticos disponibles (por ahora todos son de todos los jugadores)
 const FX_KINDS = { deploy: { default: 0, meteoro: 30, arcano: 30, perro: 30, fichas: 30, sombras: 30, kame: 30, grimorio: 30, grieta: 30 }, sleeve: { sin: 0, oro: 40, neon: 30, casino: 40, dragonball: 40, trebol: 40, petalos: 40, pokeball: 40 }, finish: { default: 0, eclipse: 50, hechizo: 50, poker: 50, dball: 50, trebol: 50, petalos: 50, neon: 50 } }; // precio en monedas de cada efecto, por tipo
+const FX_PASS = ['grieta', 'pokeball', 'neon']; // efectos exclusivos del pase de batalla (no se venden ni salen en sobres)
 const FX_PRICE = Object.assign({}, FX_KINDS.deploy, FX_KINDS.sleeve, FX_KINDS.finish);
 const FX_DEFAULT = { deploy: 'default', sleeve: 'sin', finish: 'default' };
 const FX_DEPLOY = Object.keys(FX_PRICE);
@@ -137,7 +138,7 @@ const rankReached = (u) => Math.max(u.ptsMax || 0, u.pts || 0);
 function rollBox(u) {
   const cards = ALL.filter((c) => !(u.owned || []).includes(c.id));
   const skins = SKINS.filter((s) => !s.pass && !(u.skins || []).includes(s.id));
-  const fxs = FX_DEPLOY.filter((id) => FX_PRICE[id] > 0 && !fxOwned(u).includes(id));
+  const fxs = FX_DEPLOY.filter((id) => FX_PRICE[id] > 0 && !FX_PASS.includes(id) && !fxOwned(u).includes(id));
   const pools = [['card', cards, 5], ['skin', skins, 3], ['fx', fxs, 2]].filter((p) => p[1].length);
   if (!pools.length) { // lo tiene todo: carta repetida
     const c = ALL[crypto.randomInt(0, ALL.length)];
@@ -814,6 +815,7 @@ module.exports = async function handler(req, res) {
     if (act === 'fxBuy') { // comprar un efecto en la tienda
       const id = String(body.id || '');
       if (!FX_DEPLOY.includes(id)) { res.status(400).json({ error: 'Ese efecto no existe.' }); return; }
+      if (FX_PASS.includes(id) && !isAdmin(u)) { res.status(403).json({ error: 'Ese efecto es exclusivo del pase de batalla.' }); return; }
       if (fxOwned(u).includes(id)) { res.status(409).json({ error: 'Ya tienes ese efecto.', user: publicUser(u) }); return; }
       const cost = isAdmin(u) ? 0 : FX_PRICE[id];
       if (u.coins < cost) { res.status(402).json({ error: `Necesitas ${FX_PRICE[id]} monedas.`, user: publicUser(u) }); return; }

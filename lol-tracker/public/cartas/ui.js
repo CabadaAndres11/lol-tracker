@@ -491,7 +491,7 @@
     var a = ui.acct || {}, W = { 'Común': 50, 'Rara': 30, 'Épica': 15, 'Legendaria': 5 };
     var cards = D.cards.filter(function (c) { return !ui.ownedSet[c.id]; });
     var skins = (window.CARTAS_SKINS || []).filter(function (k) { return !k.pass && (a.skins || []).indexOf(k.id) < 0; });
-    var fxs = DEPLOY_LIST.concat(SLEEVE_LIST, FIN_LIST).filter(function (e) { return e.price > 0 && fxHas && !fxHas(e.id); });
+    var fxs = DEPLOY_LIST.concat(SLEEVE_LIST, FIN_LIST).filter(function (e) { return e.price > 0 && !e.pass && fxHas && !fxHas(e.id); });
     var pools = [['Carta nueva', cards.length, 5], ['Skin nueva', skins.length, 3], ['Efecto nuevo', fxs.length, 2]], tot = 0;
     pools.forEach(function (p) { if (p[1]) tot += p[2]; });
     var rows = pools.map(function (p) { return '<li><span>' + p[0] + '</span><b>' + (p[1] ? Math.round(p[2] / tot * 1000) / 10 + '%' : '—') + '</b><em>' + (p[1] ? p[1] + ' sin conseguir' : 'ya las tienes todas') + '</em></li>'; }).join('');
@@ -1464,7 +1464,7 @@
     { id: 'sombras', name: 'Soldados de sombra', desc: 'Un charco de sombras moradas se abre en el suelo, la carta se va formando como una silueta de humo con ojos brillantes y, al completarse, vuela a su hueco.', price: 30, ms: 3200, gap: 650 },
     { id: 'kame', name: 'Kamehameha', desc: 'Un guerrero carga su energía, dispara un Kamehameha que cruza la pantalla y el rayo deja la carta en su hueco.', price: 30, ms: 3300, gap: 700 },
     { id: 'grimorio', name: 'Grimorio de cinco hojas', desc: 'Un grimorio negro con un trébol de cinco hojas flota entre humo, se abre con un destello y de sus páginas sale la carta, que vuela a su hueco.', price: 30, ms: 3400, gap: 700 },
-    { id: 'grieta', name: 'Grieta dimensional', desc: 'La pantalla se resquebraja desde el centro, la grieta se abre en un resplandor y la carta surge de ella antes de volar a su hueco.', price: 30, ms: 3300, gap: 700 }
+    { pass: true, id: 'grieta', name: 'Grieta dimensional', desc: 'La pantalla se resquebraja desde el centro, la grieta se abre en un resplandor y la carta surge de ella antes de volar a su hueco.', price: 30, ms: 3300, gap: 700 }
   ];
   try { new Image().src = 'img/dog.webp'; } catch (e) {}
   var SLEEVE_LIST = [
@@ -1475,7 +1475,7 @@
     { id: 'dragonball', name: 'Dragon Ball', desc: 'Borde naranja y azul de kimono de combate y reverso naranja con el emblema de la escuela de la Tortuga en el centro.', price: 40 },
     { id: 'trebol', name: 'Trébol de cinco hojas', desc: 'Borde de cobre oscuro y reverso de grimorio gastado con un trébol negro de cinco hojas en el centro.', price: 40 },
     { id: 'petalos', name: 'Pétalos de la boticaria', desc: 'Borde que va del rosa al verde y reverso de jardín de hierbas con pétalos rosas y hojas verdes cayendo alrededor de una flor.', price: 40 },
-    { id: 'pokeball', name: 'Pokéball', desc: 'Borde negro y blanco de Pokéball y reverso rojo con una Pokéball en el centro.', price: 40 }
+    { pass: true, id: 'pokeball', name: 'Pokéball', desc: 'Borde negro y blanco de Pokéball y reverso rojo con una Pokéball en el centro.', price: 40 }
   ];
   // ---------- Efectos de victoria y derrota (cada pack trae los dos) ----------
   var FIN_LIST = [
@@ -1486,7 +1486,7 @@
     { id: 'dball', name: 'Kamehameha final', desc: 'Victoria: banner naranja y azul con rayos de energía, chispas de ki que suben y el emblema de la Tortuga. Derrota: el banner se agrieta en gris azulado y cae ceniza de combate.', price: 50 },
     { id: 'trebol', name: 'Grimorio del trébol', desc: 'Victoria: banner de cuero y cobre con tréboles de cinco hojas dorados que caen como polvo de magia. Derrota: el grimorio se oscurece y tréboles negros se desmoronan en ceniza.', price: 50 },
     { id: 'petalos', name: 'Jardín de la boticaria', desc: 'Victoria: banner rosa y verde bajo una lluvia de pétalos y hojas. Derrota: los pétalos se marchitan y el banner se agrieta entre hojas secas.', price: 50 },
-    { id: 'neon', name: 'Máscara de neón', desc: 'Sin banner: una explosión de neón da paso a una máscara de tubos luminosos. Victoria: sonrisa cosida en azul eléctrico. Derrota: ceño y lágrimas en rojo parpadeante.', price: 50 }
+    { pass: true, id: 'neon', name: 'Máscara de neón', desc: 'Sin banner: una explosión de neón da paso a una máscara de tubos luminosos. Victoria: sonrisa cosida en azul eléctrico. Derrota: ceño y lágrimas en rojo parpadeante.', price: 50 }
   ];
   var FIN_THEME = { eclipse: 'eclipse', hechizo: 'arcano', poker: 'poker', dball: 'dball', trebol: 'trebol', petalos: 'petalos' };
   var FIN_ICO = { dball: '<img class="finimg" src="img/sleeve-goku.webp" alt="">', trebol: '<svg class="finsvg" viewBox="-50 -50 100 100">' + [0, 72, 144, 216, 288].map(function (a) { return '<path transform="rotate(' + a + ')" d="M0 -3 C-19 -10 -24 -34 -10 -39 C-4 -41 0 -35 0 -31 C0 -35 4 -41 10 -39 C24 -34 19 -10 0 -3Z" fill="currentColor"/>'; }).join('') + '</svg>', petalos: '<svg class="finsvg" viewBox="-50 -50 100 100">' + [0, 72, 144, 216, 288].map(function (a, k) { return '<ellipse cx="0" cy="-24" rx="13" ry="22" transform="rotate(' + a + ')" fill="' + (k % 2 ? '#f472b6' : '#f9a8d4') + '"/>'; }).join('') + '<circle r="9" fill="#fde68a"/></svg>' };
@@ -1878,11 +1878,11 @@
   function fxItems(where, kind) {
     kind = kind || 'deploy';
     var a = ui.acct, sl = kind === 'sleeve', fi = kind === 'finish', cur = sl ? sleeveId() : fi ? finId() : deployId(), prev = sl ? 'slvprev' : fi ? 'finprev' : 'fxprev';
-    return (sl ? SLEEVE_LIST : fi ? FIN_LIST : DEPLOY_LIST).filter(function (e) { return where === 'col' || e.price > 0; }).map(function (e) {
+    return (sl ? SLEEVE_LIST : fi ? FIN_LIST : DEPLOY_LIST).filter(function (e) { return where === 'col' || (e.price > 0 && !e.pass); }).map(function (e) {
       var eq = e.id === cur, has = fxHas(e.id) || e.price === 0, btn;
       if (where === 'shop') btn = has ? '<button class="btn sec sm" disabled>' + ic('check') + ' Ya lo tienes</button>' : '<button class="btn sm" data-act="fxbuy" data-id="' + e.id + '"' + (a.coins < (a.admin ? 0 : e.price) ? ' disabled' : '') + '>Comprar · ' + (a.admin ? 'gratis' : e.price + ' ' + ic('moneda')) + '</button>';
-      else btn = eq ? '' : has ? '<button class="btn sm" data-act="fxequip" data-kind="' + kind + '" data-id="' + e.id + '">Equipar</button>' : '<button class="btn sm" disabled title="Cómpralo en la tienda">' + ic('candado') + ' Sin comprar</button><button class="btn sec sm" data-act="fxgoshop">Ir a la tienda</button>';
-      return '<div class="fxitem' + (eq && where === 'col' ? ' eq' : '') + (has ? '' : ' nofx') + '"><div class="fxinfo"><b>' + esc(e.name) + (eq && where === 'col' ? ' <span class="fxbadge">' + ic('check') + ' Equipado</span>' : '') + (has || e.price === 0 ? '' : ' <span class="fxprice">' + e.price + ' ' + ic('moneda') + '</span>') + '</b><span class="mut">' + esc(e.desc) + '</span></div><div class="fxbtns"><button class="btn sec sm" data-act="' + prev + '" data-id="' + e.id + '">' + ic('ojo') + ' Probar</button>' + btn + '</div></div>';
+      else btn = eq ? '' : has ? '<button class="btn sm" data-act="fxequip" data-kind="' + kind + '" data-id="' + e.id + '">Equipar</button>' : '<button class="btn sm" disabled title="Cómpralo en la tienda">' + ic('candado') + (e.pass ? ' Pase de batalla' : ' Sin comprar') + '</button>' + (e.pass ? '' : '<button class="btn sec sm" data-act="fxgoshop">Ir a la tienda</button>');
+      return '<div class="fxitem' + (eq && where === 'col' ? ' eq' : '') + (has ? '' : ' nofx') + '"><div class="fxinfo"><b>' + esc(e.name) + (eq && where === 'col' ? ' <span class="fxbadge">' + ic('check') + ' Equipado</span>' : '') + (has || e.price === 0 ? '' : e.pass ? ' <span class="fxprice">Pase de batalla</span>' : ' <span class="fxprice">' + e.price + ' ' + ic('moneda') + '</span>') + '</b><span class="mut">' + esc(e.desc) + '</span></div><div class="fxbtns"><button class="btn sec sm" data-act="' + prev + '" data-id="' + e.id + '">' + ic('ojo') + ' Probar</button>' + btn + '</div></div>';
     }).join('');
   }
   function effectsTab() {

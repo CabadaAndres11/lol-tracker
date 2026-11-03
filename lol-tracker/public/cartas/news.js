@@ -2,12 +2,12 @@
 (function (root) {
   var NEWS = [
     { date: '2026-11-03', tag: 'Novedad', title: 'Nuevo efecto de victoria y derrota: Máscara de neón',
-      items: ['Nuevo efecto «Máscara de neón», distinto a los demás: sin banner, una explosión de neón da paso a una máscara de tubos luminosos. Victoria: sonrisa cosida en azul eléctrico. Derrota: ceño, lágrimas y parpadeo en rojo. Las luces alternan azul y rosa en la victoria, y rojo y blanco en la derrota. Está en la tienda (50 monedas) y es la recompensa del nivel 18 del pase (de prueba por ahora). En el pase tiene un botón de play para verla.'] },
+      items: ['Nuevo efecto «Máscara de neón», distinto a los demás: sin banner, una explosión de neón da paso a una máscara de tubos luminosos. Victoria: sonrisa cosida en azul eléctrico. Derrota: ceño, lágrimas y parpadeo en rojo. Las luces alternan azul y rosa en la victoria, y rojo y blanco en la derrota. Es exclusivo del pase de batalla (no se vende ni sale en sobres): recompensa del nivel 18, de prueba por ahora. En el pase tiene un botón de play para verla.'] },
     { date: '2026-11-03', tag: 'Novedad', title: 'Nuevo despliegue: Grieta dimensional',
-      items: ['Nuevo efecto de despliegue «Grieta dimensional»: la pantalla se resquebraja desde el centro, la grieta se abre en un resplandor y la carta surge de ella antes de volar a su hueco. Está en la tienda (30 monedas) y es la recompensa del nivel 13 del pase (de prueba por ahora; sustituye a «Aparición arcana», que sigue en la tienda).',
+      items: ['Nuevo efecto de despliegue «Grieta dimensional»: la pantalla se resquebraja desde el centro, la grieta se abre en un resplandor y la carta surge de ella antes de volar a su hueco. Es exclusivo del pase de batalla (no se vende ni sale en sobres): recompensa del nivel 13, de prueba por ahora.',
         'En el pase, los efectos de despliegue tienen un botón de play sobre su icono para verlos en acción antes de conseguirlos.'] },
     { date: '2026-11-03', tag: 'Novedad', title: 'Nueva funda: Pokéball',
-      items: ['Nueva funda «Pokéball»: borde negro y blanco y reverso rojo con una Pokéball en el centro. Está en la tienda (40 monedas) y es la recompensa del nivel 5 del pase de batalla (de prueba por ahora; sustituye a la funda Neón, que sigue en la tienda).'] },
+      items: ['Nueva funda «Pokéball»: borde negro y blanco y reverso rojo con una Pokéball en el centro. Es exclusiva del pase de batalla (no se vende ni sale en sobres): recompensa del nivel 5, de prueba por ahora.'] },
     { date: '2026-11-03', tag: 'Novedad', title: 'Nueva skin exclusiva del pase: Dashlight Kingambit',
       items: ['Nueva skin «Dashlight Kingambit» para Computer Dashlight. Como Pampert Oikawa, no se vende ni sale en sobres: es la recompensa final del pase de batalla (nivel 20, de prueba por ahora; sustituye a «Hoja espectral», que sigue en la tienda).'] },
     { date: '2026-11-03', tag: 'Novedad', title: 'Nueva skin exclusiva del pase: Pampert Oikawa',

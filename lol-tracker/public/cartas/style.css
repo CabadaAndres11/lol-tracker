@@ -2637,3 +2637,10 @@ body.soc-open #app { margin-right: 286px; }
 .ipseg button.on { background: linear-gradient(180deg, #e8c777, #b98a2e); color: #2a1a00; border-color: #fde68a; }
 .ipmodes { display: flex; flex-direction: column; gap: .45rem; } .ipmodes button { display: flex; flex-direction: column; align-items: flex-start; gap: .15rem; padding: .65rem .9rem; border-radius: 10px; border: 1px solid rgba(232,199,119,.4); background: rgba(255,255,255,.05); color: #fff; cursor: pointer; text-align: left; }
 .ipmodes button:hover { background: rgba(232,199,119,.18); border-color: #e8c777; } .ipmodes b { font-size: 1rem; } .ipmodes span { font-size: .8rem; color: #cbd5e1; }
+
+/* Aviso de nueva versión */
+.updbar { position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%); z-index: 900; display: flex; align-items: center; gap: .8rem; width: min(94vw, 640px); padding: .7rem 1rem; border-radius: 14px; background: linear-gradient(180deg, #1b1533, #0f0b1f); border: 1px solid #e8c777; box-shadow: 0 10px 40px rgba(0,0,0,.7), 0 0 24px rgba(232,199,119,.25); animation: updin .4s cubic-bezier(.2,1.2,.4,1); }
+@keyframes updin { from { opacity: 0; transform: translate(-50%, 20px); } }
+.updbar .updic { width: 34px; flex: none; display: grid; } .updbar .updic svg { width: 100%; height: auto; }
+.updbar div { flex: 1; min-width: 0; } .updbar b { display: block; font-size: .95rem; color: #fde68a; } .updbar div span { font-size: .8rem; color: #cbd5e1; }
+@media (max-width: 560px) { .updbar { flex-wrap: wrap; } .updbar div { flex-basis: calc(100% - 50px); } }

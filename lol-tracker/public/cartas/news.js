@@ -1,6 +1,8 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-03', tag: 'Novedad', title: 'Aviso de nueva versión',
+      items: ['El juego comprueba cada pocos minutos si hay una versión más reciente. Cuando la hay, aparece un aviso para actualizar el navegador y no quedarte con una versión antigua. Si estás en una partida, te pide confirmación antes de recargar.'] },
     { date: '2026-11-03', tag: 'Corrección', title: 'Aviso de cajas de rango en Clasificación',
       items: ['Las cajas de rango por recoger ahora se avisan en Clasificación (menú y pantalla de inicio) y ya no cuentan en el aviso de Misiones.'] },
     { date: '2026-11-03', tag: 'Corrección', title: 'Genkidama y Remedio con la mano llena',

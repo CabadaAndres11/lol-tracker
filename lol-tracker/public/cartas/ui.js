@@ -2823,9 +2823,42 @@
     pre.then(function () { return api(PV.px + 'Join', { deck: ui.deck, code: inv.code, mode: PV.mode, cover: curCover() }); }).then(pvpGot);
     return '';
   };
+  // ---------- Aviso de nueva versión: comprueba cada pocos minutos si el juego se ha actualizado ----------
+  var UPD = { files: ['ui.js', 'engine.js', 'cards.js', 'style.css', 'news.js', 'season.js', 'social.js', 'missions.js'], base: null, shown: false, last: 0, busy: false };
+  function updSig() { // huella de los archivos del juego en el servidor (ETag / fecha / tamaño)
+    return Promise.all(UPD.files.map(function (f) {
+      return fetch('/cartas/' + f, { method: 'HEAD', cache: 'no-store' }).then(function (r) { return r.ok ? [r.headers.get('etag'), r.headers.get('last-modified'), r.headers.get('content-length')].join('~') : ''; }).catch(function () { return ''; });
+    })).then(function (a) { return a.some(function (x) { return !x || x === '~~'; }) ? '' : a.join('|'); });
+  }
+  function updCheck() {
+    if (UPD.busy || UPD.shown) return; UPD.busy = true; UPD.last = Date.now();
+    updSig().then(function (sig) {
+      UPD.busy = false; if (!sig) return;
+      if (!UPD.base) { UPD.base = sig; return; }
+      if (sig !== UPD.base) updShow();
+    });
+  }
+  function updShow() {
+    UPD.shown = true;
+    var el = document.createElement('div'); el.className = 'updbar';
+    el.innerHTML = '<span class="updic">' + ic('brillo') + '</span><div><b>¡Hay una nueva versión del juego!</b><span>Actualiza el navegador para tener las últimas novedades y correcciones.</span></div><button class="btn sm" data-u="go">Actualizar</button><button class="btn sec sm" data-u="later">Más tarde</button>';
+    el.addEventListener('click', function (e) {
+      var t = e.target.closest('[data-u]'); if (!t) return;
+      if (t.dataset.u === 'later') { el.remove(); UPD.shown = false; UPD.base = null; UPD.last = Date.now() + 10 * 60000; return; } // vuelve a avisar pasados ~15 min
+      if ((PV.on || ui.screen === 'game') && !window.confirm('Estás en una partida: si actualizas ahora la perderás. ¿Actualizar igualmente?')) return;
+      location.reload();
+    });
+    document.body.appendChild(el);
+  }
+  function updStart() {
+    updCheck();
+    setInterval(updCheck, window.CARTAS_UPDATE_MS || 5 * 60000);
+    document.addEventListener('visibilitychange', function () { if (!document.hidden && Date.now() - UPD.last > 2 * 60000) updCheck(); });
+  }
   ui.cardHtml = cardHtml; window.CartasUI = ui; window.CartasRender = render; // depuración
   document.addEventListener('click', function (e) { if (!e.target.closest || !e.target.closest('.acctw')) { var o = document.querySelector('.acctw.open'); if (o) o.classList.remove('open'); } });
   app.addEventListener('keydown', function (e) { if (e.key === 'Enter' && ui.screen === 'login' && e.target.id && e.target.id.indexOf('lg-') === 0) { var b = app.querySelector('[data-act=login],[data-act=register]'); if (b) b.click(); } });
+  updStart();
   render();
   if (!getTok()) { ui.screen = 'login'; render(); }
   else api('me').then(function (r) {

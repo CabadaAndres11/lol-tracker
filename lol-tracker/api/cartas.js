@@ -45,7 +45,7 @@ const ALL = DATA.cards.concat(DATA.actions);
 const BY_ID = {}; ALL.forEach((c) => { BY_ID[c.id] = c; });
 // Regalo de bienvenida: el jugador elige un mazo inicial de una sinergia (+ acciones generales Comunes).
 // Si la sinergia no tiene tropas Comunes se añaden dos tropas Comunes baratas para poder jugar la tienda inicial.
-const STARTER_THEMES = ['Pokémon', 'Informático', 'Trabajo', 'Lol', 'Comebacker', 'KOI'];
+const STARTER_THEMES = ['Pokémon', 'Comebacker', 'Correa', 'Informático', 'Anime'];
 function starterFor(theme) {
   const troops = DATA.cards.filter((c) => c.themes.includes(theme));
   const ids = troops.map((c) => c.id);

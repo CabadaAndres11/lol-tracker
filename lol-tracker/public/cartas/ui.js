@@ -792,7 +792,7 @@
       '<div class="btnrow">' + (reg ? '<button class="btn" data-act="register">Crear cuenta</button>' : '<button class="btn" data-act="login">Entrar</button>') + '</div>' +
       (reg ? '<p class="mut" style="margin:.6rem 0 0">Al crear la cuenta recibes ' + 150 + ' monedas y un mazo inicial a tu elección.</p>' : '<p class="mut" style="margin:.6rem 0 0">¿Primera vez? Pulsa «Registrarse» para crear tu cuenta.</p>') + '</div></div>';
   }
-  var STARTERS = ['Pokémon', 'Informático', 'Trabajo', 'Lol', 'Comebacker', 'KOI'];
+  var STARTERS = ['Pokémon', 'Comebacker', 'Correa', 'Informático', 'Anime'];
   function starterCards(act) {
     return STARTERS.map(function (t) {
       var th = D.themes[t], n = D.cards.filter(function (c) { return c.themes.indexOf(t) >= 0; }).length;

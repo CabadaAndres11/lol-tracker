@@ -1,6 +1,8 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-03', tag: 'Novedad', title: 'Montaje automático de mazos',
+      items: ['En el editor de mazos hay un nuevo botón «Montaje automático»: eliges de 1 a 3 sinergias y monta un mazo con tus cartas de esas sinergias, una tropa Común para la tienda inicial y acciones generales (y las de tus sinergias). Intenta que cada sinergia llegue a su segundo nivel y equilibra tropas caras y baratas. Después puedes retocarlo a mano antes de guardar.'] },
     { date: '2026-11-03', tag: 'Corrección', title: 'Misiones de racha y tienda con cartas al máximo',
       items: ['Las misiones de victorias seguidas (de Misiones y de temporada) ahora muestran tu racha actual como progreso, no la mejor que hayas logrado. Si completas una, queda cumplida aunque luego pierdas y puedes recogerla igualmente.',
         'En partida, cuando una carta llega a ★3 por copias, dejan de salir más copias suyas en la tienda (también se retiran las que ya estaban a la venta).'] },

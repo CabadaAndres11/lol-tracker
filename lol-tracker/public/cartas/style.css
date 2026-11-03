@@ -2416,3 +2416,5 @@ body.soc-open #app { margin-right: 286px; }
 
 .genw::after { content: attr(data-tip); position: absolute; left: 50%; bottom: calc(100% + 14px); transform: translate(-50%, 4px); padding: .25rem .6rem; border-radius: 4px; background: rgba(8,14,32,.95); border: 1px solid rgba(124,200,255,.7); color: #e6f3ff; font-size: .8rem; font-weight: 700; letter-spacing: .04em; white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity .15s, transform .15s; z-index: 30; box-shadow: 0 4px 14px rgba(0,0,0,.5); }
 .genw:hover::after { opacity: 1; transform: translate(-50%, 0); }
+
+.autoov { z-index: 960; } .autop { width: min(560px, 94vw); } .autop .chips { margin: .6rem 0; } .autop .chip small { opacity: .7; margin-left: .25rem; }

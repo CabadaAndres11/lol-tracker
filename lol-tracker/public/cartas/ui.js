@@ -969,6 +969,56 @@
         T.th.map(function (n, k) { return '<i class="' + (k < tier ? 'on' : '') + '">' + n + '</i>'; }).join('') + '</div></div><span class="need">' + (nxt ? c[t] + '/' + nxt : ic('check') + ' máx') + '</span></div>';
     }).join('') + '</div>';
   }
+  // ---------- Montaje automático de mazos ----------
+  var AUTO_ACT = ['entrenamiento', 'armadura', 'golpe-certero', 'arenga', 'intimidacion', 'banquete', 'lluvia', 'mal-de-ojo']; // acciones generales por orden de preferencia
+  var RBON = { 'Común': 0, 'Rara': 2, 'Épica': 4, 'Legendaria': 6 };
+  function autoBuild(sel) {
+    var B = CFG.deckBudget, deck = [], used = 0, has = function (id) { return deck.indexOf(id) >= 0; };
+    var matches = function (c) { return c.themes.filter(function (t) { return sel.indexOf(t) >= 0; }).length; };
+    var base = function (c) { return matches(c) * 10 + (c.atk * 1.5 + c.hp * .6) * .35 + RBON[c.rarity] + (lvOf(c.id) - 1) + (2 - c.size) * 1.5; };
+    var cand = D.cards.filter(function (c) { return owns(c.id) && matches(c) > 0; });
+    // acciones: las de las sinergias elegidas (hasta 2) y generales (hasta 3)
+    var tAct = D.actions.filter(function (a) { return a.theme && sel.indexOf(a.theme) >= 0 && owns(a.id); }).slice(0, 2).map(function (a) { return a.id; });
+    var gAct = AUTO_ACT.filter(function (id) { return owns(id); }).slice(0, 3);
+    var acts = tAct.concat(gAct), reserve = acts.length;
+    var add = function (c) { deck.push(c.id); used += c.size; };
+    var tb = B - reserve, big = 0, hi = 0;
+    var fits = function (c) { return !has(c.id) && used + c.size <= tb && !(c.size >= 3 && big >= 2) && !(c.cost >= 4 && hi >= 4); };
+    var take = function (c) { add(c); if (c.size >= 3) big++; if (c.cost >= 4) hi++; };
+    // 1) una tropa Común (la tienda inicial solo ofrece Comunes): la mejor de las sinergias o, si no hay, la más barata que tengas
+    var com = cand.filter(function (c) { return c.rarity === 'Común'; }).sort(function (a, b) { return base(b) - base(a); })[0] || D.cards.filter(function (c) { return owns(c.id) && c.rarity === 'Común'; }).sort(function (a, b) { return a.cost - b.cost; })[0];
+    if (com) take(com);
+    // 2) cobertura: cada sinergia debe alcanzar su segundo nivel (o el máximo que permitan tus cartas)
+    var target = function (t) { var th = D.themes[t].th; return th[Math.min(1, th.length - 1)]; };
+    var count = function (t) { return deck.filter(function (id) { return CARD[id].type === 'tropa' && CARD[id].themes.indexOf(t) >= 0; }).length; };
+    for (var g = 0; g < 40; g++) {
+      var need = sel.filter(function (t) { return count(t) < target(t) && cand.some(function (c) { return fits(c) && c.themes.indexOf(t) >= 0; }); });
+      if (!need.length) break;
+      var best = null, bv = -1;
+      cand.forEach(function (c) { if (!fits(c)) return; var v = base(c) + c.themes.filter(function (t) { return need.indexOf(t) >= 0; }).length * 8; if (v > bv) { bv = v; best = c; } });
+      if (!best) break; take(best);
+    }
+    // 3) el resto de tropas de las sinergias, de mejor a peor
+    cand.slice().sort(function (a, b) { return base(b) - base(a); }).forEach(function (c) { if (fits(c)) take(c); });
+    // 4) relleno con tus mejores tropas baratas de otras sinergias si sobra sitio
+    D.cards.filter(function (c) { return owns(c.id) && !has(c.id) && c.cost <= 3; }).sort(function (a, b) { return (b.atk * 1.5 + b.hp * .6) / b.size - (a.atk * 1.5 + a.hp * .6) / a.size; }).forEach(function (c) { if (fits(c)) take(c); });
+    // 5) acciones
+    acts.forEach(function (id) { if (used + CARD[id].size <= B) { deck.push(id); used += CARD[id].size; } });
+    // 6) si aún sobra espacio: más tropas o acciones que tengas
+    D.cards.filter(function (c) { return owns(c.id) && !has(c.id); }).sort(function (a, b) { return base(b) - base(a); }).forEach(function (c) { if (!has(c.id) && used + c.size <= B) { deck.push(c.id); used += c.size; } });
+    D.actions.filter(function (a) { return owns(a.id) && !has(a.id) && (!a.theme || sel.indexOf(a.theme) >= 0); }).forEach(function (a) { if (!has(a.id) && used + a.size <= B) { deck.push(a.id); used += a.size; } });
+    return deck;
+  }
+  function autoModal() {
+    var a = ui.auto, sel = a.sel;
+    var chips = Object.keys(D.themes).map(function (t) {
+      var n = D.cards.filter(function (c) { return c.themes.indexOf(t) >= 0 && owns(c.id); }).length;
+      return '<button class="chip' + (sel.indexOf(t) >= 0 ? ' on' : '') + '" style="--tc:' + D.themes[t].color + '" data-act="autotog" data-t="' + esc(t) + '">' + tic(t) + esc(t) + ' <small>' + n + '</small></button>';
+    }).join('');
+    return '<div class="overlay autoov"><div class="panel autop"><h2>' + ic('dado') + ' Montaje automático</h2><p class="mut">Elige de 1 a 3 sinergias. Montaré un mazo con tus cartas de esas sinergias y acciones generales. El número de cada sinergia son las cartas que tienes de ella.</p><div class="chips filt">' + chips + '</div>' +
+      '<p class="mut">' + sel.length + '/3 elegidas' + (a.msg ? ' · <span style="color:var(--bad)">' + esc(a.msg) + '</span>' : '') + '</p>' +
+      '<div class="bar" style="justify-content:center"><button class="btn cta" data-act="autogo"' + (sel.length ? '' : ' disabled') + '>' + ic('check') + ' Montar mazo</button><button class="btn sec" data-act="autoclose">Cancelar</button></div></div></div>';
+  }
   function deckEditor() {
     var d = ui.dedit, used = E.deckSize(d.ids), err = deckErrFor(d.ids), troops = d.ids.filter(function (id) { return CARD[id].type === 'tropa'; }).length;
     var segs = ''; for (var k = 0; k < CFG.deckBudget; k++) segs += '<i' + (k < used ? ' class="on"' : '') + '></i>';
@@ -976,10 +1026,10 @@
     var left = '<div class="panel dedleft"><label class="dlbl">Nombre del mazo<input id="de-name" maxlength="20" value="' + esc(d.name) + '" placeholder="Nombre"></label>' +
       '<div class="dlbl">Portada del mazo</div><div class="decovers">' + (covers.length ? covers.map(function (id) { return '<button class="' + (id === cur ? 'on' : '') + '" data-act="decover" data-id="' + id + '" title="' + esc((CARD[id] || {}).name || id) + '" style="background-image:url(/cartas/art/' + id + '.webp)"></button>'; }).join('') : '<span class="mut">Aún no tienes ilustraciones.</span>') + '</div>' +
       '<div class="bar" style="margin:.6rem 0 0"><span class="pill">Espacio <b>' + used + '/' + CFG.deckBudget + '</b></span><span class="pill">' + troops + ' tropas</span><span class="pill">' + d.ids.length + ' cartas</span></div><div class="meter">' + segs + '</div>' +
-      (ui.msg ? '<div class="hint" style="color:var(--bad)">' + esc(ui.msg) + '</div>' : (err && d.ids.length ? '<div class="hint" style="color:var(--bad)">' + esc(err) + '</div>' : '')) +
+      (ui.autoNote && !ui.msg ? '<div class="hint">' + esc(ui.autoNote) + '</div>' : '') + (ui.msg ? '<div class="hint" style="color:var(--bad)">' + esc(ui.msg) + '</div>' : (err && d.ids.length ? '<div class="hint" style="color:var(--bad)">' + esc(err) + '</div>' : '')) +
       deckSynHtml(d.ids) +
       '<div class="dlbl">En el mazo</div><ul class="delist">' + (d.ids.length ? d.ids.map(function (id) { var c = CARD[id]; return '<li><span>' + esc(c.name) + '</span><i class="pips">' + new Array(c.size + 1).join('●') + '</i><button data-act="detoggle" data-id="' + id + '" title="Quitar">✕</button></li>'; }).join('') : '<li class="mut">Vacío: elige una sinergia y añade cartas.</li>') + '</ul>' +
-      '<div class="bar"><button class="btn sec sm" data-act="derand">' + ic('dado') + ' Aleatorio</button><button class="btn sec sm" data-act="declear">Vaciar</button></div>' +
+      '<div class="bar"><button class="btn sec sm" data-act="deauto">' + ic('estrella') + ' Montaje automático</button><button class="btn sec sm" data-act="derand">' + ic('dado') + ' Aleatorio</button><button class="btn sec sm" data-act="declear">Vaciar</button></div>' +
       '<div class="bar"><button class="btn cta" data-act="desave"' + (err ? ' disabled' : '') + '>' + ic('disquete') + ' Guardar mazo</button><button class="btn sec" data-act="decancel">Cancelar</button></div></div>';
     var th = d.theme, chips = '<div class="chips filt">' + Object.keys(D.themes).map(function (t) { var n = themeCards(t).filter(function (c) { return owns(c.id); }).length; return '<button class="chip' + (th === t ? ' on' : '') + '" style="--tc:' + D.themes[t].color + '" data-act="dethm" data-t="' + esc(t) + '">' + tic(t) + esc(t) + ' ' + n + '</button>'; }).join('') +
       '<button class="chip' + (th === '__gen' ? ' on' : '') + '" data-act="dethm" data-t="__gen">Acciones generales</button></div>';
@@ -987,7 +1037,7 @@
     var guide = '<div class="bar synbar"><button class="btn sec sm' + (ui.synAll ? ' on' : '') + '" data-act="synall">' + ic('libro') + ' ' + (ui.synAll ? 'Ocultar guía de sinergias' : 'Guía de todas las sinergias') + '</button></div>' + (ui.synAll ? synGuide() : (th && th !== '__gen' ? synInfo(th) : ''));
     var grid = ui.synAll ? '' : !th ? '<p class="mut">Elige una sinergia para ver qué hace y tus cartas de esa sinergia, y añadirlas al mazo.</p>' : !list.length ? '<p class="mut">No tienes ninguna carta de esta sinergia todavía.</p>' :
       '<div class="deckgrid">' + byLv(list).map(function (c) { return cardHtml(c, { lv: lvOf(c.id), size: true, cls: d.ids.indexOf(c.id) >= 0 ? 'in' : '', attrs: 'data-act="detoggle" data-id="' + c.id + '"', tag: 'button', extra: '<span class="eyeb" data-act="zoom" data-id="' + c.id + '" title="Ver ampliada en 3D">' + ic('ojo') + '</span>' }); }).join('') + '</div>';
-    return '<div class="dedlayout">' + left + '<div class="dedright"><h2 class="dedh">' + (ui.slots[d.i] ? 'Editando' : 'Nuevo mazo') + ' · hueco ' + (d.i + 1) + '</h2>' + chips + guide + grid + '</div></div>';
+    return (ui.auto ? autoModal() : '') + '<div class="dedlayout">' + left + '<div class="dedright"><h2 class="dedh">' + (ui.slots[d.i] ? 'Editando' : 'Nuevo mazo') + ' · hueco ' + (d.i + 1) + '</h2>' + chips + guide + grid + '</div></div>';
   }
   function renderDeck() {
     var tab = ui.dedit ? 'decks' : (ui.colTab || 'cards');
@@ -2398,7 +2448,7 @@
     if (act === 'passplay') return passPlay(el.dataset.id);
     if (act === 'fxequip') { return api('fxEquip', { kind: el.dataset.kind || 'deploy', id: el.dataset.id }).then(function (r) { if (r.ok) setAcct(r.data.user); ui.msg = ''; renderDeck(); }); }
     if (act === 'dkopen') { var oi = +el.dataset.i; ui.deckOpen = ui.deckOpen === oi ? null : oi; ui.delAsk = null; ui.msg = ''; return renderDeck(); }
-    if (act === 'dkedit') { var ei = +el.dataset.i, esl = ui.slots[ei]; ui.dedit = { i: ei, name: esl ? esl.name : 'Mazo ' + (ei + 1), ids: esl ? esl.ids.slice() : [], cover: esl ? esl.cover || '' : '', theme: '' }; ui.colTab = 'decks'; ui.msg = ''; window.scrollTo(0, 0); return render(); }
+    if (act === 'dkedit') { ui.auto = null; ui.autoNote = ''; var ei = +el.dataset.i, esl = ui.slots[ei]; ui.dedit = { i: ei, name: esl ? esl.name : 'Mazo ' + (ei + 1), ids: esl ? esl.ids.slice() : [], cover: esl ? esl.cover || '' : '', theme: '' }; ui.colTab = 'decks'; ui.msg = ''; window.scrollTo(0, 0); return render(); }
     if (act === 'dkdel') { ui.delAsk = +el.dataset.i; return renderDeck(); }
     if (act === 'dkdelno') { ui.delAsk = null; return renderDeck(); }
     if (act === 'dkdelyes') { var di = +el.dataset.i; ui.slots[di] = null; saveSlots(); ui.delAsk = null; ui.deckOpen = null; ui.msg = 'Mazo eliminado.'; return renderDeck(); }
@@ -2413,9 +2463,22 @@
       var y = window.scrollY; renderDeck(); window.scrollTo(0, y); return;
     }
     if (act === 'decover') { ui.dedit.cover = el.dataset.id; var yc = window.scrollY; renderDeck(); window.scrollTo(0, yc); return; }
+    if (act === 'deauto') { ui.auto = { sel: [], msg: '' }; return renderDeck(); }
+    if (act === 'autoclose') { ui.auto = null; return renderDeck(); }
+    if (act === 'autotog') { var at = el.dataset.t, ai = ui.auto.sel.indexOf(at); ui.auto.msg = ''; if (ai >= 0) ui.auto.sel.splice(ai, 1); else if (ui.auto.sel.length < 3) ui.auto.sel.push(at); else ui.auto.msg = 'Máximo 3 sinergias.'; return renderDeck(); }
+    if (act === 'autogo') {
+      var asel = ui.auto.sel.slice(); if (!asel.length) return;
+      var aids = autoBuild(asel), aerr = deckErrFor(aids);
+      ui.auto = null;
+      if (aerr) { ui.msg = 'No he podido montar un mazo válido con tus cartas: ' + aerr; return renderDeck(); }
+      ui.dedit.ids = aids; ui.msg = '';
+      var tc = asel.map(function (t) { return t + ' ' + aids.filter(function (id) { return CARD[id].type === 'tropa' && CARD[id].themes.indexOf(t) >= 0; }).length; }).join(', ');
+      ui.autoNote = 'Mazo montado con ' + aids.length + ' cartas (' + E.deckSize(aids) + '/' + CFG.deckBudget + ' de espacio). Tropas por sinergia: ' + tc + '. Puedes retocarlo a mano antes de guardar.';
+      return renderDeck();
+    }
     if (act === 'derand') { ui.dedit.ids = E.randomDeck(Math.random, ui.acct.owned); ui.msg = ''; return renderDeck(); }
-    if (act === 'declear') { ui.dedit.ids = []; ui.msg = ''; return renderDeck(); }
-    if (act === 'decancel') { ui.dedit = null; ui.msg = ''; window.scrollTo(0, 0); return render(); }
+    if (act === 'declear') { ui.dedit.ids = []; ui.msg = ''; ui.autoNote = ''; return renderDeck(); }
+    if (act === 'decancel') { ui.dedit = null; ui.auto = null; ui.autoNote = ''; ui.msg = ''; window.scrollTo(0, 0); return render(); }
     if (act === 'desave') {
       var dd = ui.dedit, derr = deckErrFor(dd.ids);
       if (derr) { ui.msg = derr; return renderDeck(); }

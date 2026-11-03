@@ -1843,6 +1843,7 @@
     if (ui.tut && ui.screen !== 'game') ui.tut = null;
     if (ui.tut) tutCheck(); else tutClear();
     syncHash();
+    if (window.CartasSocial) window.CartasSocial.sync();
   }
 
   // ---------- Tutorial: bocadillos del guía ----------
@@ -2303,6 +2304,25 @@
     render();
   }
 
+  // ---------- Enlaces con el sistema de amigos (social.js) ----------
+  ui.api = api; ui.ic = ic; ui.esc = esc; ui.artOk = artOk;
+  ui.socPlaying = function () { return !!PV.on || ui.screen === 'game'; };
+  ui.socInRoom = function () { return PV.wait && PV.wait.kind === 'code' && PV.wait.code ? { kind: PV.px === 'vs4' ? 'vs4' : 'pvp', code: PV.wait.code, mode: PV.mode || '' } : null; };
+  ui.socCreateRoom = function (kind, mode) { // crea una sala con tu mazo actual y devuelve {kind, code, mode}
+    if (PV.on || ui.screen === 'game') return Promise.resolve({ err: 'Termina la partida antes de invitar.' });
+    if (deckError()) { ui.screen = 'deck'; render(); return Promise.resolve({ err: 'Tu mazo no es válido todavía.' }); }
+    saveDeck(); ui.botGame = false; PV.mode = mode || ''; PV.wait = { kind: 'code', code: '' }; PV.px = kind === 'vs4' ? 'vs4' : 'pvp'; ui.lobby = PV.px; ui.msg = ''; ui.screen = 'pvp'; render();
+    return api(PV.px + 'Create', { deck: ui.deck, mode: PV.mode, cover: curCover() }).then(function (r) { pvpGot(r); return r.ok && r.data.code ? { kind: PV.px, code: r.data.code, mode: PV.mode } : { err: (r.data && r.data.error) || 'No se pudo crear la sala.' }; });
+  };
+  ui.socJoin = function (inv) { // unirse a la sala de una invitación
+    if (PV.on || ui.screen === 'game') return 'Termina la partida antes de unirte.';
+    if (deckError()) { ui.screen = 'deck'; render(); return 'Tu mazo no es válido todavía.'; }
+    saveDeck();
+    var pre = PV.wait ? api(PV.px + 'Cancel') : Promise.resolve(); // si estabas en otra sala o buscando, sales antes de entrar
+    clearTimeout(PV.tm); PV.wait = null; ui.botGame = false; PV.mode = inv.mode || ''; PV.px = inv.kind === 'vs4' ? 'vs4' : 'pvp'; ui.lobby = PV.px; ui.msg = ''; ui.screen = 'pvp'; render();
+    pre.then(function () { return api(PV.px + 'Join', { deck: ui.deck, code: inv.code, cover: curCover() }); }).then(pvpGot);
+    return '';
+  };
   window.CartasUI = ui; window.CartasRender = render; // depuración
   document.addEventListener('click', function (e) { if (!e.target.closest || !e.target.closest('.acctw')) { var o = document.querySelector('.acctw.open'); if (o) o.classList.remove('open'); } });
   app.addEventListener('keydown', function (e) { if (e.key === 'Enter' && ui.screen === 'login' && e.target.id && e.target.id.indexOf('lg-') === 0) { var b = app.querySelector('[data-act=login],[data-act=register]'); if (b) b.click(); } });

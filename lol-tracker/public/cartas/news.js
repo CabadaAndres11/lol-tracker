@@ -1,6 +1,12 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-03', tag: 'Novedad', title: 'Amigos: lista, estado, chat e invitaciones',
+      items: ['Nueva lista de amigos a la derecha de la pantalla. Pulsa «+» para buscar a un jugador por su nombre y enviarle una solicitud; cuando la acepte, sois amigos.',
+        'Ves quién está en línea, quién está jugando una partida y quién está desconectado.',
+        'Pulsa a un amigo para chatear con él; los mensajes sin leer aparecen con un aviso.',
+        'Invita a un amigo en línea a una partida 1 contra 1 o a un Versus de 4: le llega la invitación y, si la acepta, entra directo a tu sala.',
+        'Puedes ocultar la lista con » y volver a abrirla con la pestaña del borde. En partida empieza oculta.'] },
     { date: '2026-11-03', tag: 'Novedad', title: '¡Ya está aquí la versión 1.3! Renovación de la sinergia Anime',
       art: ['dashlight-sun-jin-woo', 'aitorlg-maomao', 'chipy-goku'],
       items: ['Versión 1.3: la sinergia Anime se renueva por completo. Al entrar verás un pop-up de bienvenida con las novedades; puedes volver a verlo cuando quieras en Perfil → Animaciones.',

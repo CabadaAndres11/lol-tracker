@@ -676,6 +676,11 @@ module.exports = async function handler(req, res) {
       await saveUser(cfg, u);
       res.status(200).json({ user: publicUser(u) }); return;
     }
+    if (act.startsWith('soc')) {
+      const r = await require('./_social').socialHandle(cfg, act, body, u);
+      if (r.status) { res.status(r.status).json({ error: r.error }); return; }
+      res.status(200).json(r); return;
+    }
     if (act.startsWith('vs4')) {
       const r = await vs4Handle(cfg, act, body, u);
       if (r.status) { res.status(r.status).json({ error: r.error }); return; }

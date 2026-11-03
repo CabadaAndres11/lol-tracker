@@ -29,7 +29,7 @@
     { kind: 'pack', n: 1 }, { kind: 'fx', fx: 'finish', id: 'hechizo' }, { kind: 'coins', n: 100 }, { kind: 'box', n: 2 }, { kind: 'skin', id: 'lihone-viego-espectral' }
   ];
   var LEVELS = R.map(function (r, k) { return { lv: k + 1, reward: r }; });
-  var SEASON = { id: 't1', name: 'Temporada 1', end: null, xpPerLevel: 45, levels: LEVELS, missions: MISSIONS };
+  var SEASON = { id: 't1', name: 'Temporada 1', end: null, xpPerLevel: 35, levels: LEVELS, missions: MISSIONS };
   function levelOf(xp) { return Math.min(SEASON.levels.length, Math.floor(Math.max(0, xp) / SEASON.xpPerLevel)); }
   var API = { SEASON: SEASON, levelOf: levelOf };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.CARTAS_SEASON = API;

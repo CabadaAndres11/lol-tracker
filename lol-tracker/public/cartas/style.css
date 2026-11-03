@@ -2422,7 +2422,6 @@ body.soc-open #app { margin-right: 286px; }
 /* Sobre Anime: la ilustración reemplaza al degradado; misma apertura (tapa que se rasga y cartas) */
 .packs-grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 900px; }
 @media (max-width: 700px) { .packs-grid.two { grid-template-columns: 1fr; } }
-.bpk.anime { width: 177px; }
 .bpk.anime .bpk-lid, .bpk.anime .bpk-main { background: url(img/pack-anime.webp) center / 100% 100% no-repeat; }
 .bpk.anime .bpk-lid::after, .bpk.anime .bpk-main::after { display: none; }
 .bpk.anime { filter: drop-shadow(0 14px 18px rgba(120,40,200,.55)); }

@@ -32,7 +32,7 @@
     tab = document.createElement('button'); tab.id = 'soctab'; tab.setAttribute('data-soc', 'open'); tab.setAttribute('aria-label', 'Abrir lista de amigos'); tab.hidden = true;
     document.body.appendChild(tab);
     chatEl = document.createElement('div'); chatEl.id = 'socchat'; chatEl.hidden = true;
-    chatEl.innerHTML = '<div class="chead"></div><div class="cmsgs"></div><div class="cform"><input id="soc-ci" maxlength="300" autocomplete="off" placeholder="Escribe un mensaje…"><button class="sbtn go" data-soc="send">Enviar</button></div>';
+    chatEl.innerHTML = '<div class="chead"></div><div class="cmsgs"></div><div class="cform"><button class="sbtn emob" id="soc-emo" data-soc="emo" data-emo-open="1" title="Emoticonos" aria-label="Emoticonos">' + ic('emoji') + '</button><input id="soc-ci" maxlength="300" autocomplete="off" placeholder="Escribe un mensaje…"><button class="sbtn go" data-soc="send">Enviar</button></div>';
     document.body.appendChild(chatEl);
     [root, tab, chatEl].forEach(function (el) { el.addEventListener('click', onClick); });
     root.querySelector('#soc-q').addEventListener('input', function (e) {
@@ -95,7 +95,7 @@
     chatEl.hidden = !isOpen();
     chatEl.querySelector('.chead').innerHTML = avatar(f, f.st) + '<div class="ftx"><b>' + esc(f.name) + '</b><span class="fst ' + f.st + '">' + STXT[f.st] + '</span></div><button class="sbtn" data-soc="chatx" aria-label="Cerrar chat">×</button>';
     var me = ui.acct.name.toLowerCase(), box = chatEl.querySelector('.cmsgs'), near = box.scrollHeight - box.scrollTop - box.clientHeight < 60;
-    box.innerHTML = SOC.msgs.length ? SOC.msgs.map(function (m) { return '<div class="cm ' + (m.f.toLowerCase() === me ? 'me' : 'them') + '"><span>' + esc(m.x) + '</span><i>' + fmtT(m.t) + '</i></div>'; }).join('') : '<p class="sempty">Aún no habéis hablado. ¡Saluda!</p>';
+    box.innerHTML = SOC.msgs.length ? SOC.msgs.map(function (m) { return '<div class="cm ' + (m.f.toLowerCase() === me ? 'me' : 'them') + (m.e ? ' emo' : '') + '"><span>' + (m.e ? ui.emoImg(m.e, 'cme') : esc(m.x)) + '</span><i>' + fmtT(m.t) + '</i></div>'; }).join('') : '<p class="sempty">Aún no habéis hablado. ¡Saluda!</p>';
     if (near || SOC.stick) { box.scrollTop = box.scrollHeight; SOC.stick = false; }
   }
   function layout() {
@@ -141,6 +141,11 @@
     SOC.msgs = SOC.msgs.concat([{ f: ui.acct.name, t: Date.now(), x: t }]); SOC.stick = true; drawChat();
     ui.api('socSend', { to: SOC.chat, text: t }).then(function (r) { if (!r.ok) toast((r.data && r.data.error) || 'No se pudo enviar.'); clearTimeout(SOC.tm); poll(); });
   }
+  function sendEmote(eid) {
+    if (!SOC.chat) return;
+    SOC.msgs = SOC.msgs.concat([{ f: ui.acct.name, t: Date.now(), x: '', e: eid }]); SOC.stick = true; drawChat();
+    ui.api('socSend', { to: SOC.chat, emote: eid }).then(function (r) { if (!r.ok) toast((r.data && r.data.error) || 'No se pudo enviar.'); clearTimeout(SOC.tm); poll(); });
+  }
   function sendInvite(name, room) {
     return ui.api('socInvite', { to: name, kind: room.kind, code: room.code, mode: room.mode }).then(function (r) { toast(r.ok ? (r.data.msg || 'Invitación enviada.') : ((r.data && r.data.error) || 'No se pudo invitar.')); });
   }
@@ -161,6 +166,7 @@
     if (a === 'remove') { if (!window.confirm('¿Eliminar a ' + n + ' de tus amigos?')) return; if (SOC.chat === n) { SOC.chat = ''; layout(); } return doRel('socRemove', n); }
     if (a === 'chatx') { SOC.chat = ''; SOC.msgs = []; layout(); return; }
     if (a === 'send') return send();
+    if (a === 'emo') return ui.emoPick(t, sendEmote);
     if (a === 'invite') {
       var room = ui.socInRoom();
       if (room) return sendInvite(n, room);

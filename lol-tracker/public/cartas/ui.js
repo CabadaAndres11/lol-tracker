@@ -412,6 +412,7 @@
     if (r.kind === 'box') return { k: 'Botín', t: n > 1 ? n + ' cajas' : 'Una caja', v: '<div class="rwv"><img src="/cartas/img/box.webp" alt="">' + x + '</div>' };
     if (r.kind === 'pack') return { k: 'Sobre', t: n > 1 ? n + ' sobres' : 'Un sobre', v: '<div class="rwv"><img src="/cartas/img/pack-set1.webp" alt="">' + x + '</div>' };
     if (r.kind === 'card') { var c = CARD[r.id]; return { k: 'Carta', t: c ? c.name : r.id, v: '<div class="rwv art"><span style="background-image:url(/cartas/art/' + r.id + '.webp)"></span></div>' }; }
+    if (r.kind === 'emotes') { var es = EMO.setOf(r.id); return { k: 'Emoticonos', t: es ? es.name : r.id, sub: es ? es.emotes.length + ' emoticonos para chat y partidas' : '', v: '<div class="rwv emo">' + emoImg(r.id + '-1') + '</div>' }; }
     if (r.kind === 'skin') { var sk = (window.CARTAS_SKINS || []).filter(function (k) { return k.id === r.id; })[0]; return { k: 'Skin', t: sk ? sk.name : r.id, v: '<div class="rwv art"><span style="background-image:url(/cartas/art/' + r.id + '.webp)"></span></div>' }; }
     var fk = FXKIND[r.fx] || FXKIND.deploy, e = fk[2]().filter(function (z) { return z.id === r.id; })[0] || { name: r.id };
     return { k: 'Efecto · ' + fk[0], t: e.name, v: '<div class="rwv fx">' + ic(fk[1]) + '</div>' };
@@ -451,7 +452,7 @@
     }).join('');
     app.innerHTML = head('pass', ic('estrella') + ' Pase de batalla') + (ui.msg ? '<p class="err">' + esc(ui.msg) + '</p>' : '') +
       '<div class="pass"><div class="phd"><b>' + esc(S.name) + '</b>' + (left == null ? '' : '<span class="pchip">' + ic('reloj') + ' ' + (d.active ? left + ' d' : 'Terminada') + '</span>') + '</div>' +
-      '<div class="phero"><div class="pring"></div><div class="pvis">' + info.v + '</div><div class="pinfo"><span class="pk">' + esc(info.k) + '</span><h2>' + esc(info.t) + '</h2>' + state + (ui.passNote ? '<span class="pnote">' + esc(ui.passNote) + '</span>' : '') + '</div></div>' +
+      '<div class="phero"><div class="pring"></div><div class="pvis">' + info.v + '</div><div class="pinfo"><span class="pk">' + esc(info.k) + '</span><h2>' + esc(info.t) + '</h2>' + (info.sub ? '<span class="psub">' + esc(info.sub) + '</span>' : '') + state + (ui.passNote ? '<span class="pnote">' + esc(ui.passNote) + '</span>' : '') + '</div></div>' +
       '<div class="ptrackw"><button class="parrow l" data-act="passscroll" data-d="-1" aria-label="Anterior">‹</button><div class="ptrack" id="ptrack">' + track + '</div><button class="parrow r" data-act="passscroll" data-d="1" aria-label="Siguiente">›</button></div>' +
       '<div class="pbot"><div class="plv"><b>' + lv + '</b></div><div class="pxp"><div class="sexp"><i style="width:' + Math.round(into / S.xpPerLevel * 100) + '%"></i></div><span>' + (lv >= max ? '¡Pase completado!' : into + ' / ' + S.xpPerLevel + ' XP para el nivel ' + (lv + 1)) + ' · XP total ' + d.xp + '</span></div>' +
       '<div class="pact">' + (ready.length > 1 ? '<button class="btn sec" data-act="slclaimall">Reclamar todo (' + ready.length + ')</button>' : '') + '<button class="btn cta" data-act="slclaim" data-lv="' + sel.lv + '"' + (selOk && !selCl && d.active ? '' : ' disabled') + '>Reclamar</button></div></div></div></div>';
@@ -1006,6 +1007,73 @@
     ui.pick = { act: act }; render();
   }
 
+  // ---------- Emoticonos ----------
+  var EMO = window.CARTAS_EMOTES || { SETS: [], parse: function () { return null; }, setOf: function () { return null; } };
+  function emoSrc(eid) { return '/cartas/emo/' + eid + '.webp'; }
+  function emoImg(eid, cls) { var p = EMO.parse(eid); return p ? '<img class="emo' + (cls ? ' ' + cls : '') + '" src="' + emoSrc(eid) + '" alt="' + esc(p.name) + '" title="' + esc(p.name) + '">' : ''; }
+  function mySets() { return ((ui.acct && ui.acct.emoteSets) || []).map(function (id) { return EMO.setOf(id); }).filter(Boolean); }
+  ui.emoImg = emoImg; ui.emoSets = mySets;
+  function emoPickClose() { var o = document.getElementById('emopick'); if (o) o.remove(); document.removeEventListener('mousedown', emoPickOut, true); document.removeEventListener('keydown', emoPickKey); }
+  function emoPickOut(e) { var o = document.getElementById('emopick'); if (o && !o.contains(e.target) && !(e.target.closest && e.target.closest('[data-emo-open]'))) emoPickClose(); }
+  function emoPickKey(e) { if (e.key === 'Escape') emoPickClose(); }
+  // Selector de emoticonos flotante junto a un botón; cb(eid) al elegir uno
+  ui.emoPick = function (anchor, cb) {
+    var was = document.getElementById('emopick'); emoPickClose(); if (was && was.dataset.for === (anchor.id || anchor.className)) return;
+    var sets = mySets(), cur = sets[0] ? sets[0].id : '', o = document.createElement('div');
+    o.id = 'emopick'; o.dataset.for = anchor.id || anchor.className;
+    function draw() {
+      if (!sets.length) { o.innerHTML = '<p class="emoempty">Aún no tienes emoticonos. Consigue sets de emoticonos en el pase de batalla.</p>'; return; }
+      var s = EMO.setOf(cur);
+      o.innerHTML = '<div class="emotabs">' + sets.map(function (x) { return '<button class="' + (x.id === cur ? 'on' : '') + '" data-set="' + x.id + '" title="' + esc(x.name) + '">' + emoImg(x.id + '-1') + '</button>'; }).join('') + '</div><div class="emogrid">' + s.emotes.map(function (n, i) { return '<button data-e="' + s.id + '-' + (i + 1) + '" title="' + esc(n) + '">' + emoImg(s.id + '-' + (i + 1)) + '</button>'; }).join('') + '</div>';
+    }
+    o.addEventListener('click', function (e) {
+      var tb = e.target.closest('[data-set]'), b = e.target.closest('[data-e]');
+      if (tb) { cur = tb.dataset.set; draw(); } else if (b) { var eid = b.dataset.e; emoPickClose(); cb(eid); }
+    });
+    draw(); document.body.appendChild(o);
+    var r = anchor.getBoundingClientRect();
+    o.style.left = Math.max(8, Math.min(window.innerWidth - o.offsetWidth - 8, r.left)) + 'px';
+    o.style.bottom = (window.innerHeight - r.top + 8) + 'px';
+    setTimeout(function () { document.addEventListener('mousedown', emoPickOut, true); document.addEventListener('keydown', emoPickKey); }, 0);
+  };
+  // Burbujas de emoticono en partida (fuera de #app para que no se borren al repintar)
+  function emoShow(name, eid, mine) {
+    if (!EMO.parse(eid)) return;
+    var host = document.getElementById(mine ? 'emome' : 'emoz');
+    if (!host) { host = document.createElement('div'); host.id = mine ? 'emome' : 'emoz'; document.body.appendChild(host); }
+    var b = document.createElement('div'); b.className = 'emobub' + (mine ? ' mine' : '');
+    b.innerHTML = emoImg(eid) + '<span>' + esc(mine ? 'Tú' : name) + '</span>';
+    host.appendChild(b); snd('pick');
+    setTimeout(function () { b.classList.add('out'); setTimeout(function () { b.remove(); }, 400); }, 3400);
+  }
+  // Emoticonos que trae una vista de partida online: se muestra el que sea nuevo y reciente
+  function emoApply(d) {
+    if (!d || !d.em) return;
+    PV.emN = PV.emN && PV.emId === PV.id ? PV.emN : {}; PV.emId = PV.id;
+    d.em.forEach(function (x, i) {
+      if (!x) return;
+      var seen = PV.emN[i];
+      if (seen != null && x.n <= seen) return;
+      PV.emN[i] = x.n;
+      if (seen == null && x.ago > 4000) return; // ya estaba al unirte
+      var mine = d.vs4 ? i === d.seat : i === 0, name = d.vs4 ? (d.emn || [])[i] : (d.names || [])[i];
+      emoShow(name || 'Rival', x.e, mine);
+    });
+  }
+  function emoSend(eid) {
+    if (PV.on) return api(PV.px + 'Emote', { id: PV.id, e: eid }).then(function (r) { if (r.ok) { if (r.data.em) emoApply(r.data); pvpGot(r); } });
+    emoShow('Tú', eid, true); // contra la IA solo lo ves tú
+  }
+  function emoSync() {
+    var on = ui.screen === 'game' && !ui.tut && ui.acct && mySets().length, b = document.getElementById('emobtn');
+    if (!on) { if (b) b.remove(); var z = document.getElementById('emoz'), m = document.getElementById('emome'); if (z) z.remove(); if (m) m.remove(); return; }
+    if (b) return;
+    b = document.createElement('button'); b.id = 'emobtn'; b.setAttribute('data-emo-open', '1'); b.title = 'Emoticonos'; b.setAttribute('aria-label', 'Emoticonos');
+    b.innerHTML = ic('emoji');
+    b.addEventListener('click', function () { ui.emoPick(b, emoSend); });
+    document.body.appendChild(b);
+  }
+
   // ---------- 1 vs 1 online ----------
   // El servidor guarda la partida; aquí se aplican tus acciones al momento y se envían en cola. Cada respuesta del servidor
   // trae tu vista (tú siempre eres p[0]) y sustituye a la copia local.
@@ -1060,7 +1128,7 @@
       if (ch && !ui.playing && !ui.busy) render();
       return pvpSchedule(1200);
     }
-    if (d.s) { if (!PV.on) pvpBegin(d); else pvpAdopt(d); pvpSchedule(1200); }
+    if (d.s) { if (!PV.on) pvpBegin(d); else pvpAdopt(d); emoApply(d); pvpSchedule(1200); }
   }
   function pvpBegin(d) {
     pvpReset(); PV.on = true; PV.id = d.id; PV.seat = d.seat; PV.names = d.names; PV.rdy = d.rdy; PV.v = d.v;
@@ -1957,6 +2025,7 @@
     if (ui.tut && ui.screen !== 'game') ui.tut = null;
     if (ui.tut) tutCheck(); else tutClear();
     syncHash();
+    emoSync();
     if (window.CartasSocial) window.CartasSocial.sync();
   }
 

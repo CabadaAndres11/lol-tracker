@@ -7,6 +7,22 @@ const DATA = require('../public/cartas/cards.js');
 const SKINS = require('../public/cartas/skins.js');
 const MS = require('../public/cartas/missions.js');
 const SS = require('../public/cartas/season.js');
+const EM = require('../public/cartas/emotes.js');
+const EMOTE_CD = 2000; // ms entre emoticonos en partida
+const emoteSetsOf = (u) => (String(u.name).toLowerCase() === 'admin' ? EM.SETS.map((s) => s.id) : (u.emoteSets || []).filter((id) => EM.setOf(id)));
+const emoteOwns = (u, id) => emoteSetsOf(u).includes(id);
+// Emoticonos de la partida tal como los ve el cliente: { e, n, ago }
+const emView = (x) => (x ? { e: x.e, n: x.n, ago: Date.now() - x.t } : null);
+// Intenta enviar un emoticono en una partida; devuelve true si se ha registrado
+function emoteSend(g, seat, u, body, nseats) {
+  const p = EM.parse(body.e);
+  if (!p || !emoteOwns(u, p.set.id)) return false;
+  g.em = g.em || new Array(nseats).fill(null);
+  const prev = g.em[seat];
+  if (prev && Date.now() - prev.t < EMOTE_CD) return false;
+  g.em[seat] = { e: p.set.id + '-' + p.n, t: Date.now(), n: (prev ? prev.n : 0) + 1 };
+  g.v++; return true;
+}
 const SKIN_BY_ID = {}; SKINS.forEach((s) => { SKIN_BY_ID[s.id] = s; });
 
 const START_COINS = 150;
@@ -102,6 +118,7 @@ function seasonPublic(u) {
 function grantReward(u, r) {
   if (r.kind === 'coins') u.coins += r.n | 0;
   else if (r.kind === 'pack') u.packs = (u.packs || 0) + (r.n | 0);
+  else if (r.kind === 'emotes') { if (EM.setOf(r.id) && !(u.emoteSets || []).includes(r.id)) u.emoteSets = [...(u.emoteSets || []), r.id]; }
   else if (r.kind === 'box') u.boxes = (u.boxes || 0) + (r.n | 0);
   else if (r.kind === 'card') { if (!(u.owned || []).includes(r.id)) u.owned.push(r.id); else { u.dups = u.dups || {}; u.dups[r.id] = (u.dups[r.id] || 0) + 1; } }
   else if (r.kind === 'skin') { u.skins = u.skins || []; if (!u.skins.includes(r.id)) u.skins.push(r.id); else u.coins += 50; }
@@ -142,7 +159,7 @@ function rollBox(u) {
 }
 function publicUser(u) {
   return {
-    name: u.name, pts: u.pts || 0, coins: u.coins, owned: u.owned, dups: u.dups || {}, skins: u.skins || [], skinSel: u.skinSel || {}, decks: u.decks || null, avatar: u.avatar || '', fx: { deploy: fxSel(u, 'deploy'), sleeve: fxSel(u, 'sleeve'), finish: fxSel(u, 'finish') }, fxOwned: fxOwned(u), boxes: u.boxes || 0, ms: { stats: missionStats(u), claimed: u.msClaimed || [] }, packs: u.packs || 0, rkClaimed: u.rkClaimed || [], season: seasonPublic(u), ptsMax: rankReached(u),
+    name: u.name, pts: u.pts || 0, coins: u.coins, owned: u.owned, dups: u.dups || {}, skins: u.skins || [], skinSel: u.skinSel || {}, decks: u.decks || null, avatar: u.avatar || '', fx: { deploy: fxSel(u, 'deploy'), sleeve: fxSel(u, 'sleeve'), finish: fxSel(u, 'finish') }, fxOwned: fxOwned(u), boxes: u.boxes || 0, ms: { stats: missionStats(u), claimed: u.msClaimed || [] }, packs: u.packs || 0, emoteSets: emoteSetsOf(u), rkClaimed: u.rkClaimed || [], season: seasonPublic(u), ptsMax: rankReached(u),
     dailyAvailable: u.lastDaily !== today(),
     gamesToday: u.rewardDay === today() ? u.rewardCount : 0,
     maxGamesToday: MAX_GAME_REWARDS_PER_DAY,
@@ -306,6 +323,7 @@ function viewFor(g, seat) {
     ok: true, id: g.id, v: g.v, seat, names: seat ? [g.names[1], g.names[0]] : g.names.slice(),
     rdy: seat ? [g.rdy[1], g.rdy[0]] : g.rdy.slice(), dl: g.dl ? Math.max(0, g.dl - Date.now()) : 0,
     reward: g.rew[seat], s,
+    em: g.em ? (seat ? [emView(g.em[1]), emView(g.em[0])] : g.em.map(emView)) : [null, null],
   };
 }
 const SEAT_OPS = {
@@ -388,6 +406,8 @@ async function pvpHandle(cfg, act, body, u) {
     let hint = '';
     if (act === 'pvpLeave') {
       if (!s.over) { E.forfeit(s, seat, E.pv(s, seat, 'Abandonaste la partida: derrota.', 'El rival abandonó: victoria.')); g.ab = seat; g.dl = 0; g.v++; }
+    } else if (act === 'pvpEmote' && !s.over) {
+      emoteSend(g, seat, u, body, 2);
     } else if (act === 'pvpOp' && !s.over) {
       const op = String(body.op || ''), a = Array.isArray(body.a) ? body.a : [];
       const x = (n) => (seat === 1 && typeof n === 'number' ? n ^ 1 : n); // uid de su vista -> canónico
@@ -459,6 +479,7 @@ function v4View(g, seat) {
   return {
     ok: true, id: g.id, v: g.v, seat, vs4: true, names: [g.names[seat], opp >= 0 ? g.names[opp] : 'Descanso'],
     rdy: [!!T.rdy[seat], opp >= 0 ? !!T.rdy[opp] : false], dl: g.dl ? Math.max(0, g.dl - Date.now()) : 0, reward: g.rew[seat], s,
+    em: (g.em || [null, null, null, null]).map(emView), emn: g.names.slice(),
   };
 }
 async function payV4(cfg, g) {
@@ -631,6 +652,8 @@ async function vs4Handle(cfg, act, body, u) {
     const T = g.T, v0 = g.v; let hint = '';
     if (act === 'vs4Leave') {
       if (!T.out[seat]) { V4.eliminate(T, seat, 'Abandonaste la partida.', true); g.v++; }
+    } else if (act === 'vs4Emote' && !T.over) {
+      emoteSend(g, seat, u, body, 4);
     } else if (act === 'vs4Op' && !T.out[seat] && !T.over) {
       const op = String(body.op || ''), a = Array.isArray(body.a) ? body.a : [];
       const opp = T.opp[seat];
@@ -725,7 +748,7 @@ module.exports = async function handler(req, res) {
       res.status(200).json({ user: publicUser(u) }); return;
     }
     if (act.startsWith('soc')) {
-      const r = await require('./_social').socialHandle(cfg, act, body, u, { stats: missionStats, rank: rankReached, loadUser });
+      const r = await require('./_social').socialHandle(cfg, act, body, u, { stats: missionStats, rank: rankReached, loadUser, emote: { parse: EM.parse, owns: emoteOwns } });
       if (r.status) { res.status(r.status).json({ error: r.error }); return; }
       res.status(200).json(r); return;
     }

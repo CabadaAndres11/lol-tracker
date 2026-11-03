@@ -1,6 +1,9 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-03', tag: 'Novedad', title: 'Emoticonos personalizados',
+      items: ['Nuevos emoticonos agrupados en Sets (Set Camuflaje y Set Gorra). Úsalos en el chat con tus amigos (botón de carita junto al mensaje) y en las partidas online: el botón de carita abajo a la izquierda los muestra a ambos jugadores. Hay una espera de 2 segundos entre emoticonos.',
+        'Solo puedes enviar los de los sets que tengas, pero todos ven los que te envían. Los sets se consiguen en el pase de batalla (niveles 8 y 16, recompensas de prueba).'] },
     { date: '2026-11-03', tag: 'Cambio', title: 'Nueva moneda',
       items: ['La moneda del juego estrena ilustración en toda la interfaz (tienda, partidas, recompensas...). Las recompensas de monedas del pase de batalla se muestran como un montón de monedas.'] },
     { date: '2026-11-03', tag: 'Novedad', title: 'Pase de batalla y misiones de temporada',

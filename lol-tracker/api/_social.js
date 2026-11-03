@@ -124,12 +124,18 @@ async function socialHandle(cfg, act, body, u, X) {
   // ---- chat ----
   if (act === 'socSend') {
     const to = cleanName(body.to), text = String(body.text || '').replace(/\s+/g, ' ').trim().slice(0, CHAT_LEN);
-    if (!text) return { status: 400, error: 'Escribe un mensaje.' };
+    let emo = '';
+    if (body.emote) { // mensaje con un emoticono de un set que tengas
+      const p = X.emote.parse(body.emote);
+      if (!p || !X.emote.owns(u, p.set.id)) return { status: 403, error: 'No tienes ese emoticono.' };
+      emo = p.set.id + '-' + p.n;
+    }
+    if (!text && !emo) return { status: 400, error: 'Escribe un mensaje.' };
     const r = await rec(cfg, me);
     if (!has(r.fr, to)) return { status: 403, error: 'Solo puedes escribir a tus amigos.' };
     return lock(cfg, async () => {
       const k = chatKey(me, to), msgs = parse(await redis(cfg, ['GET', k]), []);
-      msgs.push({ f: me, t: Date.now(), x: text });
+      msgs.push(emo ? { f: me, t: Date.now(), x: '', e: emo } : { f: me, t: Date.now(), x: text });
       await redis(cfg, ['SET', k, JSON.stringify(msgs.slice(-CHAT_KEEP)), 'EX', String(30 * 86400)]);
       await redis(cfg, ['SET', readKey(me, to), String(Date.now()), 'EX', String(60 * 86400)]);
       return { ok: true };

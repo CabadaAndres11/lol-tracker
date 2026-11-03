@@ -2325,3 +2325,23 @@ body.soc-open #app { margin-right: 286px; }
 .pact { display: flex; gap: .6rem; flex: none; }
 .pact .btn[disabled] { opacity: .45; }
 @media (max-width: 760px) { .phero { grid-template-columns: 1fr; padding: 0 1rem; text-align: center; } .pvis { justify-self: center; margin: 0; } .pinfo { align-items: center; } .pbot { flex-wrap: wrap; } .ptrackw { padding: 0 1.8rem; } }
+/* Emoticonos */
+.emo { display: inline-block; height: 1em; width: auto; vertical-align: middle; pointer-events: none; }
+.rwv.emo { width: auto; height: 64px; } .rwv.emo img { width: auto; height: 64px; max-width: 110px; }
+.pvis .rwv.emo { transform: scale(1.9); }
+.psub { color: #bfe3ff; font-size: .9rem; }
+.cm.emo span { background: transparent !important; padding: .1rem; } .cme { height: 64px; width: auto; }
+#socchat .cform .emob { padding: 0 .45rem; } #socchat .cform .emob .ic { width: 1.3em; height: 1.3em; margin: 0; }
+#emobtn { position: fixed; left: 1rem; bottom: 1rem; z-index: 960; width: 3rem; height: 3rem; border-radius: 50%; border: 2px solid var(--gold); background: rgba(8,16,34,.92); color: var(--gold); cursor: pointer; display: grid; place-items: center; box-shadow: 0 4px 14px rgba(0,0,0,.5); }
+#emobtn .ic { width: 1.7rem; height: 1.7rem; margin: 0; } #emobtn:hover { background: rgba(240,201,106,.15); }
+#emopick { position: fixed; z-index: 1200; width: 310px; max-height: 60vh; overflow: auto; padding: .5rem; border-radius: 14px; border: 1px solid rgba(200,170,110,.5); background: rgba(8,14,28,.97); box-shadow: 0 8px 28px rgba(0,0,0,.6); }
+.emotabs { display: flex; gap: .3rem; margin-bottom: .4rem; } .emotabs button { height: 40px; padding: .1rem .3rem; border-radius: 8px; border: 1px solid var(--line); background: rgba(255,255,255,.04); cursor: pointer; } .emotabs button.on { border-color: var(--gold); background: rgba(240,201,106,.12); } .emotabs .emo { height: 100%; }
+.emogrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: .3rem; } .emogrid button { padding: .15rem; border-radius: 8px; border: 1px solid transparent; background: rgba(255,255,255,.03); cursor: pointer; } .emogrid button:hover { border-color: var(--gold); background: rgba(240,201,106,.1); } .emogrid .emo { height: 52px; width: 100%; object-fit: contain; }
+.emoempty { margin: .4rem; color: var(--mut); font-size: .9rem; }
+#emoz, #emome { position: fixed; z-index: 1190; display: flex; flex-direction: column; gap: .4rem; pointer-events: none; }
+#emoz { top: 5.5rem; left: 50%; transform: translateX(-50%); align-items: center; } #emome { left: 1rem; bottom: 5rem; align-items: flex-start; }
+.emobub { display: flex; flex-direction: column; align-items: center; gap: .1rem; animation: emopop .35s cubic-bezier(.3,1.5,.5,1) both; transition: opacity .4s, transform .4s; }
+.emobub .emo { height: 110px; filter: drop-shadow(0 4px 10px rgba(0,0,0,.6)); } .emobub span { font-size: .75rem; font-weight: 700; padding: .05rem .5rem; border-radius: 99px; background: rgba(0,0,0,.6); color: #f4efe0; }
+.emobub.out { opacity: 0; transform: translateY(-8px) scale(.9); }
+@keyframes emopop { from { opacity: 0; transform: scale(.4) translateY(14px); } to { opacity: 1; transform: none; } }
+@media (max-width: 640px) { .emobub .emo { height: 84px; } #emome { bottom: 4.5rem; } }

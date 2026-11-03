@@ -52,7 +52,11 @@ function starterFor(theme) {
   if (!troops.some((c) => c.rarity === 'Común')) {
     DATA.cards.filter((c) => c.rarity === 'Común' && !ids.includes(c.id)).sort((x, y) => x.cost - y.cost).slice(0, 2).forEach((c) => ids.push(c.id));
   }
-  return ids.concat(DATA.actions.filter((a) => a.theme === theme || (!a.theme && a.rarity === 'Común')).map((a) => a.id));
+  const out = ids.concat(DATA.actions.filter((a) => a.theme === theme || (!a.theme && a.rarity === 'Común')).map((a) => a.id));
+  // El mazo debe ocupar al menos deckMin huecos: si el pack se queda corto, se completa con tropas Comunes baratas de otras sinergias.
+  const fill = DATA.cards.filter((c) => c.rarity === 'Común' && !out.includes(c.id)).sort((x, y) => x.cost - y.cost || x.size - y.size);
+  while (E.deckSize(out) < E.CFG.deckMin && fill.length) out.push(fill.shift().id);
+  return out;
 }
 
 const uKey = (n) => `cartas:user:${n.toLowerCase()}`;
@@ -187,7 +191,7 @@ async function loadUser(cfg, name) {
     if (u.dups && u.dups['dashlight-gambler'] != null) { u.dups['pampert-gambler'] = u.dups['dashlight-gambler']; delete u.dups['dashlight-gambler']; }
     await redis(cfg, ['SET', uKey(u.name), JSON.stringify(u)]);
   }
-  const GONE = ['capitulo-especial']; // cartas eliminadas del juego
+  const GONE = ['capitulo-especial', 'rabia-contenida', 'fiesta-del-pueblo', 'hermano-del-alma', 'sofa-compartido', 'madrugon']; // cartas eliminadas del juego
   if (u && ((u.owned || []).some((x) => GONE.includes(x)) || GONE.some((g) => JSON.stringify(u.decks || '').includes(g)))) {
     u.owned = (u.owned || []).filter((x) => !GONE.includes(x));
     const clean = (v) => Array.isArray(v) ? v.filter((x) => !GONE.includes(x)).map(clean) : v && typeof v === 'object' ? Object.fromEntries(Object.entries(v).map(([k, x]) => [k, clean(x)])) : v;
@@ -241,6 +245,7 @@ function checkDeck(u, deck) {
     if (u.owned.indexOf(id) < 0) return 'Tu mazo tiene cartas que no tienes.';
   }
   if (E.deckSize(deck) > E.CFG.deckBudget) return 'Tu mazo se pasa del presupuesto.';
+  if (E.deckSize(deck) < E.CFG.deckMin) return `Tu mazo debe ocupar al menos ${E.CFG.deckMin} de ${E.CFG.deckBudget} huecos.`;
   if (!deck.some((id) => BY_ID[id].type === 'tropa' && BY_ID[id].rarity === 'Común')) return 'Tu mazo necesita al menos una tropa Común.';
   return '';
 }

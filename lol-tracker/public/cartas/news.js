@@ -1,6 +1,9 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-04', tag: 'Cambio', title: 'Mazos mínimos de 15 huecos',
+      items: ['Para jugar, un mazo debe ocupar al menos 15 de los 20 huecos de espacio. Si le falta, no podrás entrar a partida con él y el editor te avisará de cuánto te falta.',
+        'Los mazos iniciales de Informático, Trabajo y KOI incluyen ahora alguna tropa Común extra para llegar al mínimo desde el primer día.'] },
     { date: '2026-11-04', tag: 'Cambio', title: 'Adiós a cinco sinergias',
       items: ['Se eliminan las sinergias Tilt, Pueblo, NINI, Pelayos y Dúo Inseparable. Algunas cartas se quedan temporalmente sin sinergia: las rediseñaremos en próximas versiones.',
         'Con ellas desaparecen sus cartas de acción: Rabia contenida, Fiesta del pueblo, Hermano del alma, Sofá compartido y Madrugón.'] },

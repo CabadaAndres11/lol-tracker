@@ -6,7 +6,7 @@
   // ---------- Ajustes de balance (todo en un sitio para tocarlo fácil) ----------
   var CFG = {
     slots: 4, handMax: 5, life: 12, gold: 8, income: 2, shopEvery: 3, shopOffers: 5,
-    refreshCost: 1, deckBudget: 20,
+    refreshCost: 1, deckBudget: 20, deckMin: 15,
     interest: { per: 5, max: 3 }, // interés (estilo TFT): +1 de oro por cada 'per' de oro que conserves al terminar la ronda, hasta 'max'
     reviveLife: 20, // modo Resurrección: vida inicial (la vida solo se pierde con golpes directos; la carta que ataca recibe el ataque de la atacada)
     merge: [1, 2, 4], // fusión de 3 copias iguales (estilo TFT): multiplicador de las estadísticas base por estrella

@@ -1013,6 +1013,7 @@
     ids = ids || [];
     if (ids.length < 3) return 'Un mazo necesita al menos 3 cartas.';
     if (E.deckSize(ids) > CFG.deckBudget) return 'El mazo se pasa del presupuesto de espacio.';
+    if (E.deckSize(ids) < CFG.deckMin) return 'El mazo debe ocupar al menos ' + CFG.deckMin + ' de los ' + CFG.deckBudget + ' huecos de espacio (ahora ' + E.deckSize(ids) + ').';
     var troops = ids.filter(function (id) { return CARD[id].type === 'tropa'; });
     if (!troops.length) return 'El mazo necesita al menos una tropa.';
     if (!troops.some(function (id) { return CARD[id].rarity === 'Común'; })) return 'Necesitas al menos una tropa Común: la tienda inicial solo ofrece Comunes.';

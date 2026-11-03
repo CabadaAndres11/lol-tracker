@@ -1501,20 +1501,22 @@
     (P.nvs || []).forEach(function (n) { have[n.id] = 1; }); if (cur) have[cur] = 1;
     var all = (D.novias || []).filter(function (n) { return have[n.id]; });
     if (!all.length) return '';
-    return '<div class="novsw" title="Elige qué novia ocupa el hueco 5">' + all.map(function (n) {
-      return '<button class="nsw' + (n.id === cur ? ' on' : '') + '" data-act="novia" data-id="' + n.id + '" title="' + (n.id === cur ? esc(n.name) + ' está en el hueco 5' : 'Poner a ' + esc(n.name) + ' en el hueco 5') + '" style="background-image:url(/cartas/art/' + n.id + '.webp)"><i>' + esc(n.name.charAt(0)) + '</i></button>';
+    return '<div class="novsw" title="Elige qué novia ocupa el hueco extra">' + all.map(function (n) {
+      return '<button class="nsw' + (n.id === cur ? ' on' : '') + '" data-act="novia" data-id="' + n.id + '" title="' + (n.id === cur ? esc(n.name) + ' está en el hueco extra' : 'Poner a ' + esc(n.name) + ' en el hueco extra') + '" style="background-image:url(/cartas/art/' + n.id + '.webp)"><i>' + esc(n.name.charAt(0)) + '</i></button>';
     }).join('') + '</div>';
   }
   function mesaRow(side, view, s, mine) {
     var P = s.p[side], prep = s.phase === 'prep' && !ui.playing && !s.shopOpen, shop = s.shopOpen && !ui.playing, sel = ui.sel;
     var aim = {}; Object.keys(s.p[0].target).forEach(function (k) { var t = s.p[0].target[k]; aim[t] = (aim[t] || 0) + 1; });
-    var jin = P.mesa.some(function (x) { return x && !x.dead && x.id === 'dashlight-sun-jin-woo'; }), has5 = (E.tiers(P).Correa || 0) >= 1 || !!view.mesa[side][4] || jin;
-    var h = '<div class="row4 side' + side + (has5 ? ' has5' : '') + '">';
-    view.mesa[side].forEach(function (v, k) {
-      if (k === 4 && !has5) return;
+    var jin = P.mesa.some(function (x) { return x && !x.dead && x.id === 'dashlight-sun-jin-woo'; }), vm = view.mesa[side];
+    // Huecos extra (cada sinergia o pasiva crea el suyo): 4 = novia (Correa), 5 = soldado de sombra (Dashlight Sun Jin-Woo)
+    var ex4 = (E.tiers(P).Correa || 0) >= 1 || !!vm[4], ex5 = jin || !!vm[5], nex = (ex4 ? 1 : 0) + (ex5 ? 1 : 0);
+    var h = '<div class="row4 side' + side + (nex ? ' has5' : '') + (nex > 1 ? ' ex2' : '') + '">';
+    vm.forEach(function (v, k) {
+      if ((k === 4 && !ex4) || (k === 5 && !ex5)) return;
       if (!v) {
-        if (k === 4 && jin && (E.tiers(P).Correa || 0) < 1) { h += '<div class="cw"><div class="slot nov">' + ic('humo') + ' Hueco 5<br><small>Soldado de Sombra</small></div></div>'; return; }
-        if (k === 4) { h += '<div class="cw"><div class="slot nov">' + ic('corazon') + ' Hueco 5<br><small>' + (mine ? ((P.nvs || []).length ? 'Elige una novia' : 'Sin novias') : 'Novia') + '</small></div>' + (mine ? novSwitch(s) : '') + '</div>'; return; }
+        if (k === 5) { h += '<div class="cw"><div class="slot nov shd">' + ic('humo') + ' Hueco extra<br><small>Soldado de Sombra</small></div></div>'; return; }
+        if (k === 4) { h += '<div class="cw"><div class="slot nov">' + ic('corazon') + ' Hueco extra<br><small>' + (mine ? ((P.nvs || []).length ? 'Elige una novia' : 'Sin novias') : 'Novia') + '</small></div>' + (mine ? novSwitch(s) : '') + '</div>'; return; }
         var free = mine && s.phase === 'prep' && !ui.playing && sel && sel.k === 'hand' && E.isTroop(P.hand[sel.i]);
         h += '<div class="cw"><div class="slot' + (free ? ' free' : '') + '"' + (free ? ' data-act="slot" data-i="' + k + '"' : '') + '>' + (free ? 'Colocar aquí' : 'Hueco') + '</div></div>';
         return;
@@ -1542,7 +1544,7 @@
         }
         if (shop && I && E.isNov(I)) under += '<div class="mini"><button data-act="retire" data-slot="' + k + '">' + ic('deshacer') + ' Retirar</button></div>';
         else if (shop && I && E.has(I, 'Lol')) under += '<div class="mini"><button data-act="sell" data-from="mesa" data-i="' + k + '" title="Vender y recuperar su valor">' + ic('moneda') + ' Vender ' + E.sellValue(I) + '</button></div>';
-        else if (shop && I && !E.has(I, 'Lol')) under += '<div class="mini"><button data-act="retire" data-slot="' + k + '">' + ic('deshacer') + ' Retirar</button><button data-act="sell" data-from="mesa" data-i="' + k + '" title="Vender y recuperar su valor">' + ic('moneda') + ' Vender ' + E.sellValue(I) + '</button></div>';
+        else if (shop && I && !I.shadow && !E.has(I, 'Lol')) under += '<div class="mini"><button data-act="retire" data-slot="' + k + '">' + ic('deshacer') + ' Retirar</button><button data-act="sell" data-from="mesa" data-i="' + k + '" title="Vender y recuperar su valor">' + ic('moneda') + ' Vender ' + E.sellValue(I) + '</button></div>';
       } else {
         o.attrs += ' data-act="foe"';
         if (prep && sel && (sel.k === 'mine' || (sel.k === 'act' && CARD[s.p[0].hand[sel.i].id].target === 'enemy'))) o.cls += ' tgtable';
@@ -2713,7 +2715,7 @@
     }
     if (act === 'novia') {
       var nk = -1; (s.p[0].nvs || []).forEach(function (n, q) { if (n.id === el.dataset.id) nk = q; });
-      if (nk < 0) return; // ya está en el hueco 5
+      if (nk < 0) return; // ya está en el hueco extra
       if (E.place(s, 0, -1 - nk, 4)) { ui.landed = s.p[0].mesa[4].uid; snd('place'); pvs('place', [-1 - nk, 4]); ui.hint = ''; } else ui.hint = 'No se puede colocar ahora.';
       ui.sel = null; if (!s.shopOpen) nextPending(s);
       return render();

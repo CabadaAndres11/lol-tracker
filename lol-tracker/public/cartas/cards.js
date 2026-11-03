@@ -643,7 +643,7 @@ var D={
    "size": 2,
    "pas": {
     "n": "Soldado de Sombra",
-    "t": "En mesa desbloquea el hueco 5: al derrotar a una tropa, su versión al 50% lo ocupa hasta que la derroten o Dashlight derrote a otra tropa."
+    "t": "En mesa crea un hueco extra: al derrotar a una tropa, su versión al 50% lo ocupa hasta que la derroten o Dashlight derrote a otra tropa."
    }
   },
   {
@@ -996,7 +996,7 @@ var D={
    "type": "accion",
    "size": 1,
    "target": "none",
-   "text": "Mejora el hueco 5 con +3/+3 permanente: lo recibe la novia que lo ocupe y se mantiene aunque la cambies o caiga (necesitas el nivel 1 de Correa y una novia en el hueco 5).",
+   "text": "Mejora el hueco extra de la novia con +3/+3 permanente: lo recibe la novia que lo ocupe y se mantiene aunque la cambies o caiga (necesitas el nivel 1 de Correa y una novia en el hueco 5).",
    "theme": "Correa"
   },
   {
@@ -1219,7 +1219,7 @@ var D={
    ],
    "color": "#fb7185",
    "tx": [
-    "Desbloquea el hueco 5 y recibes a las 4 novias (una sola en el hueco 5). Eriko +2/+2 a la mesa cada combate (tope 10), Helena sin bonus, Lucía 3 de daño a las rivales, Ari evita el 50% de los golpes.",
+    "Crea un hueco extra y recibes a las 4 novias (una sola ocupa el hueco extra). Eriko +2/+2 a la mesa cada combate (tope 10), Helena sin bonus, Lucía 3 de daño a las rivales, Ari evita el 50% de los golpes.",
     "Eriko +3/+3 (tope 15), Helena +2 de ataque, Lucía 4 de daño, Ari evita el 60%.",
     "Eriko +4/+4 (tope 20), Helena +4 de ataque, Lucía 5 de daño, Ari evita el 70%."
    ]

@@ -1,10 +1,13 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-03', tag: 'Cambio', title: 'Huecos extra independientes',
+      items: ['Cada sinergia o pasiva con un espacio especial crea ahora su propio hueco extra, ya no es siempre el «hueco 5»: Correa crea el hueco extra de la novia y Dashlight Sun Jin-Woo, el del Soldado de Sombra.',
+        'Así la novia y el soldado ya no se pisan: puedes tener las dos cosas a la vez, y se muestran en la mesa como huecos extra a continuación de los 4 normales. Los huecos extra no se ocupan a mano con tropas.'] },
     { date: '2026-11-03', tag: 'Cambio', title: 'Rework de Dashlight Sun Jin-Woo: el Soldado de Sombra permanece',
       art: ['dashlight-sun-jin-woo'],
       items: ['El Soldado de Sombra ya no desaparece en la siguiente tienda: se queda en el hueco 5 hasta que lo derroten o hasta que Dashlight derrote a otra tropa, momento en que es sustituido por una versión (al 50%) de la nueva tropa caída.',
-        'Si Dashlight deja la mesa (por ejemplo, porque lo vendes o lo devuelves a la mano), el soldado se desvanece. Mientras dure, no se puede vender ni devolver a la mano, y las novias de Correa no pueden ocupar el hueco 5.',
+        'Si Dashlight deja la mesa (por ejemplo, porque lo vendes o lo devuelves a la mano), el soldado se desvanece. Mientras dure, no se puede vender ni devolver a la mano.',
         'Se elimina la regla especial de Royal Rumble (2 tiendas), que ya no hace falta.'] },
     { date: '2026-11-03', tag: 'Cambio', title: 'Royal Rumble: siempre contra la IA Normal',
       items: ['En Royal Rumble ya no se puede elegir la dificultad de la IA: siempre es Normal. Así tanto tú como la IA empezáis con todas las cartas sin niveles y la partida es igual de justa para los dos. Se aplica también al Versus de 4 contra bots, y las recompensas son las de la dificultad Normal.'] },

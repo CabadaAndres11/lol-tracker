@@ -85,9 +85,9 @@
     if (c >= 1 && !P.novGiven) {
       P.novGiven = true;
       (DATA.novias || []).forEach(function (n) { if (!P.nvs.some(function (x) { return x.id === n.id; }) && !(P.mesa[4] && P.mesa[4].id === n.id)) P.nvs.push(mk(s, n.id, p)); });
-      say(s, pv(s, p, '¡Sinergia Correa! Se desbloquea el hueco 5 y recibes a las 4 novias.', 'El rival desbloquea el hueco 5 y sus novias.'));
+      say(s, pv(s, p, '¡Sinergia Correa! Se crea un hueco extra y recibes a las 4 novias.', 'El rival crea un hueco extra y sus novias.'));
     }
-    if (c < 1 && P.mesa[4] && !P.mesa[4].shadow) { s5out(P, P.mesa[4]); P.nvs.push(P.mesa[4]); delete P.target[P.mesa[4].uid]; P.mesa[4] = null; } // sin la sinergia, la novia vuelve a la reserva
+    if (c < 1 && P.mesa[4]) { s5out(P, P.mesa[4]); P.nvs.push(P.mesa[4]); delete P.target[P.mesa[4].uid]; P.mesa[4] = null; } // sin la sinergia, la novia vuelve a la reserva
   }
   // Mejora del hueco 5 (acción Regalo): la tiene el hueco, no la novia. Se aplica a la novia que lo ocupe y se retira al salir.
   function s5in(P, i) { var b = P.s5; if (!b || !i) return; i.perm.atk += b.atk; i.perm.hp += b.hp; i.hp += b.hp; }
@@ -146,7 +146,7 @@
   function rumbleDeck() { return DATA.cards.concat(DATA.actions).map(function (c) { return c.id; }); }
 
   function newPlayer(deck) {
-    return { life: CFG.life, gold: CFG.gold, deck: deck.slice(), hand: [], mesa: [null, null, null, null, null], nvs: [], novGiven: false, grave: [], target: {}, voley: {}, fl: {}, offers: [], refreshes: 0, pickUsed: false, anime: 0, gen: 0, lost: false };
+    return { life: CFG.life, gold: CFG.gold, deck: deck.slice(), hand: [], mesa: [null, null, null, null, null, null], nvs: [], novGiven: false, grave: [], target: {}, voley: {}, fl: {}, offers: [], refreshes: 0, pickUsed: false, anime: 0, gen: 0, lost: false };
   }
 
   function newGame(deckA, deckB, seed, opts) {
@@ -412,7 +412,7 @@
   }
   function retire(s, p, slot) {
     var P = s.p[p], i = P.mesa[slot];
-    if (slot === 4 && i && !i.shadow && s.phase === 'prep') { s5out(P, i); P.mesa[4] = null; P.nvs.push(i); delete P.target[i.uid]; return true; } // la novia vuelve a la reserva
+    if (slot === 4 && i && s.phase === 'prep') { s5out(P, i); P.mesa[4] = null; P.nvs.push(i); delete P.target[i.uid]; return true; } // la novia vuelve a la reserva
     if (!s.shopOpen || s.phase !== 'prep' || !i || i.dead || i.shadow) return false;
     if (has(i, 'Lol')) return false;
     if (P.hand.length >= handCap(s)) return false;
@@ -428,13 +428,13 @@
     if (handIdx < 0 || slot === 4) { // novias: handIdx negativo = posición -1-k en la reserva; solo van al hueco 5
       var k = -1 - handIdx, n = (P.nvs || [])[k];
       if (s.phase !== 'prep' || slot !== 4 || !n || (tiers(P)['Correa'] || 0) < 1) return false;
-      if (P.mesa[4] && P.mesa[4].shadow) return false;
       P.nvs.splice(k, 1);
       if (P.mesa[4]) { s5out(P, P.mesa[4]); P.nvs.push(P.mesa[4]); delete P.target[P.mesa[4].uid]; }
       s5in(P, n); P.mesa[4] = n;
       return true;
     }
     var i = P.hand[handIdx];
+    if (slot < 0 || slot > 3) return false; // los huecos extra (4: novia, 5: soldado de sombra) no se ocupan a mano con tropas
     if (s.phase !== 'prep' || !i || !isTroop(i) || P.mesa[slot] || dupBlock(s, p, handIdx)) return false;
     P.hand.splice(handIdx, 1); P.mesa[slot] = i;
     if (!i.counted) { i.counted = 1; P.used = (P.used || 0) + 1; } // cartas usadas (para las misiones): cada tropa cuenta una vez
@@ -489,7 +489,7 @@
     'campeones-de-europa': { ok: function (s, p) { return (tiers(s.p[p])['KOI'] || 0) >= 1 ? '' : 'Necesitas el nivel 1 de KOI (2 cartas distintas).'; }, run: function (s, p) { s.p[p].fl.koi = true; return 'las KOI que caigan esta ronda ceden todo su ataque'; } },
     'remate-doble': { ok: function (s, p) { return (tiers(s.p[p])['Voley'] || 0) >= 1 ? '' : 'Necesitas el nivel 1 de Voley (2 cartas distintas).'; }, run: function (s, p) { s.p[p].fl.vol = true; return 'tus Voley: ataque doble o defensa total'; } },
     'cita-sorpresa': {
-      ok: function (s, p) { var n = s.p[p].mesa[4]; return (tiers(s.p[p])['Correa'] || 0) >= 1 && n && !n.dead ? '' : 'Necesitas el nivel 1 de Correa y una novia en el hueco 5.'; },
+      ok: function (s, p) { var n = s.p[p].mesa[4]; return (tiers(s.p[p])['Correa'] || 0) >= 1 && n && !n.dead ? '' : 'Necesitas el nivel 1 de Correa y una novia en el hueco extra.'; },
       run: function (s, p) { var n = s.p[p].mesa[4], g = sc(s, 3); var P5 = s.p[p].s5 || (s.p[p].s5 = { atk: 0, hp: 0 }); P5.atk += g; P5.hp += g; grow(n, 'atk', g); grow(n, 'hp', g); return 'el hueco 5 mejora +' + g + '/+' + g + ' permanente (' + card(n).name + ' lo recibe ahora y la siguiente novia también)'; } },
     'rabia-contenida': { run: function (s, p) { var n = sc(s, 1); s.p[p].fl.tilt = n; return 'si ganas esta ronda: +' + n + ' ataque a las Tilt'; } },
     'fiesta-del-pueblo': { ok: function (s, p) { return (tiers(s.p[p])['Pueblo'] || 0) >= 1 ? '' : 'Necesitas el nivel 1 de Pueblo (2 cartas distintas).'; }, run: function (s, p) { s.p[p].fl.pueblo = true; return 'el crecimiento del pueblo se duplica'; } },
@@ -1002,7 +1002,7 @@
         line += ' Dúo en sintonía: ' + dn + ' de daño a todas las tropas rivales.';
         mesaTroops(s.p[a.owner]).forEach(function (v) { line += passiveHit(s, v, dn, 0); });
       }
-      if (tgt.dead && pas(a) === 'sombra' && (!P.mesa[4] || P.mesa[4].shadow) && !isNov(tgt)) line += shadowRaise(s, a, tgt); // si ya había un soldado, el nuevo lo sustituye
+      if (tgt.dead && pas(a) === 'sombra' && !isNov(tgt)) line += shadowRaise(s, a, tgt); // el soldado tiene su propio hueco extra: si ya había uno, el nuevo lo sustituye
       if (tgt.dead && pas(a) === 'embargo' && !a.dead) {
         E.life -= 2; P.gold += 1; plife = tgt.owner; pdmg = 2;
         line += ' Embargo: ' + pv(s, a.owner, 'el rival pierde 2 de vida y ganas 1 de oro.', 'pierdes 2 de vida y el rival gana 1 de oro.');
@@ -1135,18 +1135,18 @@
   // ---------- Dashlight Sun Jin-Woo: Soldado de Sombra ----------
   // Al derrotar a una tropa (con el hueco 5 libre o con otro soldado), aparece una versión suya al 50% de estadísticas. Dura hasta que la derroten o Dashlight derrote a otra tropa.
   function shadowRaise(s, a, tgt) {
-    var P = s.p[a.owner], n = mk(s, tgt.id, a.owner), c = card(tgt), old = P.mesa[4] && P.mesa[4].shadow ? P.mesa[4] : null;
+    var P = s.p[a.owner], n = mk(s, tgt.id, a.owner), c = card(tgt), old = P.mesa[5] && P.mesa[5].shadow ? P.mesa[5] : null;
     if (old) delete P.target[old.uid];
     var na = Math.max(1, Math.round(atk(tgt) / 2)), nh = Math.max(1, Math.round(maxHp(tgt) / 2));
     n.shadow = true; n.perm = { atk: na - c.atk, hp: nh - c.hp }; n.hp = nh; n.tmp = { atk: 0, hp: 0, red: 0 };
-    P.mesa[4] = n;
-    return ' Soldado de Sombra: ' + c.name + ' (' + na + '/' + nh + ') ocupa el hueco 5' + (old ? ' y sustituye al soldado anterior.' : ' hasta que lo derroten o Dashlight derrote a otra tropa.');
+    P.mesa[5] = n;
+    return ' Soldado de Sombra: ' + c.name + ' (' + na + '/' + nh + ') ocupa su hueco extra' + (old ? ' y sustituye al soldado anterior.' : ' hasta que lo derroten o Dashlight derrote a otra tropa.');
   }
   // El soldado de sombra dura hasta que lo derroten o Dashlight derrote a otra tropa; si Dashlight deja la mesa, se desvanece.
   function shadowOrphan(s, p) {
-    var P = s.p[p], sh = P.mesa[4];
+    var P = s.p[p], sh = P.mesa[5];
     if (!sh || !sh.shadow || mesaTroops(P).some(function (i) { return pas(i) === 'sombra' && !i.dead; })) return false;
-    delete P.target[sh.uid]; P.mesa[4] = null; return true;
+    delete P.target[sh.uid]; P.mesa[5] = null; return true;
   }
   // ---------- AitoRLG MaoMao: Boticaria ----------
   // Al abrirse cada tienda: retira el soldado de sombra y, con MaoMao en la mesa, cada 2 tiendas cura o entrega un Remedio. Devuelve texto de registro.

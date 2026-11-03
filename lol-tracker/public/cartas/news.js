@@ -1,6 +1,8 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-03', tag: 'Cambio', title: 'Pase de batalla: ver las skins en 3D',
+      items: ['En el pase, las recompensas de skin tienen un botón «Ver en 3D» para ver la carta con la skin ampliada y girarla antes de conseguirla. Además, el nivel 14 pasa a dar 2 sobres del Set 1 (recompensa de prueba).'] },
     { date: '2026-11-03', tag: 'Novedad', title: 'Nuevo sobre: Sobre Anime',
       items: ['Nuevo sobre «Anime»: trae 5 cartas al azar solo de la sinergia Anime (sus tropas y la acción Kamehameha); la última siempre es Rara o mejor. Está en la tienda junto al Set 1 (50 monedas), con su propia animación de apertura.',
         'Las cartas de Anime ya no salen en el sobre del Set 1 (siguen saliendo en las cajas).',

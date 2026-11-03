@@ -2426,3 +2426,6 @@ body.soc-open #app { margin-right: 286px; }
 .bpk.anime .bpk-lid::after, .bpk.anime .bpk-main::after { display: none; }
 .bpk.anime { filter: drop-shadow(0 14px 18px rgba(120,40,200,.55)); }
 .bpk.anime.rip, .bpk.anime.shake { filter: none; }
+
+.rwplay.d3 { top: auto; bottom: 6px; width: auto; height: auto; border-radius: 99px; padding: .45rem 1.1rem; display: inline-flex; align-items: center; gap: .4rem; font-weight: 700; font-size: .85rem; letter-spacing: .04em; white-space: nowrap; }
+.rwplay.d3 .ic { width: 1.1em; height: 1.1em; margin: 0; }

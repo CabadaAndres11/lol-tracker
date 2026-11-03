@@ -356,8 +356,9 @@
     var P = s.p[p];
     if (!s.shopOpen || s.phase !== 'prep' || s.over) return false;
     var i = where === 'mesa' ? P.mesa[idx] : P.hand[idx];
-    if (!i || i.dead || isNov(i)) return false;
+    if (!i || i.dead || isNov(i) || i.shadow) return false;
     if (where === 'mesa') { P.mesa[idx] = null; delete P.target[i.uid]; } else P.hand.splice(idx, 1);
+    shadowOrphan(s, p);
     P.gold += sellValue(i);
     novSync(s, p);
     checkShop(s);
@@ -412,11 +413,11 @@
   function retire(s, p, slot) {
     var P = s.p[p], i = P.mesa[slot];
     if (slot === 4 && i && !i.shadow && s.phase === 'prep') { s5out(P, i); P.mesa[4] = null; P.nvs.push(i); delete P.target[i.uid]; return true; } // la novia vuelve a la reserva
-    if (!s.shopOpen || s.phase !== 'prep' || !i || i.dead) return false;
+    if (!s.shopOpen || s.phase !== 'prep' || !i || i.dead || i.shadow) return false;
     if (has(i, 'Lol')) return false;
     if (P.hand.length >= handCap(s)) return false;
     P.mesa[slot] = null; P.hand.push(i); // conserva la vida actual
-    delete P.target[i.uid];
+    delete P.target[i.uid]; shadowOrphan(s, p);
     novSync(s, p);
     return true;
   }
@@ -1001,7 +1002,7 @@
         line += ' Dúo en sintonía: ' + dn + ' de daño a todas las tropas rivales.';
         mesaTroops(s.p[a.owner]).forEach(function (v) { line += passiveHit(s, v, dn, 0); });
       }
-      if (tgt.dead && pas(a) === 'sombra' && !P.mesa[4] && !isNov(tgt)) line += shadowRaise(s, a, tgt);
+      if (tgt.dead && pas(a) === 'sombra' && (!P.mesa[4] || P.mesa[4].shadow) && !isNov(tgt)) line += shadowRaise(s, a, tgt); // si ya había un soldado, el nuevo lo sustituye
       if (tgt.dead && pas(a) === 'embargo' && !a.dead) {
         E.life -= 2; P.gold += 1; plife = tgt.owner; pdmg = 2;
         line += ' Embargo: ' + pv(s, a.owner, 'el rival pierde 2 de vida y ganas 1 de oro.', 'pierdes 2 de vida y el rival gana 1 de oro.');
@@ -1116,7 +1117,7 @@
   }
 
   function cleanup(s) {
-    s.p.forEach(function (P) {
+    s.p.forEach(function (P, pi) {
       P.mesa.forEach(function (i, k) {
         if (!i) return;
         if (i.shadow && (i.dead || i.hp <= 0)) { P.mesa[k] = null; delete P.target[i.uid]; return; } // el soldado de sombra caído desaparece (tampoco revive)
@@ -1127,27 +1128,32 @@
       });
       P.hand.forEach(function (i) { if (isTroop(i)) { i.tmp = { atk: 0, hp: 0, red: 0 }; i.hp = s.mode === 'revive' ? maxHp(i) : Math.min(i.hp, maxHp(i)); } }); // en clásico las heridas se conservan en la mano
       P.target = {}; P.voley = {};
+      shadowOrphan(s, pi);
     });
   }
 
   // ---------- Dashlight Sun Jin-Woo: Soldado de Sombra ----------
-  // Al derrotar a una tropa (con el hueco 5 libre), aparece una versión suya al 50% de estadísticas hasta la siguiente tienda.
+  // Al derrotar a una tropa (con el hueco 5 libre o con otro soldado), aparece una versión suya al 50% de estadísticas. Dura hasta que la derroten o Dashlight derrote a otra tropa.
   function shadowRaise(s, a, tgt) {
-    var P = s.p[a.owner], n = mk(s, tgt.id, a.owner), c = card(tgt);
+    var P = s.p[a.owner], n = mk(s, tgt.id, a.owner), c = card(tgt), old = P.mesa[4] && P.mesa[4].shadow ? P.mesa[4] : null;
+    if (old) delete P.target[old.uid];
     var na = Math.max(1, Math.round(atk(tgt) / 2)), nh = Math.max(1, Math.round(maxHp(tgt) / 2));
     n.shadow = true; n.perm = { atk: na - c.atk, hp: nh - c.hp }; n.hp = nh; n.tmp = { atk: 0, hp: 0, red: 0 };
     P.mesa[4] = n;
-    return ' Soldado de Sombra: ' + c.name + ' (' + na + '/' + nh + ') ocupa el hueco 5 hasta la siguiente tienda.';
+    return ' Soldado de Sombra: ' + c.name + ' (' + na + '/' + nh + ') ocupa el hueco 5' + (old ? ' y sustituye al soldado anterior.' : ' hasta que lo derroten o Dashlight derrote a otra tropa.');
+  }
+  // El soldado de sombra dura hasta que lo derroten o Dashlight derrote a otra tropa; si Dashlight deja la mesa, se desvanece.
+  function shadowOrphan(s, p) {
+    var P = s.p[p], sh = P.mesa[4];
+    if (!sh || !sh.shadow || mesaTroops(P).some(function (i) { return pas(i) === 'sombra' && !i.dead; })) return false;
+    delete P.target[sh.uid]; P.mesa[4] = null; return true;
   }
   // ---------- AitoRLG MaoMao: Boticaria ----------
   // Al abrirse cada tienda: retira el soldado de sombra y, con MaoMao en la mesa, cada 2 tiendas cura o entrega un Remedio. Devuelve texto de registro.
   function shopStart(s, p) {
     var P = s.p[p], out = [];
     P.hda = false;
-    if (P.mesa[4] && P.mesa[4].shadow) {
-      P.mesa[4].sh = (P.mesa[4].sh || 0) + 1; // en Royal Rumble hay una tienda por combate: el soldado dura 2 tiendas (los mismos 2 combates que en el modo normal)
-      if (P.mesa[4].sh >= (s.rumble ? 2 : 1)) { delete P.target[P.mesa[4].uid]; P.mesa[4] = null; out.push('El soldado de sombra desaparece.'); }
-    }
+    if (shadowOrphan(s, p)) out.push('El soldado de sombra desaparece: Dashlight ya no está en la mesa.');
     if (mesaTroops(P).some(function (i) { return pas(i) === 'boticaria'; })) {
       P.bot = (P.bot || 0) + 1;
       if (P.bot >= (s.rumble ? 4 : 2)) { // en Rumble hay una tienda por combate: mismo ritmo (cada 4 combates)

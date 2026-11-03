@@ -2257,3 +2257,9 @@ body.soc-open #app { margin-right: 286px; }
 .pstat b { font-family: var(--serif); font-size: 1.7rem; color: var(--ink); line-height: 1.1; }
 .pstat .psl { font-size: .8rem; color: var(--mut); text-transform: uppercase; letter-spacing: .06em; }
 .pstat .pss { font-size: .75rem; color: var(--gold); }
+/* Perfil de un amigo */
+.fpov { z-index: 400; }
+.fpp { position: relative; width: min(760px, calc(100vw - 2rem)); max-height: calc(100vh - 2rem); overflow: auto; margin: 0; }
+.fpp .profhead { margin-bottom: .8rem; } .fpp .pstats { margin: 0; border: 0; padding: 0; background: none; }
+.fpx { position: absolute; top: .5rem; right: .7rem; width: 2rem; height: 2rem; border-radius: 50%; border: 1px solid var(--line); background: rgba(255,255,255,.05); color: var(--ink); font-size: 1.2rem; cursor: pointer; z-index: 2; }
+.fpp .fst.on { color: #4ade80; } .fpp .fst.play { color: #fbbf24; }

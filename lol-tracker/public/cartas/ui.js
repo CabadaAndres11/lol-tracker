@@ -523,9 +523,9 @@
   function statTile(ico, val, lab, sub) {
     return '<div class="pstat"><span class="psi">' + ic(ico) + '</span><b>' + val + '</b><span class="psl">' + lab + '</span>' + (sub ? '<span class="pss">' + sub + '</span>' : '') + '</div>';
   }
-  function statsPanel() {
-    var a = ui.acct, st = (a.ms && a.ms.stats) || {}, g = st.games || 0, w = st.wins || 0, pct = g ? Math.round(w / g * 100) : 0;
-    var totalCards = D.cards.length + D.actions.length, ownedN = a.owned.length, rk = rankOf(a.ptsMax || a.pts || 0), cur = rankOf(a.pts || 0), nx = RANKS[cur + 1];
+  function statsPanel(a) {
+    var st = a.stats || {}, g = st.games || 0, w = st.wins || 0, pct = g ? Math.round(w / g * 100) : 0;
+    var totalCards = D.cards.length + D.actions.length, ownedN = a.ownedN, rk = rankOf(a.ptsMax || a.pts || 0), cur = rankOf(a.pts || 0), nx = RANKS[cur + 1];
     var bar = nx ? '<div class="pbar"><i style="width:' + Math.max(0, Math.min(100, ((a.pts - RANKS[cur].min) / (nx.min - RANKS[cur].min)) * 100)) + '%;background:' + RANKS[cur].c + '"></i></div><span class="mut">' + (nx.min - a.pts) + ' puntos para ' + nx.n + '</span>' : '<span class="mut">¡Rango máximo!</span>';
     return '<div class="panel pstats"><h2>' + ic('trofeo') + ' Estadísticas</h2>' +
       '<div class="prank"><span class="pemb">' + rkEmblem(cur, true) + '</span><div><b class="prn" style="color:' + RANKS[cur].c + '">' + RANKS[cur].n + '</b><span class="mut">' + a.pts + ' puntos de clasificación' + (rk > cur ? ' · mejor rango: ' + RANKS[rk].n : '') + '</span>' + bar + '</div></div>' +
@@ -545,8 +545,26 @@
         return '<button class="avopt' + (cur === c.id ? ' on' : '') + '" data-act="setavatar" data-card="' + c.id + '" title="' + esc(c.name) + '"><span class="avt has" style="background-image:url(/cartas/art/' + c.id + '.webp)"></span><b>' + esc(c.name) + '</b></button>';
       }).join('') + '</div>' + (mySkins.length ? '<h3 class="avsub">Skins</h3><div class="avgrid">' + mySkins.map(function (k) {
         return '<button class="avopt skin' + (cur === k.id ? ' on' : '') + '" data-act="setavatar" data-card="' + k.id + '" title="' + esc(CARD[k.card].name + ' · ' + k.name) + '"><span class="avt has" style="background-image:url(/cartas/art/' + k.id + '.webp)"></span><b>' + esc(k.name) + '</b></button>';
-      }).join('') + '</div>' : '') + '<div class="btnrow"><button class="btn sec" data-act="avedit">Cerrar</button></div></div>') + statsPanel() + '</div>';
+      }).join('') + '</div>' : '') + '<div class="btnrow"><button class="btn sec" data-act="avedit">Cerrar</button></div></div>') + statsPanel({ pts: a.pts, ptsMax: a.ptsMax, ownedN: a.owned.length, stats: (a.ms && a.ms.stats) || {} }) + '</div>';
   }
+  // Perfil de un amigo (ventana emergente): foto, rango y estadísticas
+  var STTXT = { on: 'En línea', play: 'En partida', off: 'Desconectado' };
+  function closeFriendProfile() { var o = document.getElementById('friendprof'); if (o) o.remove(); document.removeEventListener('keydown', fpKey); }
+  function fpKey(e) { if (e.key === 'Escape') closeFriendProfile(); }
+  ui.showProfile = function (name) {
+    closeFriendProfile();
+    var o = document.createElement('div'); o.id = 'friendprof'; o.className = 'overlay fpov';
+    o.innerHTML = '<div class="panel fpp"><p class="mut" style="text-align:center">Cargando…</p></div>';
+    o.addEventListener('click', function (e) { if (e.target === o || e.target.closest('[data-fp=close]')) closeFriendProfile(); });
+    document.body.appendChild(o); document.addEventListener('keydown', fpKey);
+    api('socProfile', { name: name }).then(function (r) {
+      if (!document.getElementById('friendprof')) return;
+      var p = r.ok && r.data.profile;
+      if (!p) { o.firstChild.innerHTML = '<p class="err">' + esc((r.data && r.data.error) || 'No se pudo cargar el perfil.') + '</p><div class="btnrow"><button class="btn sec" data-fp="close">Cerrar</button></div>'; return; }
+      var ok = p.avatar && artOk(p.avatar);
+      o.firstChild.innerHTML = '<button class="fpx" data-fp="close" aria-label="Cerrar">×</button><div class="profhead"><span class="avt xl' + (ok ? ' has' : '') + '"' + (ok ? ' style="background-image:url(/cartas/art/' + esc(p.avatar) + '.webp)"' : '') + '>' + (ok ? '' : ic('usuario')) + '</span><div><h2>' + esc(p.name) + '</h2><p class="mut"><span class="fst ' + p.st + '">' + STTXT[p.st] + '</span> · ' + p.pts + ' puntos de clasificación</p></div></div>' + statsPanel({ pts: p.pts, ptsMax: p.ptsMax, ownedN: p.owned, stats: p.stats });
+    });
+  };
   function renderSettings() {
     app.innerHTML = head('profile', '' + ic('ajustes') + ' Ajustes') + (ui.msg ? '<p class="err">' + esc(ui.msg) + '</p>' : '') +
       '<div class="btnrow" style="margin-bottom:.8rem"><button class="btn sec" data-act="nav" data-to="profile">← Volver al perfil</button></div>' + sfxPanel() + animPanel() +

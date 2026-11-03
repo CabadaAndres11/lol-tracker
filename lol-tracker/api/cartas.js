@@ -692,7 +692,7 @@ module.exports = async function handler(req, res) {
       res.status(200).json({ user: publicUser(u) }); return;
     }
     if (act.startsWith('soc')) {
-      const r = await require('./_social').socialHandle(cfg, act, body, u);
+      const r = await require('./_social').socialHandle(cfg, act, body, u, { stats: missionStats, rank: rankReached, loadUser });
       if (r.status) { res.status(r.status).json({ error: r.error }); return; }
       res.status(200).json(r); return;
     }

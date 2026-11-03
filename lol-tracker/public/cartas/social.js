@@ -53,7 +53,7 @@
     return '<div class="frow ' + f.st + (SOC.chat === f.name ? ' sel' : '') + '" data-soc="chat" data-n="' + esc(f.name) + '" tabindex="0">' + avatar(f, f.st) +
       '<div class="ftx"><b>' + esc(f.name) + '</b><span class="fst ' + f.st + '">' + STXT[f.st] + '</span></div>' +
       (f.unread ? '<span class="fbadge">' + (f.unread > 9 ? '9+' : f.unread) + '</span>' : '') +
-      '<div class="fact">' + (online ? '<button class="sbtn" data-soc="invite" data-n="' + esc(f.name) + '" title="Invitar a partida" aria-label="Invitar a partida">' + ic('espadas') + '</button>' : '') +
+      '<div class="fact"><button class="sbtn" data-soc="prof" data-n="' + esc(f.name) + '" title="Ver perfil" aria-label="Ver perfil">' + ic('usuario') + '</button>' + (online ? '<button class="sbtn" data-soc="invite" data-n="' + esc(f.name) + '" title="Invitar a partida" aria-label="Invitar a partida">' + ic('espadas') + '</button>' : '') +
       '<button class="sbtn" data-soc="remove" data-n="' + esc(f.name) + '" title="Eliminar amigo" aria-label="Eliminar amigo">' + ic('papelera') + '</button></div>' +
       (menu ? '<div class="fmenu"><span>Invitar a:</span><button class="sbtn go" data-soc="invk" data-k="pvp" data-n="' + esc(f.name) + '">1 contra 1</button><button class="sbtn go" data-soc="invk" data-k="vs4" data-n="' + esc(f.name) + '">Versus de 4</button></div>' : '') + '</div>';
   }
@@ -153,6 +153,7 @@
     if (a === 'open') { if (ui.screen === 'game') SOC.openGame = true; else setPref(true); layout(); drawChat(); return; }
     if (a === 'close') { if (ui.screen === 'game') SOC.openGame = false; else setPref(false); layout(); return; }
     if (a === 'addtog') { SOC.add = !SOC.add; var box = root.querySelector('.ssearch'); box.hidden = !SOC.add; if (SOC.add) root.querySelector('#soc-q').focus(); return; }
+    if (a === 'prof') return ui.showProfile(n);
     if (a === 'add') return doRel('socAdd', n);
     if (a === 'accept') return doRel('socAccept', n);
     if (a === 'decline') return doRel('socDecline', n);

@@ -40,7 +40,7 @@ async function profiles(cfg, names) {
 }
 const cleanName = (v) => String(v || '').replace(/\s+/g, ' ').trim().slice(0, 16);
 
-async function socialHandle(cfg, act, body, u) {
+async function socialHandle(cfg, act, body, u, X) {
   const me = u.name;
   // ---- latido + lista de amigos (se llama cada pocos segundos) ----
   if (act === 'socPoll') {
@@ -66,6 +66,15 @@ async function socialHandle(cfg, act, body, u) {
       await redis(cfg, ['SET', readKey(me, chatWith), String(now), 'EX', String(60 * 86400)]);
     }
     return out;
+  }
+  // ---- perfil de un amigo: foto, rango y estadísticas ----
+  if (act === 'socProfile') {
+    const name = cleanName(body.name), r = await rec(cfg, me);
+    if (!has(r.fr, name)) return { status: 403, error: 'Solo puedes ver el perfil de tus amigos.' };
+    const f = await X.loadUser(cfg, name);
+    if (!f) return { status: 404, error: 'Ese jugador ya no existe.' };
+    const pr = await redis(cfg, ['GET', presKey(f.name)]);
+    return { ok: true, profile: { name: f.name, avatar: f.avatar || '', pts: f.pts || 0, ptsMax: X.rank(f), owned: (f.owned || []).length, stats: X.stats(f), st: pr === 'play' ? 'play' : pr ? 'on' : 'off' } };
   }
   // ---- buscar jugadores por nombre (empieza por…) ----
   if (act === 'socSearch') {

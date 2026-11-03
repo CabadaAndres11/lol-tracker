@@ -1,6 +1,8 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-03', tag: 'Novedad', title: 'Perfil de tus amigos',
+      items: ['En la lista de amigos, el botón del muñeco abre el perfil de ese amigo: foto de perfil, estado, rango y todas sus estadísticas. Solo puedes ver el perfil de tus amigos.'] },
     { date: '2026-11-03', tag: 'Cambio', title: 'Perfil con estadísticas y nueva pantalla de Ajustes',
       items: ['Tu perfil muestra ahora tu rango y el progreso hacia el siguiente, además de tus partidas jugadas, victorias y porcentaje, mejor racha, cartas jugadas, partidas por modo (1 contra 1 online, Versus de 4, Resurrección y Royal Rumble) y datos de tu colección (cartas, nivel 3, sobres, skins y efectos).',
         'El sonido, las animaciones de versiones anteriores y el cierre de sesión pasan a una pantalla propia: botón «Ajustes» en tu perfil o en el menú de tu cuenta.',

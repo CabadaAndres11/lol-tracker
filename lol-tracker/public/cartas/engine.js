@@ -20,7 +20,7 @@
     lol: { atk: [1, 1, 2], hp: [0, 1, 2], cap: [4, 6, 8] },
     trabajo: { shop: [0, 0, 2] },
     anime: { store: [0.5, 0.75, 1] }, // Genkidama: fracción del daño recibido que almacenan las Anime, por nivel
-    koi: { atk: [1, 1, 2], cap: 5, heir: [0.5, 0.75, 1] }, // mejora al caer (tope por tropa) + herencia: % del ataque de la KOI caída pasa a una KOI viva al azar (sin tope)
+    koi: { atk: [1, 1, 2], cap: 5, heir: [0.5, 0.75, 1] }, // mejora al caer (tope por tropa) + herencia: % del ataque de la KOI caída pasa, solo esa ronda, a una KOI viva al azar
     voley: { atk: [1, 2, 3], red: [1, 1, 2], cap: 8 },
     novias: { eriko: [2, 3, 4], eCap: [10, 15, 20], helena: [0, 2, 4], lucia: [3, 4, 5], ari: [0.5, 0.6, 0.7] }, // por nivel de Correa // novias del hueco 5 (sinergia Correa)
     gambling: { orbs: [1, 2, 3], probs: [[60, 30, 10], [40, 40, 20], [20, 40, 40]] }, // orbes por ronda sin daño directo; probabilidad (%) de que cada orbe dé +1/+1, +2/+2 o +3/+3
@@ -832,14 +832,13 @@
           mesaTroops(s.p[d.owner]).forEach(function (i) { gainCap(i, 'koi', 'atk', kb, FX.koi.cap); });
           line += ' KOI anima al equipo: +' + kb + ' de ataque.';
           fxk = { type: 'koi', side: d.owner, title: '¡KOI anima al equipo!', sub: '+' + kb + ' ataque permanente', uids: mesaTroops(s.p[d.owner]).map(function (i) { return i.uid; }), neg: false };
-          // Herencia: parte del ataque de la KOI caída pasa, de forma permanente, a una KOI viva al azar
+          // Herencia: parte del ataque de la KOI caída pasa, solo durante esta ronda, a una KOI viva al azar
           var heirs = mesaTroops(s.p[d.owner]).filter(function (i) { return has(i, 'KOI') && i !== d; });
           if (heirs.length && atk(d) > 0) {
             var hm = Math.max(1, Math.floor(atk(d) * FX.koi.heir[s.p[d.owner].fl.koi ? 2 : tt2['KOI'] - 1])), hv = heirs.filter(function (i) { return pas(i) === 'heredero'; })[0] || heirs[Math.floor(s.rng() * heirs.length)];
-            grow(hv, 'atk', hm);
-            if (s.mode === 'revive') d.perm.atk -= hm; // en Resurrección la KOI renace: el ataque se traspasa, no se copia
-            line += ' Herencia: ' + card(hv).name + ' recibe +' + hm + ' de ataque permanente.';
-            fxk.sub += ' · herencia +' + hm + ' a ' + card(hv).name; fxk.uids = fxk.uids.concat(heirs.indexOf(hv) >= 0 ? [] : [hv.uid]);
+            hv.tmp.atk += hm; // temporal: se pierde al acabar la ronda
+            line += ' Herencia: ' + card(hv).name + ' recibe +' + hm + ' de ataque esta ronda.';
+            fxk.sub += ' · herencia +' + hm + ' (solo esta ronda) a ' + card(hv).name; fxk.uids = fxk.uids.concat(heirs.indexOf(hv) >= 0 ? [] : [hv.uid]);
           }
         }
     if (pas(d) === 'llanto' && depth < 4) { // Chipy Llorón: la mitad de su ataque a todas las tropas rivales

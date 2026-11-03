@@ -1137,7 +1137,7 @@ var D={
    ],
    "color": "#fb923c",
    "tx": [
-    "Cuando muere una KOI, tus tropas vivas ganan +1 ataque permanente (tope +5 por tropa) y la mitad de su ataque pasa, de forma permanente, a una KOI viva al azar.",
+    "Cuando muere una KOI, tus tropas vivas ganan +1 ataque permanente (tope +5 por tropa) y la mitad de su ataque pasa, solo durante esa ronda, a una KOI viva al azar.",
     "+1 ataque permanente (tope +5) y 3/4 de su ataque pasan a una KOI viva al azar.",
     "+2 ataque permanente (tope +5) y todo su ataque pasa a una KOI viva al azar."
    ]

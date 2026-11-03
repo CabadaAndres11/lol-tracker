@@ -1,6 +1,10 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-03', tag: 'Cambio', title: 'Perfil con estadísticas y nueva pantalla de Ajustes',
+      items: ['Tu perfil muestra ahora tu rango y el progreso hacia el siguiente, además de tus partidas jugadas, victorias y porcentaje, mejor racha, cartas jugadas, partidas por modo (1 contra 1 online, Versus de 4, Resurrección y Royal Rumble) y datos de tu colección (cartas, nivel 3, sobres, skins y efectos).',
+        'El sonido, las animaciones de versiones anteriores y el cierre de sesión pasan a una pantalla propia: botón «Ajustes» en tu perfil o en el menú de tu cuenta.',
+        'Las partidas de Royal Rumble ahora se cuentan aparte (siguen contando también como Resurrección para las misiones).'] },
     { date: '2026-11-03', tag: 'Novedad', title: 'Nuevo modo: Royal Rumble',
       art: ['javihi-prime', 'mertens-meliodas'],
       items: ['Nuevo modo de juego «Royal Rumble»: funciona como Resurrección, pero se entra sin mazo. En la tienda puede salir cualquier carta del juego y vas construyendo tu composición sobre la marcha.',

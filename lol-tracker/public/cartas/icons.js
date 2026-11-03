@@ -93,6 +93,7 @@
     caja: '<path d="M32 7L55 18v28L32 57 9 46V18z"/><path d="M9 18l23 11 23-11M32 29v28"/>',
     mision: '<circle cx="32" cy="32" r="22"/><circle cx="32" cy="32" r="11"/><circle cx="32" cy="32" r="2.5"/><path d="M32 4v9M32 51v9M4 32h9M51 32h9"/>',
     altavoz: '<path d="M10 24h10l14-11v38L20 40H10z"/><path d="M43 24c4 4 4 12 0 16M49 17c8 8 8 22 0 30"/>',
+    ajustes: '<circle cx="32" cy="32" r="9"/><circle cx="32" cy="32" r="19"/><path d="M32 5v8M32 51v8M5 32h8M51 32h8M13 13l6 6M45 45l6 6M13 51l6-6M45 19l6-6"/>',
     lapiz: '<path d="M12 52l3-12L43 12l9 9-28 28z"/><path d="M37 18l9 9"/>'
   };
   Object.keys(LN).forEach(function (k) { I[k] = L(LN[k]); });

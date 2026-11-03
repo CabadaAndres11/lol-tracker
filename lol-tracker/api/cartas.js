@@ -69,7 +69,8 @@ function recordGame(u, o) {
   st.games = (st.games || 0) + 1;
   if (o.won) { st.wins = (st.wins || 0) + 1; st.streak = (st.streak || 0) + 1; st.bestStreak = Math.max(st.bestStreak || 0, st.streak); } else st.streak = 0;
   st.cards = (st.cards || 0) + Math.max(0, Math.min(60, Number(o.cards) || 0));
-  if (o.mode === 'revive') st.revive = (st.revive || 0) + 1;
+  if (o.mode === 'revive' || o.mode === 'rumble') st.revive = (st.revive || 0) + 1;
+  if (o.mode === 'rumble') st.rumble = (st.rumble || 0) + 1;
   if (o.kind === 'pvp') st.mp = (st.mp || 0) + 1;
   if (o.kind === 'v4') st.v4 = (st.v4 || 0) + 1;
 }
@@ -77,7 +78,7 @@ function missionStats(u) {
   const st = u.st || {};
   const fxCount = fxOwned(u).filter((x) => FX_PRICE[x] > 0).length;
   return {
-    games: st.games || 0, wins: st.wins || 0, bestStreak: st.bestStreak || 0, cards: st.cards || 0, revive: st.revive || 0, mp: st.mp || 0, v4: st.v4 || 0, packs: st.packs || 0,
+    games: st.games || 0, wins: st.wins || 0, bestStreak: st.bestStreak || 0, cards: st.cards || 0, revive: st.revive || 0, rumble: st.rumble || 0, mp: st.mp || 0, v4: st.v4 || 0, packs: st.packs || 0,
     lv3: Object.keys(u.dups || {}).filter((id) => (u.dups[id] || 0) >= 3).length, owned: (u.owned || []).length, skins: (u.skins || []).length, fx: fxCount,
   };
 }
@@ -252,7 +253,7 @@ async function payPvp(cfg, g) {
     const u = await loadUser(cfg, g.names[seat]); if (!u) continue;
     if (u.rewardDay !== today()) { u.rewardDay = today(); u.rewardCount = 0; }
     const won = s.winner === seat;
-    if (valid) recordGame(u, { won: won && g.ab !== seat, kind: 'pvp', mode: s.mode, cards: (s.p[seat] || {}).used });
+    if (valid) recordGame(u, { won: won && g.ab !== seat, kind: 'pvp', mode: s.rumble ? 'rumble' : s.mode, cards: (s.p[seat] || {}).used });
     let gained = 0;
     if (valid && g.ab !== seat && u.rewardCount < MAX_GAME_REWARDS_PER_DAY) {
       gained = PVP_COINS.played + (won ? PVP_COINS.win : 0); u.rewardCount++; u.coins += gained;
@@ -436,7 +437,7 @@ async function payV4(cfg, g) {
     const u = await loadUser(cfg, g.names[seat]); if (!u) continue;
     if (u.rewardDay !== today()) { u.rewardDay = today(); u.rewardCount = 0; }
     const abandoned = (T.ab || []).includes(seat);
-    if (valid) recordGame(u, { won: !abandoned && T.place[seat] === 1, kind: 'v4', mode: T.mode, cards: (T.p[seat] || {}).used });
+    if (valid) recordGame(u, { won: !abandoned && T.place[seat] === 1, kind: 'v4', mode: T.rumble ? 'rumble' : T.mode, cards: (T.p[seat] || {}).used });
     let gained = 0;
     if (valid && !abandoned && u.rewardCount < MAX_GAME_REWARDS_PER_DAY) {
       gained = g.bots ? Math.round((BOT_COINS.played + (BOT_COINS.place[T.place[seat]] || 0)) * DIFF_MULT[g.diff | 0]) : PVP_COINS.played + (V4.PLACE_BONUS[T.place[seat]] || 0); u.rewardCount++; u.coins += gained;
@@ -854,7 +855,7 @@ module.exports = async function handler(req, res) {
       u.startedAt = 0;
       const diff = u.gameDiff | 0; u.gameDiff = 0;
       if (u.rewardDay !== today()) { u.rewardDay = today(); u.rewardCount = 0; }
-      if (valid) recordGame(u, { won: !!body.won, kind: 'ia', mode: body.mode === 'revive' || body.mode === 'rumble' ? 'revive' : '', cards: body.cards });
+      if (valid) recordGame(u, { won: !!body.won, kind: 'ia', mode: normMode(body.mode), cards: body.cards });
       let gained = 0, pts = 0;
       if (valid && u.rewardCount < MAX_GAME_REWARDS_PER_DAY) {
         gained = Math.round((GAME_COINS.played + (body.won ? GAME_COINS.win : 0)) * DIFF_MULT[diff]);

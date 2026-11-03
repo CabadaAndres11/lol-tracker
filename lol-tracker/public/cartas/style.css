@@ -2242,3 +2242,18 @@ body.soc-open #app { margin-right: 286px; }
 #socchat .cform { display: flex; gap: .35rem; padding: .5rem; border-top: 1px solid rgba(200,170,110,.25); }
 #socchat .cform input { flex: 1; min-width: 0; width: auto; }
 #socchat .cform .sbtn { flex: none; padding: 0 .7rem; height: auto; }
+
+/* Perfil: estadísticas */
+.pstats h2 { margin-top: 0; }
+.prank { display: flex; align-items: center; gap: 1rem; margin-bottom: .4rem; }
+.prank .pemb { width: 72px; flex: none; } .prank .pemb svg { width: 100%; height: auto; }
+.prank > div { display: flex; flex-direction: column; gap: .25rem; flex: 1; min-width: 0; }
+.prn { font-family: var(--serif); font-size: 1.4rem; letter-spacing: .1em; text-transform: uppercase; }
+.pbar { height: 8px; border-radius: 99px; background: rgba(255,255,255,.08); overflow: hidden; max-width: 360px; }
+.pbar i { display: block; height: 100%; border-radius: 99px; }
+.pgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: .6rem; }
+.pstat { display: flex; flex-direction: column; align-items: center; gap: .1rem; padding: .8rem .5rem; border: 1px solid var(--line); border-radius: 12px; background: rgba(255,255,255,.03); text-align: center; }
+.pstat .psi { font-size: 1.5rem; color: var(--gold); } .pstat .psi .ic { width: 1em; height: 1em; margin: 0; }
+.pstat b { font-family: var(--serif); font-size: 1.7rem; color: var(--ink); line-height: 1.1; }
+.pstat .psl { font-size: .8rem; color: var(--mut); text-transform: uppercase; letter-spacing: .06em; }
+.pstat .pss { font-size: .75rem; color: var(--gold); }

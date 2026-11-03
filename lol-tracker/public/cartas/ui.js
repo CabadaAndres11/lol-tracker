@@ -327,7 +327,7 @@
   }
   function navHtml(cur) {
     var home = cur === 'home';
-    var acct = ui.acct ? '<button class="navb coinpill" data-act="nav" data-to="packs" title="Tus monedas">' + ic('moneda') + ' ' + ui.acct.coins + '</button><button class="navb avtb' + (cur === 'profile' ? ' on' : '') + '" data-act="nav" data-to="profile" title="Tu perfil">' + avatarHtml('sm') + '</button><span class="acctw"><button class="navb who" data-act="acctmenu" title="Tu cuenta">' + esc(ui.acct.name) + ' ▾</button><div class="acctmenu"><div class="am-name">Sesión de <b>' + esc(ui.acct.name) + '</b></div><button class="am-prof" data-act="nav" data-to="profile">' + ic('usuario') + ' Mi perfil</button><button data-act="sfxmute">' + ic('altavoz') + ' Sonido: ' + (window.CartasSfx && window.CartasSfx.get().mute ? 'desactivado' : 'activado') + '</button><button data-act="logout">' + ic('puerta') + ' Cerrar sesión</button></div></span>' : '';
+    var acct = ui.acct ? '<button class="navb coinpill" data-act="nav" data-to="packs" title="Tus monedas">' + ic('moneda') + ' ' + ui.acct.coins + '</button><button class="navb avtb' + (cur === 'profile' ? ' on' : '') + '" data-act="nav" data-to="profile" title="Tu perfil">' + avatarHtml('sm') + '</button><span class="acctw"><button class="navb who" data-act="acctmenu" title="Tu cuenta">' + esc(ui.acct.name) + ' ▾</button><div class="acctmenu"><div class="am-name">Sesión de <b>' + esc(ui.acct.name) + '</b></div><button class="am-prof" data-act="nav" data-to="profile">' + ic('usuario') + ' Mi perfil</button><button data-act="nav" data-to="settings">' + ic('ajustes') + ' Ajustes</button><button data-act="sfxmute">' + ic('altavoz') + ' Sonido: ' + (window.CartasSfx && window.CartasSfx.get().mute ? 'desactivado' : 'activado') + '</button><button data-act="logout">' + ic('puerta') + ' Cerrar sesión</button></div></span>' : '';
     return '<nav class="nav' + (home ? ' navhome' : '') + '">' + (home ? '<span class="navlogo"><img src="/cartas/logo-icon.png" alt="">TCG Arena</span>' : NAV.map(function (n) { var bd = n[0] === 'missions' && claimableCount() ? '<i class="nbadge">' + claimableCount() + '</i>' : ''; return '<button class="navb' + (n[0] === cur ? ' on' : '') + '" data-act="nav" data-to="' + n[0] + '">' + ic(n[1]) + ' ' + n[2] + bd + '</button>'; }).join('')) +
       '<span class="navsp"></span>' + acct + '</nav><a class="hubback" href="/" title="Volver al inicio">← Juegos</a>';
   }
@@ -503,7 +503,7 @@
         ['packs', ic('tienda'), 'Tienda', (ui.acct ? ui.acct.coins : 0) + ' monedas'],
         ['missions', ic('mision'), 'Misiones', claimableCount() ? claimableCount() + ' por recoger' : 'Gana cajas'],
         ['ladder', ic('trofeo'), 'Clasificación', ui.acct.pts + ' puntos'],
-        ['profile', ic('usuario'), 'Perfil', 'Foto y cuenta'],
+        ['profile', ic('usuario'), 'Perfil', 'Estadísticas y ajustes'],
       ].map(function (m) { return '<button class="ricon" data-act="nav" data-to="' + m[0] + '"><span class="rii">' + m[1] + '</span><b>' + m[2] + '</b><span class="mut">' + m[3] + '</span></button>'; }).join('') + '</div>' + homeNews() + '</div>';
     h += '<p class="mut" style="text-align:center">' + D.cards.length + ' tropas · ' + D.actions.length + ' acciones</p></div>';
     app.innerHTML = h;
@@ -520,16 +520,37 @@
       return '<div class="animrow"><span class="animver">' + x.ver + '</span><div class="animtx"><b>' + esc(x.name) + '</b><span class="mut">' + esc(x.desc) + '</span></div><button class="btn sm" data-act="playanim" data-id="' + x.id + '">' + ic('play') + ' Reproducir</button></div>';
     }).join('') + '</div></div>';
   }
+  function statTile(ico, val, lab, sub) {
+    return '<div class="pstat"><span class="psi">' + ic(ico) + '</span><b>' + val + '</b><span class="psl">' + lab + '</span>' + (sub ? '<span class="pss">' + sub + '</span>' : '') + '</div>';
+  }
+  function statsPanel() {
+    var a = ui.acct, st = (a.ms && a.ms.stats) || {}, g = st.games || 0, w = st.wins || 0, pct = g ? Math.round(w / g * 100) : 0;
+    var totalCards = D.cards.length + D.actions.length, ownedN = a.owned.length, rk = rankOf(a.ptsMax || a.pts || 0), cur = rankOf(a.pts || 0), nx = RANKS[cur + 1];
+    var bar = nx ? '<div class="pbar"><i style="width:' + Math.max(0, Math.min(100, ((a.pts - RANKS[cur].min) / (nx.min - RANKS[cur].min)) * 100)) + '%;background:' + RANKS[cur].c + '"></i></div><span class="mut">' + (nx.min - a.pts) + ' puntos para ' + nx.n + '</span>' : '<span class="mut">¡Rango máximo!</span>';
+    return '<div class="panel pstats"><h2>' + ic('trofeo') + ' Estadísticas</h2>' +
+      '<div class="prank"><span class="pemb">' + rkEmblem(cur, true) + '</span><div><b class="prn" style="color:' + RANKS[cur].c + '">' + RANKS[cur].n + '</b><span class="mut">' + a.pts + ' puntos de clasificación' + (rk > cur ? ' · mejor rango: ' + RANKS[rk].n : '') + '</span>' + bar + '</div></div>' +
+      '<h3 class="avsub">Partidas</h3><div class="pgrid">' +
+      statTile('espadas', g, 'Partidas jugadas') + statTile('trofeo', w, 'Victorias', pct + '% de victorias') + statTile('fuego', st.bestStreak || 0, 'Mejor racha', 'victorias seguidas') + statTile('cartas', st.cards || 0, 'Cartas jugadas', 'en tus partidas') + '</div>' +
+      '<h3 class="avsub">Por modo</h3><div class="pgrid">' +
+      statTile('grupo', st.mp || 0, '1 vs 1 online') + statTile('grupo', st.v4 || 0, 'Versus de 4') + statTile('cambio', (st.revive || 0) - (st.rumble || 0), 'Resurrección') + statTile('fuego', st.rumble || 0, 'Royal Rumble') + '</div>' +
+      '<h3 class="avsub">Colección</h3><div class="pgrid">' +
+      statTile('cartas', ownedN + '/' + totalCards, 'Cartas desbloqueadas', Math.round(ownedN / totalCards * 100) + '%') + statTile('estrella', st.lv3 || 0, 'Cartas a nivel 3') + statTile('sobre', st.packs || 0, 'Sobres abiertos') + statTile('brillo', (st.skins || 0) + ' · ' + (st.fx || 0), 'Skins · efectos') + '</div></div>';
+  }
   function renderProfile() {
     var a = ui.acct, mySkins = (window.CARTAS_SKINS || []).filter(function (k) { return (a.skins || []).indexOf(k.id) >= 0; }), cur = a.avatar || '', own = D.cards.filter(function (c) { return ARTS[c.id] && ui.ownedSet && ui.ownedSet[c.id]; }).sort(function (x, y) { return RARS.indexOf(y.rarity) - RARS.indexOf(x.rarity) || x.name.localeCompare(y.name); });
     app.innerHTML = head('profile', '' + ic('usuario') + ' Mi perfil') + (ui.msg ? '<p class="err">' + esc(ui.msg) + '</p>' : '') +
-      '<div class="panel profhead"><button class="avedit' + (ui.avEdit ? ' on' : '') + '" data-act="avedit" title="Cambiar foto de perfil" aria-label="Cambiar foto de perfil">' + avatarHtml('xl') + '<span class="avpen">' + ic('lapiz') + '</span></button><div><h2>' + esc(a.name) + '</h2><p class="mut">' + a.pts + ' puntos de clasificación · ' + a.coins + ' ' + ic('moneda') + ' · ' + a.owned.length + ' cartas desbloqueadas</p><div class="btnrow"><button class="btn sec" data-act="logout">' + ic('puerta') + ' Cerrar sesión</button></div></div></div>' +
+      '<div class="panel profhead"><button class="avedit' + (ui.avEdit ? ' on' : '') + '" data-act="avedit" title="Cambiar foto de perfil" aria-label="Cambiar foto de perfil">' + avatarHtml('xl') + '<span class="avpen">' + ic('lapiz') + '</span></button><div><h2>' + esc(a.name) + '</h2><p class="mut">' + a.pts + ' puntos de clasificación · ' + a.coins + ' ' + ic('moneda') + ' · ' + a.owned.length + ' cartas desbloqueadas</p><div class="btnrow"><button class="btn sec" data-act="nav" data-to="settings">' + ic('ajustes') + ' Ajustes</button><button class="btn sec" data-act="logout">' + ic('puerta') + ' Cerrar sesión</button></div></div></div>' +
       (!ui.avEdit ? '' : '<div class="panel"><h2>Foto de perfil</h2><p class="mut">Elige la ilustración de una de tus cartas desbloqueadas o de una de tus skins. Cuantas más consigas, más opciones tendrás.</p>' +
       '<div class="avgrid"><button class="avopt none' + (cur ? '' : ' on') + '" data-act="setavatar" data-card="" title="Sin foto"><span class="avt">' + ic('usuario') + '</span><b>Ninguna</b></button>' + own.map(function (c) {
         return '<button class="avopt' + (cur === c.id ? ' on' : '') + '" data-act="setavatar" data-card="' + c.id + '" title="' + esc(c.name) + '"><span class="avt has" style="background-image:url(/cartas/art/' + c.id + '.webp)"></span><b>' + esc(c.name) + '</b></button>';
       }).join('') + '</div>' + (mySkins.length ? '<h3 class="avsub">Skins</h3><div class="avgrid">' + mySkins.map(function (k) {
         return '<button class="avopt skin' + (cur === k.id ? ' on' : '') + '" data-act="setavatar" data-card="' + k.id + '" title="' + esc(CARD[k.card].name + ' · ' + k.name) + '"><span class="avt has" style="background-image:url(/cartas/art/' + k.id + '.webp)"></span><b>' + esc(k.name) + '</b></button>';
-      }).join('') + '</div>' : '') + '<div class="btnrow"><button class="btn sec" data-act="avedit">Cerrar</button></div></div>') + sfxPanel() + animPanel() + '</div>';
+      }).join('') + '</div>' : '') + '<div class="btnrow"><button class="btn sec" data-act="avedit">Cerrar</button></div></div>') + statsPanel() + '</div>';
+  }
+  function renderSettings() {
+    app.innerHTML = head('profile', '' + ic('ajustes') + ' Ajustes') + (ui.msg ? '<p class="err">' + esc(ui.msg) + '</p>' : '') +
+      '<div class="btnrow" style="margin-bottom:.8rem"><button class="btn sec" data-act="nav" data-to="profile">← Volver al perfil</button></div>' + sfxPanel() + animPanel() +
+      '<div class="panel"><h2>' + ic('usuario') + ' Cuenta</h2><p class="mut">Sesión iniciada como <b>' + esc(ui.acct.name) + '</b>.</p><div class="btnrow"><button class="btn sec" data-act="logout">' + ic('puerta') + ' Cerrar sesión</button></div></div></div>';
   }
 
   function renderBoot() { app.innerHTML = '<div class="wrap"><p class="mut" style="text-align:center;margin-top:30vh">Cargando…</p></div>'; }
@@ -1250,7 +1271,7 @@
       if (!s.rep && PV.on) s.rep = 1;
       if (!s.rep) {
         s.rep = 1; ui.reward = null;
-        api('gameFinish', { won: win, rounds: s.round, cards: s.p[0].used || 0, mode: s.mode || '' }).then(function (r) {
+        api('gameFinish', { won: win, rounds: s.round, cards: s.p[0].used || 0, mode: s.rumble ? 'rumble' : s.mode || '' }).then(function (r) {
           ui.reward = r.ok ? r.data : { gained: 0, err: 1 };
           if (r.ok) setAcct(r.data.user);
           if (ui.s === s && ui.screen === 'game' && s.phase === 'over' && !ui.playing) render();
@@ -1814,9 +1835,9 @@
   window.addEventListener('resize', function () { var o = document.querySelector('#board svg.arrows'); if (o) o.remove(); drawArrows(); });
 
   // ---------- Navegación por URL (#/mazo, #/tienda…): al recargar se vuelve a la misma sección ----------
-  var ROUTES = { home: 'inicio', modes: 'jugar', pvp: 'jugar', game: 'jugar', deck: 'coleccion', packs: 'tienda', profile: 'perfil', ladder: 'clasificacion', missions: 'misiones' };
-  var ROUTE_SCREEN = { inicio: 'home', jugar: 'modes', coleccion: 'deck', mazo: 'deck', tienda: 'packs', perfil: 'profile', clasificacion: 'ladder', misiones: 'missions' };
-  var ROUTE_TITLE = { home: 'Inicio', modes: 'Jugar', pvp: 'Jugar', game: 'Partida', deck: 'Colección', packs: 'Tienda', profile: 'Perfil', ladder: 'Clasificación', missions: 'Misiones' };
+  var ROUTES = { home: 'inicio', modes: 'jugar', pvp: 'jugar', game: 'jugar', deck: 'coleccion', packs: 'tienda', profile: 'perfil', settings: 'ajustes', ladder: 'clasificacion', missions: 'misiones' };
+  var ROUTE_SCREEN = { inicio: 'home', jugar: 'modes', coleccion: 'deck', mazo: 'deck', tienda: 'packs', perfil: 'profile', ajustes: 'settings', clasificacion: 'ladder', misiones: 'missions' };
+  var ROUTE_TITLE = { home: 'Inicio', modes: 'Jugar', pvp: 'Jugar', game: 'Partida', deck: 'Colección', packs: 'Tienda', profile: 'Perfil', settings: 'Ajustes', ladder: 'Clasificación', missions: 'Misiones' };
   function hashScreen() { var m = /^#\/([a-z]+)/.exec(location.hash || ''); return m && ROUTE_SCREEN[m[1]] || null; }
   function landing() { var sc = hashScreen() || 'home'; return sc; }
   function syncHash() {
@@ -1839,7 +1860,7 @@
     if (ui.genfx) return; // la animación de la Genkidama pinta el resultado al terminar
     document.body.classList.remove('shopbg');
     if (PV.wait && ui.screen !== 'pvp') pvpCancelWait();
-    var f = { home: renderHome, deck: renderDeck, modes: renderModes, pvp: renderPvp, login: renderLogin, starter: renderStarter, packs: renderPacks, profile: renderProfile, ladder: renderLadder, missions: renderMissions, boot: renderBoot }[ui.screen];
+    var f = { home: renderHome, deck: renderDeck, modes: renderModes, pvp: renderPvp, login: renderLogin, starter: renderStarter, packs: renderPacks, profile: renderProfile, settings: renderSettings, ladder: renderLadder, missions: renderMissions, boot: renderBoot }[ui.screen];
     if (f) f(); else renderGame();
     if (ui.screen !== 'game') clearFlights();
     if (ui.tut && ui.screen !== 'game') ui.tut = null;
@@ -2080,7 +2101,7 @@
     }
     if (act === 'nav') {
       clearTimeout(timer); ui.playing = false;
-      if (el.dataset.to === 'missions' || el.dataset.to === 'ladder') refreshAcct(function () { if (ui.screen === 'missions' || ui.screen === 'ladder') render(); });
+      if (el.dataset.to === 'missions' || el.dataset.to === 'ladder' || el.dataset.to === 'profile') refreshAcct(function () { if (ui.screen === 'missions' || ui.screen === 'ladder' || ui.screen === 'profile') render(); });
       if (el.dataset.to === 'play') { ui.screen = 'modes'; window.scrollTo(0, 0); return render(); }
       ui.screen = el.dataset.to; ui.msg = ''; ui.avEdit = false; window.scrollTo(0, 0); return render();
     }

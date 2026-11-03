@@ -632,7 +632,7 @@
       (arts.length ? '' : '<img class="rnlogo" src="/cartas/logo.webp" alt="">') +
       '<div class="rnbody"><span class="ntag nt-' + esc(n.tag) + '">' + esc(n.tag) + '</span><h2>' + esc(n.title) + '</h2><ul>' + (ui.newsFull && newsNeedsFull(n) ? n.items.map(function (t) { return '<li>' + (t.indexOf('{{intro}}') >= 0 ? esc(t.replace('{{intro}}', '')) + '<a href="#" class="newslink" data-act="introplay">▶ Ver la animación</a>' : esc(t)) + '</li>'; }) : newsSummary(n).map(function (t) { return '<li>' + esc(t) + '</li>'; })).join('') + '</ul>' +
       (newsNeedsFull(n) ? '<button class="btn sec sm" data-act="newsmore">' + (ui.newsFull ? 'Mostrar menos ▴' : 'Leer la noticia completa ▾') + '</button>' : '') +
-      (arts.length > 1 ? '<div class="rnthumbs">' + arts.map(function (id) { return '<span style="background-image:url(/cartas/art/' + id + '.webp)" title="' + esc(CARD[id].name) + '"></span>'; }).join('') + '</div>' : '') + '</div></div></div>';
+      (arts.length > 1 ? '<div class="rnthumbs">' + arts.map(function (id) { return '<span style="background-image:url(/cartas/art/' + id + '.webp)" title="' + esc(CARD[id] ? CARD[id].name : id.replace(/-/g, ' ')) + '"></span>'; }).join('') + '</div>' : '') + '</div></div></div>';
   }
   // Cambia solo el panel de noticias (así la lista conserva su scroll)
   function refreshNews() {

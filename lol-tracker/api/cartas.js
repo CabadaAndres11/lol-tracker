@@ -101,6 +101,7 @@ function seasonPublic(u) {
 // Entrega la recompensa de un nivel del pase
 function grantReward(u, r) {
   if (r.kind === 'coins') u.coins += r.n | 0;
+  else if (r.kind === 'pack') u.packs = (u.packs || 0) + (r.n | 0);
   else if (r.kind === 'box') u.boxes = (u.boxes || 0) + (r.n | 0);
   else if (r.kind === 'card') { if (!(u.owned || []).includes(r.id)) u.owned.push(r.id); else { u.dups = u.dups || {}; u.dups[r.id] = (u.dups[r.id] || 0) + 1; } }
   else if (r.kind === 'skin') { u.skins = u.skins || []; if (!u.skins.includes(r.id)) u.skins.push(r.id); else u.coins += 50; }
@@ -141,7 +142,7 @@ function rollBox(u) {
 }
 function publicUser(u) {
   return {
-    name: u.name, pts: u.pts || 0, coins: u.coins, owned: u.owned, dups: u.dups || {}, skins: u.skins || [], skinSel: u.skinSel || {}, decks: u.decks || null, avatar: u.avatar || '', fx: { deploy: fxSel(u, 'deploy'), sleeve: fxSel(u, 'sleeve'), finish: fxSel(u, 'finish') }, fxOwned: fxOwned(u), boxes: u.boxes || 0, ms: { stats: missionStats(u), claimed: u.msClaimed || [] }, rkClaimed: u.rkClaimed || [], season: seasonPublic(u), ptsMax: rankReached(u),
+    name: u.name, pts: u.pts || 0, coins: u.coins, owned: u.owned, dups: u.dups || {}, skins: u.skins || [], skinSel: u.skinSel || {}, decks: u.decks || null, avatar: u.avatar || '', fx: { deploy: fxSel(u, 'deploy'), sleeve: fxSel(u, 'sleeve'), finish: fxSel(u, 'finish') }, fxOwned: fxOwned(u), boxes: u.boxes || 0, ms: { stats: missionStats(u), claimed: u.msClaimed || [] }, packs: u.packs || 0, rkClaimed: u.rkClaimed || [], season: seasonPublic(u), ptsMax: rankReached(u),
     dailyAvailable: u.lastDaily !== today(),
     gamesToday: u.rewardDay === today() ? u.rewardCount : 0,
     maxGamesToday: MAX_GAME_REWARDS_PER_DAY,
@@ -832,9 +833,15 @@ module.exports = async function handler(req, res) {
     }
 
     if (act === 'open') {
+      const fromInv = !!body.inv; // sobre del inventario (pase de batalla...): no cuesta monedas
       const cost = isAdmin(u) ? 0 : PACK_COST;
-      if (u.coins < cost) { res.status(402).json({ error: `Necesitas ${PACK_COST} monedas.`, user: publicUser(u) }); return; }
-      u.coins -= cost;
+      if (fromInv) {
+        if ((u.packs || 0) < 1) { res.status(409).json({ error: 'No tienes sobres en el inventario.', user: publicUser(u) }); return; }
+        u.packs -= 1;
+      } else {
+        if (u.coins < cost) { res.status(402).json({ error: `Necesitas ${PACK_COST} monedas.`, user: publicUser(u) }); return; }
+        u.coins -= cost;
+      }
       const ids = [];
       for (let k = 0; k < PACK_SIZE; k++) ids.push(drawCard(k === PACK_SIZE - 1 ? 'Rara' : null)); // la última es Rara o mejor
       const cards = ids.map((id) => {

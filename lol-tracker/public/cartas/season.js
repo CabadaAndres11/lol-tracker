@@ -3,7 +3,7 @@
  * ATENCIÓN: las misiones y recompensas de abajo son DE PRUEBA, se definirán más adelante. Para una temporada nueva
  * cambia el `id` (el progreso de cada cuenta empieza de cero al cambiar de temporada).
  *   stat: games | wins | bestStreak | cards | revive | rumble | mp | v4 | packs   (se cuentan desde que empieza la temporada)
- *   reward: { kind: 'coins', n } | { kind: 'box', n } | { kind: 'card', id } | { kind: 'skin', id } | { kind: 'fx', id } */
+ *   reward: { kind: 'coins', n } | { kind: 'pack', n } | { kind: 'box', n } | { kind: 'card', id } | { kind: 'skin', id } | { kind: 'fx', fx: 'deploy'|'sleeve'|'finish', id } */
 (function (root) {
   var MISSIONS = [
     { id: 'g3', stat: 'games', goal: 3, xp: 30, t: 'Primeros pasos', d: 'Juega 3 partidas.' },
@@ -21,8 +21,14 @@
     { id: 'pk3', stat: 'packs', goal: 3, xp: 40, t: 'Abriendo sobres', d: 'Abre 3 sobres.' },
     { id: 'pk10', stat: 'packs', goal: 10, xp: 80, t: 'Cazador de sobres', d: 'Abre 10 sobres.' }
   ];
-  var LEVELS = [], i;
-  for (i = 1; i <= 20; i++) LEVELS.push({ lv: i, reward: i % 5 === 0 ? { kind: 'box', n: 1 } : { kind: 'coins', n: 20 + i * 2 } });
+  // Recompensas de PRUEBA (monedas, sobres, cajas, skins y efectos repartidos por el pase)
+  var R = [
+    { kind: 'coins', n: 30 }, { kind: 'pack', n: 1 }, { kind: 'coins', n: 40 }, { kind: 'box', n: 1 }, { kind: 'fx', fx: 'sleeve', id: 'neon' },
+    { kind: 'coins', n: 50 }, { kind: 'pack', n: 1 }, { kind: 'box', n: 1 }, { kind: 'coins', n: 60 }, { kind: 'skin', id: 'potango-real' },
+    { kind: 'coins', n: 70 }, { kind: 'pack', n: 2 }, { kind: 'fx', fx: 'deploy', id: 'arcano' }, { kind: 'box', n: 1 }, { kind: 'coins', n: 80 },
+    { kind: 'pack', n: 1 }, { kind: 'fx', fx: 'finish', id: 'hechizo' }, { kind: 'coins', n: 100 }, { kind: 'box', n: 2 }, { kind: 'skin', id: 'lihone-viego-espectral' }
+  ];
+  var LEVELS = R.map(function (r, k) { return { lv: k + 1, reward: r }; });
   var SEASON = { id: 't1', name: 'Temporada 1', end: null, xpPerLevel: 45, levels: LEVELS, missions: MISSIONS };
   function levelOf(xp) { return Math.min(SEASON.levels.length, Math.floor(Math.max(0, xp) / SEASON.xpPerLevel)); }
   var API = { SEASON: SEASON, levelOf: levelOf };

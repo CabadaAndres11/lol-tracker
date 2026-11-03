@@ -2,9 +2,10 @@
 (function (root) {
   var NEWS = [
     { date: '2026-11-03', tag: 'Novedad', title: 'Pase de batalla y misiones de temporada',
-      items: ['La pantalla de Misiones tiene ahora tres pestañas: Misiones (las de siempre), Misiones de temporada y Pase de batalla.',
-        'Completa misiones de temporada para ganar XP. Cada nivel del pase se desbloquea con XP y tiene su recompensa, que recoges tú cuando quieras.',
-        'El progreso de temporada cuenta desde que empieza la temporada y se reinicia al cambiar de temporada. Las misiones y recompensas actuales son de prueba: se definirán más adelante.'] },
+      items: ['Nuevo apartado «Pase» en el menú: un camino de niveles con una recompensa en cada uno (monedas, sobres, cajas, skins y efectos). Elige un nivel para verlo en grande y recógelo con «Reclamar», o recoge todos los listos de una vez.',
+        'Los niveles se desbloquean con XP, que ganas completando las nuevas Misiones de temporada (pestaña dentro de Misiones). El progreso de temporada se reinicia al cambiar de temporada.',
+        'Los sobres ahora se pueden guardar en el inventario (Colección → Inventario) y abrir cuando quieras.',
+        'Las misiones y recompensas actuales son de prueba: se definirán más adelante.'] },
     { date: '2026-11-03', tag: 'Novedad', title: 'Perfil de tus amigos',
       items: ['En la lista de amigos, el botón del muñeco abre el perfil de ese amigo: foto de perfil, estado, rango y todas sus estadísticas. Solo puedes ver el perfil de tus amigos.'] },
     { date: '2026-11-03', tag: 'Cambio', title: 'Perfil con estadísticas y nueva pantalla de Ajustes',

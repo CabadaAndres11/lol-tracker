@@ -456,7 +456,7 @@
       '<div class="pbot"><div class="plv"><b>' + lv + '</b></div><div class="pxp"><div class="sexp"><i style="width:' + Math.round(into / S.xpPerLevel * 100) + '%"></i></div><span>' + (lv >= max ? '¡Pase completado!' : into + ' / ' + S.xpPerLevel + ' XP para el nivel ' + (lv + 1)) + ' · XP total ' + d.xp + '</span></div>' +
       '<div class="pact">' + (ready.length > 1 ? '<button class="btn sec" data-act="slclaimall">Reclamar todo (' + ready.length + ')</button>' : '') + '<button class="btn cta" data-act="slclaim" data-lv="' + sel.lv + '"' + (selOk && !selCl && d.active ? '' : ' disabled') + '>Reclamar</button></div></div></div></div>';
     var tr = document.getElementById('ptrack'), nd = tr && tr.querySelector('.pnode.sel');
-    if (tr && nd) { tr.scrollLeft = ui.passScroll != null ? ui.passScroll : Math.max(0, nd.offsetLeft - tr.clientWidth / 2 + nd.clientWidth / 2); ui.passScroll = null; }
+    if (tr && nd) { tr.style.scrollBehavior = 'auto'; tr.scrollLeft = ui.passScroll != null ? ui.passScroll : Math.max(0, nd.offsetLeft - tr.clientWidth / 2 + nd.clientWidth / 2); ui.passScroll = null; requestAnimationFrame(function () { tr.style.scrollBehavior = ''; }); }
   }
   function renderMissions() {
     var a = ui.acct, all = MSN.MISSIONS.slice().sort(function (x, y) {

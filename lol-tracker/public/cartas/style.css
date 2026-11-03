@@ -2413,3 +2413,6 @@ body.soc-open #app { margin-right: 286px; }
 @keyframes gkpulse { 0%, 100% { transform: scale(.92); opacity: .8; } 50% { transform: scale(1.12); opacity: 1; } }
 @keyframes gkspin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .genw .gk-aura, .genw .gk-orb, .genw b { animation: none; } }
+
+.genw::after { content: attr(data-tip); position: absolute; left: 50%; bottom: calc(100% + 14px); transform: translate(-50%, 4px); padding: .25rem .6rem; border-radius: 4px; background: rgba(8,14,32,.95); border: 1px solid rgba(124,200,255,.7); color: #e6f3ff; font-size: .8rem; font-weight: 700; letter-spacing: .04em; white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity .15s, transform .15s; z-index: 30; box-shadow: 0 4px 14px rgba(0,0,0,.5); }
+.genw:hover::after { opacity: 1; transform: translate(-50%, 0); }

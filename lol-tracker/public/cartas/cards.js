@@ -59,8 +59,7 @@ var D={
    "name": "Lihone",
    "person": "Lihone",
    "themes": [
-    "Pokémon",
-    "Pueblo"
+    "Pokémon"
    ],
    "cost": 4,
    "atk": 4,
@@ -145,8 +144,7 @@ var D={
    "name": "AitoRLG Regla",
    "person": "AitoRLG",
    "themes": [
-    "Trabajo",
-    "Tilt"
+    "Trabajo"
    ],
    "cost": 3,
    "atk": 6,
@@ -238,8 +236,7 @@ var D={
    "name": "Javihi Dúo",
    "person": "Javihi",
    "themes": [
-    "Dúo Inseparable",
-    "Tilt"
+
    ],
    "cost": 4,
    "atk": 5,
@@ -272,8 +269,7 @@ var D={
    "name": "Javihi Prime",
    "person": "Javihi",
    "themes": [
-    "Voley",
-    "NINI"
+    "Voley"
    ],
    "cost": 5,
    "atk": 6,
@@ -306,8 +302,7 @@ var D={
    "name": "Sech Dúo",
    "person": "Sech",
    "themes": [
-    "Dúo Inseparable",
-    "Tilt"
+
    ],
    "cost": 4,
    "atk": 5,
@@ -325,8 +320,7 @@ var D={
    "name": "Sech",
    "person": "Sech",
    "themes": [
-    "Trabajo",
-    "Pelayos"
+    "Trabajo"
    ],
    "cost": 5,
    "atk": 6,
@@ -470,8 +464,7 @@ var D={
    "name": "PotAnGo",
    "person": "Hellbramn",
    "themes": [
-    "Correa",
-    "Pueblo"
+    "Correa"
    ],
    "cost": 5,
    "atk": 5,
@@ -504,8 +497,7 @@ var D={
    "name": "Mertens PRIME",
    "person": "Mertens",
    "themes": [
-    "Pueblo",
-    "NINI"
+
    ],
    "cost": 5,
    "atk": 3,
@@ -552,8 +544,7 @@ var D={
    "name": "Chipy Llorón",
    "person": "Chipy",
    "themes": [
-    "Pelayos",
-    "Tilt"
+
    ],
    "cost": 5,
    "atk": 7,
@@ -726,7 +717,9 @@ var D={
    "id": "eriko",
    "name": "Eriko",
    "person": "Eriko",
-   "themes": [],
+   "themes": [
+
+   ],
    "cost": 0,
    "atk": 2,
    "hp": 12,
@@ -743,7 +736,9 @@ var D={
    "id": "helena",
    "name": "Helena",
    "person": "Helena",
-   "themes": [],
+   "themes": [
+
+   ],
    "cost": 0,
    "atk": 6,
    "hp": 8,
@@ -760,7 +755,9 @@ var D={
    "id": "lucia",
    "name": "Lucía",
    "person": "Lucía",
-   "themes": [],
+   "themes": [
+
+   ],
    "cost": 0,
    "atk": 3,
    "hp": 10,
@@ -777,7 +774,9 @@ var D={
    "id": "ari",
    "name": "Ari",
    "person": "Ari",
-   "themes": [],
+   "themes": [
+
+   ],
    "cost": 0,
    "atk": 2,
    "hp": 12,
@@ -1000,61 +999,6 @@ var D={
    "theme": "Correa"
   },
   {
-   "id": "rabia-contenida",
-   "name": "Rabia contenida",
-   "cost": 2,
-   "rarity": "Rara",
-   "type": "accion",
-   "size": 1,
-   "target": "none",
-   "text": "Si ganas esta ronda, tus tropas Tilt ganan +1 de ataque permanente.",
-   "theme": "Tilt"
-  },
-  {
-   "id": "fiesta-del-pueblo",
-   "name": "Fiesta del pueblo",
-   "cost": 2,
-   "rarity": "Rara",
-   "type": "accion",
-   "size": 1,
-   "target": "none",
-   "text": "Esta ronda, las estadísticas que ganen tus Pueblo se duplican (necesitas el nivel 1 de Pueblo).",
-   "theme": "Pueblo"
-  },
-  {
-   "id": "hermano-del-alma",
-   "name": "Hermano del alma",
-   "cost": 3,
-   "rarity": "Épica",
-   "type": "accion",
-   "size": 1,
-   "target": "none",
-   "text": "Si tienes un Dúo Inseparable en la mesa, consigues en tu mano una copia de su pareja. Solo se puede usar una vez entre tiendas.",
-   "theme": "Dúo Inseparable"
-  },
-  {
-   "id": "sofa-compartido",
-   "name": "Sofá compartido",
-   "cost": 2,
-   "rarity": "Rara",
-   "type": "accion",
-   "size": 1,
-   "target": "none",
-   "text": "Si tienes una NINI en la mesa y la otra en la mano, ambas ganan +2/+2 permanente.",
-   "theme": "NINI"
-  },
-  {
-   "id": "madrugon",
-   "name": "Madrugón",
-   "cost": 2,
-   "rarity": "Rara",
-   "type": "accion",
-   "size": 1,
-   "target": "none",
-   "text": "Esta ronda tus Pelayos en mesa atacan los primeros.",
-   "theme": "Pelayos"
-  },
-  {
    "id": "golpe-de-suerte",
    "name": "Golpe de Suerte",
    "cost": 2,
@@ -1222,57 +1166,6 @@ var D={
     "Crea un hueco extra y recibes a las 4 novias (una sola ocupa el hueco extra). Eriko +2/+2 a la mesa cada combate (tope 10), Helena sin bonus, Lucía 3 de daño a las rivales, Ari evita el 50% de los golpes.",
     "Eriko +3/+3 (tope 15), Helena +2 de ataque, Lucía 4 de daño, Ari evita el 60%.",
     "Eriko +4/+4 (tope 20), Helena +4 de ataque, Lucía 5 de daño, Ari evita el 70%."
-   ]
-  },
- "Tilt": {
-   "th": [
-    2,
-    3,
-    4
-   ],
-   "color": "#ef4444",
-   "tx": [
-    "Cada vez que recibe daño gana +1 ataque; si pierdes la ronda, +1 permanente.",
-    "+1 por golpe, +2 permanente.",
-    "+2 por golpe, +2 permanente."
-   ]
-  },
-  "Pueblo": {
-   "th": [
-    2,
-    3
-   ],
-   "color": "#84cc16",
-   "tx": [
-    "Cada ronda: +1/+1 permanente a las Pueblo (tope +4/+4).",
-    "Cada ronda: +2/+2 permanente (tope +8/+8)."
-   ]
-  },
-  "Dúo Inseparable": {
-   "th": [
-    2
-   ],
-   "color": "#c084fc",
-   "tx": [
-    "Las dos tropas Dúo en mesa ganan +3/+3 y, si una muere, la otra gana +2 ataque."
-   ]
-  },
-  "NINI": {
-   "th": [
-    2
-   ],
-   "color": "#94a3b8",
-   "tx": [
-    "Sin ninguna Trabajo en mesa ni mano, las NINI ganan +2/+2 por ronda (tope +8/+8)."
-   ]
-  },
-  "Pelayos": {
-   "th": [
-    2
-   ],
-   "color": "#2dd4bf",
-   "tx": [
-    "Atacan siempre las últimas y ganan como vida máxima y ataque la mitad del daño que hacen (tope +10/+10)."
    ]
   }
  },

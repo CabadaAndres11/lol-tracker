@@ -61,7 +61,7 @@
     sobre: '<rect x="12" y="4" width="40" height="56" rx="6" ' + f('purple') + ' ' + S + '/><path d="M16 8v48" stroke="#fff" stroke-width="4" opacity=".3"/><path d="M32 22l3 6.5 7 .8-5.2 4.8 1.4 7-6.2-3.6-6.2 3.6 1.4-7L22 29.3l7-.8z" ' + f('gold') + ' stroke="' + K + '" stroke-width="2.2" stroke-linejoin="round"/>'
   };
   I['t-Pokémon'] = I.huevo; I['t-Informático'] = I.chip; I['t-Trabajo'] = I.maletin; I['t-Lol'] = I.emblema; I['t-Comebacker'] = I.fuego; I['t-Voley'] = I.voley;
-  I['t-Anime'] = I.shuriken; I['t-Correa'] = I.corazon; I['t-Tilt'] = I.humo; I['t-Pueblo'] = I.pueblo; I['t-KOI'] = I.pez; I['t-Dúo Inseparable'] = I.duo; I['t-NINI'] = I.sofa; I['t-Pelayos'] = I.escudo; I['t-Gambling'] = I.dado;
+  I['t-Anime'] = I.shuriken; I['t-Correa'] = I.corazon; I['t-KOI'] = I.pez; I['t-Gambling'] = I.dado;
   // ---- Iconos de interfaz: trazo fino minimalista (heredan el color del texto). Las sinergias y la moneda conservan su estilo. ----
   function L(inner, w) { return '<g fill="none" stroke="currentColor" stroke-width="' + (w || 3.6) + '" stroke-linecap="round" stroke-linejoin="round">' + inner + '</g>'; }
   var LN = {

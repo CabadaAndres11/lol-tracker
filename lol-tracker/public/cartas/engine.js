@@ -23,11 +23,6 @@
     koi: { atk: [1, 1, 2], cap: 5, heir: [0.5, 0.75, 1] }, // mejora al caer (tope por tropa) + herencia: % del ataque de la KOI caída pasa a una KOI viva al azar (sin tope)
     voley: { atk: [1, 2, 3], red: [1, 1, 2], cap: 8 },
     novias: { eriko: [2, 3, 4], eCap: [10, 15, 20], helena: [0, 2, 4], lucia: [3, 4, 5], ari: [0.5, 0.6, 0.7] }, // por nivel de Correa // novias del hueco 5 (sinergia Correa)
-    tilt: { hit: [1, 1, 2], perm: [1, 2, 2], cap: 8 },
-    pueblo: { per: [1, 2], cap: [4, 8] },
-    duo: { stat: 2, death: 2, cap: 12 },
-    nini: { per: 2, cap: 8 },
-    pelayos: { cap: 10 },
     gambling: { orbs: [1, 2, 3], probs: [[60, 30, 10], [40, 40, 20], [20, 40, 40]] }, // orbes por ronda sin daño directo; probabilidad (%) de que cada orbe dé +1/+1, +2/+2 o +3/+3
   };
 
@@ -117,9 +112,6 @@
     return t;
   }
   function mesaTroops(P) { return P.mesa.filter(alive); }
-  function hasWork(P) {
-    return P.mesa.concat(P.hand).some(function (i) { return i && isTroop(i) && has(i, 'Trabajo'); });
-  }
   function noTroops(P) {
     return !P.mesa.some(alive) && !P.hand.some(function (i) { return isTroop(i); });
   }
@@ -491,29 +483,12 @@
     'cita-sorpresa': {
       ok: function (s, p) { var n = s.p[p].mesa[4]; return (tiers(s.p[p])['Correa'] || 0) >= 1 && n && !n.dead ? '' : 'Necesitas el nivel 1 de Correa y una novia en el hueco extra.'; },
       run: function (s, p) { var n = s.p[p].mesa[4], g = sc(s, 3); var P5 = s.p[p].s5 || (s.p[p].s5 = { atk: 0, hp: 0 }); P5.atk += g; P5.hp += g; grow(n, 'atk', g); grow(n, 'hp', g); return 'el hueco 5 mejora +' + g + '/+' + g + ' permanente (' + card(n).name + ' lo recibe ahora y la siguiente novia también)'; } },
-    'rabia-contenida': { run: function (s, p) { var n = sc(s, 1); s.p[p].fl.tilt = n; return 'si ganas esta ronda: +' + n + ' ataque a las Tilt'; } },
-    'fiesta-del-pueblo': { ok: function (s, p) { return (tiers(s.p[p])['Pueblo'] || 0) >= 1 ? '' : 'Necesitas el nivel 1 de Pueblo (2 cartas distintas).'; }, run: function (s, p) { s.p[p].fl.pueblo = true; return 'el crecimiento del pueblo se duplica'; } },
-    'hermano-del-alma': {
-      ok: function (s, p) { return s.p[p].hda ? 'Ya has usado Hermano del alma desde la última tienda.' : duoPartner(s.p[p]) ? '' : 'Necesitas un Dúo Inseparable en la mesa.'; },
-      run: function (s, p) { var id = duoPartner(s.p[p]); s.p[p].hda = true; s.p[p].hand.push(mk(s, id, p)); mergeCheck(s, p); return 'consigues una copia de ' + CARD[id].name; } },
-    'sofa-compartido': {
-      ok: function (s, p) { var P = s.p[p]; return mesaTroops(P).some(function (i) { return has(i, 'NINI'); }) && P.hand.some(function (i) { return isTroop(i) && has(i, 'NINI'); }) ? '' : 'Necesitas una NINI en la mesa y otra en la mano.'; },
-      run: function (s, p) { var P = s.p[p], n = sc(s, 2); mesaTroops(P).concat(P.hand.filter(isTroop)).filter(function (i) { return has(i, 'NINI'); }).forEach(function (i) { grow(i, 'atk', n); grow(i, 'hp', n); }); return '+' + n + '/+' + n + ' permanente a las NINI'; } },
     'golpe-de-suerte': {
       ok: function (s, p) { var g = gamState(s.p[p]); return g.done ? 'Tus orbes ya se han canjeado: no se ganan más.' : (tiers(s.p[p])['Gambling'] || 0) >= 1 ? '' : 'Necesitas el nivel 1 de Gambling (2 cartas distintas).'; },
       run: function (s, p) { var g = gamState(s.p[p]), win = (typeof s.rng === 'function' ? s.rng() : Math.random()) < .5; if (win) { g.orbs += 2; return '¡Suerte! Ganas 2 orbes (' + g.orbs + (g.orbs === 1 ? ' acumulada)' : ' acumuladas)'); } var lost = Math.min(2, g.orbs); g.orbs -= lost; return 'Mala suerte: pierdes ' + lost + (lost === 1 ? ' orbe' : ' orbes') + ' (' + g.orbs + (g.orbs === 1 ? ' acumulada)' : ' acumuladas)'); } },
-    madrugon: { ok: function (s, p) { return mesaTroops(s.p[p]).some(function (i) { return has(i, 'Pelayos'); }) ? '' : 'Necesitas una Pelayos en la mesa.'; }, run: function (s, p) { s.p[p].fl.pel = true; return 'tus Pelayos atacan primero'; } },
   };
   function graveKoi(P) {
     return P.grave.filter(function (i) { return isTroop(i) && has(i, 'KOI'); }).sort(function (a, b) { return atk(b) - atk(a); })[0] || null;
-  }
-  function duoPartner(P) {
-    var on = mesaTroops(P).filter(function (i) { return has(i, 'Dúo Inseparable'); });
-    for (var k = 0; k < on.length; k++) {
-      var other = DATA.cards.filter(function (c) { return c.themes.indexOf('Dúo Inseparable') >= 0 && c.id !== on[k].id; })[0];
-      if (other) return other.id;
-    }
-    return null;
   }
   // ¿Se puede jugar esta acción ahora? Devuelve '' o el motivo.
   function actionBlock(s, p, c, tgt) {
@@ -730,15 +705,6 @@
     s.tiers = T;
     [0, 1].forEach(function (p) {
       var P = s.p[p], t = T[p], troops = mesaTroops(P), who = p === 0 ? 'Tus' : 'Las del rival';
-      // Dúo
-      if ((t['Dúo Inseparable'] || 0) >= 1) {
-        var duos = troops.filter(function (i) { return has(i, 'Dúo Inseparable'); });
-        if (duos.length >= 2) {
-          var du = duos.filter(function (i) { return gainCap(i, 'duo', 'both', FX.duo.stat, FX.duo.cap) > 0; });
-          if (du.length) fxFrame(s, p, 'duo', 'Dúo Inseparable', '+' + FX.duo.stat + '/+' + FX.duo.stat + ' permanente', du.map(function (i) { return i.uid; }));
-        }
-
-      }
       // Informático nivel 3: +1/+1 permanente por cada actualización de tienda de la partida (se acredita lo que falta)
       if ((t['Informático'] || 0) >= 3) {
         var infN = Math.floor(s.refreshN[p] / 3);
@@ -784,25 +750,6 @@
           }
         }
       }
-      // Pueblo
-      if (t['Pueblo']) {
-        var pt = t['Pueblo'] - 1;
-        var pu = [];
-        troops.filter(function (i) { return has(i, 'Pueblo'); }).forEach(function (i) {
-          var g = Math.min(FX.pueblo.per[pt], FX.pueblo.cap[pt] - i.caps.pueblo);
-          if (g > 0) { i.caps.pueblo += g; var gg = P.fl.pueblo ? g * 2 : g; grow(i, 'atk', gg); grow(i, 'hp', gg); pu.push(i.uid); }
-        });
-        if (pu.length) fxFrame(s, p, 'pueblo', 'El pueblo crece', '+' + FX.pueblo.per[pt] * (P.fl.pueblo ? 2 : 1) + '/+' + FX.pueblo.per[pt] * (P.fl.pueblo ? 2 : 1) + ' permanente' + (P.fl.pueblo ? ' (¡fiesta!)' : ''), pu);
-      }
-      // NINI
-      if (t['NINI'] && !hasWork(P)) {
-        var ni = [];
-        troops.filter(function (i) { return has(i, 'NINI'); }).forEach(function (i) {
-          var g = Math.min(FX.nini.per, FX.nini.cap - i.caps.nini);
-          if (g > 0) { i.caps.nini += g; grow(i, 'atk', g); grow(i, 'hp', g); ni.push(i.uid); }
-        });
-        if (ni.length) fxFrame(s, p, 'nini', 'Sin trabajo, sin problemas', '+' + FX.nini.per + '/+' + FX.nini.per + ' permanente', ni);
-      }
       // Voley
       if (t['Voley']) {
         var vt = t['Voley'] - 1;
@@ -832,20 +779,15 @@
   }
 
   function order(s) {
-    // Ataques de uno en uno, alternando bandos; las Pelayos van siempre al final.
+    // Ataques de uno en uno, alternando bandos.
     var f = s.first, seq = [];
-    function queues(pel) {
-      return [0, 1].map(function (p) { return mesaTroops(s.p[p]).filter(function (i) { return has(i, 'Pelayos') === pel; }); });
+    var q = [0, 1].map(function (p) { return mesaTroops(s.p[p]); }), a = [q[f], q[1 - f]], k = [0, 0], turn = 0;
+    while (k[0] < a[0].length || k[1] < a[1].length) {
+      var side = turn % 2;
+      if (k[side] >= a[side].length) side = 1 - side;
+      seq.push(a[side][k[side]++]);
+      turn++;
     }
-    [false, true].forEach(function (pel) {
-      var q = queues(pel), a = [q[f], q[1 - f]], k = [0, 0], turn = 0;
-      while (k[0] < a[0].length || k[1] < a[1].length) {
-        var side = turn % 2;
-        if (k[side] >= a[side].length) side = 1 - side;
-        seq.push(a[side][k[side]++]);
-        turn++;
-      }
-    });
     return seq;
   }
 
@@ -857,7 +799,7 @@
     return mesaTroops(s.p[p]).filter(function (i) { return !(T[i.uid] && foes.some(function (f) { return f.uid === T[i.uid]; })); });
   }
 
-  // Efectos al caer una tropa (KOI, Dúo Inseparable). Devuelve texto de registro y animación.
+  // Efectos al caer una tropa (KOI). Devuelve texto de registro y animación.
   // ---------- Pasivas de legendarias ----------
   var PAS = { 'dashlight-sun-jin-woo': 'sombra', 'aitorlg-maomao': 'boticaria', 'javihi-duo': 'duo', 'sech-duo': 'duo', 'javihi-prime': 'remate', 'sech': 'embargo', 'potango': 'aliento', 'mertens-prime': 'pereza', 'chipy-lloron': 'llanto', 'lihone-viego': 'racha', 'aitorlg-renata': 'prorroga', 'haikyuu-lihone': 'saque', 'lihone': 'captura', 'pampert-koisito': 'cabezon', 'aitorlg-koisito': 'heredero', 'mertens-gambler': 'malaracha', 'computer-dashlight': 'medallas', 'pampert-gambler': 'colega' };
   function pas(i) { return PAS[i.id] || ''; }
@@ -876,13 +818,12 @@
     genCharge(s, v, Math.min(n, Math.max(0, v.hp)));
     v.hp -= n;
     var tv = s.tiers[v.owner];
-    if (has(v, 'Tilt') && tv && tv['Tilt']) gainCap(v, 'tilt', 'atk', FX.tilt.hit[tv['Tilt'] - 1], FX.tilt.cap);
     var out = ' ' + card(v).name + ' -' + n + '.';
     if (v.hp <= 0 && wardSave(s, v)) out += ' ¡Aguanta a 0 de vida hasta atacar!';
     else if (v.hp <= 0) { v.dead = true; v.hp = 0; out += ' ¡Cae!'; out += deathFx(s, v, depth + 1).line; }
     return out;
   }
-  // Efectos al caer una tropa (KOI, Dúo Inseparable). Devuelve texto de registro y animación.
+  // Efectos al caer una tropa (KOI). Devuelve texto de registro y animación.
   function deathFx(s, d, depth) {
     var line = '', fxk = null; depth = depth || 0;
         var tt2 = s.tiers[d.owner];
@@ -900,11 +841,6 @@
             line += ' Herencia: ' + card(hv).name + ' recibe +' + hm + ' de ataque permanente.';
             fxk.sub += ' · herencia +' + hm + ' a ' + card(hv).name; fxk.uids = fxk.uids.concat(heirs.indexOf(hv) >= 0 ? [] : [hv.uid]);
           }
-        }
-        if (has(d, 'Dúo Inseparable') && tt2['Dúo Inseparable']) {
-          var dd = mesaTroops(s.p[d.owner]).filter(function (i) { return has(i, 'Dúo Inseparable'); });
-          dd.forEach(function (i) { gainCap(i, 'duo', 'atk', FX.duo.death, FX.duo.cap); });
-          if (dd.length && !fxk) fxk = { type: 'duo', side: d.owner, title: 'Su dúo se ha roto', sub: '+' + FX.duo.death + ' ataque', uids: dd.map(function (i) { return i.uid; }), neg: false };
         }
     if (pas(d) === 'llanto' && depth < 4) { // Chipy Llorón: la mitad de su ataque a todas las tropas rivales
       var ln = Math.ceil(atk(d) / 2), lf = mesaTroops(s.p[1 - d.owner]);
@@ -925,10 +861,6 @@
     // Cabezón (Pampert Koisito): recibe 2 de daño menos por golpe
     [0, 1].forEach(function (p) { mesaTroops(s.p[p]).forEach(function (i) { if (pas(i) === 'cabezon') i.tmp.red += 2; }); });
     var seq = order(s);
-    // Madrugón: las Pelayos de quien lo jugó atacan las primeras
-    var firstPel = [];
-    [s.first, 1 - s.first].forEach(function (p) { if (s.p[p].fl.pel) firstPel = firstPel.concat(seq.filter(function (i) { return i.owner === p && has(i, 'Pelayos'); })); });
-    if (firstPel.length) seq = firstPel.concat(seq.filter(function (i) { return firstPel.indexOf(i) < 0; }));
     // Remate doble: los Voley en ataque golpean dos veces; en defensa no atacan y reciben como mucho 1
     var dbl = {};
     [0, 1].forEach(function (p) {
@@ -979,13 +911,6 @@
           var li = ta['Lol'] - 1, ga = Math.min(FX.lol.atk[li], FX.lol.cap[li] - a.caps.lol);
           if (ga > 0) { a.caps.lol += ga; grow(a, 'atk', ga); if (FX.lol.hp[li]) grow(a, 'hp', Math.min(FX.lol.hp[li], ga)); }
         }
-        if (has(a, 'Pelayos') && ta['Pelayos']) {
-          var gp = Math.min(Math.ceil(real / 2), FX.pelayos.cap - a.caps.pel);
-          if (gp > 0) { a.caps.pel += gp; grow(a, 'atk', gp); grow(a, 'hp', gp); line += ' +' + gp + '/+' + gp + ' (Pelayos)'; }
-        }
-        if (has(tgt, 'Tilt') && tt['Tilt']) {
-          gainCap(tgt, 'tilt', 'atk', FX.tilt.hit[tt['Tilt'] - 1], FX.tilt.cap);
-        }
       }
       if (tgt.hp <= 0 && wardSave(s, tgt)) {
         line += ' ¡Prórroga! ' + card(tgt).name + ' aguanta a 0 de vida hasta que ataque.';
@@ -1030,8 +955,6 @@
         if (a.tmp.cap1) rec = Math.min(rec, 1);
         if (rec > 0) {
           if (!a.dead) { genCharge(s, a, Math.min(rec, Math.max(0, a.hp))); a.hp -= rec; } line += ' Contraataque: ' + card(a).name + ' recibe ' + rec + '.';
-          var ta2 = s.tiers[a.owner];
-          if (has(a, 'Tilt') && ta2['Tilt']) gainCap(a, 'tilt', 'atk', FX.tilt.hit[ta2['Tilt'] - 1], FX.tilt.cap);
           if (a.hp <= 0 && !a.dead && wardSave(s, a)) { line += ' (aguanta a 0 de vida)'; }
           else if (a.hp <= 0 && !a.dead) { a.dead = true; a.hp = 0; line += ' ¡Cae!'; var df2 = deathFx(s, a); line += df2.line; if (!fxk) fxk = df2.fx; }
         }
@@ -1050,26 +973,10 @@
       finishDying(a);
     }
     if (!s.over) {
-      // Tilt: si pierdes la ronda (menos tropas vivas), parte del ataque se queda
       var al = [mesaTroops(s.p[0]).length, mesaTroops(s.p[1]).length];
-      [0, 1].forEach(function (p) {
-        var t = s.tiers[p];
-        if (t['Tilt'] && al[p] < al[1 - p]) {
-          mesaTroops(s.p[p]).filter(function (i) { return has(i, 'Tilt'); }).forEach(function (i) {
-            gainCap(i, 'tilt', 'atk', FX.tilt.perm[t['Tilt'] - 1], FX.tilt.cap);
-          });
-          fxFrame(s, p, 'tilt', 'Tilt', 'conservan ataque tras perder la ronda', mesaTroops(s.p[p]).filter(function (i) { return has(i, 'Tilt'); }).map(function (i) { return i.uid; }));
-        }
-      });
       [0, 1].forEach(function (p) {
         var P = s.p[p], won = al[p] > al[1 - p];
         if (P.fl.work && won) { var wg = P.fl.work === true ? 5 : P.fl.work; P.gold += wg; fxFrame(s, p, 'trabajo', 'Horas extra', '+' + wg + ' de oro por ganar la ronda', []); }
-        if (P.fl.tilt && won) {
-          var tl = mesaTroops(P).filter(function (i) { return has(i, 'Tilt'); });
-          var tg = P.fl.tilt === true ? 1 : P.fl.tilt;
-          tl.forEach(function (i) { grow(i, 'atk', tg); });
-          if (tl.length) fxFrame(s, p, 'tilt', 'Rabia contenida', '+' + tg + ' ataque permanente a las Tilt', tl.map(function (i) { return i.uid; }));
-        }
       });
       // Dúo en sintonía: si acaban las dos vivas, el jugador se cura 1
       [0, 1].forEach(function (p) {
@@ -1152,7 +1059,6 @@
   // Al abrirse cada tienda: retira el soldado de sombra y, con MaoMao en la mesa, cada 2 tiendas cura o entrega un Remedio. Devuelve texto de registro.
   function shopStart(s, p) {
     var P = s.p[p], out = [];
-    P.hda = false;
     if (shadowOrphan(s, p)) out.push('El soldado de sombra desaparece: Dashlight ya no está en la mesa.');
     if (mesaTroops(P).some(function (i) { return pas(i) === 'boticaria'; })) {
       P.bot = (P.bot || 0) + 1;

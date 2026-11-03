@@ -1,6 +1,9 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-04', tag: 'Cambio', title: 'Adiós a cinco sinergias',
+      items: ['Se eliminan las sinergias Tilt, Pueblo, NINI, Pelayos y Dúo Inseparable. Algunas cartas se quedan temporalmente sin sinergia: las rediseñaremos en próximas versiones.',
+        'Con ellas desaparecen sus cartas de acción: Rabia contenida, Fiesta del pueblo, Hermano del alma, Sofá compartido y Madrugón.'] },
     { date: '2026-11-03', tag: 'Cambio', title: 'Sin límite de rondas',
       items: ['Se elimina la ronda máxima (antes 40): las partidas pueden alargarse indefinidamente, tanto en 1 vs 1 como en Versus de 4, hasta que solo quede un ganador.'] },
     { date: '2026-11-03', tag: 'Cambio', title: 'Huecos extra independientes',

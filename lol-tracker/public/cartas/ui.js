@@ -416,7 +416,7 @@
     if (r.kind === 'skin') { var sk = (window.CARTAS_SKINS || []).filter(function (k) { return k.id === r.id; })[0]; return { k: 'Skin', t: sk ? sk.name : r.id, v: '<div class="rwv art"><span style="background-image:url(/cartas/art/' + r.id + '.webp)"></span></div>' }; }
     var fk = FXKIND[r.fx] || FXKIND.deploy, e = fk[2]().filter(function (z) { return z.id === r.id; })[0] || { name: r.id };
     if (r.fx === 'sleeve') return { k: 'Efecto · ' + fk[0], t: e.name, v: '<div class="rwv slvp slv-' + r.id + '"><div class="slvback"><span></span></div></div>' };
-    return { k: 'Efecto · ' + fk[0], t: e.name, v: '<div class="rwv fx">' + ic(fk[1]) + '</div>', play: r.fx === 'deploy' ? '<button class="rwplay" data-act="passplay" data-id="' + r.id + '" title="Ver el efecto"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>' : '' };
+    return { k: 'Efecto · ' + fk[0], t: e.name, v: '<div class="rwv fx">' + ic(fk[1]) + '</div>', play: r.fx === 'deploy' || r.fx === 'finish' ? '<button class="rwplay" data-act="' + (r.fx === 'finish' ? 'passfin' : 'passplay') + '" data-id="' + r.id + '" title="Ver el efecto"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>' : '' };
   }
   function seasonHead() {
     var d = seData(), S = SS.SEASON, lv = seLevel(), max = S.levels.length, into = lv >= max ? S.xpPerLevel : d.xp - lv * S.xpPerLevel;
@@ -456,7 +456,7 @@
       '<div class="phero"><div class="pring"></div><div class="pvis">' + info.v + (info.play || '') + '</div><div class="pinfo"><span class="pk">' + esc(info.k) + '</span><h2>' + esc(info.t) + '</h2>' + (info.sub ? '<span class="psub">' + esc(info.sub) + '</span>' : '') + state + (ui.passNote ? '<span class="pnote">' + esc(ui.passNote) + '</span>' : '') + '</div></div>' +
       '<div class="ptrackw"><button class="parrow l" data-act="passscroll" data-d="-1" aria-label="Anterior">‹</button><div class="ptrack" id="ptrack">' + track + '</div><button class="parrow r" data-act="passscroll" data-d="1" aria-label="Siguiente">›</button></div>' +
       '<div class="pbot"><div class="plv"><b>' + lv + '</b></div><div class="pxp"><div class="sexp"><i style="width:' + Math.round(into / S.xpPerLevel * 100) + '%"></i></div><span>' + (lv >= max ? '¡Pase completado!' : into + ' / ' + S.xpPerLevel + ' XP para el nivel ' + (lv + 1)) + ' · XP total ' + d.xp + '</span></div>' +
-      '<div class="pact">' + (ready.length > 1 ? '<button class="btn sec" data-act="slclaimall">Reclamar todo (' + ready.length + ')</button>' : '') + '<button class="btn cta" data-act="slclaim" data-lv="' + sel.lv + '"' + (selOk && !selCl && d.active ? '' : ' disabled') + '>Reclamar</button></div></div></div></div>';
+      '<div class="pact">' + (ready.length > 1 ? '<button class="btn sec" data-act="slclaimall">Reclamar todo (' + ready.length + ')</button>' : '') + '<button class="btn cta" data-act="slclaim" data-lv="' + sel.lv + '"' + (selOk && !selCl && d.active ? '' : ' disabled') + '>Reclamar</button></div></div></div></div>' + finPrevHtml();
     var tr = document.getElementById('ptrack'), nd = tr && tr.querySelector('.pnode.sel');
     if (tr && nd) { tr.style.scrollBehavior = 'auto'; tr.scrollLeft = ui.passScroll != null ? ui.passScroll : Math.max(0, nd.offsetLeft - tr.clientWidth / 2 + nd.clientWidth / 2); ui.passScroll = null; requestAnimationFrame(function () { tr.style.scrollBehavior = ''; }); }
   }
@@ -1485,12 +1485,36 @@
     { id: 'poker', name: 'Mano ganadora', desc: 'Victoria: lluvia de fichas de casino sobre un banner de fieltro verde y oro. Derrota: las fichas se deslizan apagadas y el banner se agrieta: la banca gana.', price: 50 },
     { id: 'dball', name: 'Kamehameha final', desc: 'Victoria: banner naranja y azul con rayos de energía, chispas de ki que suben y el emblema de la Tortuga. Derrota: el banner se agrieta en gris azulado y cae ceniza de combate.', price: 50 },
     { id: 'trebol', name: 'Grimorio del trébol', desc: 'Victoria: banner de cuero y cobre con tréboles de cinco hojas dorados que caen como polvo de magia. Derrota: el grimorio se oscurece y tréboles negros se desmoronan en ceniza.', price: 50 },
-    { id: 'petalos', name: 'Jardín de la boticaria', desc: 'Victoria: banner rosa y verde bajo una lluvia de pétalos y hojas. Derrota: los pétalos se marchitan y el banner se agrieta entre hojas secas.', price: 50 }
+    { id: 'petalos', name: 'Jardín de la boticaria', desc: 'Victoria: banner rosa y verde bajo una lluvia de pétalos y hojas. Derrota: los pétalos se marchitan y el banner se agrieta entre hojas secas.', price: 50 },
+    { id: 'neon', name: 'Máscara de neón', desc: 'Sin banner: una explosión de neón da paso a una máscara de tubos luminosos. Victoria: sonrisa cosida en azul eléctrico. Derrota: ceño y lágrimas en rojo parpadeante.', price: 50 }
   ];
   var FIN_THEME = { eclipse: 'eclipse', hechizo: 'arcano', poker: 'poker', dball: 'dball', trebol: 'trebol', petalos: 'petalos' };
   var FIN_ICO = { dball: '<img class="finimg" src="img/sleeve-goku.webp" alt="">', trebol: '<svg class="finsvg" viewBox="-50 -50 100 100">' + [0, 72, 144, 216, 288].map(function (a) { return '<path transform="rotate(' + a + ')" d="M0 -3 C-19 -10 -24 -34 -10 -39 C-4 -41 0 -35 0 -31 C0 -35 4 -41 10 -39 C24 -34 19 -10 0 -3Z" fill="currentColor"/>'; }).join('') + '</svg>', petalos: '<svg class="finsvg" viewBox="-50 -50 100 100">' + [0, 72, 144, 216, 288].map(function (a, k) { return '<ellipse cx="0" cy="-24" rx="13" ry="22" transform="rotate(' + a + ')" fill="' + (k % 2 ? '#f472b6' : '#f9a8d4') + '"/>'; }).join('') + '<circle r="9" fill="#fde68a"/></svg>' };
   function finId() { var id = ui.acct && ui.acct.fx && ui.acct.fx.finish; return id && FIN_LIST.some(function (e) { return e.id === id; }) && fxHas(id) ? id : 'default'; }
+  // Máscara de neón: sin banner; explosión de neón y una cara de tubos luminosos que cambia de expresión
+  function neonFin(win, title, sub, rw, btns, extra) {
+    var bz = function (a, c, b, t) { var u = 1 - t; return [u * u * a[0] + 2 * u * t * c[0] + t * t * b[0], u * u * a[1] + 2 * u * t * c[1] + t * t * b[1]]; };
+    var P = [], add = function (d) { P.push(d); };
+    add('M66 112 Q54 190 68 268'); add('M334 112 Q346 190 332 268');
+    add('M82 62 Q200 46 318 62');
+    [128, 272].forEach(function (x) { add('M' + (x - 30) + ' 172 L' + (x + 30) + ' 238 M' + (x + 30) + ' 172 L' + (x - 30) + ' 238'); add('M' + (x - 22) + ' 168 L' + (x + 38) + ' 234 M' + (x + 22) + ' 168 L' + (x - 38) + ' 234'); });
+    add('M180 298 Q200 314 220 298');
+    var U0, UC, U1, L0, LC, L1;
+    if (win) { U0 = [76, 338]; UC = [200, 408]; U1 = [324, 338]; L0 = [96, 366]; LC = [200, 450]; L1 = [304, 366]; }
+    else { U0 = [118, 408]; UC = [200, 352]; U1 = [282, 408]; L0 = [134, 428]; LC = [200, 388]; L1 = [266, 428]; add('M90 148 L166 180'); add('M310 148 L234 180'); add('M122 252 Q116 276 122 296'); add('M278 252 Q284 276 278 296'); }
+    add('M' + U0 + ' Q' + UC + ' ' + U1); add('M' + L0 + ' Q' + LC + ' ' + L1);
+    for (var s = 1; s <= 7; s++) { var t = s / 8, a = bz(U0, UC, U1, t), b = bz(L0, LC, L1, t), sl = (s % 2 ? 1 : -1) * 3; add('M' + (a[0] + sl).toFixed(1) + ' ' + (a[1] + (win ? -12 : 12)).toFixed(1) + ' L' + (b[0] - sl).toFixed(1) + ' ' + (b[1] + (win ? 12 : -12)).toFixed(1)); }
+    var gl = '', co = '';
+    P.forEach(function (d, i) { gl += '<path class="nxs" style="--i:' + i + '" pathLength="1" d="' + d + '"/>'; co += '<path class="nxc" style="--i:' + i + '" pathLength="1" d="' + d + '"/>'; });
+    var fx = '<div class="nxburst"><i class="nxflash"></i><i class="nxring"></i><i class="nxring r2"></i><i class="nxring r3"></i>', q;
+    for (q = 0; q < 16; q++) fx += '<i class="nxray" style="--a:' + (q * 22.5 + (q % 3) * 4) + 'deg;--l:' + (40 + (q * 37) % 50) + 'vmin"></i>';
+    for (q = 0; q < 26; q++) fx += '<i class="nxsp" style="--a:' + (q * 13.8 + (q % 4) * 5) + 'deg;--d:' + (22 + (q * 29) % 46) + 'vmin;--w:' + (14 + (q % 4) * 8) + 'px;--t:' + (.04 + (q % 5) * .02).toFixed(2) + 's"></i>';
+    fx += '</div>';
+    var face = '<svg class="nxface" viewBox="0 0 400 480"><path class="nxhead" d="M62 48 Q200 22 338 48 Q356 200 336 318 Q318 410 200 462 Q82 410 64 318 Q44 200 62 48Z"/>' + gl + co + '</svg>';
+    return '<div class="overlay fin fin-neon ' + (win ? 'owin' : 'olose') + (extra ? ' finprev' : '') + '">' + fx + face + '<div class="nxtitle">' + esc(title.replace(/[¡!]/g, '').toUpperCase()) + '</div><p class="finsub">' + sub + '</p><div class="finpanel">' + rw + '<div class="finbtns">' + btns + '</div></div></div>';
+  }
   function finOverlay(id, win, title, sub, rw, btns, extra) {
+    if (id === 'neon') return neonFin(win, title, sub, rw, btns, extra);
     if (FIN_THEME[id]) {
       var arc = id === 'hechizo', pok = id === 'poker', nw = id === 'dball' || id === 'trebol' || id === 'petalos', fx = '<div class="finfx">' + (nw && id === 'dball' ? '<div class="finrays"></div><i class="ring"></i><i class="ring r2"></i>' : nw ? '<i class="ring"></i><i class="ring r2"></i>' : pok ? '<i class="ring"></i><i class="ring r2"></i>' : arc ? '<div class="arcw"><i class="arc a"></i><i class="arc b"></i></div><i class="ring"></i><i class="ring r2"></i>' : '<div class="finrays"></div><i class="ring"></i><i class="ring r2"></i>'), n = win ? 34 : 30;
       for (var q = 0; q < n; q++) fx += '<i class="fp" style="--x:' + ((q * 29 + (q % 4) * 7) % 100) + '%;--d:' + (((q * 37) % 100) / 100 * 3).toFixed(2) + 's;--t:' + (3.6 + ((q * 13) % 10) / 4).toFixed(2) + 's;--s:' + (5 + (q % 5) * 2) + 'px;--w:' + ((q % 2 ? 1 : -1) * (14 + (q % 4) * 9)) + 'px"></i>';
@@ -2247,7 +2271,7 @@
     if (act === 'sfxbg') { window.CartasSfx.set('bg', el.checked); return; }
     if (act === 'sfxreset') { window.CartasSfx.reset(); snd('confirm'); return render(); }
     if (act === 'sfxtest') { var tc = el.dataset.cat; snd(tc === 'ui' ? 'buy' : tc === 'combat' ? 'heavy' : tc === 'pack' ? 'rev-Épica' : 'win'); return; }
-    if (ui.finPrev && act !== 'finprev' && act !== 'finflip' && act !== 'finclose') ui.finPrev = null;
+    if (ui.finPrev && act !== 'finprev' && act !== 'passfin' && act !== 'finflip' && act !== 'finclose') ui.finPrev = null;
     if (ui.dedit) { var ne = document.getElementById('de-name'); if (ne) ui.dedit.name = ne.value; }
     if (act === 'playanim') { if (el.dataset.id === 'correa') openIntro(); else if (el.dataset.id === 'v12') openIntro12(); else if (el.dataset.id === 'v13') openIntro13(); return; }
     if (act === 'avedit') { ui.avEdit = !ui.avEdit; return render(); }
@@ -2361,9 +2385,10 @@
     if (act === 'coltab') { ui.colTab = el.dataset.t; ui.dedit = null; ui.msg = ''; ui.delAsk = null; window.scrollTo(0, 0); return render(); }
     if (act === 'shopfxsec') { ui.shopFxSec = el.dataset.t; ui.slvPrev = null; return render(); }
     if (act === 'fxsec') { ui.fxSec = el.dataset.t; ui.slvPrev = null; return renderDeck(); }
+    if (act === 'passfin') { ui.finPrev = { id: el.dataset.id, win: true }; snd('win', 300); return render(); }
     if (act === 'finprev') { ui.finPrev = { id: el.dataset.id, win: true }; snd('win', 300); return ui.screen === 'packs' ? render() : renderDeck(); }
-    if (act === 'finflip') { if (ui.finPrev) { ui.finPrev.win = !ui.finPrev.win; snd(ui.finPrev.win ? 'win' : 'lose', 300); } return ui.screen === 'packs' ? render() : renderDeck(); }
-    if (act === 'finclose') { ui.finPrev = null; return ui.screen === 'packs' ? render() : renderDeck(); }
+    if (act === 'finflip') { if (ui.finPrev) { ui.finPrev.win = !ui.finPrev.win; snd(ui.finPrev.win ? 'win' : 'lose', 300); } return ui.screen === 'packs' || ui.screen === 'pass' ? render() : renderDeck(); }
+    if (act === 'finclose') { ui.finPrev = null; return ui.screen === 'packs' || ui.screen === 'pass' ? render() : renderDeck(); }
     if (act === 'slvprev') { ui.slvPrev = el.dataset.id; return ui.screen === 'packs' ? render() : renderDeck(); }
     if (act === 'fxgoshop') { ui.screen = 'packs'; ui.shopTab = 'fx'; window.scrollTo(0, 0); return render(); }
     if (act === 'fxbuy') { return api('fxBuy', { id: el.dataset.id }).then(function (r) { if (r.data && r.data.user) setAcct(r.data.user); ui.msg = r.ok ? '' : (r.data.error || ''); render(); }); }

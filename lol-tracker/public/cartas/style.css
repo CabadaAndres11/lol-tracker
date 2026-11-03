@@ -2363,3 +2363,36 @@ body.soc-open #app { margin-right: 286px; }
 .rwplay{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:58px;height:58px;border-radius:50%;border:2px solid #e8c777;background:rgba(10,16,40,.78);color:#f4e2b0;display:grid;place-items:center;cursor:pointer;box-shadow:0 0 18px rgba(232,199,119,.45);z-index:3;transition:transform .15s,background .15s}
 .rwplay svg{width:26px;height:26px;fill:currentColor;margin-left:3px}
 .rwplay:hover{transform:translate(-50%,-50%) scale(1.1);background:rgba(30,40,80,.9)}
+
+/* ---------- Máscara de neón (victoria / derrota) ---------- */
+.fin-neon { --c: #28e8ff; --g: #1d6bff; }
+.fin-neon.olose { --c: #ff4a68; --g: #ff0a3c; }
+.fin-neon.owin { background: radial-gradient(ellipse 60% 55% at 50% 38%, rgba(20,70,190,.55), transparent 72%), linear-gradient(rgba(2,4,16,.95), rgba(1,2,8,.98)); }
+.fin-neon.olose { background: radial-gradient(ellipse 60% 55% at 50% 38%, rgba(150,10,40,.5), transparent 72%), linear-gradient(rgba(14,3,8,.95), rgba(4,1,3,.98)); }
+.nxburst { position: absolute; left: 50%; top: 38%; width: 0; height: 0; pointer-events: none; }
+.nxflash { position: fixed; inset: 0; background: radial-gradient(circle at 50% 38%, #fff, var(--c) 18%, transparent 55%); opacity: 0; animation: nxflash .9s .05s ease-out both; }
+@keyframes nxflash { 0% { opacity: 0; } 12% { opacity: .95; } 100% { opacity: 0; } }
+.nxring { position: absolute; left: -150px; top: -150px; width: 300px; height: 300px; border-radius: 50%; border: 4px solid var(--c); box-shadow: 0 0 22px var(--c), inset 0 0 22px var(--g); opacity: 0; animation: nxring 1.3s .1s cubic-bezier(.2,.7,.3,1) both; }
+.nxring.r2 { animation-delay: .3s; border-width: 2px; } .nxring.r3 { animation-delay: .5s; border-width: 1px; }
+@keyframes nxring { 0% { transform: scale(.1); opacity: 0; } 15% { opacity: 1; } 100% { transform: scale(5); opacity: 0; } }
+.nxray { position: absolute; left: -2px; top: 0; width: 4px; height: var(--l); border-radius: 4px; background: linear-gradient(to top, #fff, var(--c) 40%, transparent); box-shadow: 0 0 10px var(--c), 0 0 22px var(--g); transform-origin: 50% 0; transform: rotate(var(--a)) scaleY(0); opacity: 0; animation: nxray .9s .1s cubic-bezier(.1,.7,.3,1) both; }
+@keyframes nxray { 0% { transform: rotate(var(--a)) scaleY(0); opacity: 0; } 20% { opacity: 1; } 100% { transform: rotate(var(--a)) scaleY(1); opacity: 0; } }
+.nxsp { position: absolute; left: -2px; top: -2px; width: var(--w); height: 4px; border-radius: 4px; background: #fff; box-shadow: 0 0 8px var(--c), 0 0 18px var(--g); opacity: 0; animation: nxsp 1.2s var(--t) cubic-bezier(.1,.7,.3,1) both; }
+@keyframes nxsp { 0% { transform: rotate(var(--a)) translateX(10px); opacity: 0; } 15% { opacity: 1; } 100% { transform: rotate(var(--a)) translateX(var(--d)); opacity: 0; } }
+.nxface { position: relative; z-index: 2; height: min(44vh, 400px); width: auto; overflow: visible; }
+.nxhead { fill: #02040f; stroke: rgba(60,110,220,.4); stroke-width: 2; opacity: 0; animation: nxhead .6s .35s ease-out forwards; }
+.fin-neon.olose .nxhead { stroke: rgba(220,60,90,.35); }
+@keyframes nxhead { to { opacity: 1; } }
+.nxs, .nxc { fill: none; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; stroke-dashoffset: 1; }
+.nxs { stroke: var(--c); stroke-width: 8; filter: drop-shadow(0 0 5px var(--c)) drop-shadow(0 0 16px var(--g)); animation: nxdraw .5s calc(.55s + var(--i) * .07s) ease-out forwards, nxflick 3.4s calc(2.2s + var(--i) * .11s) infinite; }
+.nxc { stroke: #fff; stroke-width: 2.6; opacity: .9; animation: nxdraw .5s calc(.55s + var(--i) * .07s) ease-out forwards, nxflick 3.4s calc(2.2s + var(--i) * .11s) infinite; }
+.fin-neon.olose .nxs, .fin-neon.olose .nxc { animation-name: nxdraw, nxflick2; animation-duration: .5s, 1.9s; }
+@keyframes nxdraw { to { stroke-dashoffset: 0; } }
+@keyframes nxflick { 0%, 44%, 58%, 100% { opacity: 1; } 46% { opacity: .3; } 48% { opacity: 1; } 52% { opacity: .55; } 55% { opacity: 1; } }
+@keyframes nxflick2 { 0%, 100% { opacity: 1; } 8% { opacity: .2; } 12% { opacity: 1; } 30% { opacity: .5; } 34% { opacity: 1; } 62% { opacity: .15; } 66% { opacity: .9; } 70% { opacity: .3; } 74% { opacity: 1; } }
+.nxtitle { position: relative; z-index: 2; font-family: var(--serif); font-weight: 700; font-size: clamp(2rem, 7vw, 3.6rem); letter-spacing: .22em; padding-left: .22em; color: #fff; text-shadow: 0 0 6px var(--c), 0 0 18px var(--c), 0 0 38px var(--g), 0 0 70px var(--g); opacity: 0; animation: nxtitle 1.4s 2.2s steps(1) forwards, nxflick 3.4s 3.8s infinite; }
+.fin-neon.olose .nxtitle { animation: nxtitle 1.4s 2.2s steps(1) forwards, nxflick2 1.9s 3.8s infinite; }
+@keyframes nxtitle { 0% { opacity: 0; } 12% { opacity: 1; } 22% { opacity: .1; } 34% { opacity: 1; } 46% { opacity: .3; } 60%, 100% { opacity: 1; } }
+.fin-neon .finsub { animation-delay: 2.7s; color: #cfe6ff; } .fin-neon.olose .finsub { color: #ffc4cf; }
+.fin-neon .finpanel { animation-delay: 3s; }
+@media (prefers-reduced-motion: reduce) { .nxburst, .nxflash { display: none; } .nxs, .nxc { animation: none; stroke-dashoffset: 0; } .nxhead { animation: none; opacity: 1; } .nxtitle { animation: none; opacity: 1; } }

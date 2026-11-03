@@ -1,6 +1,10 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-03', tag: 'Novedad', title: 'Nuevo sobre: Sobre Anime',
+      items: ['Nuevo sobre «Anime»: trae 5 cartas al azar solo de la sinergia Anime (sus tropas y la acción Kamehameha); la última siempre es Rara o mejor. Está en la tienda junto al Set 1 (50 monedas), con su propia animación de apertura.',
+        'Las cartas de Anime ya no salen en el sobre del Set 1 (siguen saliendo en las cajas).',
+        'Los sobres Anime se guardan en el inventario junto a los del Set 1. En el pase de batalla hay sobres Anime en los niveles 7 y 12 (recompensas de prueba).'] },
     { date: '2026-11-03', tag: 'Novedad', title: 'Montaje automático de mazos',
       items: ['En el editor de mazos hay un nuevo botón «Montaje automático»: eliges de 1 a 3 sinergias y monta un mazo con tus cartas de esas sinergias, una tropa Común para la tienda inicial y acciones generales (y las de tus sinergias). Intenta que cada sinergia llegue a su segundo nivel y equilibra tropas caras y baratas. Después puedes retocarlo a mano antes de guardar.'] },
     { date: '2026-11-03', tag: 'Corrección', title: 'Misiones de racha y tienda con cartas al máximo',

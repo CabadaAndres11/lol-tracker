@@ -3,7 +3,7 @@
  * ATENCIÓN: las misiones y recompensas de abajo son DE PRUEBA, se definirán más adelante. Para una temporada nueva
  * cambia el `id` (el progreso de cada cuenta empieza de cero al cambiar de temporada).
  *   stat: games | wins | streak (racha actual) | cards | revive | rumble | mp | v4 | packs   (se cuentan desde que empieza la temporada)
- *   reward: { kind: 'coins', n } | { kind: 'pack', n } | { kind: 'box', n } | { kind: 'emotes', id: <set de emoticonos> } | { kind: 'card', id } | { kind: 'skin', id } | { kind: 'fx', fx: 'deploy'|'sleeve'|'finish', id } */
+ *   reward: { kind: 'coins', n } | { kind: 'pack', n, set?: 'anime' (sin set = Set 1) } | { kind: 'box', n } | { kind: 'emotes', id: <set de emoticonos> } | { kind: 'card', id } | { kind: 'skin', id } | { kind: 'fx', fx: 'deploy'|'sleeve'|'finish', id } */
 (function (root) {
   var MISSIONS = [
     { id: 'g3', stat: 'games', goal: 3, xp: 30, t: 'Primeros pasos', d: 'Juega 3 partidas.' },
@@ -24,8 +24,8 @@
   // Recompensas de PRUEBA (monedas, sobres, cajas, skins y efectos repartidos por el pase)
   var R = [
     { kind: 'coins', n: 30 }, { kind: 'pack', n: 1 }, { kind: 'coins', n: 40 }, { kind: 'box', n: 1 }, { kind: 'fx', fx: 'sleeve', id: 'pokeball' },
-    { kind: 'coins', n: 50 }, { kind: 'pack', n: 1 }, { kind: 'emotes', id: 'camo' }, { kind: 'coins', n: 60 }, { kind: 'skin', id: 'pampert-oikawa' },
-    { kind: 'coins', n: 70 }, { kind: 'pack', n: 2 }, { kind: 'fx', fx: 'deploy', id: 'grieta' }, { kind: 'box', n: 1 }, { kind: 'coins', n: 80 },
+    { kind: 'coins', n: 50 }, { kind: 'pack', n: 1, set: 'anime' }, { kind: 'emotes', id: 'camo' }, { kind: 'coins', n: 60 }, { kind: 'skin', id: 'pampert-oikawa' },
+    { kind: 'coins', n: 70 }, { kind: 'pack', n: 2, set: 'anime' }, { kind: 'fx', fx: 'deploy', id: 'grieta' }, { kind: 'box', n: 1 }, { kind: 'coins', n: 80 },
     { kind: 'emotes', id: 'gorra' }, { kind: 'coins', n: 100 }, { kind: 'fx', fx: 'finish', id: 'mascara' }, { kind: 'box', n: 2 }, { kind: 'skin', id: 'dashlight-kingambit' }
   ];
   var LEVELS = R.map(function (r, k) { return { lv: k + 1, reward: r }; });

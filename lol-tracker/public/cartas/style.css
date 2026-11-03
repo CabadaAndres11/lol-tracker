@@ -2418,3 +2418,13 @@ body.soc-open #app { margin-right: 286px; }
 .genw:hover::after { opacity: 1; transform: translate(-50%, 0); }
 
 .autoov { z-index: 960; } .autop { width: min(560px, 94vw); } .autop .chips { margin: .6rem 0; } .autop .chip small { opacity: .7; margin-left: .25rem; }
+
+/* Sobre Anime: la ilustración reemplaza al degradado; misma apertura (tapa que se rasga y cartas) */
+.packs-grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 900px; }
+@media (max-width: 700px) { .packs-grid.two { grid-template-columns: 1fr; } }
+.bpk.anime { width: 177px; }
+.bpk.anime .bpk-lid, .bpk.anime .bpk-main { background: url(img/pack-anime.webp) 0 0 / 177px 266px no-repeat; }
+.bpk.anime .bpk-main { background-position: 0 -30px; }
+.bpk.anime .bpk-lid::after, .bpk.anime .bpk-main::after { display: none; }
+.bpk.anime { filter: drop-shadow(0 14px 18px rgba(120,40,200,.55)); }
+.bpk.anime.rip, .bpk.anime.shake { filter: none; }

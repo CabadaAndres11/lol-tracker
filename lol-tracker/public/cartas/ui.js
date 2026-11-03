@@ -410,7 +410,7 @@
     var n = r.n || 1, x = n > 1 ? '<span class="rwn">×' + n + '</span>' : '';
     if (r.kind === 'coins') return { k: 'Monedas', t: r.n + ' monedas', v: '<div class="rwv coins"><img src="/cartas/img/coins-pile.webp" alt=""><span class="rwn">' + r.n + '</span></div>' };
     if (r.kind === 'box') return { k: 'Botín', t: n > 1 ? n + ' cajas' : 'Una caja', v: '<div class="rwv"><img src="/cartas/img/box.webp" alt="">' + x + '</div>' };
-    if (r.kind === 'pack') return { k: 'Sobre', t: n > 1 ? n + ' sobres' : 'Un sobre', v: '<div class="rwv"><img src="/cartas/img/pack-set1.webp" alt="">' + x + '</div>' };
+    if (r.kind === 'pack') { var an = r.set === 'anime'; return { k: an ? 'Sobre Anime' : 'Sobre', t: n > 1 ? n + ' sobres' + (an ? ' Anime' : '') : an ? 'Un sobre Anime' : 'Un sobre', v: '<div class="rwv"><img src="/cartas/img/pack-' + (an ? 'anime' : 'set1') + '.webp" alt="">' + x + '</div>' }; }
     if (r.kind === 'card') { var c = CARD[r.id]; return { k: 'Carta', t: c ? c.name : r.id, v: '<div class="rwv art"><span style="background-image:url(/cartas/art/' + r.id + '.webp)"></span></div>' }; }
     if (r.kind === 'emotes') { var es = EMO.setOf(r.id); return { k: 'Emoticonos', t: es ? es.name : r.id, sub: es ? es.emotes.length + ' emoticonos para chat y partidas' : '', v: '<div class="rwv emo">' + emoImg(r.id + '-1') + '</div>' }; }
     if (r.kind === 'skin') { var sk = (window.CARTAS_SKINS || []).filter(function (k) { return k.id === r.id; })[0]; return { k: 'Skin', t: sk ? sk.name : r.id, v: '<div class="rwv art"><span style="background-image:url(/cartas/art/' + r.id + '.webp)"></span></div>' }; }
@@ -478,8 +478,11 @@
       '<ul class="mslist">' + items + '</ul></div>';
   }
   function invPacks() {
-    var n = (ui.acct && ui.acct.packs) || 0;
-    return '<div class="invwrap"><div class="invbox invpk' + (n ? '' : ' empty') + '"><img class="bximg" src="/cartas/img/pack-set1.webp" alt="Sobre">' + (n ? '<span class="invn">×' + n + '</span>' : '') + '</div><div class="invinfo"><h2 class="dedh">Sobres</h2><p class="mut colhint">Cada sobre trae ' + ui.acct.packSize + ' cartas al azar de todo el juego; la última es Rara o mejor.</p>' + (n ? '<button class="btn cta big" data-act="openpack" data-inv="1"' + (ui.pack ? ' disabled' : '') + '>' + ic('sobre') + ' Abrir sobre</button><p class="mut">Tienes ' + n + (n === 1 ? ' sobre' : ' sobres') + ' sin abrir.</p>' : '<p class="mut">No tienes sobres ahora mismo. Consíguelos en el pase de batalla.</p><div class="btnrow"><button class="btn sec" data-act="nav" data-to="pass">' + ic('estrella') + ' Pase de batalla</button></div>') + '</div></div>';
+    var PK = [['set1', 'Sobres Set 1', 'packs', 'Cada sobre trae ' + ui.acct.packSize + ' cartas al azar de todo el juego (sin la sinergia Anime); la última es Rara o mejor.'], ['anime', 'Sobres Anime', 'packsAnime', 'Cada sobre trae ' + ui.acct.packSize + ' cartas al azar de la sinergia Anime y su acción; la última es Rara o mejor.']];
+    return PK.map(function (p) {
+      var n = (ui.acct && ui.acct[p[2]]) || 0;
+      return '<div class="invwrap"><div class="invbox invpk' + (n ? '' : ' empty') + '"><img class="bximg" src="/cartas/img/pack-' + (p[0] === 'anime' ? 'anime' : 'set1') + '.webp" alt="Sobre">' + (n ? '<span class="invn">×' + n + '</span>' : '') + '</div><div class="invinfo"><h2 class="dedh">' + p[1] + '</h2><p class="mut colhint">' + p[3] + '</p>' + (n ? '<button class="btn cta big" data-act="openpack" data-inv="1" data-pack="' + p[0] + '"' + (ui.pack ? ' disabled' : '') + '>' + ic('sobre') + ' Abrir sobre</button><p class="mut">Tienes ' + n + (n === 1 ? ' sobre' : ' sobres') + ' sin abrir.</p>' : '<p class="mut">No tienes sobres de este tipo ahora mismo. Consíguelos en el pase de batalla o cómpralos en la tienda.</p><div class="btnrow"><button class="btn sec" data-act="nav" data-to="pass">' + ic('estrella') + ' Pase de batalla</button></div>') + '</div></div>';
+    }).join('');
   }
   function invTab() {
     var n = (ui.acct && ui.acct.boxes) || 0;
@@ -675,8 +678,8 @@
     app.innerHTML = '<div class="wrap"><div class="loginbox starterbox panel"><h1>Elige tu mazo inicial</h1><p class="mut">Cada mazo gira en torno a una sinergia. Es tu regalo de bienvenida: podrás ampliar tu colección abriendo sobres.</p><div class="starters">' + starterCards('pickstarter') + '</div>' + (ui.msg ? '<div class="hint" style="color:var(--bad)">' + esc(ui.msg) + '</div>' : '') +
       '<button class="btn sec" data-act="backlogin">← Volver</button></div></div>';
   }
-  function bpkHtml(cls) {
-    return '<div class="bpk ' + (cls || '') + '"><div class="bpk-glow"></div><div class="bpk-rays"></div><div class="bpk-main"></div><div class="bpk-lid"></div></div>';
+  function bpkHtml(cls, pack) {
+    return '<div class="bpk ' + (pack === 'anime' ? 'anime ' : '') + (cls || '') + '"><div class="bpk-glow"></div><div class="bpk-rays"></div><div class="bpk-main"></div><div class="bpk-lid"></div></div>';
   }
   var GEM = { 'Común': '●', 'Rara': '◆', 'Épica': '✦', 'Legendaria': '★' };
   var RANK = ['Común', 'Rara', 'Épica', 'Legendaria'];
@@ -741,9 +744,9 @@
       (cur.art ? '' : '<div class="shcard">' + cardHtml(cur.card, { lv: 1 }) + '</div>') +
       '<div class="shtxt"><span class="shk">' + cur.kicker + '</span><h2>' + esc(cur.title) + '</h2><p>' + esc(cur.sub) + '</p><div class="shact">' + cur.btn + (a.admin ? '' : '') + '<span class="shpr">' + (cur.price ? ic('moneda') + ' ' + cur.price : '') + '</span><button class="btn sec sm" data-act="zoom" ' + cur.zoom + ' title="Ver ampliada en 3D">' + ic('ojo') + ' Ver en 3D</button></div></div>' +
       '<div class="shdots">' + F.map(function (x, k) { return '<button class="' + (k === sel ? 'on' : '') + '" data-act="shopsel" data-i="' + k + '">' + (k + 1) + '</button>'; }).join('') + '</div></div>';
-    var tiles = [{ pack: true }].concat(F.map(function (x, k) { return { f: x, k: k }; }).filter(function (t) { return t.k !== sel; }).slice(0, 3));
+    var tiles = [{ pack: 'set1' }, { pack: 'anime' }].concat(F.map(function (x, k) { return { f: x, k: k }; }).filter(function (t) { return t.k !== sel; }).slice(0, 2));
     var side = '<div class="shtiles">' + tiles.map(function (t) {
-      if (t.pack) return '<button class="shtile pack" data-act="shoptab" data-t="packs"><span class="shtv">' + bpkHtml('mini') + '</span><b>Set 1</b><span class="shtp">' + (a.packCost ? ic('moneda') + ' ' + a.packCost : 'Gratis') + '</span></button>';
+      if (t.pack) return '<button class="shtile pack" data-act="shoptab" data-t="packs"><span class="shtv">' + bpkHtml('mini', t.pack) + '</span><b>' + (t.pack === 'anime' ? 'Sobre Anime' : 'Set 1') + '</b><span class="shtp">' + (a.packCost ? ic('moneda') + ' ' + a.packCost : 'Gratis') + '</span></button>';
       var inf = featInfo(t.f, a);
       return '<button class="shtile" data-act="shopsel" data-i="' + t.k + '"><span class="shtv"' + (inf.art ? ' style="background-image:url(/cartas/art/' + inf.art + '.webp)"' : ' style="background-image:radial-gradient(circle at 50% 45%,' + hexMix(thc(inf.card), '#0b0716', .15) + ',' + hexMix(thc(inf.card), '#0b0716', .7) + ')"') + '>' + (inf.art ? '' : '<i class="shmini">' + (inf.card.theme && D.themes[inf.card.theme] ? tic(inf.card.theme) : ic('brillo')) + '</i>') + '</span><em>' + inf.kicker + '</em><b>' + esc(inf.title) + '</b><span class="shtp">' + ic('moneda') + ' ' + inf.price + '</span></button>';
     }).join('') + '</div>';
@@ -765,10 +768,13 @@
     else body = '<h2 class="dedh">Despliegues</h2><p class="mut colhint">Cambian cómo aparecen tus cartas en la mesa. Pruébalos antes de comprar; una vez tuyos, los equipas en Colección → Efectos.</p>' + fxDemo() + '<div class="fxlist">' + fxItems('shop', 'deploy') + '</div>';
     return '<div class="fxlayout">' + nav + '<div class="fxmain">' + body + '</div></div>';
   }
+  function packPanel(a, pk) {
+    var an = pk === 'anime', can = a.coins >= a.packCost && !ui.pack;
+    return '<div class="panel packbox">' + bpkHtml('', pk) + '<h2>' + (an ? 'Sobre Anime' : 'Set 1') + '</h2><p class="mut">' + a.packSize + (an ? ' cartas al azar de la sinergia Anime (sus tropas y su acción). ' : ' cartas al azar de todo el juego (tropas y acciones, sin la sinergia Anime). ') + 'La última siempre es Rara o mejor. Las cartas que ya tengas suben su nivel.</p>' +
+      '<button class="btn cta big" data-act="openpack" data-pack="' + pk + '"' + (can ? '' : ' disabled') + '>' + (a.packCost ? 'Abrir sobre · ' + a.packCost + ' ' + ic('moneda') + '' : 'Abrir sobre · gratis') + '</button>' + (a.coins < a.packCost ? '<p class="mut">Te faltan ' + (a.packCost - a.coins) + ' monedas.</p>' : '') + '</div>';
+  }
   function packsTab(a) {
-    var can = a.coins >= a.packCost && !ui.pack;
-    return '<div class="packs-grid one"><div class="panel packbox">' + bpkHtml('') + '<h2>Set 1</h2><p class="mut">' + a.packSize + ' cartas al azar de todo el juego (tropas y acciones). La última siempre es Rara o mejor. Las cartas que ya tengas se cambian por monedas.</p>' +
-      '<button class="btn cta big" data-act="openpack"' + (can ? '' : ' disabled') + '>' + (a.packCost ? 'Abrir sobre · ' + a.packCost + ' ' + ic('moneda') + '' : 'Abrir sobre · gratis') + '</button>' + (a.coins < a.packCost ? '<p class="mut">Te faltan ' + (a.packCost - a.coins) + ' monedas.</p>' : '') + (ui.msg ? '<div class="hint" style="color:var(--bad)">' + esc(ui.msg) + '</div>' : '') + '</div></div>';
+    return '<div class="packs-grid two">' + packPanel(a, 'set1') + packPanel(a, 'anime') + '</div>' + (ui.msg ? '<div class="hint" style="color:var(--bad)">' + esc(ui.msg) + '</div>' : '');
   }
   var SHTABS = [['feat', 'Destacados'], ['packs', 'Sobres'], ['skins', 'Skins'], ['cards', 'Cartas'], ['fx', 'Efectos']];
   function renderPacks() {
@@ -795,9 +801,9 @@
   }
   function packOverlay() {
     var pk = ui.pack; if (!pk) return '';
-    if (!pk.cards) return '<div class="packov best-Común">' + bpkHtml('shake best-Común') + '</div>';
+    if (!pk.cards) return '<div class="packov best-Común">' + bpkHtml('shake best-Común', pk.pack) + '</div>';
     var best = pk.cards.reduce(function (b, c) { var r = CARD[c.id].rarity; return RANK.indexOf(r) > RANK.indexOf(b) ? r : b; }, 'Común');
-    if (pk.stage === 'rip') return '<div class="packov best-' + best + (best === 'Legendaria' ? ' rainbow' : '') + '">' + bpkHtml('rip best-' + best) + pkFx(best) + '</div>';
+    if (pk.stage === 'rip') return '<div class="packov best-' + best + (best === 'Legendaria' ? ' rainbow' : '') + '">' + bpkHtml('rip best-' + best, pk.pack) + pkFx(best) + '</div>';
     var gain = pk.cards.reduce(function (n, c) { return n + c.dupCoins; }, 0);
     var allRev = pk.rev.every(Boolean);
     return '<div class="packov best-' + best + (best === 'Legendaria' ? ' rainbowpost' : '') + '" data-act="packbg"><div class="pcards' + (sleeveId() !== 'sin' ? ' slv-' + sleeveId() : '') + '">' + pk.cards.map(function (c, i) {
@@ -2363,9 +2369,9 @@
     if (act === 'skinequip') return api('skinEquip', { id: el.dataset.skin, card: el.dataset.card }).then(function (r) { if (r.data && r.data.user) setAcct(r.data.user); render(); });
     if (act === 'daily') { return api('daily').then(function (r) { if (r.data && r.data.user) setAcct(r.data.user); ui.msg = r.ok ? '' : (r.data.error || ''); render(); }); }
     if (act === 'openpack') {
-      if (ui.pack) return; ui.msg = ''; ui.pack = { cards: null, rev: [] }; render(); snd('shake');
+      if (ui.pack) return; ui.msg = ''; var pkId = el.dataset.pack === 'anime' ? 'anime' : 'set1'; ui.pack = { cards: null, rev: [], pack: pkId }; render(); snd('shake');
       var t0 = Date.now(), pk0 = ui.pack;
-      return api('open', el.dataset.inv ? { inv: 1 } : {}).then(function (r) {
+      return api('open', el.dataset.inv ? { inv: 1, pack: pkId } : { pack: pkId }).then(function (r) {
         var wait = Math.max(0, 1300 - (Date.now() - t0));
         setTimeout(function () {
           if (ui.pack !== pk0) return;

@@ -395,7 +395,7 @@
   function navHtml(cur) {
     var home = cur === 'home';
     var acct = ui.acct ? '<button class="navb coinpill" data-act="nav" data-to="packs" title="Tus monedas">' + ic('moneda') + ' ' + ui.acct.coins + '</button><button class="navb avtb' + (cur === 'profile' ? ' on' : '') + '" data-act="nav" data-to="profile" title="Tu perfil">' + avatarHtml('sm') + '</button><span class="acctw"><button class="navb who" data-act="acctmenu" title="Tu cuenta">' + esc(ui.acct.name) + ' ▾</button><div class="acctmenu"><div class="am-name">Sesión de <b>' + esc(ui.acct.name) + '</b></div><button class="am-prof" data-act="nav" data-to="profile">' + ic('usuario') + ' Mi perfil</button><button data-act="nav" data-to="settings">' + ic('ajustes') + ' Ajustes</button><button data-act="sfxmute">' + ic('altavoz') + ' Sonido: ' + (window.CartasSfx && window.CartasSfx.get().mute ? 'desactivado' : 'activado') + '</button><button data-act="logout">' + ic('puerta') + ' Cerrar sesión</button></div></span>' : '';
-    return '<nav class="nav' + (home ? ' navhome' : '') + '">' + (home ? '<span class="navlogo"><img src="/cartas/logo-icon.png" alt="">TCG Arena</span>' : NAV.map(function (n) { var bd = n[0] === 'pass' && seasonReady('pass') ? '<i class="nbadge">' + seasonReady('pass') + '</i>' : n[0] === 'missions' && claimableCount() ? '<i class="nbadge">' + claimableCount() + '</i>' : ''; return '<button class="navb' + (n[0] === cur ? ' on' : '') + '" data-act="nav" data-to="' + n[0] + '">' + ic(n[1]) + ' ' + n[2] + bd + '</button>'; }).join('')) +
+    return '<nav class="nav' + (home ? ' navhome' : '') + '">' + (home ? '<span class="navlogo"><img src="/cartas/logo-icon.png" alt="">TCG Arena</span>' : NAV.map(function (n) { var bd = n[0] === 'pass' && seasonReady('pass') ? '<i class="nbadge">' + seasonReady('pass') + '</i>' : n[0] === 'missions' && claimableCount() ? '<i class="nbadge">' + claimableCount() + '</i>' : n[0] === 'ladder' && rankClaimable() ? '<i class="nbadge">' + rankClaimable() + '</i>' : ''; return '<button class="navb' + (n[0] === cur ? ' on' : '') + '" data-act="nav" data-to="' + n[0] + '">' + ic(n[1]) + ' ' + n[2] + bd + '</button>'; }).join('')) +
       '<span class="navsp"></span>' + acct + '</nav><a class="hubback" href="/" title="Volver al inicio">← Juegos</a>';
   }
   function oddsHtml(s) {
@@ -451,7 +451,10 @@
   function rkClaimed(rb) { return ((ui.acct && ui.acct.rkClaimed) || []).indexOf(rb.id) >= 0; }
   function claimableCount() {
     if (!ui.acct) return 0;
-    return MSN.MISSIONS.filter(function (m) { return msDone(m) && !msClaimed(m); }).length + MSN.RANK_BOXES.filter(function (r) { return rkReached(r) && !rkClaimed(r); }).length + seasonReady('season');
+    return MSN.MISSIONS.filter(function (m) { return msDone(m) && !msClaimed(m); }).length + seasonReady('season');
+  }
+  function rankClaimable() { // cajas de rango por recoger: se avisan en Clasificación
+    return ui.acct ? MSN.RANK_BOXES.filter(function (r) { return rkReached(r) && !rkClaimed(r); }).length : 0;
   }
   function boxImg(cls) { return '<img class="bximg ' + (cls || '') + '" src="/cartas/img/box.webp" alt="Caja">'; }
   function rankBoxBtn(r) {
@@ -705,7 +708,7 @@
         ['packs', ic('tienda'), 'Tienda', (ui.acct ? ui.acct.coins : 0) + ' monedas'],
         ['missions', ic('mision'), 'Misiones', claimableCount() ? claimableCount() + ' por recoger' : 'Gana cajas'],
         ['pass', ic('estrella'), 'Pase de batalla', 'Nivel ' + seLevel()],
-        ['ladder', ic('trofeo'), 'Clasificación', ui.acct.pts + ' puntos'],
+        ['ladder', ic('trofeo'), 'Clasificación', rankClaimable() ? rankClaimable() + ' por recoger' : ui.acct.pts + ' puntos'],
         ['profile', ic('usuario'), 'Perfil', 'Estadísticas y ajustes'],
       ].map(function (m) { return '<button class="ricon" data-act="nav" data-to="' + m[0] + '"><span class="rii">' + m[1] + '</span><b>' + m[2] + '</b><span class="mut">' + m[3] + '</span></button>'; }).join('') + '</div>' + homeNews() + '</div>';
     h += '<p class="mut" style="text-align:center">' + D.cards.length + ' tropas · ' + D.actions.length + ' acciones</p></div>';

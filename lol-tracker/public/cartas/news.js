@@ -1,6 +1,8 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-03', tag: 'Corrección', title: 'Aviso de cajas de rango en Clasificación',
+      items: ['Las cajas de rango por recoger ahora se avisan en Clasificación (menú y pantalla de inicio) y ya no cuentan en el aviso de Misiones.'] },
     { date: '2026-11-03', tag: 'Corrección', title: 'Genkidama y Remedio con la mano llena',
       items: ['En Resurrección y Royal Rumble la mano no tiene límite, pero el juego creía que seguía siendo de 5 cartas: con 5 o más en la mano no te entregaba la Genkidama de la sinergia Anime (ni el Remedio de la Boticaria de AitoRLG MaoMao). Ahora las recibes siempre. En el resto de modos sigue el límite de 5 cartas.'] },
     { date: '2026-11-03', tag: 'Equilibrio', title: 'Soldado de Sombra en Royal Rumble',

@@ -55,8 +55,7 @@
       (f.unread ? '<span class="fbadge">' + (f.unread > 9 ? '9+' : f.unread) + '</span>' : '') +
       '<div class="fact"><button class="sbtn" data-soc="prof" data-n="' + esc(f.name) + '" title="Ver perfil" aria-label="Ver perfil">' + ic('usuario') + '</button>' + (online ? '<button class="sbtn" data-soc="invite" data-n="' + esc(f.name) + '" title="Invitar a partida" aria-label="Invitar a partida">' + ic('espadas') + '</button>' : '') +
       '<button class="sbtn" data-soc="remove" data-n="' + esc(f.name) + '" title="Eliminar amigo" aria-label="Eliminar amigo">' + ic('papelera') + '</button></div>' +
-      (menu ? (SOC.invKind ? '<div class="fmenu"><span>' + (SOC.invKind === 'vs4' ? 'Versus de 4' : '1 contra 1') + ' · modo:</span><button class="sbtn go" data-soc="invm" data-m="" data-n="' + esc(f.name) + '">Clásico</button><button class="sbtn go" data-soc="invm" data-m="revive" data-n="' + esc(f.name) + '">Resurrección</button><button class="sbtn go" data-soc="invm" data-m="rumble" data-n="' + esc(f.name) + '">Royal Rumble</button><button class="sbtn" data-soc="invback" data-n="' + esc(f.name) + '">‹ Atrás</button></div>'
-        : '<div class="fmenu"><span>Invitar a:</span><button class="sbtn go" data-soc="invk" data-k="pvp" data-n="' + esc(f.name) + '">1 contra 1</button><button class="sbtn go" data-soc="invk" data-k="vs4" data-n="' + esc(f.name) + '">Versus de 4</button></div>') : '') + '</div>';
+      '' + '</div>';
   }
   function section(title, n, body, cls) { return n || body ? '<div class="ssec ' + (cls || '') + '"><h4>' + title + (n != null ? ' <i>' + n + '</i>' : '') + '</h4>' + body + '</div>' : ''; }
   function draw() {
@@ -151,6 +150,31 @@
     return ui.api('socInvite', { to: name, kind: room.kind, code: room.code, mode: room.mode }).then(function (r) { toast(r.ok ? (r.data.msg || 'Invitación enviada.') : ((r.data && r.data.error) || 'No se pudo invitar.')); });
   }
 
+  // Ventana central para elegir tipo de partida y modo al invitar
+  var popEl = null;
+  function closePop() { if (popEl) { popEl.remove(); popEl = null; } document.removeEventListener('keydown', popKey); }
+  function popKey(e) { if (e.key === 'Escape') closePop(); }
+  function invPop(name) {
+    closePop();
+    var kind = 'pvp', MODES = [['', 'Clásico', 'Con tu mazo, a las reglas de siempre.'], ['revive', 'Resurrección', 'Las tropas derrotadas vuelven a la partida.'], ['rumble', 'Royal Rumble', 'Sin mazo: sale cualquier carta del juego.']];
+    popEl = document.createElement('div'); popEl.className = 'invpop';
+    function paint() {
+      popEl.innerHTML = '<div class="ipbox"><button class="ipx" data-ip="x" aria-label="Cerrar">✕</button><h3>Invitar a ' + ui.esc(name) + '</h3>' +
+        '<div class="ipl">Tipo de partida</div><div class="ipseg"><button class="' + (kind === 'pvp' ? 'on' : '') + '" data-ip="k" data-k="pvp">1 contra 1</button><button class="' + (kind === 'vs4' ? 'on' : '') + '" data-ip="k" data-k="vs4">Versus de 4</button></div>' +
+        '<div class="ipl">Modo de juego</div><div class="ipmodes">' + MODES.map(function (m) { return '<button data-ip="m" data-m="' + m[0] + '"><b>' + m[1] + '</b><span>' + m[2] + '</span></button>'; }).join('') + '</div></div>';
+    }
+    paint();
+    popEl.addEventListener('click', function (e) {
+      if (e.target === popEl) return closePop();
+      var t = e.target.closest('[data-ip]'); if (!t) return;
+      e.stopPropagation();
+      if (t.dataset.ip === 'x') return closePop();
+      if (t.dataset.ip === 'k') { kind = t.dataset.k; return paint(); }
+      closePop();
+      ui.socCreateRoom(kind, t.dataset.m || '').then(function (res) { if (res && res.err) return toast(res.err); if (res) return sendInvite(name, res); });
+    });
+    document.body.appendChild(popEl); document.addEventListener('keydown', popKey);
+  }
   function onClick(e) {
     var t = e.target.closest('[data-soc]'); if (!t) return;
     var a = t.dataset.soc, n = t.dataset.n;
@@ -171,13 +195,7 @@
     if (a === 'invite') {
       var room = ui.socInRoom();
       if (room) return sendInvite(n, room);
-      SOC.invKind = ''; SOC.invMenu = SOC.invMenu === n ? '' : n; draw(); return;
-    }
-    if (a === 'invk') { SOC.invKind = t.dataset.k; draw(); return; }
-    if (a === 'invback') { SOC.invKind = ''; draw(); return; }
-    if (a === 'invm') {
-      var kind = SOC.invKind || 'pvp'; SOC.invMenu = ''; SOC.invKind = ''; draw();
-      return ui.socCreateRoom(kind, t.dataset.m || '').then(function (res) { if (res && res.err) return toast(res.err); if (res) return sendInvite(n, res); });
+      return invPop(n);
     }
     if (a === 'invyes' || a === 'invno') {
       var id = t.dataset.id, yes = a === 'invyes';

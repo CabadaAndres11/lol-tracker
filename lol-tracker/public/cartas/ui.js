@@ -2471,7 +2471,7 @@
       var aids = autoBuild(asel), aerr = deckErrFor(aids);
       ui.auto = null;
       if (aerr) { ui.msg = 'No he podido montar un mazo válido con tus cartas: ' + aerr; return renderDeck(); }
-      ui.dedit.ids = aids; ui.msg = '';
+      ui.dedit.ids = aids; ui.msg = ''; ui.synAll = false; ui.dedit.theme = asel[0]; // se abre la primera sinergia para ver y retocar sus cartas
       var tc = asel.map(function (t) { return t + ' ' + aids.filter(function (id) { return CARD[id].type === 'tropa' && CARD[id].themes.indexOf(t) >= 0; }).length; }).join(', ');
       ui.autoNote = 'Mazo montado con ' + aids.length + ' cartas (' + E.deckSize(aids) + '/' + CFG.deckBudget + ' de espacio). Tropas por sinergia: ' + tc + '. Puedes retocarlo a mano antes de guardar.';
       return renderDeck();

@@ -1,6 +1,8 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-03', tag: 'Cambio', title: 'Nueva moneda',
+      items: ['La moneda del juego estrena ilustración en toda la interfaz (tienda, partidas, recompensas...). Las recompensas de monedas del pase de batalla se muestran como un montón de monedas.'] },
     { date: '2026-11-03', tag: 'Novedad', title: 'Pase de batalla y misiones de temporada',
       items: ['Nuevo apartado «Pase» en el menú: un camino de niveles con una recompensa en cada uno (monedas, sobres, cajas, skins y efectos). Elige un nivel para verlo en grande y recógelo con «Reclamar», o recoge todos los listos de una vez.',
         'Los niveles se desbloquean con XP, que ganas completando las nuevas Misiones de temporada (pestaña dentro de Misiones). El progreso de temporada se reinicia al cambiar de temporada.',

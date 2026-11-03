@@ -408,7 +408,7 @@
   // Descripción de una recompensa del pase: tipo, nombre y imagen (big = vista grande del centro)
   function seasonRewardInfo(r, big) {
     var n = r.n || 1, x = n > 1 ? '<span class="rwn">×' + n + '</span>' : '';
-    if (r.kind === 'coins') return { k: 'Monedas', t: r.n + ' monedas', v: '<div class="rwv coins">' + ic('moneda') + '<span class="rwn">' + r.n + '</span></div>' };
+    if (r.kind === 'coins') return { k: 'Monedas', t: r.n + ' monedas', v: '<div class="rwv coins"><img src="/cartas/img/coins-pile.webp" alt=""><span class="rwn">' + r.n + '</span></div>' };
     if (r.kind === 'box') return { k: 'Botín', t: n > 1 ? n + ' cajas' : 'Una caja', v: '<div class="rwv"><img src="/cartas/img/box.webp" alt="">' + x + '</div>' };
     if (r.kind === 'pack') return { k: 'Sobre', t: n > 1 ? n + ' sobres' : 'Un sobre', v: '<div class="rwv"><img src="/cartas/img/pack-set1.webp" alt="">' + x + '</div>' };
     if (r.kind === 'card') { var c = CARD[r.id]; return { k: 'Carta', t: c ? c.name : r.id, v: '<div class="rwv art"><span style="background-image:url(/cartas/art/' + r.id + '.webp)"></span></div>' }; }

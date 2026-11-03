@@ -640,9 +640,9 @@
     } else if (f.k === 'newsyn') {
       var NS = [['Goblins', 'g'], ['Fantasía', 'f']].concat(f.more ? [['¿?', 'n']] : []);
       h = '<div class="fxrow">' + NS.map(function (x, i) { return '<div class="nsy ' + x[1] + '" style="--i:' + i + '"><span>?</span><b>' + esc(x[0]) + '</b></div>'; }).join('') + '</div><div class="fxlab new">' + (f.more ? 'A la espera de más' : 'Sinergias nuevas') + '</div>';
-    } else if (f.k === 'rarity') {
-      var R = [['Común', '#9ca3af'], ['Rara', '#3b82f6'], ['Épica', '#a855f7'], ['Legendaria', '#f59e0b']];
-      h = '<span class="fxspoil">Spoiler</span><div class="fxrar">' + R.map(function (r, i) { return '<div class="rr" style="--i:' + i + ';--c:' + r[1] + '"><i></i><b>' + r[0] + '</b></div>'; }).join('') + '<em class="rup">▲</em></div><div class="fxlab new">Goblins · mejora la rareza</div>';
+    } else if (f.k === 'level') {
+      var R = [['★ Nivel 1', '#9ca3af'], ['★★ Nivel 2', '#3b82f6'], ['★★★ Nivel 3', '#f59e0b']];
+      h = '<span class="fxspoil">Spoiler</span><div class="fxrar">' + R.map(function (r, i) { return '<div class="rr" style="--i:' + i + ';--c:' + r[1] + '"><i></i><b>' + r[0] + '</b></div>'; }).join('') + '<em class="rup">▲</em></div><div class="fxlab new">Goblins · mejora el nivel</div>';
     }
     return h;
   }

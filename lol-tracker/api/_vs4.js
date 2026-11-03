@@ -115,7 +115,7 @@ function botsAct(T) {
 function startRound(T) {
   T.round++; T.phase = 'prep'; T.stuck = {}; T.rest = -1; T.opp = [-1, -1, -1, -1]; T.pairs = [];
   T.fx = [null, null, null, null];
-  T.shopOpen = T.round % 3 === 1;
+  T.shopOpen = T.round % E.shopEvery(T) === 1;
   const alive = aliveSeats(T);
   alive.forEach((p) => {
     const got = E.income(T, p);

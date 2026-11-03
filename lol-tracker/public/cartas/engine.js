@@ -195,9 +195,11 @@
     return g + extra;
   }
 
+  // Rondas entre tiendas: normalmente una tienda cada 3 rondas (2 combates); en Royal Rumble, una tienda entre cada combate
+  function shopEvery(s) { return s.rumble ? 2 : CFG.shopEvery; }
   function startRound(s) {
     s.round++;
-    var shopRd = s.round % CFG.shopEvery === 1;
+    var shopRd = s.round % shopEvery(s) === 1;
     if (!shopRd) s.cn = (s.cn || 0) + 1; // combates jugados hasta ahora (las rondas de tienda no cuentan)
     s.first = ((s.cn || 0) + (shopRd ? 1 : 0) + (s.first0 || 0)) % 2; // en tienda: quién abrirá el próximo combate
     s.frames = [];
@@ -209,7 +211,7 @@
       s.p[p].target = {}; s.p[p].anime = 0; s.p[p].fl = {};
       genGive(s, p);
     });
-    if (s.round % CFG.shopEvery === 1) {
+    if (shopRd) {
       s.shops++;
       s.shopOpen = true;
       [0, 1].forEach(function (p) { var m = shopStart(s, p); if (m && (p === 0 || s.pvp)) say(s, pv(s, p, m, 'Rival: ' + m)); openShop(s, p); });
@@ -232,10 +234,11 @@
   }
 
   // ---------- Tienda ----------
+  function shopsEff(s) { return s.rumble ? Math.ceil(s.shops * 2 / 3) : s.shops; } // en Rumble hay más tiendas por combate: la progresión de rarezas se ajusta
   function offerPool(s, p) {
     var P = s.p[p], t = tiers(P);
     var pool = P.deck.filter(function (id) { return CARD[id].type === 'tropa' || true; });
-    var elig = pool.filter(function (id) { return !(CARD[id].cost === 5 && CARD[id].type === 'tropa' && s.shops < 2); });
+    var elig = pool.filter(function (id) { return !(CARD[id].cost === 5 && CARD[id].type === 'tropa' && shopsEff(s) < 2); });
     if (!elig.length) elig = pool;
     if (s.round === 1) { // tienda inicial: solo tropas comunes
       var cm = pool.filter(function (id) { return CARD[id].type === 'accion' || (CARD[id].type === 'tropa' && CARD[id].rarity === 'Común'); });
@@ -244,7 +247,7 @@
     var owned = {}, hc = {};
     if (s.rumble) P.mesa.concat(P.hand).forEach(function (i) { if (i && isTroop(i) && !i.dead) { owned[i.id] = 1; card(i).themes.forEach(function (th) { hc[th] = 1; }); } });
     return elig.map(function (id) {
-      var rr = CARD[id].rarity, w = (CFG.rarityWeight[rr] || 10) + (CFG.rarityRamp[rr] || 0) * Math.max(0, s.shops - 1);
+      var rr = CARD[id].rarity, w = (CFG.rarityWeight[rr] || 10) + (CFG.rarityRamp[rr] || 0) * Math.max(0, shopsEff(s) - 1);
       w = Math.max(rr === 'Común' ? 10 : 1, Math.min(40, w));
       if (s.rumble) { // Royal Rumble: pocas acciones; más probabilidad de repetidas (subir de nivel) y de cartas de tus temáticas
         if (CARD[id].type === 'accion') w *= CFG.rumble.act;
@@ -546,7 +549,7 @@
   function aiBonus(s, p) {
     var lv = aiLv(s, p), P = s.p[p];
     if (!lv || s.round < 2) return;
-    if (s.round % CFG.shopEvery === 1) P.gold += (lv >= 2 ? 2 : 1);
+    if (s.round % shopEvery(s) === 1) P.gold += (lv >= 2 ? 2 : 1);
     var ML = s.maxLife || CFG.life;
     if (lv >= 2 && P.life > 0 && P.life < ML) { var h = Math.min(2, ML - P.life); P.life += h; if (!s.pvp) say(s, 'El rival (Experto) se cura ' + h + ' de vida.'); }
   }
@@ -1133,7 +1136,7 @@
     if (P.mesa[4] && P.mesa[4].shadow) { delete P.target[P.mesa[4].uid]; P.mesa[4] = null; out.push('El soldado de sombra desaparece.'); }
     if (mesaTroops(P).some(function (i) { return pas(i) === 'boticaria'; })) {
       P.bot = (P.bot || 0) + 1;
-      if (P.bot >= 2) {
+      if (P.bot >= (s.rumble ? 4 : 2)) { // en Rumble hay una tienda por combate: mismo ritmo (cada 4 combates)
         P.bot = 0;
         var ML = s.maxLife || CFG.life;
         if (P.life < ML) { P.life = ML; out.push('Boticaria: tu vida se rellena al máximo.'); }
@@ -1227,7 +1230,7 @@
     newGame: newGame, randomDeck: randomDeck, deckSize: deckSize, mulberry32: mulberry32,
     place: place, playAction: playAction, setTarget: setTarget, clearTargets: clearTargets, forfeit: forfeit, setVoley: setVoley, actionBlock: actionBlock, validTarget: validTarget,
     sell: sell, sellValue: sellValue, handCap: handCap, dupBlock: dupBlock, buy: buy, mergeCheck: mergeCheck, willMerge: willMerge, shopOdds: shopOdds, refresh: refresh, refreshCost: refreshCost, pickFromDeck: pickFromDeck, retire: retire,
-    aiDeck: aiDeck, rumbleDeck: rumbleDeck, genGive: genGive, shopStart: shopStart, genStored: genStored, aiBonus: aiBonus, aiLv: aiLv, aiShop: aiShop, aiPrep: aiPrep, aiTargets: aiTargets, fight: fight, endShop: endShop, pendingTargets: pendingTargets, freeze: freeze, nextRound: nextRound,
+    aiDeck: aiDeck, rumbleDeck: rumbleDeck, shopEvery: shopEvery, genGive: genGive, shopStart: shopStart, genStored: genStored, aiBonus: aiBonus, aiLv: aiLv, aiShop: aiShop, aiPrep: aiPrep, aiTargets: aiTargets, fight: fight, endShop: endShop, pendingTargets: pendingTargets, freeze: freeze, nextRound: nextRound,
     interest: interest, isNov: isNov, immune: immune, targetable: targetable, novSync: novSync, themeCounts: themeCounts, tiers: tiers, tierOf: tierOf, atk: atk, maxHp: maxHp, card: card, isTroop: isTroop, has: has, mesaTroops: mesaTroops, viewOf: viewOf,
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.CartasEngine = API;

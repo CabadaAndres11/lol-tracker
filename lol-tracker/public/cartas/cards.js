@@ -643,7 +643,7 @@ var D={
    "size": 2,
    "pas": {
     "n": "Soldado de Sombra",
-    "t": "En mesa desbloquea el hueco 5: al derrotar a una tropa, su versión al 50% lo ocupa hasta la siguiente tienda."
+    "t": "En mesa desbloquea el hueco 5: al derrotar a una tropa, su versión al 50% lo ocupa hasta la siguiente tienda (2 tiendas en Royal Rumble)."
    }
   },
   {

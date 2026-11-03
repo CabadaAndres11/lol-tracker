@@ -1,6 +1,8 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-03', tag: 'Equilibrio', title: 'Soldado de Sombra en Royal Rumble',
+      items: ['Dashlight Sun Jin-Woo — Soldado de Sombra: en Royal Rumble el soldado ahora dura 2 tiendas en vez de una. Como en este modo hay una tienda antes de cada combate, así se mantiene durante los mismos 2 combates que en el modo normal.'] },
     { date: '2026-11-03', tag: 'Avance', title: 'Charla con los Desarrolladores',
       items: ['Charla con los desarrolladores sobre lo que puede llegar en las próximas versiones: sinergias que se retiran, cartas que cambian por completo, nuevas sinergias y objetivos del juego.'],
       chat: [

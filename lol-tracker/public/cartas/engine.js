@@ -1144,7 +1144,10 @@
   function shopStart(s, p) {
     var P = s.p[p], out = [];
     P.hda = false;
-    if (P.mesa[4] && P.mesa[4].shadow) { delete P.target[P.mesa[4].uid]; P.mesa[4] = null; out.push('El soldado de sombra desaparece.'); }
+    if (P.mesa[4] && P.mesa[4].shadow) {
+      P.mesa[4].sh = (P.mesa[4].sh || 0) + 1; // en Royal Rumble hay una tienda por combate: el soldado dura 2 tiendas (los mismos 2 combates que en el modo normal)
+      if (P.mesa[4].sh >= (s.rumble ? 2 : 1)) { delete P.target[P.mesa[4].uid]; P.mesa[4] = null; out.push('El soldado de sombra desaparece.'); }
+    }
     if (mesaTroops(P).some(function (i) { return pas(i) === 'boticaria'; })) {
       P.bot = (P.bot || 0) + 1;
       if (P.bot >= (s.rumble ? 4 : 2)) { // en Rumble hay una tienda por combate: mismo ritmo (cada 4 combates)

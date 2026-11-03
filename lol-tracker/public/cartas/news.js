@@ -1,6 +1,8 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-03', tag: 'Novedad', title: 'Nueva funda: Pokéball',
+      items: ['Nueva funda «Pokéball»: borde negro y blanco y reverso rojo con una Pokéball en el centro. Está en la tienda (40 monedas) y es la recompensa del nivel 5 del pase de batalla (de prueba por ahora; sustituye a la funda Neón, que sigue en la tienda).'] },
     { date: '2026-11-03', tag: 'Novedad', title: 'Nueva skin exclusiva del pase: Dashlight Kingambit',
       items: ['Nueva skin «Dashlight Kingambit» para Computer Dashlight. Como Pampert Oikawa, no se vende ni sale en sobres: es la recompensa final del pase de batalla (nivel 20, de prueba por ahora; sustituye a «Hoja espectral», que sigue en la tienda).'] },
     { date: '2026-11-03', tag: 'Novedad', title: 'Nueva skin exclusiva del pase: Pampert Oikawa',

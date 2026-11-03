@@ -2346,3 +2346,10 @@ body.soc-open #app { margin-right: 286px; }
 @keyframes emopop { from { opacity: 0; transform: scale(.4) translateY(14px); } to { opacity: 1; transform: none; } }
 @media (max-width: 640px) { .emobub .emo { height: 84px; } #emome { bottom: 4.5rem; } }
 .pthumb .rwv.emo { height: auto; max-width: 66px; } .pthumb .rwv.emo img { width: auto; height: auto; max-width: 66px; max-height: 60px; }
+
+.slv-pokeball { --slv: linear-gradient(135deg, #ef4444, #dc2626 45%, #f8fafc 50%, #1f2937 55%, #111827); }
+.card.slv-pokeball { box-shadow: 0 6px 16px rgba(0,0,0,.5), 0 0 12px rgba(239,68,68,.55); }
+.slv-pokeball .slvback, .slv-pokeball .pcard .pback { border: 3px solid #111827; background: url("img/pokemon.png") center / 62% auto no-repeat, linear-gradient(0deg, transparent 47%, #111827 47% 53%, transparent 53%), radial-gradient(circle at 50% 38%, #f87171 0, #dc2626 55%, #991b1b 100%); }
+.slv-pokeball .slvback { box-shadow: 0 0 0 1px #f8fafc, 0 12px 24px rgba(0,0,0,.55), 0 0 18px rgba(239,68,68,.5); }
+.slv-pokeball .slvback span, .slv-pokeball .pback span { visibility: hidden; }
+.rwv.slvp .slvback { width: 46px; height: 64px; aspect-ratio: auto; border-width: 2px; border-radius: 6px; box-shadow: 0 3px 8px rgba(0,0,0,.5); } .rwv.slvp .slvback span { display: none; }

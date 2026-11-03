@@ -415,6 +415,7 @@
     if (r.kind === 'emotes') { var es = EMO.setOf(r.id); return { k: 'Emoticonos', t: es ? es.name : r.id, sub: es ? es.emotes.length + ' emoticonos para chat y partidas' : '', v: '<div class="rwv emo">' + emoImg(r.id + '-1') + '</div>' }; }
     if (r.kind === 'skin') { var sk = (window.CARTAS_SKINS || []).filter(function (k) { return k.id === r.id; })[0]; return { k: 'Skin', t: sk ? sk.name : r.id, v: '<div class="rwv art"><span style="background-image:url(/cartas/art/' + r.id + '.webp)"></span></div>' }; }
     var fk = FXKIND[r.fx] || FXKIND.deploy, e = fk[2]().filter(function (z) { return z.id === r.id; })[0] || { name: r.id };
+    if (r.fx === 'sleeve') return { k: 'Efecto · ' + fk[0], t: e.name, v: '<div class="rwv slvp slv-' + r.id + '"><div class="slvback"><span></span></div></div>' };
     return { k: 'Efecto · ' + fk[0], t: e.name, v: '<div class="rwv fx">' + ic(fk[1]) + '</div>' };
   }
   function seasonHead() {
@@ -1472,7 +1473,8 @@
     { id: 'casino', name: 'Casino', desc: 'Borde de ficha de póker a rayas rojas, blancas y negras, y reverso de fieltro verde con palos de la baraja y una ficha en el centro.', price: 40 },
     { id: 'dragonball', name: 'Dragon Ball', desc: 'Borde naranja y azul de kimono de combate y reverso naranja con el emblema de la escuela de la Tortuga en el centro.', price: 40 },
     { id: 'trebol', name: 'Trébol de cinco hojas', desc: 'Borde de cobre oscuro y reverso de grimorio gastado con un trébol negro de cinco hojas en el centro.', price: 40 },
-    { id: 'petalos', name: 'Pétalos de la boticaria', desc: 'Borde que va del rosa al verde y reverso de jardín de hierbas con pétalos rosas y hojas verdes cayendo alrededor de una flor.', price: 40 }
+    { id: 'petalos', name: 'Pétalos de la boticaria', desc: 'Borde que va del rosa al verde y reverso de jardín de hierbas con pétalos rosas y hojas verdes cayendo alrededor de una flor.', price: 40 },
+    { id: 'pokeball', name: 'Pokéball', desc: 'Borde negro y blanco de Pokéball y reverso rojo con una Pokéball en el centro.', price: 40 }
   ];
   // ---------- Efectos de victoria y derrota (cada pack trae los dos) ----------
   var FIN_LIST = [

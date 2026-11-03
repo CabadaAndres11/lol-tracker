@@ -1,6 +1,8 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-03', tag: 'Novedad', title: 'Nueva skin exclusiva del pase: Pampert Oikawa',
+      items: ['Nueva skin «Pampert Oikawa» para Pampert. No se vende en la tienda ni sale en sobres: solo se consigue en el pase de batalla (recompensa del nivel 10, de prueba por ahora; sustituye a «Real PotAnGo», que sigue en la tienda).'] },
     { date: '2026-11-03', tag: 'Novedad', title: 'Emoticonos personalizados',
       items: ['Nuevos emoticonos agrupados en Sets (Set Dashlight Akali y Set Lihone). Úsalos en el chat con tus amigos (botón de carita junto al mensaje) y en las partidas online: el botón de carita abajo a la izquierda los muestra a ambos jugadores. Hay una espera de 2 segundos entre emoticonos.',
         'Solo puedes enviar los de los sets que tengas, pero todos ven los que te envían. Los sets se consiguen en el pase de batalla (niveles 8 y 16, recompensas de prueba).'] },

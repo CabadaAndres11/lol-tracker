@@ -489,7 +489,7 @@
   function boxOddsHtml() {
     var a = ui.acct || {}, W = { 'Común': 50, 'Rara': 30, 'Épica': 15, 'Legendaria': 5 };
     var cards = D.cards.filter(function (c) { return !ui.ownedSet[c.id]; });
-    var skins = (window.CARTAS_SKINS || []).filter(function (k) { return (a.skins || []).indexOf(k.id) < 0; });
+    var skins = (window.CARTAS_SKINS || []).filter(function (k) { return !k.pass && (a.skins || []).indexOf(k.id) < 0; });
     var fxs = DEPLOY_LIST.concat(SLEEVE_LIST, FIN_LIST).filter(function (e) { return e.price > 0 && fxHas && !fxHas(e.id); });
     var pools = [['Carta nueva', cards.length, 5], ['Skin nueva', skins.length, 3], ['Efecto nuevo', fxs.length, 2]], tot = 0;
     pools.forEach(function (p) { if (p[1]) tot += p[2]; });
@@ -679,7 +679,7 @@
   var GEM = { 'Común': '●', 'Rara': '◆', 'Épica': '✦', 'Legendaria': '★' };
   var RANK = ['Común', 'Rara', 'Épica', 'Legendaria'];
   function skinShop(a) {
-    var SK = window.CARTAS_SKINS || [];
+    var SK = (window.CARTAS_SKINS || []).filter(function (k) { return !k.pass; });
     if (!SK.length) return '';
     return '<div class="panel skinshop"><h2>' + ic('estrella') + ' Skins</h2><p class="mut">Cambian solo la ilustración de una carta. Necesitas tener la carta. Se ven en tus partidas.</p><div class="skgrid">' + SK.map(function (s) {
       var c = CARD[s.card], hasCard = a.owned.indexOf(s.card) >= 0, own = (a.skins || []).indexOf(s.id) >= 0, eq = a.skinSel && a.skinSel[s.card] === s.id;
@@ -705,6 +705,7 @@
   function skinBtn(a, s) {
     var hasCard = a.owned.indexOf(s.card) >= 0, own = (a.skins || []).indexOf(s.id) >= 0, eq = a.skinSel && a.skinSel[s.card] === s.id;
     return own ? (eq ? '<button class="btn sec sm" data-act="skinequip" data-skin="" data-card="' + s.card + '">' + ic('check') + ' Equipada · usar clásica</button>' : '<button class="btn sm" data-act="skinequip" data-skin="' + s.id + '" data-card="' + s.card + '">Equipar</button>')
+      : s.pass ? '<button class="btn sm" disabled>Exclusiva del pase</button>'
       : !hasCard ? '<button class="btn sm" disabled>Necesitas la carta</button>'
       : '<button class="btn sm" data-act="skinbuy" data-skin="' + s.id + '"' + (a.coins < (a.admin ? 0 : s.price) ? ' disabled' : '') + '>Comprar · ' + (a.admin ? 'gratis' : s.price + ' ' + ic('moneda')) + '</button>';
   }
@@ -714,7 +715,7 @@
   }
   // Destacados: la última skin y las últimas cartas (lo más nuevo primero)
   function shopFeatured() {
-    var SK = (window.CARTAS_SKINS || []).slice().reverse(), CL = (D.shop || []).slice().reverse(), out = [];
+    var SK = (window.CARTAS_SKINS || []).filter(function (k) { return !k.pass; }).reverse(), CL = (D.shop || []).slice().reverse(), out = [];
     if (SK[0]) out.push({ kind: 'skin', s: SK[0] });
     CL.slice(0, 3).forEach(function (it) { out.push({ kind: 'card', it: it }); });
     SK.slice(1, 3).forEach(function (s) { out.push({ kind: 'skin', s: s }); });
@@ -920,11 +921,11 @@
   }
   function skinsTab() {
     var a = ui.acct, SK = window.CARTAS_SKINS || [], have = SK.filter(function (s) { return (a.skins || []).indexOf(s.id) >= 0; }).length;
-    var h = colSummary(have, SK.length, 'skins en propiedad') + '<p class="mut colhint">Pulsa una skin para verla en 3D. Se compran en la Tienda; las que aún no tienes aparecen apagadas.</p>';
+    var h = colSummary(have, SK.length, 'skins en propiedad') + '<p class="mut colhint">Pulsa una skin para verla en 3D. Se compran en la Tienda (o se ganan en el pase); las que aún no tienes aparecen apagadas.</p>';
     if (!SK.length) return h + '<p class="mut">Aún no hay skins.</p>';
     return h + '<div class="skgrid">' + SK.slice().reverse().map(function (s) {
       var c = CARD[s.card], own = (a.skins || []).indexOf(s.id) >= 0;
-      return '<div class="skitem"><div class="skcard">' + cardHtml(c, { skin: s.id, lv: 1, cls: own ? '' : 'locked', extra: own ? '' : '<span class="lockb">' + ic('candado') + '</span>', attrs: 'data-act="zoom" data-id="' + s.card + '" data-skin="' + s.id + '" title="Ver en 3D"', tag: 'button' }) + '</div><b>' + esc(c.name) + '</b><span class="mut">' + esc(s.name) + (own ? ' · ' + ic('check') + ' tuya' : ' · ' + s.price + ' monedas') + '</span>' + skinBtn(a, s) + '</div>';
+      return '<div class="skitem"><div class="skcard">' + cardHtml(c, { skin: s.id, lv: 1, cls: own ? '' : 'locked', extra: own ? '' : '<span class="lockb">' + ic('candado') + '</span>', attrs: 'data-act="zoom" data-id="' + s.card + '" data-skin="' + s.id + '" title="Ver en 3D"', tag: 'button' }) + '</div><b>' + esc(c.name) + '</b><span class="mut">' + esc(s.name) + (own ? ' · ' + ic('check') + ' tuya' : s.pass ? ' · Pase de batalla' : ' · ' + s.price + ' monedas') + '</span>' + skinBtn(a, s) + '</div>';
     }).join('') + '</div>';
   }
   function decksTab() {

@@ -136,7 +136,7 @@ const rankReached = (u) => Math.max(u.ptsMax || 0, u.pts || 0);
 // Caja: una carta, una skin o un efecto que aún no tengas; si lo tienes todo, una carta repetida.
 function rollBox(u) {
   const cards = ALL.filter((c) => !(u.owned || []).includes(c.id));
-  const skins = SKINS.filter((s) => !(u.skins || []).includes(s.id));
+  const skins = SKINS.filter((s) => !s.pass && !(u.skins || []).includes(s.id));
   const fxs = FX_DEPLOY.filter((id) => FX_PRICE[id] > 0 && !fxOwned(u).includes(id));
   const pools = [['card', cards, 5], ['skin', skins, 3], ['fx', fxs, 2]].filter((p) => p[1].length);
   if (!pools.length) { // lo tiene todo: carta repetida
@@ -834,6 +834,7 @@ module.exports = async function handler(req, res) {
       u.skins = u.skins || []; u.skinSel = u.skinSel || {};
       if (act === 'skinBuy') {
         if (!sk) { res.status(400).json({ error: 'Skin no válida.' }); return; }
+        if (sk.pass) { res.status(403).json({ error: 'Esa skin es exclusiva del pase de batalla.' }); return; }
         if (u.skins.includes(sk.id)) { res.status(409).json({ error: 'Ya tienes esa skin.', user: publicUser(u) }); return; }
         if (u.owned.indexOf(sk.card) < 0) { res.status(403).json({ error: 'Necesitas tener la carta para comprar su skin.' }); return; }
         const cost = isAdmin(u) ? 0 : sk.price;

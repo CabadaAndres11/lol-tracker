@@ -1497,7 +1497,7 @@
     var P = [], add = function (d) { P.push(d); };
     add('M66 112 Q54 190 68 268'); add('M334 112 Q346 190 332 268');
     add('M82 62 Q200 46 318 62');
-    [128, 272].forEach(function (x) { add('M' + (x - 30) + ' 172 L' + (x + 30) + ' 238 M' + (x + 30) + ' 172 L' + (x - 30) + ' 238'); add('M' + (x - 22) + ' 168 L' + (x + 38) + ' 234 M' + (x + 22) + ' 168 L' + (x - 38) + ' 234'); });
+    [128, 272].forEach(function (x) { add('M' + (x - 30) + ' 172 L' + (x + 30) + ' 238'); add('M' + (x + 30) + ' 172 L' + (x - 30) + ' 238'); add('M' + (x - 22) + ' 168 L' + (x + 38) + ' 234'); add('M' + (x + 22) + ' 168 L' + (x - 38) + ' 234'); });
     add('M180 298 Q200 314 220 298');
     var U0, UC, U1, L0, LC, L1;
     if (win) { U0 = [76, 338]; UC = [200, 408]; U1 = [324, 338]; L0 = [96, 366]; LC = [200, 450]; L1 = [304, 366]; }
@@ -1505,12 +1505,13 @@
     add('M' + U0 + ' Q' + UC + ' ' + U1); add('M' + L0 + ' Q' + LC + ' ' + L1);
     for (var s = 1; s <= 7; s++) { var t = s / 8, a = bz(U0, UC, U1, t), b = bz(L0, LC, L1, t), sl = (s % 2 ? 1 : -1) * 3; add('M' + (a[0] + sl).toFixed(1) + ' ' + (a[1] + (win ? -12 : 12)).toFixed(1) + ' L' + (b[0] - sl).toFixed(1) + ' ' + (b[1] + (win ? 12 : -12)).toFixed(1)); }
     var gl = '', co = '';
-    P.forEach(function (d, i) { gl += '<path class="nxs" style="--i:' + i + '" pathLength="1" d="' + d + '"/>'; co += '<path class="nxc" style="--i:' + i + '" pathLength="1" d="' + d + '"/>'; });
+    var CA = win ? '--c:#28e8ff;--g:#1d6bff' : '--c:#ff4a68;--g:#ff0a3c', CB = win ? '--c:#ff5ad8;--g:#ff1fa5' : '--c:#ffffff;--g:#dfe6ff';
+    P.forEach(function (d, i) { var st = '--i:' + i + ';' + (i % 2 ? CB : CA); gl += '<path class="nxs" style="' + st + '" pathLength="1" d="' + d + '"/>'; co += '<path class="nxc" style="--i:' + i + '" pathLength="1" d="' + d + '"/>'; });
     var fx = '<div class="nxburst"><i class="nxflash"></i><i class="nxring"></i><i class="nxring r2"></i><i class="nxring r3"></i>', q;
     for (q = 0; q < 16; q++) fx += '<i class="nxray" style="--a:' + (q * 22.5 + (q % 3) * 4) + 'deg;--l:' + (40 + (q * 37) % 50) + 'vmin"></i>';
     for (q = 0; q < 26; q++) fx += '<i class="nxsp" style="--a:' + (q * 13.8 + (q % 4) * 5) + 'deg;--d:' + (22 + (q * 29) % 46) + 'vmin;--w:' + (14 + (q % 4) * 8) + 'px;--t:' + (.04 + (q % 5) * .02).toFixed(2) + 's"></i>';
     fx += '</div>';
-    var face = '<svg class="nxface" viewBox="0 0 400 480"><path class="nxhead" d="M62 48 Q200 22 338 48 Q356 200 336 318 Q318 410 200 462 Q82 410 64 318 Q44 200 62 48Z"/>' + gl + co + '</svg>';
+    var face = '<svg class="nxface" viewBox="0 0 400 480">' + gl + co + '</svg>';
     return '<div class="overlay fin fin-neon ' + (win ? 'owin' : 'olose') + (extra ? ' finprev' : '') + '">' + fx + face + '<div class="nxtitle">' + esc(title.replace(/[¡!]/g, '').toUpperCase()) + '</div><p class="finsub">' + sub + '</p><div class="finpanel">' + rw + '<div class="finbtns">' + btns + '</div></div></div>';
   }
   function finOverlay(id, win, title, sub, rw, btns, extra) {

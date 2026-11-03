@@ -2,7 +2,7 @@
 (function (root) {
   var NEWS = [
     { date: '2026-11-03', tag: 'Novedad', title: 'Nuevo efecto de victoria y derrota: Máscara de neón',
-      items: ['Nuevo efecto «Máscara de neón», distinto a los demás: sin banner, una explosión de neón da paso a una máscara de tubos luminosos. Victoria: sonrisa cosida en azul eléctrico. Derrota: ceño, lágrimas y parpadeo en rojo. Está en la tienda (50 monedas) y es la recompensa del nivel 18 del pase (de prueba por ahora; sustituye a las 100 monedas). En el pase tiene un botón de play para verla.'] },
+      items: ['Nuevo efecto «Máscara de neón», distinto a los demás: sin banner, una explosión de neón da paso a una máscara de tubos luminosos. Victoria: sonrisa cosida en azul eléctrico. Derrota: ceño, lágrimas y parpadeo en rojo. Las luces alternan azul y rosa en la victoria, y rojo y blanco en la derrota. Está en la tienda (50 monedas) y es la recompensa del nivel 18 del pase (de prueba por ahora). En el pase tiene un botón de play para verla.'] },
     { date: '2026-11-03', tag: 'Novedad', title: 'Nuevo despliegue: Grieta dimensional',
       items: ['Nuevo efecto de despliegue «Grieta dimensional»: la pantalla se resquebraja desde el centro, la grieta se abre en un resplandor y la carta surge de ella antes de volar a su hueco. Está en la tienda (30 monedas) y es la recompensa del nivel 13 del pase (de prueba por ahora; sustituye a «Aparición arcana», que sigue en la tienda).',
         'En el pase, los efectos de despliegue tienen un botón de play sobre su icono para verlos en acción antes de conseguirlos.'] },

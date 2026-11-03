@@ -2396,3 +2396,9 @@ body.soc-open #app { margin-right: 286px; }
 .fin-neon .finsub { animation-delay: 2.7s; color: #cfe6ff; } .fin-neon.olose .finsub { color: #ffc4cf; }
 .fin-neon .finpanel { animation-delay: 3s; }
 @media (prefers-reduced-motion: reduce) { .nxburst, .nxflash { display: none; } .nxs, .nxc { animation: none; stroke-dashoffset: 0; } .nxhead { animation: none; opacity: 1; } .nxtitle { animation: none; opacity: 1; } }
+
+/* Máscara de neón: sin careta, luces alternas */
+.fin-neon.owin { --c2: #ff5ad8; --g2: #ff1fa5; } .fin-neon.olose { --c2: #ffffff; --g2: #dfe6ff; }
+.nxhead { display: none; }
+.nxray:nth-child(even), .nxsp:nth-child(even), .nxring.r2 { --c: var(--c2); --g: var(--g2); }
+.fin-neon .nxtitle { text-shadow: 0 0 6px var(--c), 0 0 18px var(--c), 0 0 38px var(--c2), 0 0 70px var(--g2); }

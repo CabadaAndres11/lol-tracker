@@ -1,6 +1,10 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-04', tag: 'Novedad', title: 'Nuevo efecto de Victoria y Derrota: Botín del goblin',
+      art: ['petea-goblin'],
+      items: ['Nuevo pack «Botín del goblin» en Tienda → Efectos → Victoria y derrota (50 monedas). Banner de oro macizo con lluvia de monedas: un goblin irrumpe corriendo y se lleva la palabra «Victoria» o «Derrota» en su saco.',
+        'En derrota el oro se ve deslucido y agrietado, y el goblin se lleva «Derrota» entre monedas oxidadas. Puedes probarlo antes de comprar.'] },
     { date: '2026-11-04', tag: 'Cambio', title: 'Tienda: Mordisco Del Invierno entra y las cartas Anime salen',
       art: ['sech-duo'],
       items: ['«Mordisco Del Invierno» pasa al sobre Set 2 y se vende en la tienda (Cartas · Acciones) por 100 monedas.',

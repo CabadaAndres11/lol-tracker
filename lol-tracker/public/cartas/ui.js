@@ -559,6 +559,11 @@
       items.push({ k: p[0], n: p[2], name: p[1], img: '<img class="bximg" src="/cartas/img/pack-' + p[0] + '.webp" alt="">', desc: p[3],
         opts: opt('openpack', 'sobre', 'Abrir', 'Abre un sobre', ' data-inv="1" data-pack="' + p[0] + '"', !!ui.pack) });
     });
+    (a.invSkins || []).forEach(function (id) {
+      var sk = (window.CARTAS_SKINS || []).filter(function (k) { return k.id === id; })[0]; if (!sk) return;
+      items.push({ k: 'skin:' + id, n: 0, name: 'Skin · ' + sk.name, img: '<img class="invskin" src="/cartas/art/' + id + '.webp" alt="">', desc: 'Skin de ' + (CARD[sk.card] ? CARD[sk.card].name : sk.card) + (sk.legacy ? ', en compensación por una carta eliminada' : '') + '. Solo cambia la ilustración.',
+        opts: opt('skinunlock', 'candado', 'Desbloquear', 'Añádela a tus skins', ' data-skin="' + id + '"') + opt('zoom', 'ojo', 'Desplegar', 'Verla en 3D', ' data-id="' + sk.card + '" data-skin="' + id + '"') });
+    });
     if (a.boxes) items.push({ k: 'box', n: a.boxes, name: 'Caja', img: boxImg(), desc: 'Dentro hay una carta que no tengas, una skin o un efecto. Nunca te tocará algo repetido.',
       opts: (a.boxLocked ? opt('boxopen', 'caja', 'Abrir', 'Lo tienes todo desbloqueado: no se pueden abrir cajas', '', true) : opt('boxopen', 'caja', 'Abrir', 'Abre una caja')) + opt('boxinfo', 'ojo', 'Probabilidades', ui.boxInfo ? 'Ocultar las probabilidades' : 'Qué te puede tocar') });
     return items;
@@ -570,7 +575,7 @@
     if (!items.length) return h + '<div class="invempty"><p class="mut">Tu inventario está vacío. Consigue cajas completando misiones y subiendo de rango, y sobres en el pase de batalla o en la tienda.</p><div class="btnrow"><button class="btn sec" data-act="nav" data-to="missions">' + ic('mision') + ' Misiones</button><button class="btn sec" data-act="nav" data-to="ladder">' + ic('trofeo') + ' Clasificación</button><button class="btn sec" data-act="nav" data-to="pass">' + ic('estrella') + ' Pase de batalla</button></div></div>';
     h += '<p class="mut colhint">Pulsa un objeto para ver qué puedes hacer con él.</p><div class="invgrid">' + items.map(function (it) {
       var on = sel === it.k;
-      return '<div class="invcell' + (on ? ' on' : '') + '"><button class="invtile" data-act="invsel" data-k="' + it.k + '" title="' + it.name + '">' + it.img + '<span class="invn">×' + it.n + '</span></button>' +
+      return '<div class="invcell' + (on ? ' on' : '') + '"><button class="invtile" data-act="invsel" data-k="' + it.k + '" title="' + it.name + '">' + it.img + '' + (it.n ? '<span class="invn">×' + it.n + '</span>' : '') + '</button>' +
         (on ? '<div class="invmenu"><div class="invmh"><b>' + it.name + '</b><small>' + it.desc + '</small></div>' + it.opts + (it.k === 'box' && ui.boxInfo ? boxOddsHtml() : '') + '</div>' : '') + '</div>';
     }).join('') + '</div>';
     return h;
@@ -2592,6 +2597,7 @@
     if (act === 'rkclaim') { return api('rankClaim', { id: el.dataset.id }).then(function (r) { if (r.data && r.data.user) setAcct(r.data.user); if (r.ok) snd('claim'); ui.msg = r.ok ? '' : (r.data.error || ''); render(); }); }
     if (act === 'goinv') { ui.screen = 'deck'; ui.colTab = 'inv'; ui.dedit = null; window.scrollTo(0, 0); return render(); }
     if (act === 'invsel') { ui.invSel = ui.invSel === el.dataset.k ? '' : el.dataset.k; ui.boxInfo = false; return renderDeck(); }
+    if (act === 'skinunlock') return api('skinUnlock', { id: el.dataset.skin }).then(function (r) { if (r.data && r.data.user) setAcct(r.data.user); ui.msg = r.ok ? '' : ((r.data && r.data.error) || ''); ui.invSel = ''; renderDeck(); });
     if (act === 'boxinfo') { ui.boxInfo = !ui.boxInfo; return renderDeck(); }
     if (act === 'boxclose') { ui.box = null; return renderDeck(); }
     if (act === 'boxopen') {

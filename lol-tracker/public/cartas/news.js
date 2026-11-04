@@ -1,6 +1,10 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-04', tag: 'Cambio', title: 'Skins de compensación en el inventario',
+      art: ['javihi-friki', 'aitorlg-regla'],
+      items: ['Las skins que se entregan como compensación por cartas eliminadas (PokeAitoRLG, Javihi Prime...) ahora llegan a tu inventario en vez de añadirse directamente.',
+        'Pulsa la skin para elegir: «Desbloquear» (la añade a tus skins) o «Desplegar» (verla en 3D antes de decidir).'] },
     { date: '2026-11-04', tag: 'Cambio', title: 'Nuevo inventario',
       items: ['El inventario se rediseña: ya no hay un hueco reservado para cada cosa. Tus objetos (sobres Set 1, sobres Anime, cajas...) aparecen agrupados en cuadrados con su cantidad, y solo los que tienes.',
         'Pulsa un cuadrado para ver sus opciones: «Abrir» (si está disponible) y, en las cajas, «Probabilidades».'] },

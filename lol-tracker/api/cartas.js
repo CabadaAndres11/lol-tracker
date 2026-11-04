@@ -174,7 +174,7 @@ function rollBox(u) {
 }
 function publicUser(u) {
   return {
-    name: u.name, boxLocked: boxLocked(u), pts: u.pts || 0, coins: u.coins, owned: u.owned, dups: u.dups || {}, skins: u.skins || [], skinSel: u.skinSel || {}, decks: u.decks || null, avatar: u.avatar || '', fx: { deploy: fxSel(u, 'deploy'), sleeve: fxSel(u, 'sleeve'), finish: fxSel(u, 'finish') }, fxOwned: fxOwned(u), boxes: u.boxes || 0, ms: { stats: missionStats(u), claimed: u.msClaimed || [] }, packs: u.packs || 0, packsAnime: u.packsAnime || 0, emoteSets: emoteSetsOf(u), rkClaimed: u.rkClaimed || [], season: seasonPublic(u), ptsMax: rankReached(u),
+    name: u.name, boxLocked: boxLocked(u), pts: u.pts || 0, coins: u.coins, owned: u.owned, dups: u.dups || {}, skins: u.skins || [], skinSel: u.skinSel || {}, decks: u.decks || null, avatar: u.avatar || '', fx: { deploy: fxSel(u, 'deploy'), sleeve: fxSel(u, 'sleeve'), finish: fxSel(u, 'finish') }, fxOwned: fxOwned(u), boxes: u.boxes || 0, invSkins: (u.invSkins || []).filter((id) => !(u.skins || []).includes(id)), ms: { stats: missionStats(u), claimed: u.msClaimed || [] }, packs: u.packs || 0, packsAnime: u.packsAnime || 0, emoteSets: emoteSetsOf(u), rkClaimed: u.rkClaimed || [], season: seasonPublic(u), ptsMax: rankReached(u),
     dailyAvailable: u.lastDaily !== today(),
     gamesToday: u.rewardDay === today() ? u.rewardCount : 0,
     maxGamesToday: MAX_GAME_REWARDS_PER_DAY,
@@ -183,6 +183,8 @@ function publicUser(u) {
   };
 }
 const isAdmin = (u) => String(u.name).toLowerCase() === 'admin';
+// Skins de compensación (por cartas eliminadas): van al inventario y el jugador las desbloquea cuando quiere
+function giveSkin(u, id) { u.skins = u.skins || []; u.invSkins = u.invSkins || []; if (!u.skins.includes(id) && !u.invSkins.includes(id)) u.invSkins.push(id); }
 async function loadUser(cfg, name) {
   const raw = await redis(cfg, ['GET', uKey(name)]);
   const u = raw ? JSON.parse(raw) : null;
@@ -199,7 +201,7 @@ async function loadUser(cfg, name) {
     const had = (u.owned || []).includes(OLD_FRIKI), hadRegla = (u.owned || []).includes('aitorlg-regla');
     u.dups = u.dups || {};
     if (had) {
-      u.skins = u.skins || []; if (!u.skins.includes('aitorlg-pokeaito')) u.skins.push('aitorlg-pokeaito');
+      giveSkin(u, 'aitorlg-pokeaito');
       if (!hadRegla) u.owned.push('aitorlg-regla');
       u.dups['aitorlg-regla'] = (u.dups['aitorlg-regla'] || 0) + (hadRegla ? 1 : 0) + (u.dups[OLD_FRIKI] || 0);
     }
@@ -220,7 +222,7 @@ async function loadUser(cfg, name) {
     const had = (u.owned || []).includes(OLD_PRIME), hadNew = (u.owned || []).includes('javihi-friki');
     u.dups = u.dups || {};
     if (had) {
-      u.skins = u.skins || []; if (!u.skins.includes('javihi-friki-prime')) u.skins.push('javihi-friki-prime');
+      giveSkin(u, 'javihi-friki-prime');
       if (!hadNew) u.owned.push('javihi-friki');
       u.dups['javihi-friki'] = (u.dups['javihi-friki'] || 0) + (hadNew ? 1 : 0) + (u.dups[OLD_PRIME] || 0);
     }
@@ -922,6 +924,14 @@ module.exports = async function handler(req, res) {
       u.avatar = id;
       await saveUser(cfg, u);
       res.status(200).json({ user: publicUser(u) }); return;
+    }
+    if (act === 'skinUnlock') { // desbloquear una skin guardada en el inventario
+      const id = String(body.id || body.skin || '');
+      if (!(u.invSkins || []).includes(id)) { res.status(409).json({ error: 'Esa skin no está en tu inventario.', user: publicUser(u) }); return; }
+      u.invSkins = u.invSkins.filter((x) => x !== id); u.skins = u.skins || [];
+      if (!u.skins.includes(id)) u.skins.push(id);
+      await saveUser(cfg, u);
+      res.status(200).json({ ok: true, user: publicUser(u) }); return;
     }
     if (act === 'skinBuy' || act === 'skinEquip') {
       const sk = SKIN_BY_ID[String(body.id || body.skin || '')];

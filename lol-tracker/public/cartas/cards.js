@@ -966,6 +966,7 @@ var D={
   {
    "id": "torreta-lunar",
    "name": "Torreta Lunar",
+   "person": "Torreta",
    "cost": 0,
    "atk": 7,
    "hp": 7,

@@ -1,6 +1,10 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-04', tag: 'Cambio', title: 'Arreglo: torreta de Crescendum',
+      art: ['sech-duo'],
+      items: ['Arreglado un fallo que congelaba la partida cuando aparecía la torreta de Crescendum.',
+        'La Torreta Lunar ahora es una carta más: aparece en su hueco extra desde la preparación (con ataque y vida visibles), puedes elegirle objetivo y tiene ilustración propia. No se puede vender ni retirar y desaparece al acabar la ronda.'] },
     { date: '2026-11-04', tag: 'Novedad', title: 'Nueva sinergia: Magic Botlane',
       art: ['javihi-duo', 'sech-duo'],
       items: ['Nueva sinergia «Magic Botlane» (Javihi Dúo + Sech Dúo). Con ambos en la mesa, los ataques dirigidos a Sech Dúo se redirigen a Javihi Dúo.',

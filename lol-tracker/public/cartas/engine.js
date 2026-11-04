@@ -83,6 +83,14 @@
       say(s, pv(s, p, '¡Sinergia Correa! Se crea un hueco extra y recibes a las 4 novias.', 'El rival crea un hueco extra y sus novias.'));
     }
     if (c < 1 && P.mesa[4]) { s5out(P, P.mesa[4]); P.nvs.push(P.mesa[4]); delete P.target[P.mesa[4].uid]; P.mesa[4] = null; } // sin la sinergia, la novia vuelve a la reserva
+    lunarSync(s, p);
+  }
+  // Crescendum (Sech Dúo): con esa arma y Sech Dúo en la mesa hay una torreta 7/7 en el hueco extra 7 (mesa[6]) desde la preparación, para poder elegirle objetivo; se retira al acabar la ronda.
+  function lunarSync(s, p) {
+    var P = s.p[p], t = P.mesa[6];
+    var on = P.arma === 'crescendum' && P.mesa.some(function (i) { return i && !i.dead && PAS[i.id] === 'armas'; });
+    if (on && !t) { var tu = mk(s, 'torreta-lunar', p); tu.turret = true; P.mesa[6] = tu; }
+    else if (!on && t && t.turret) { delete P.target[t.uid]; P.mesa[6] = null; }
   }
   // Mejora del hueco 5 (acción Regalo): la tiene el hueco, no la novia. Se aplica a la novia que lo ocupe y se retira al salir.
   function s5in(P, i) { var b = P.s5; if (!b || !i) return; i.perm.atk += b.atk; i.perm.hp += b.hp; i.hp += b.hp; }
@@ -222,6 +230,7 @@
       }
     }
     s.phase = 'prep';
+    lunarSync(s, 0); lunarSync(s, 1);
     if (!s.pvp) { aiShop(s, 1); aiPrep(s, 1); }
     if (s.shopOpen) checkShop(s);
   }
@@ -349,7 +358,7 @@
     var P = s.p[p];
     if (!s.shopOpen || s.phase !== 'prep' || s.over) return false;
     var i = where === 'mesa' ? P.mesa[idx] : P.hand[idx];
-    if (!i || i.dead || isNov(i) || i.shadow) return false;
+    if (!i || i.dead || isNov(i) || i.shadow || i.turret) return false;
     if (where === 'mesa') { P.mesa[idx] = null; delete P.target[i.uid]; } else P.hand.splice(idx, 1);
     shadowOrphan(s, p);
     P.gold += sellValue(i);
@@ -406,7 +415,7 @@
   function retire(s, p, slot) {
     var P = s.p[p], i = P.mesa[slot];
     if (slot === 4 && i && s.phase === 'prep') { s5out(P, i); P.mesa[4] = null; P.nvs.push(i); delete P.target[i.uid]; return true; } // la novia vuelve a la reserva
-    if (!s.shopOpen || s.phase !== 'prep' || !i || i.dead || i.shadow) return false;
+    if (!s.shopOpen || s.phase !== 'prep' || !i || i.dead || i.shadow || i.turret) return false;
     if (has(i, 'Lol')) return false;
     if (P.hand.length >= handCap(s)) return false;
     P.mesa[slot] = null; P.hand.push(i); // conserva la vida actual
@@ -441,7 +450,7 @@
     if (isNov(i)) { if (k >= 0) P.mesa[k] = null; novLose(P, i); return; } // en clásico, la novia caída queda eliminada
     i.dead = true; i.hp = 0;
     if (k >= 0) P.mesa[k] = null;
-    if (!i.shadow) P.grave.push(i);
+    if (!i.shadow && !i.turret) P.grave.push(i);
     delete P.target[i.uid];
   }
   function validTarget(c, i) { if (immune(i) && c.target === 'enemy') return false; return !c.only || has(i, c.only); }
@@ -861,6 +870,7 @@
   }
   function fight(s) {
     if (s.phase !== 'prep' || s.over || s.shopOpen) return false;
+    lunarSync(s, 0); lunarSync(s, 1);
     if (pendingTargets(s, 0).length || (s.pvp && pendingTargets(s, 1).length)) return false;
     s.shopOpen = false;
     s.frames = [];
@@ -879,8 +889,8 @@
       var an = ARMA_NM[P.arma];
       if (P.arma === 'calibrum') { sd.tmp.atk += 5; fxFrame(s, p, 'armas', 'Armas Lunares · ' + an, '+5 de ataque esta ronda', [sd.uid]); }
       else if (P.arma === 'crescendum') {
-        var tu = mk(s, 'torreta-lunar', p); tu.turret = true; P.mesa[6] = tu;
-        fxFrame(s, p, 'armas', 'Armas Lunares · ' + an, 'hueco extra y torreta 7/7 hasta el final de la ronda', [sd.uid, tu.uid]);
+        var tu = P.mesa[6] || { uid: -1 };
+        fxFrame(s, p, 'armas', 'Armas Lunares · ' + an, 'hueco extra y torreta 7/7 hasta el final de la ronda', [sd.uid, tu.uid].filter(function (u) { return u >= 0; }));
       } else fxFrame(s, p, 'armas', 'Armas Lunares · ' + an, ARMA_TX[P.arma], [sd.uid]);
     });
     var seq = order(s);

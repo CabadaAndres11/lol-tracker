@@ -2677,4 +2677,4 @@ body.soc-open #app { margin-right: 286px; }
 .wpnb { position: absolute; top: 4px; left: 4px; z-index: 6; display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 3px 4px 2px; border-radius: 8px; background: rgba(7,11,23,.82); border: 1px solid #7dd3fc; box-shadow: 0 0 10px rgba(125,211,252,.55); max-width: 62%; pointer-events: auto; }
 .wpnb img { width: 100%; max-height: 30px; object-fit: contain; display: block; }
 .wpnb b { font-size: .55rem; letter-spacing: .04em; color: #bae6fd; text-transform: uppercase; line-height: 1; }
-.card.turretc, .turretc .card { filter: saturate(.7) hue-rotate(160deg); box-shadow: 0 0 18px 2px rgba(56,189,248,.7); }
+.card.turretc, .turretc .card { box-shadow: 0 0 18px 2px rgba(56,189,248,.7); }

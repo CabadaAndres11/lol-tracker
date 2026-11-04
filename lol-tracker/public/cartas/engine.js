@@ -469,6 +469,9 @@
     kamehameha: { ok: function (s, p) { if ((tiers(s.p[p])['Anime'] || 0) < 1) return 'Necesitas el nivel 1 de Anime (2 cartas distintas).'; if (genStored(s.p[p]) <= 0) return 'La Genkidama está vacía: tus Anime aún no han recibido daño.'; return targetable(s.p[1 - p]).length ? '' : 'El rival no tiene tropas.'; },
       run: function (s, p) { var P = s.p[p], tot = genStored(P), foes = targetable(s.p[1 - p]), n = Math.floor(tot / foes.length); P.gen = 0; foes.forEach(function (i) { genCharge(s, i, Math.min(n, Math.max(0, i.hp))); i.hp -= n; if (i.hp <= 0) dropDead(s, 1 - p, i); }); return n + ' de daño a cada tropa rival (Genkidama repartida: ' + tot + ')'; } },
     'golpe-certero': { run: function (s, p, t) { var n = sc(s, 6); genCharge(s, t, Math.min(n, Math.max(0, t.hp))); t.hp -= n; if (t.hp <= 0) dropDead(s, 1 - p, t); return n + ' de daño'; } },
+    'mordisco-del-invierno': {
+      ok: function (s, p, t) { if ((tiers(s.p[p])['Magic Botlane'] || 0) < 1) return 'Necesitas el nivel 1 de Magic Botlane (Javihi Dúo + Sech Dúo).'; return t && t.tmp.noAtk ? 'Esa tropa ya no puede actuar este turno.' : ''; },
+      run: function (s, p, t) { t.tmp.noAtk = true; t.tmp.stun = true; return card(t).name + ' no podrá actuar en este combate'; } },
     lluvia: { ok: function (s, p) { return targetable(s.p[1 - p]).length ? '' : 'El rival no tiene tropas.'; }, run: function (s, p) { var n = sc(s, 2); targetable(s.p[1 - p]).forEach(function (i) { genCharge(s, i, Math.min(n, Math.max(0, i.hp))); i.hp -= n; if (i.hp <= 0) dropDead(s, 1 - p, i); }); return n + ' de daño a todas las rivales'; } },
     'bola-extra': { ok: function (s, p) { return (tiers(s.p[p])['Pokémon'] || 0) >= 1 ? '' : 'Necesitas el nivel 1 de Pokémon (2 cartas distintas).'; }, run: function (s, p) { s.p[p].fl.pk = (s.p[p].fl.pk || 0) + 1; return 'bola extra esta ronda'; } },
     'segundo-aliento': {
@@ -668,7 +671,7 @@
       life: [s.p[0].life, s.p[1].life],
       mesa: s.p.map(function (P) {
         return P.mesa.map(function (i) {
-          return i ? { uid: i.uid, id: i.id, atk: atk(i), hp: Math.max(0, i.hp), max: maxHp(i), dead: !!i.dead, red: i.tmp.red, baseAtk: card(i).atk, baseHp: card(i).hp } : null;
+          return i ? { uid: i.uid, id: i.id, atk: atk(i), hp: Math.max(0, i.hp), max: maxHp(i), dead: !!i.dead, red: i.tmp.red, stun: !!i.tmp.stun, baseAtk: card(i).atk, baseHp: card(i).hp } : null;
         });
       }),
     };
@@ -986,12 +989,15 @@
       // Resurrección: la carta que ataca también recibe el ataque de la carta atacada (contraataque)
       var rec = 0;
       if (s.mode === 'revive') {
-        rec = Math.max(0, atk(tgt) - a.tmp.red);
-        if (a.tmp.cap1) rec = Math.min(rec, 1);
+        var ca = a, cg = a.id === 'sech-duo' ? botlaneGuard(s, a.owner) : null; // Magic Botlane: el contraataque a Sech Dúo va a Javihi Dúo
+        if (cg && cg !== a) ca = cg;
+        rec = Math.max(0, atk(tgt) - ca.tmp.red);
+        if (ca.tmp.cap1) rec = Math.min(rec, 1);
+        rec = muroDmg(ca, rec);
         if (rec > 0) {
-          if (!a.dead) { genCharge(s, a, Math.min(rec, Math.max(0, a.hp))); a.hp -= rec; } line += ' Contraataque: ' + card(a).name + ' recibe ' + rec + '.';
-          if (a.hp <= 0 && !a.dead && wardSave(s, a)) { line += ' (aguanta a 0 de vida)'; }
-          else if (a.hp <= 0 && !a.dead) { a.dead = true; a.hp = 0; line += ' ¡Cae!'; var df2 = deathFx(s, a); line += df2.line; if (!fxk) fxk = df2.fx; }
+          if (!ca.dead) { genCharge(s, ca, Math.min(rec, Math.max(0, ca.hp))); ca.hp -= rec; } line += ' Contraataque: ' + card(ca).name + ' recibe ' + rec + (ca !== a ? ' (redirigido por Magic Botlane)' : '') + '.';
+          if (ca.hp <= 0 && !ca.dead && wardSave(s, ca)) { line += ' (aguanta a 0 de vida)'; }
+          else if (ca.hp <= 0 && !ca.dead) { ca.dead = true; ca.hp = 0; line += ' ¡Cae!'; var df2 = deathFx(s, ca); line += df2.line; if (!fxk) fxk = df2.fx; }
         }
       }
       if (pas(a) === 'armas' && !a.dead) {

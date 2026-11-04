@@ -55,7 +55,7 @@
   function tic(t) { return TIMG[t] ? '<img class="ic tic timg" src="/cartas/img/' + TIMG[t] + '.png" alt="">' : ic('t-' + t, 'tic'); }
   function tagHtml(t) { return '<span class="tag" style="--tc:' + D.themes[t].color + '">' + tic(t) + esc(t) + '</span>'; }
   function pips(n) { var h = ''; for (var k = 0; k < 3; k++) h += '<i' + (k < n ? ' class="on"' : '') + '></i>'; return h; }
-  var AICON = { entrenamiento: 'espadas', arenga: 'megafono', armadura: 'escudo', banquete: 'carne', intimidacion: 'enfado', 'mal-de-ojo': 'ojo', 'golpe-certero': 'diana', lluvia: 'arco',
+  var AICON = { 'mordisco-del-invierno': 'candado', entrenamiento: 'espadas', arenga: 'megafono', armadura: 'escudo', banquete: 'carne', intimidacion: 'enfado', 'mal-de-ojo': 'ojo', 'golpe-certero': 'diana', lluvia: 'arco',
     'bola-extra': 'beisbol', 'segundo-aliento': 'viento', 'cambio-de-linea': 'cambio', parche: 'disquete', 'horas-extra': 'maletin', 'segunda-temporada': 'trofeo', 'campeones-de-europa': 'trofeo', 'remate-doble': 'voley', 'cita-sorpresa': 'corazon', 'golpe-de-suerte': 'dado', genkidama: 'fuego', remedio: 'corazon', kamehameha: 'estrella' };
   var ARTS = {"torreta-lunar":1,"aitorlg-maomao":1,"chipy-goku":1,"dashlight-sun-jin-woo":1,"javihi-smiley":1,"lihone-rudeus":1,"mertens-meliodas":1,"pampert-asta":1,"eriko":1,"helena":1,"lucia":1,"ari":1,"aitorlg-koisito":1,"aitorlg-regla":1,"aitorlg-renata":1,"chipy-correa":1,"computer-chipy":1,"computer-dashlight":1,"computer-hellbramn":1,"computer-lihone":1,"computer-petea":1,"dashlight-akali":1,"dashlight-correa":1,"hellbramn":1,"javihi":1,"javihi-duo":1,"javihi-friki":1,"javihi-koisito":1,"javihi-prime":1,"lihone":1,"lihone-correa":1,"lihone-viego":1,"mertens":1,"mertens-gambler":1,"pampert-gambler":1,"mertens-prime":1,"pampert":1,"pampert-friki":1,"pampert-koisito":1,"petea-koisito":1,"petea-pokemaniaco":1,"potango":1,"sech":1,"sech-duo":1,"sech-koisito":1,"sech-thresh":1};
   // Nivel de carta por repetidas: 2 copias = ★2, 4 copias = ★3
@@ -1565,6 +1565,7 @@
       }
       if (v.id === 'sech-duo' && !v.dead && P.arma) { var an = E.ARMA_NM[P.arma]; o.extra = (o.extra || '') + '<span class="wpnb" title="Armas Lunares · ' + an + ': ' + E.ARMA_TX[P.arma] + '"><img src="/cartas/img/arma-' + P.arma + '.png" alt="' + an + '"><b>' + an + '</b></span>'; }
       if (I && I.turret) o.cls += ' turretc';
+      if ((I && I.tmp && I.tmp.stun) || v.stun) o.cls += ' stunned';
       var wl = k > 0 ? P.mesa[k - 1] : null; // Prórroga (AitoRLG Renata): marca la casilla que protege
       if (wl && !wl.dead && wl.id === 'aitorlg-renata' && !v.dead && !(I && I.shadow)) { o.cls += ' warded' + (I && I.tmp && I.tmp.ward ? ' wardhold' : ''); o.extra = (o.extra || '') + '<span class="wardfx" title="Prórroga: no cae a 0 de vida hasta que ataque">' + ic('escudo') + '</span>'; }
       o.gl = I ? I.gl : 1; o.lv = lvG(side, v.id); o.skin = skG(side, v.id); if (mine) o.slv = sleeveId(); if (mine && k === 4 && !(I && I.shadow)) under += novSwitch(s); h += '<div class="cw">' + cardHtml(c, o) + under + '</div>';

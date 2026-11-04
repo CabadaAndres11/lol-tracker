@@ -960,6 +960,18 @@ var D={
    "target": "none",
    "text": "50%: ganas 2 orbes Gambling. 50%: pierdes 2 orbes (mínimo 0).",
    "theme": "Gambling"
+  },
+  {
+   "id": "mordisco-del-invierno",
+   "name": "Mordisco Del Invierno",
+   "cost": 3,
+   "rarity": "Épica",
+   "type": "accion",
+   "size": 1,
+   "target": "enemy",
+   "text": "Una tropa rival no puede actuar en este combate (necesitas el nivel 1 de Magic Botlane).",
+   "theme": "Magic Botlane",
+   "foe": true
   }
  ],
  "tokens": [

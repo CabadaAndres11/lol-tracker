@@ -1,6 +1,10 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-04', tag: 'Novedad', title: 'Magic Botlane: contraataques y Mordisco Del Invierno',
+      art: ['javihi-duo', 'sech-duo'],
+      items: ['Con la sinergia Magic Botlane activa, los contraataques dirigidos a Sech Dúo también se redirigen a Javihi Dúo (modo Resurrección).',
+        'Nueva acción «Mordisco Del Invierno» (Épica, coste 3): una tropa rival no puede actuar en ese combate. Necesita el nivel 1 de Magic Botlane. La tropa afectada se ve en gris azulado.'] },
     { date: '2026-11-04', tag: 'Cambio', title: 'Arreglo: torreta de Crescendum',
       art: ['sech-duo'],
       items: ['Arreglado un fallo que congelaba la partida cuando aparecía la torreta de Crescendum.',

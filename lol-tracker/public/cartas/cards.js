@@ -275,8 +275,8 @@ var D={
     "Magic Botlane"
    ],
    "cost": 5,
-   "atk": 7,
-   "hp": 18,
+   "atk": 15,
+   "hp": 10,
    "rarity": "Legendaria",
    "type": "tropa",
    "size": 2,

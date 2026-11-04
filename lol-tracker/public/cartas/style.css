@@ -2700,3 +2700,7 @@ body.soc-open #app { margin-right: 286px; }
 @media (max-width: 720px) { .invgrid { grid-template-columns: repeat(auto-fill, 88px); } .invtile { width: 88px; height: 88px; } .invmenu { width: min(290px, calc(100vw - 32px)); } .invcell:nth-child(3n) .invmenu { left: auto; right: 0; } }
 
 .invtile .invskin { width: 100%; height: 100%; object-fit: cover; border-radius: 5px; display: block; }
+
+/* Goblins: Rey Goblin en el hueco extra 8 */
+.row4.ex4n { grid-template-columns: repeat(8, minmax(0, calc(var(--ch) * 5 / 7))); }
+@media (max-width: 720px) { .row4.ex4n { grid-template-columns: repeat(8, 1fr); } }

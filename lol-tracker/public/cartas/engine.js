@@ -85,6 +85,7 @@
     if (c < 1 && P.mesa[4]) { s5out(P, P.mesa[4]); P.nvs.push(P.mesa[4]); delete P.target[P.mesa[4].uid]; P.mesa[4] = null; } // sin la sinergia, la novia vuelve a la reserva
     lunarSync(s, p);
     loveSync(s, p);
+    goblinSync(s, p);
   }
   // Amor Verdadero (PotAnGo): con Lucía como novia seleccionada duplica sus estadísticas (lo que tenía al activarse); al cambiar de novia vuelve a las originales.
   function loveSync(s, p) {
@@ -225,7 +226,7 @@
       if (!s.pvp && s.aiLv) aiBonus(s, p);
       if (p === 0 || s.pvp) say(s, pv(s, p, 'Ronda ' + s.round + ': +' + got + ' de oro' + (s.p[p].lastInt ? ' (incluye +' + s.p[p].lastInt + ' de interés por ahorrar)' : '') + '.', 'El rival cobra +' + got + ' de oro.'));
       s.p[p].target = {}; s.p[p].anime = 0; s.p[p].fl = {};
-      genGive(s, p);
+      genGive(s, p); goblinGive(s, p);
     });
     if (shopRd) {
       s.shops++;
@@ -418,6 +419,7 @@
         var c = card(keep), from = keep.gl || 1, d = CFG.merge[from] - CFG.merge[from - 1];
         keep.gl = from + 1;
         keep.perm.atk += Math.round(c.atk * d); keep.perm.hp += Math.round(c.hp * d); keep.hp += Math.round(c.hp * d);
+        if (has(keep, 'Goblins') && (tiers(P)['Goblins'] || 0) >= 2) { P.gold += 5; say(s, pv(s, p, 'Sinergia Goblins: ' + c.name + ' sube de nivel, +5 de oro.', 'El rival gana 5 de oro por subir de nivel un Goblin.')); }
         say(s, pv(s, p, 'Fusión: 3 × ' + c.name + ' → ★' + keep.gl + ' (' + atk(keep) + '/' + maxHp(keep) + ').', 'El rival fusiona 3 × ' + c.name + ' → ★' + keep.gl + '.'));
         if (keep.gl >= CFG.merge.length && s.shopOpen) { // alcanzó el máximo: se retiran sus copias de la tienda actual
           var kid = keep.id;
@@ -743,6 +745,12 @@
           fxFrame(s, p, 'inf', 'Actualizaciones', '+1/+1 por cada 3 actualizaciones de tienda (' + s.refreshN[p] + ' en total)', inf.map(function (i) { return i.uid; }));
         }
       }
+      // Petea Goblin: Loot Infinito, los Goblins ganan +5/+5 por el nivel de su carta durante el combate
+      if (troops.some(function (i) { return pas(i) === 'loot'; })) {
+        var gb = troops.filter(function (i) { return has(i, 'Goblins'); });
+        gb.forEach(function (i) { var b = 5 * (i.gl || 1); i.tmp.atk += b; i.tmp.hp += b; i.hp += b; });
+        if (gb.length) fxFrame(s, p, 'loot', 'Loot Infinito', '+5/+5 por nivel de carta a los Goblins', gb.map(function (i) { return i.uid; }));
+      }
       // Pokémon: bola (las acciones pueden añadir bolas extra esta ronda)
       if (t['Pokémon']) {
         for (var bn = 0; bn < 1 + (P.fl.pk || 0); bn++) {
@@ -825,7 +833,7 @@
 
   // Efectos al caer una tropa (KOI). Devuelve texto de registro y animación.
   // ---------- Pasivas de legendarias ----------
-  var PAS = { 'dashlight-sun-jin-woo': 'sombra', 'aitorlg-maomao': 'boticaria', 'javihi-duo': 'muro', 'sech-duo': 'armas', 'javihi-friki': 'remate', 'sech': 'embargo', 'potango': 'amor', 'lihone-viego': 'racha', 'aitorlg-renata': 'prorroga', 'lihone': 'captura', 'pampert-koisito': 'cabezon', 'aitorlg-koisito': 'heredero', 'mertens-gambler': 'malaracha', 'computer-dashlight': 'medallas', 'pampert-gambler': 'colega' };
+  var PAS = { 'dashlight-sun-jin-woo': 'sombra', 'aitorlg-maomao': 'boticaria', 'javihi-duo': 'muro', 'sech-duo': 'armas', 'javihi-friki': 'remate', 'sech': 'embargo', 'potango': 'amor', 'petea-goblin': 'loot', 'rey-goblin': 'avaricia', 'lihone-viego': 'racha', 'aitorlg-renata': 'prorroga', 'lihone': 'captura', 'pampert-koisito': 'cabezon', 'aitorlg-koisito': 'heredero', 'mertens-gambler': 'malaracha', 'computer-dashlight': 'medallas', 'pampert-gambler': 'colega' };
   function pas(i) { return PAS[i.id] || ''; }
   // ---------- Magic Botlane: Armas Lunares (Sech Dúo) y Muro de Hielo (Javihi Dúo) ----------
   var ARMAS = ['calibrum', 'severum', 'gravitum', 'infernum', 'crescendum'];
@@ -956,6 +964,7 @@
       real = muroDmg(tgt, real); // Muro de Hielo (Javihi Dúo)
       var ariSave = false;
       if (real > 0 && mesaTroops(s.p[tgt.owner]).some(function (x) { return x.id === 'ari'; }) && s.rng() < FX.novias.ari[Math.max(0, (s.tiers[tgt.owner]['Correa'] || 1) - 1)]) { real = 0; ariSave = true; }
+      var over = pas(a) === 'avaricia' ? Math.max(0, real - Math.max(0, tgt.hp)) : 0; // Avaricia (Rey Goblin): el daño sobrante va a la vida rival
       genCharge(s, tgt, Math.min(real, Math.max(0, tgt.hp)));
       tgt.hp -= real;
       var line = card(a).name + (redir ? ' (redirigido por Magic Botlane) ataca a ' : retarget ? ' (su objetivo ya cayó) ataca a ' : ' ataca a ') + card(tgt).name + ': ' + real + ' de daño' + (tgt.tmp.red && real < dmg ? ' (reducido)' : '') + (ariSave ? ' (¡Ari lo evita!)' : '') + (tgt.id === 'javihi-duo' && real < dmg ? ' (Muro de Hielo)' : '') + '.';
@@ -974,6 +983,7 @@
       }
       // Pasivas al golpear (Embargo)
       var plife = null, pdmg = 0;
+      if (over > 0) { E.life -= over; plife = tgt.owner; pdmg = (pdmg || 0) + over; line += ' Avaricia: ' + over + ' de daño sobrante ' + pv(s, a.owner, 'a la vida del rival.', 'a tu vida.'); }
       if (tgt.dead && pas(a) === 'sombra' && !isNov(tgt)) line += shadowRaise(s, a, tgt); // el soldado tiene su propio hueco extra: si ya había uno, el nuevo lo sustituye
       if (tgt.dead && pas(a) === 'embargo' && !a.dead) {
         E.life -= 2; P.gold += 1; plife = tgt.owner; pdmg = 2;
@@ -1082,6 +1092,7 @@
     s.p.forEach(function (P, pi) {
       P.mesa.forEach(function (i, k) {
         if (!i) return;
+        if (i.king && (i.dead || i.hp <= 0) && s.mode !== 'revive') { P.mesa[k] = null; delete P.target[i.uid]; P.kingDead = true; return; } // el Rey Goblin caído no vuelve
         if (i.turret) { P.mesa[k] = null; delete P.target[i.uid]; return; } // la torreta de Crescendum dura solo una ronda
         if (i.shadow && (i.dead || i.hp <= 0)) { P.mesa[k] = null; delete P.target[i.uid]; return; } // el soldado de sombra caído desaparece (tampoco revive)
         if (isNov(i) && s.mode !== 'revive' && (i.dead || i.hp <= 0)) { P.mesa[k] = null; novLose(P, i); return; } // en clásico, la novia caída queda eliminada
@@ -1143,6 +1154,26 @@
     if ((tiers(P)['Anime'] || 0) < 1 || P.hand.length >= handCap(s) || P.hand.some(function (i) { return i && i.id === 'genkidama'; })) return;
     P.hand.push(mk(s, 'genkidama', p));
     if (p === 0 || s.pvp) say(s, pv(s, p, 'Sinergia Anime: recibes una Genkidama.', 'El rival recibe una Genkidama.'));
+  }
+
+  // Goblins (nivel 1): cada ronda (combate o tienda) recibes una copia al azar de un Goblin. En clásico y Resurrección debe estar en tu mazo.
+  function goblinIds() { return DATA.cards.filter(function (c) { return c.themes.indexOf('Goblins') >= 0; }).map(function (c) { return c.id; }); }
+  function goblinGive(s, p) {
+    var P = s.p[p];
+    if ((tiers(P)['Goblins'] || 0) < 1 || P.hand.length >= handCap(s)) return;
+    var pool = goblinIds().filter(function (id) { return s.rumble || P.deck.indexOf(id) >= 0; });
+    if (!pool.length) return;
+    var id = pool[Math.floor(s.rng() * pool.length)];
+    P.hand.push(mk(s, id, p));
+    if (p === 0 || s.pvp) say(s, pv(s, p, 'Sinergia Goblins: recibes una copia de ' + CARD[id].name + '.', 'El rival recibe un Goblin.'));
+    mergeCheck(s, p);
+  }
+  // Goblins (nivel 2): con los 4 Goblins en la mesa y todos al nivel 3 aparece el Rey Goblin en el hueco extra 8 (mesa[7]).
+  function goblinSync(s, p) {
+    var P = s.p[p], king = P.mesa[7], ids = goblinIds();
+    var on = !P.kingDead && (tiers(P)['Goblins'] || 0) >= 2 && ids.every(function (id) { return P.mesa.some(function (i) { return i && !i.dead && i.id === id && (i.gl || 1) >= CFG.merge.length; }); });
+    if (on && !king) { var k = mk(s, 'rey-goblin', p); k.king = true; P.mesa[7] = k; say(s, pv(s, p, '¡Los 4 Goblins al nivel 3! Aparece el Rey Goblin.', 'El rival invoca al Rey Goblin.')); }
+    else if (!on && king && king.king && s.phase === 'prep') { delete P.target[king.uid]; P.mesa[7] = null; }
   }
 
   function endShop(s) {

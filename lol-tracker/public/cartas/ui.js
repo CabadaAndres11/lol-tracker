@@ -582,7 +582,7 @@
   }
   function boxOddsHtml() {
     var a = ui.acct || {}, W = { 'Común': 50, 'Rara': 30, 'Épica': 15, 'Legendaria': 5 };
-    var cards = D.cards.filter(function (c) { return !ui.ownedSet[c.id]; });
+    var cards = D.cards.filter(function (c) { return !c.nopack && !ui.ownedSet[c.id]; });
     var skins = (window.CARTAS_SKINS || []).filter(function (k) { return !k.pass && (a.skins || []).indexOf(k.id) < 0; });
     var fxs = DEPLOY_LIST.concat(SLEEVE_LIST, FIN_LIST).filter(function (e) { return e.price > 0 && !e.pass && fxHas && !fxHas(e.id); });
     var pools = [['Carta nueva', cards.length, 5], ['Skin nueva', skins.length, 3], ['Efecto nuevo', fxs.length, 2]], tot = 0;
@@ -1538,10 +1538,10 @@
     var aim = {}; Object.keys(s.p[0].target).forEach(function (k) { var t = s.p[0].target[k]; aim[t] = (aim[t] || 0) + 1; });
     var jin = P.mesa.some(function (x) { return x && !x.dead && x.id === 'dashlight-sun-jin-woo'; }), vm = view.mesa[side];
     // Huecos extra (cada sinergia o pasiva crea el suyo): 4 = novia (Correa), 5 = soldado de sombra (Dashlight Sun Jin-Woo)
-    var ex4 = (E.tiers(P).Correa || 0) >= 1 || !!vm[4], ex5 = jin || !!vm[5], sechOn = P.mesa.some(function (x) { return x && !x.dead && x.id === 'sech-duo'; }), ex6 = (sechOn && P.arma === 'crescendum') || !!vm[6], nex = (ex4 ? 1 : 0) + (ex5 ? 1 : 0) + (ex6 ? 1 : 0);
-    var h = '<div class="row4 side' + side + (nex ? ' has5' : '') + (nex > 1 ? ' ex2' : '') + (nex > 2 ? ' ex3' : '') + '">';
+    var ex4 = (E.tiers(P).Correa || 0) >= 1 || !!vm[4], ex5 = jin || !!vm[5], sechOn = P.mesa.some(function (x) { return x && !x.dead && x.id === 'sech-duo'; }), ex6 = (sechOn && P.arma === 'crescendum') || !!vm[6], ex7 = !!vm[7], nex = (ex4 ? 1 : 0) + (ex5 ? 1 : 0) + (ex6 ? 1 : 0) + (ex7 ? 1 : 0);
+    var h = '<div class="row4 side' + side + (nex ? ' has5' : '') + (nex > 1 ? ' ex2' : '') + (nex > 2 ? ' ex3' : '') + (nex > 3 ? ' ex4n' : '') + '">';
     vm.forEach(function (v, k) {
-      if ((k === 4 && !ex4) || (k === 5 && !ex5) || (k === 6 && !ex6)) return;
+      if ((k === 4 && !ex4) || (k === 5 && !ex5) || (k === 6 && !ex6) || (k === 7 && !ex7)) return;
       if (!v) {
         if (k === 6) { h += '<div class="cw"><div class="slot nov lun"><img class="lunimg" src="/cartas/img/arma-crescendum.png" alt=""> Hueco extra<br><small>Torreta · Crescendum</small></div></div>'; return; }
         if (k === 5) { h += '<div class="cw"><div class="slot nov shd">' + ic('humo') + ' Hueco extra<br><small>Soldado de Sombra</small></div></div>'; return; }
@@ -2211,7 +2211,7 @@
   }
 
     // ---------- Efectos de sinergia: cartel, bola, números flotantes ----------
-  var FXICON = { duo: 'duo', armas: 'duo', novia: 'corazon', eriko: 'corazon', lucia: 'ojo', voley: 'voley', comeback: 'fuego', koi: 'trofeo', trabajo: 'maletin', gorb: 'dado', gambling: 'dado', malaracha: 'dado', colega: 'dado' };
+  var FXICON = { loot: 'moneda', duo: 'duo', armas: 'duo', novia: 'corazon', eriko: 'corazon', lucia: 'ojo', voley: 'voley', comeback: 'fuego', koi: 'trofeo', trabajo: 'maletin', gorb: 'dado', gambling: 'dado', malaracha: 'dado', colega: 'dado' };
   // Gambling: ruleta de casino (una sola tirada) que termina mostrando el total de mejora de todas las orbes
   function gamWheelSvg(win, total) {
     var N = 24, step = 360 / N, h = '', k, hi = Math.max(3, total + 2), vals = [];

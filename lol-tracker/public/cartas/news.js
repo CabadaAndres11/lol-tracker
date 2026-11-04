@@ -1,6 +1,11 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-04', tag: 'Novedad', title: 'Nueva sinergia: Goblins',
+      items: ['Nueva sinergia «Goblins» con 4 cartas: Hellbramn Goblin y Mertens Goblin (Comunes), Lihone Goblin (Rara) y Petea Goblin (Épica). Por ahora no salen en los sobres.',
+        'Con 2 Goblins distintos: cada ronda (combate o tienda) consigues en tu mano una copia al azar de un Goblin. En clásico y Resurrección debe estar en tu mazo.',
+        'Con los 4 Goblins: cada vez que una carta Goblin sube de nivel ganas 5 de oro. Si los 4 están en la mesa y todos al nivel 3, aparece el Rey Goblin en un hueco extra: 50/50, pasiva «Avaricia» (el daño sobrante a una tropa golpea directamente la vida del rival). Si cae, no vuelve a aparecer en esa partida.',
+        'Petea Goblin — Loot Infinito: si está en la mesa, los Goblins ganan +5/+5 por el nivel de su carta durante el combate (+5/+5 nivel 1, +10/+10 nivel 2, +15/+15 nivel 3).'] },
     { date: '2026-11-04', tag: 'Cambio', title: 'PotAnGo: Amor Verdadero',
       art: ['potango'],
       items: ['PotAnGo cambia su pasiva «Aliento final» por «Amor Verdadero»: si la novia seleccionada en el hueco extra es Lucía, PotAnGo duplica sus estadísticas. Si cambias de novia (o la retiras), vuelve a las originales.',

@@ -631,6 +631,70 @@ var D={
    "rarity": "Rara",
    "type": "tropa",
    "size": 1
+  },
+  {
+   "id": "hellbramn-goblin",
+   "name": "Hellbramn Goblin",
+   "person": "Hellbramn",
+   "themes": [
+    "Goblins"
+   ],
+   "cost": 2,
+   "atk": 4,
+   "hp": 6,
+   "rarity": "Común",
+   "type": "tropa",
+   "size": 1,
+   "nopack": true
+  },
+  {
+   "id": "mertens-goblin",
+   "name": "Mertens Goblin",
+   "person": "Mertens",
+   "themes": [
+    "Goblins"
+   ],
+   "cost": 2,
+   "atk": 5,
+   "hp": 5,
+   "rarity": "Común",
+   "type": "tropa",
+   "size": 1,
+   "nopack": true
+  },
+  {
+   "id": "lihone-goblin",
+   "name": "Lihone Goblin",
+   "person": "Lihone",
+   "themes": [
+    "Goblins"
+   ],
+   "cost": 3,
+   "atk": 8,
+   "hp": 7,
+   "rarity": "Rara",
+   "type": "tropa",
+   "size": 1,
+   "nopack": true
+  },
+  {
+   "id": "petea-goblin",
+   "name": "Petea Goblin",
+   "person": "Petea",
+   "themes": [
+    "Goblins"
+   ],
+   "cost": 4,
+   "atk": 8,
+   "hp": 12,
+   "rarity": "Épica",
+   "type": "tropa",
+   "size": 2,
+   "nopack": true,
+   "pas": {
+    "n": "Loot Infinito",
+    "t": "Si está en la mesa, los Goblins ganan +5/+5 por el nivel de su carta durante el combate (nivel 1: +5/+5, nivel 2: +10/+10, nivel 3: +15/+15)."
+   }
   }
  ],
  "novias": [
@@ -945,6 +1009,23 @@ var D={
  ],
  "tokens": [
   {
+   "id": "rey-goblin",
+   "name": "Rey Goblin",
+   "person": "Rey",
+   "cost": 0,
+   "atk": 50,
+   "hp": 50,
+   "rarity": "Legendaria",
+   "type": "tropa",
+   "size": 0,
+   "themes": [],
+   "token": true,
+   "pas": {
+    "n": "Avaricia",
+    "t": "El daño sobrante a una tropa se aplica directamente a la vida del jugador rival."
+   }
+  },
+  {
    "id": "torreta-lunar",
    "name": "Torreta Lunar",
    "person": "Torreta",
@@ -1095,6 +1176,17 @@ var D={
    "color": "#7dd3fc",
    "tx": [
     "Con Javihi Dúo y Sech Dúo en la mesa, los ataques dirigidos a Sech Dúo se redirigen a Javihi Dúo."
+   ]
+  },
+  "Goblins": {
+   "th": [
+    2,
+    4
+   ],
+   "color": "#84cc16",
+   "tx": [
+    "Cada ronda (combate o tienda) consigues en tu mano una copia al azar de un Goblin (en clásico y Resurrección debe estar en tu mazo).",
+    "Cada vez que una carta Goblin sube de nivel ganas 5 de oro. Con los 4 Goblins en la mesa y todos al nivel 3, aparece el Rey Goblin en un hueco extra (50/50, Avaricia: el daño sobrante a una tropa golpea la vida del rival)."
    ]
   },
   "Voley": {

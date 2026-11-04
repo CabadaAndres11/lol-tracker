@@ -2663,3 +2663,8 @@ body.soc-open #app { margin-right: 286px; }
 @keyframes sorcflip { 0% { transform: translateY(40px) rotateY(0); } 25% { transform: translateY(-60px) rotateY(720deg); } 60% { transform: translateY(-30px) rotateY(1620deg); } 100% { transform: translateY(0) rotateY(2160deg); } }
 @media (prefers-reduced-motion: reduce) { .sorcface { animation: none; } }
 @media (max-width: 640px) { .sorrow { justify-content: center; } }
+
+/* ---------- Progreso de copias hasta la siguiente mejora ---------- */
+.card .cprog { position: absolute; left: 3cqw; top: 25cqw; z-index: 4; padding: .5cqw 4cqw; border-radius: 999px; font: 800 9cqw/1.25 Inter, sans-serif; letter-spacing: .02em; color: #e9efff; background: linear-gradient(180deg, #34406a, #1b2340); border: .6cqw solid rgba(160, 185, 255, .6); box-shadow: 0 2px 6px rgba(0, 0, 0, .5); white-space: nowrap; pointer-events: none; }
+.card .cprog.max { color: #2a1a00; background: linear-gradient(180deg, #ffe28a, #e0a82b); border-color: #fff1b8; }
+.pdup { font-weight: 800; }

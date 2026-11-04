@@ -1,6 +1,9 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-04', tag: 'Cambio', title: 'Progreso de copias',
+      items: ['Al abrir un sobre, las cartas repetidas muestran «¡Copia!» con tu progreso hacia la siguiente mejora (por ejemplo 3/4 para ★3).',
+        'En la colección, cada carta que tienes muestra cuántas copias llevas hasta la siguiente mejora (1/2 para ★2, 2/4 o 3/4 para ★3) y «MÁX» cuando ya está al máximo.'] },
     { date: '2026-11-04', tag: 'Cambio', title: 'Copias de cartas nivel 3 = oro',
       items: ['Si ya tienes una carta a nivel 3, las copias que te salgan en los sobres te dan 5 monedas, sea cual sea su rareza (antes no servían para nada).'] },
     { date: '2026-11-04', tag: 'Novedad', title: 'Sortear victoria',

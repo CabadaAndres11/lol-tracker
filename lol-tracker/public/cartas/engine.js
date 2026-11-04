@@ -858,7 +858,7 @@
         if (has(d, 'KOI') && tt2['KOI']) {
           var kb = FX.koi.atk[tt2['KOI'] - 1];
           mesaTroops(s.p[d.owner]).forEach(function (i) { gainCap(i, 'koi', 'atk', kb, FX.koi.cap); });
-          line += ' KOI anima al equipo: +' + kb + ' de ataque.';
+          line += ' KOI anima al equipo: +' + kb + ' de ataque permanente (tope +' + FX.koi.cap + ' por tropa).';
           fxk = { type: 'koi', side: d.owner, title: '¡KOI anima al equipo!', sub: '+' + kb + ' ataque permanente', uids: mesaTroops(s.p[d.owner]).map(function (i) { return i.uid; }), neg: false };
           // Herencia: parte del ataque de la KOI caída pasa, solo durante esta ronda, a una KOI viva al azar
           var heirs = mesaTroops(s.p[d.owner]).filter(function (i) { return has(i, 'KOI') && i !== d; });

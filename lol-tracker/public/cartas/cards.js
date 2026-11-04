@@ -105,7 +105,7 @@ var D={
    "size": 2,
    "pas": {
     "n": "Heredero",
-    "t": "Si está vivo en la mesa, él es siempre el objetivo de la herencia de ataque de las KOI que caen."
+    "t": "Si está vivo en la mesa, él es siempre el objetivo de la herencia de ataque (solo durante esa ronda) de las KOI que caen."
    }
   },
   {
@@ -925,7 +925,7 @@ var D={
    "type": "accion",
    "size": 1,
    "target": "none",
-   "text": "Esta ronda, las KOI que caigan ceden todo su ataque en la herencia, sea cual sea tu nivel (necesitas el nivel 1 de KOI).",
+   "text": "Esta ronda, las KOI que caigan ceden todo su ataque en la herencia (solo durante esa ronda), sea cual sea tu nivel (necesitas el nivel 1 de KOI).",
    "theme": "KOI"
   },
   {
@@ -1115,8 +1115,8 @@ var D={
    "color": "#fb923c",
    "tx": [
     "Cuando muere una KOI, tus tropas vivas ganan +1 ataque permanente (tope +5 por tropa) y la mitad de su ataque pasa, solo durante esa ronda, a una KOI viva al azar.",
-    "+1 ataque permanente (tope +5) y 3/4 de su ataque pasan a una KOI viva al azar.",
-    "+2 ataque permanente (tope +5) y todo su ataque pasa a una KOI viva al azar."
+    "+1 ataque permanente (tope +5) y 3/4 de su ataque pasan, solo durante esa ronda, a una KOI viva al azar.",
+    "+2 ataque permanente (tope +5) y todo su ataque pasa, solo durante esa ronda, a una KOI viva al azar."
    ]
   },
   "Magic Botlane": {

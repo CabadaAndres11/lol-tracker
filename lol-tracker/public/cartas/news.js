@@ -1,6 +1,10 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-04', tag: 'Corrección', title: 'KOI: textos revisados',
+      art: ['aitorlg-koisito'],
+      items: ['Revisados los textos de KOI: la herencia de ataque indica ahora en todos los niveles, en Heredero y en Campeones de Europa que dura solo esa ronda.',
+        'El aviso en partida del refuerzo al equipo precisa que es permanente (con tope +5 por tropa), que es lo que hace de verdad. No se ha cambiado ningún efecto.'] },
     { date: '2026-11-04', tag: 'Cambio', title: 'Logo de Magic Botlane',
       art: ['javihi-duo', 'sech-duo'],
       items: ['La sinergia Magic Botlane estrena su logo, que aparece en las etiquetas de las cartas, la colección, las guías de sinergia y el resto de pantallas.'] },

@@ -2778,3 +2778,20 @@ body.soc-open #app { margin-right: 286px; }
 .i21 .i20gk.x b { color: #fff; animation: none; text-shadow: 0 0 1cqw #be123c; }
 .i21 .i20gk.g { background: radial-gradient(circle at 40% 35%, #fff 0 12%, #fef08a 30%, #eab308 58%, rgba(161,98,7,.25) 72%); box-shadow: 0 0 3cqw #eab308, 0 0 7cqw rgba(253,224,71,.5); }
 .i21 .i20gk.g b { color: #713f12; animation: none; text-shadow: 0 0 1cqw #fff; }
+
+/* ---------- Charla con los Desarrolladores (2.1): Petea Goblin y nuevos efectos ---------- */
+.dcc.p { left: 3%; bottom: 20%; height: 66%; opacity: 0; filter: brightness(.45) saturate(.6); transform: translateY(8%) scale(.94); pointer-events: none; }
+.devchat[data-w="p"] .dcc.p { opacity: 1; filter: drop-shadow(0 0 14px rgba(132,204,22,.75)); transform: none; animation: dcpet .5s cubic-bezier(.2,1.5,.4,1); }
+.devchat[data-w="p"] .dcc.l { opacity: 0; transform: translateX(-12%) scale(.9); }
+@keyframes dcpet { from { opacity: 0; transform: translateY(35%) rotate(-6deg) scale(.85); } }
+.devchat[data-w="p"] .dcname { background: #4d7c0f; }
+.dcfx .fxgrid.gone .ctp { border-color: #f87171; animation: dcgray 1.4s ease-out .5s both; }
+.dcfx .fxgrid.gone .cts { background: #dc2626; border-color: #fecaca; color: #fff; }
+.dcfx .nsy.t { --a: #a3a3a3; --b: #262626; } .dcfx .nsy.r { --a: #f87171; --b: #7f1d1d; } .dcfx .nsy.u { --a: #fbbf24; --b: #78350f; }
+.dcfx .nsy span .ic, .dcfx .nsy span svg, .dcfx .nsy span img { width: 62%; height: 62%; object-fit: contain; }
+.dcfx .fxrow.cmb { align-items: center; gap: 1.4cqw; } .dcfx .plus { font: 900 4cqw/1 Inter, sans-serif; color: #fde047; text-shadow: 0 0 1.4cqw #eab308; font-style: normal; animation: dcpulse 1.4s ease-in-out infinite; }
+.dcfx .kda { width: 24cqw; height: auto; filter: drop-shadow(0 0 1.6cqw rgba(125,90,255,.8)); animation: i20pop .6s cubic-bezier(.2,1.4,.4,1) .2s both, dcpulse 2.4s ease-in-out 1s infinite; }
+.dcfx .kda.s { width: 15cqw; align-self: center; margin-right: .6cqw; }
+.dcfx .fxrow.collab { align-items: center; gap: 1.2cqw; }
+.dcfx .fxrar.rk .rr.gift i { background: linear-gradient(160deg, #f0abfc, #7e22ce); border: .25cqw solid #f5d0fe; display: grid; place-items: center; font: 900 3.4cqw/1 Inter, sans-serif; color: #fff; font-style: normal; animation: dcblink 1.2s steps(1) infinite; }
+.rnmain.chatnews .cnc.c3 { right: 17%; bottom: -6%; height: 50%; z-index: 2; }

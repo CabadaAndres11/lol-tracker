@@ -1008,7 +1008,8 @@
   function themeCards(t) { return D.cards.filter(function (c) { return c.themes.indexOf(t) >= 0; }).concat(D.actions.filter(function (a) { return a.theme === t; })); }
   var RARS = ['Común', 'Rara', 'Épica', 'Legendaria'], RCOL = { 'Común': '#9ca3af', 'Rara': '#60a5fa', 'Épica': '#c084fc', 'Legendaria': '#fbbf24' };
   // Cada Correa tiene su novia: una miniatura en la carta permite alternar entre los dos
-  var GIRL = { 'lihone-correa': 'eriko', 'dashlight-correa': 'helena', 'potango': 'lucia', 'chipy-correa': 'ari' };
+  var GIRL = { 'lihone-correa': 'eriko', 'dashlight-correa': 'helena', 'potango': 'lucia', 'chipy-correa': 'ari', 'hellbramn-goblin': 'rey-goblin', 'mertens-goblin': 'rey-goblin', 'lihone-goblin': 'rey-goblin', 'petea-goblin': 'rey-goblin', 'sech-duo': 'torreta-lunar' };
+  var ALTWHO = { 'eriko': ', su novia', 'helena': ', su novia', 'lucia': ', su novia', 'ari': ', su novia', 'rey-goblin': '', 'torreta-lunar': '' };
   function cprogHtml(id) {
     var pr = copyProg(copiesOf(id));
     return '<span class="cprog' + (pr.max ? ' max' : '') + '" title="' + (pr.max ? 'Nivel máximo' : 'Copias hasta ★' + pr.next + ': ' + pr.n + ' de ' + pr.need) + '">' + (pr.max ? 'MÁX' : pr.n + '/' + pr.need) + '</span>';
@@ -1017,7 +1018,7 @@
     var own = owns(c.id), gid = GIRL[c.id], show = c, thumb = '';
     if (gid) {
       var girlView = !!(ui.novView && ui.novView[c.id]);
-      thumb = '<span class="novt" data-act="novtog" data-id="' + c.id + '" title="' + (girlView ? 'Ver a ' + esc(c.name) : 'Ver a ' + esc(CARD[gid].name) + ', su novia') + '"><img src="/cartas/art/' + (girlView ? c.id : gid) + '.webp" alt=""></span>';
+      thumb = '<span class="novt' + (ALTWHO[gid] ? '' : ' alt') + '" data-act="novtog" data-id="' + c.id + '" title="' + (girlView ? 'Ver a ' + esc(c.name) : 'Ver a ' + esc(CARD[gid].name) + ALTWHO[gid]) + '"><img src="/cartas/art/' + (girlView ? c.id : gid) + '.webp" alt=""></span>';
       if (girlView) show = CARD[gid];
     }
     return cardHtml(show, { skin: '', lv: own ? lvOf(c.id) : 1, size: true, cls: own ? '' : 'locked', extra: thumb + (own ? cprogHtml(c.id) : '<span class="lockb">' + ic('candado') + '</span>'), attrs: 'data-act="zoom" data-id="' + show.id + '" data-skin="" title="Ver en 3D"', tag: 'button' });

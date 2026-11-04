@@ -1,6 +1,10 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-04', tag: 'Mejora', title: 'Colección: ver al Rey Goblin y la Torreta Lunar',
+      art: ['rey-goblin', 'torreta-lunar'],
+      items: ['Igual que con las novias de Correa, las cuatro cartas Goblin tienen una miniatura en la parte baja de la carta que alterna entre la carta y el «Rey Goblin».',
+        'Sech Dúo tiene la suya para ver la «Torreta Lunar». Pulsa de nuevo la miniatura para volver a la carta original.'] },
     { date: '2026-11-04', tag: 'Novedad', title: 'Nuevos efectos de oro: Lluvia de monedas y Moneda de oro',
       art: ['petea-goblin'],
       items: ['Nuevo despliegue «Lluvia de monedas» (30 monedas): la carta cae desde arriba entre una lluvia de monedas de oro y vuela a su hueco con un estallido de monedas.',

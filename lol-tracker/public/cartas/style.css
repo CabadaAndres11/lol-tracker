@@ -2755,3 +2755,4 @@ body.soc-open #app { margin-right: 286px; }
   linear-gradient(150deg, #ffe680, #f2b01e 38%, #b97a08 62%, #ffd95a 86%, #fff1a8); }
 .slv-moneda .slvback { box-shadow: 0 0 0 1px #7a4d05, 0 12px 24px rgba(0,0,0,.55), 0 0 22px rgba(255,200,50,.6); }
 .slv-moneda .slvback span { display: none; }
+.card .novt.alt { border-color: #fcd34d; }

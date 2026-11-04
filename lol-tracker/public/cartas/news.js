@@ -1,6 +1,19 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-04', tag: 'Mejora', title: 'Tienda más limpia: sin textos descriptivos',
+      items: ['Se eliminan los textos descriptivos de la tienda (sobres, efectos, skins, cartas y destacados) para que los cuadros ocupen todos lo mismo: ahora los tres sobres tienen el mismo tamaño.',
+        'Los efectos siguen mostrando nombre, precio y el botón «Probar». Las descripciones completas siguen en Colección → Efectos.'] },
+    { date: '2026-11-04', tag: 'Cambio', title: 'Trabajo: mucho más oro',
+      items: ['Nivel 1 (2 cartas): +2 de oro por ronda. Nivel 2 (4 cartas): +4 de oro por ronda. Nivel 3 (6 cartas): +6 de oro por ronda y +5 al abrir cada tienda (antes +1 por ronda y +2 en la tienda).',
+        'Además, el oro de Trabajo ya no anula el interés por ahorrar: ahora se suman.'] },
+    { date: '2026-11-04', tag: 'Novedad', title: 'Nueva acción Goblins: Reparto de Botín',
+      art: ['mertens-goblin'],
+      items: ['«Reparto de Botín» (coste 2, Rara, Goblins): eliges un Goblin desplegado en tu mesa y recibes una copia suya a nivel 1 en tu mano.',
+        'Sale en el sobre Set 2; no se vende en la tienda.'] },
+    { date: '2026-11-04', tag: 'Corrección', title: 'La Torreta Lunar ya no escala con el nivel',
+      art: ['torreta-lunar'],
+      items: ['Las estadísticas de la Torreta Lunar de Crescendum son siempre 7/7, sin importar el nivel de Sech Dúo ni de la partida.'] },
     { date: '2026-11-04', tag: 'Mejora', title: 'Colección: ver al Rey Goblin y la Torreta Lunar',
       art: ['rey-goblin', 'torreta-lunar'],
       items: ['Igual que con las novias de Correa, las cuatro cartas Goblin tienen una miniatura en la parte baja de la carta que alterna entre la carta y el «Rey Goblin».',

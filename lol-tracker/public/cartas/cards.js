@@ -997,6 +997,18 @@ var D={
    "theme": "Gambling"
   },
   {
+   "id": "reparto-de-botin",
+   "pack": "set2",
+   "name": "Reparto de Botín",
+   "cost": 2,
+   "rarity": "Rara",
+   "type": "accion",
+   "size": 1,
+   "target": "ally",
+   "text": "Recibes una copia a nivel 1 de un Goblin desplegado en tu mesa.",
+   "theme": "Goblins"
+  },
+  {
    "id": "mordisco-del-invierno",
    "pack": "set2",
    "name": "Mordisco Del Invierno",
@@ -1141,9 +1153,9 @@ var D={
    ],
    "color": "#a3a3a3",
    "tx": [
-    "Con una Trabajo en mesa: +1 oro cada 2 rondas.",
-    "+1 oro por ronda.",
-    "+1 oro por ronda y +2 al abrir cada tienda."
+    "Con una Trabajo en mesa: +2 de oro por ronda.",
+    "+4 de oro por ronda.",
+    "+6 de oro por ronda y +5 al abrir cada tienda."
    ]
   },
   "Anime": {

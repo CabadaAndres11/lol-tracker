@@ -55,7 +55,7 @@
   function tic(t) { return TIMG[t] ? '<img class="ic tic timg" src="/cartas/img/' + TIMG[t] + '.png" alt="">' : ic('t-' + t, 'tic'); }
   function tagHtml(t) { return '<span class="tag" style="--tc:' + D.themes[t].color + '">' + tic(t) + esc(t) + '</span>'; }
   function pips(n) { var h = ''; for (var k = 0; k < 3; k++) h += '<i' + (k < n ? ' class="on"' : '') + '></i>'; return h; }
-  var AICON = { 'mordisco-del-invierno': 'candado', entrenamiento: 'espadas', arenga: 'megafono', armadura: 'escudo', banquete: 'carne', intimidacion: 'enfado', 'mal-de-ojo': 'ojo', 'golpe-certero': 'diana', lluvia: 'arco',
+  var AICON = { 'mordisco-del-invierno': 'candado', 'reparto-de-botin': 'moneda', entrenamiento: 'espadas', arenga: 'megafono', armadura: 'escudo', banquete: 'carne', intimidacion: 'enfado', 'mal-de-ojo': 'ojo', 'golpe-certero': 'diana', lluvia: 'arco',
     'bola-extra': 'beisbol', 'segundo-aliento': 'viento', 'cambio-de-linea': 'cambio', parche: 'disquete', 'horas-extra': 'maletin', 'segunda-temporada': 'trofeo', 'campeones-de-europa': 'trofeo', 'remate-doble': 'voley', 'cita-sorpresa': 'corazon', 'golpe-de-suerte': 'dado', genkidama: 'fuego', remedio: 'corazon', kamehameha: 'estrella' };
   var ARTS = {"torreta-lunar":1,"rey-goblin":1,"petea-goblin":1,"hellbramn-goblin":1,"mertens-goblin":1,"lihone-goblin":1,"aitorlg-maomao":1,"chipy-goku":1,"dashlight-sun-jin-woo":1,"javihi-smiley":1,"lihone-rudeus":1,"mertens-meliodas":1,"pampert-asta":1,"eriko":1,"helena":1,"lucia":1,"ari":1,"aitorlg-koisito":1,"aitorlg-regla":1,"aitorlg-renata":1,"chipy-correa":1,"computer-chipy":1,"computer-dashlight":1,"computer-hellbramn":1,"computer-lihone":1,"computer-petea":1,"dashlight-akali":1,"dashlight-correa":1,"hellbramn":1,"javihi":1,"javihi-duo":1,"javihi-friki":1,"javihi-koisito":1,"lihone":1,"lihone-correa":1,"lihone-viego":1,"mertens":1,"mertens-gambler":1,"pampert-gambler":1,"pampert":1,"pampert-friki":1,"pampert-koisito":1,"petea-koisito":1,"petea-pokemaniaco":1,"potango":1,"sech":1,"sech-duo":1,"sech-koisito":1,"sech-thresh":1};
   // Nivel de carta por repetidas: 2 copias = ★2, 4 copias = ★3
@@ -833,7 +833,7 @@
   function skinShop(a) {
     var SK = (window.CARTAS_SKINS || []).filter(function (k) { return !k.pass; });
     if (!SK.length) return '';
-    return '<div class="panel skinshop"><h2>' + ic('estrella') + ' Skins</h2><p class="mut">Cambian solo la ilustración de una carta. Necesitas tener la carta. Se ven en tus partidas.</p><div class="skgrid">' + SK.map(function (s) {
+    return '<div class="panel skinshop"><h2>' + ic('estrella') + ' Skins</h2><div class="skgrid">' + SK.map(function (s) {
       var c = CARD[s.card], hasCard = a.owned.indexOf(s.card) >= 0, own = (a.skins || []).indexOf(s.id) >= 0, eq = a.skinSel && a.skinSel[s.card] === s.id;
       var btn = own ? (eq ? '<button class="btn sec sm" data-act="skinequip" data-skin="" data-card="' + s.card + '">' + ic('check') + ' Equipada · usar clásica</button>' : '<button class="btn sm" data-act="skinequip" data-skin="' + s.id + '" data-card="' + s.card + '">Equipar</button>')
         : !hasCard ? '<button class="btn sm" disabled>Necesitas la carta</button>'
@@ -846,7 +846,7 @@
     if (!L.length) return '';
     var sub = ui.cardSub === 'acc' ? 'acc' : 'tro', list = L.filter(function (it) { return (CARD[it.id].type === 'accion') === (sub === 'acc'); });
     var tabs = '<div class="subtabs"><button class="' + (sub === 'tro' ? 'on' : '') + '" data-act="cardsub" data-t="tro">Tropas</button><button class="' + (sub === 'acc' ? 'on' : '') + '" data-act="cardsub" data-t="acc">Acciones</button></div>';
-    return '<div class="panel skinshop"><h2>' + ic('estrella') + ' Cartas nuevas</h2><p class="mut">Cartas recién añadidas que puedes comprar directamente con monedas.</p>' + tabs + (list.length ? '<div class="skgrid">' + list.map(function (it) {
+    return '<div class="panel skinshop"><h2>' + ic('estrella') + ' Cartas nuevas</h2>' + tabs + (list.length ? '<div class="skgrid">' + list.map(function (it) {
       var c = CARD[it.id], own = a.owned.indexOf(it.id) >= 0;
       var btn = own ? '<button class="btn sec sm" disabled>' + ic('check') + ' Ya la tienes</button>'
         : '<button class="btn sm" data-act="cardbuy" data-card="' + it.id + '"' + (a.coins < (a.admin ? 0 : it.price) ? ' disabled' : '') + '>Comprar · ' + (a.admin ? 'gratis' : it.price + ' ' + ic('moneda')) + '</button>';
@@ -890,7 +890,7 @@
     var sel = Math.min(ui.shopSel || 0, F.length - 1), cur = featInfo(F[sel], a), tint = cur.card.themes && cur.card.themes[0] && D.themes[cur.card.themes[0]] ? D.themes[cur.card.themes[0]].color : (cur.card.theme && D.themes[cur.card.theme] ? D.themes[cur.card.theme].color : '#a78bfa');
     var banner = '<div class="shban' + (cur.art ? ' hasart' : ' nocard') + '" style="--tint:' + tint + ';' + (cur.art ? '--shart:url(/cartas/art/' + cur.art + '.webp)' : '') + '" key="' + sel + '">' +
       (cur.art ? '' : '<div class="shcard">' + cardHtml(cur.card, { lv: 1 }) + '</div>') +
-      '<div class="shtxt"><span class="shk">' + cur.kicker + '</span><h2>' + esc(cur.title) + '</h2><p>' + esc(cur.sub) + '</p><div class="shact">' + cur.btn + (a.admin ? '' : '') + '<span class="shpr">' + (cur.price ? ic('moneda') + ' ' + cur.price : '') + '</span><button class="btn sec sm" data-act="zoom" ' + cur.zoom + ' title="Ver ampliada en 3D">' + ic('ojo') + ' Ver en 3D</button></div></div>' +
+      '<div class="shtxt"><span class="shk">' + cur.kicker + '</span><h2>' + esc(cur.title) + '</h2><div class="shact">' + cur.btn + (a.admin ? '' : '') + '<span class="shpr">' + (cur.price ? ic('moneda') + ' ' + cur.price : '') + '</span><button class="btn sec sm" data-act="zoom" ' + cur.zoom + ' title="Ver ampliada en 3D">' + ic('ojo') + ' Ver en 3D</button></div></div>' +
       '<div class="shdots">' + F.map(function (x, k) { return '<button class="' + (k === sel ? 'on' : '') + '" data-act="shopsel" data-i="' + k + '">' + (k + 1) + '</button>'; }).join('') + '</div></div>';
     var tiles = [{ pack: 'set1' }, { pack: 'anime' }, { pack: 'set2' }].concat(F.map(function (x, k) { return { f: x, k: k }; }).filter(function (t) { return t.k !== sel; }).slice(0, 1));
     var side = '<div class="shtiles">' + tiles.map(function (t) {
@@ -911,16 +911,16 @@
     var sec = ui.shopFxSec === 'sleeve' || ui.shopFxSec === 'finish' ? ui.shopFxSec : 'deploy';
     var T = [['deploy', 'Despliegues'], ['sleeve', 'Fundas'], ['finish', 'Victoria y derrota']];
     var nav = '<nav class="fxnav">' + T.map(function (t) { return '<button class="' + (t[0] === sec ? 'on' : '') + '" data-act="shopfxsec" data-t="' + t[0] + '">' + t[1] + '</button>'; }).join('') + '</nav>', body;
-    if (sec === 'sleeve') body = '<h2 class="dedh">Fundas</h2><p class="mut colhint">Cambian el borde de tus cartas en la partida y el reverso al abrir sobres. Pruébalas antes de comprar; una vez tuyas, las equipas en Colección → Efectos.</p>' + slvDemo() + '<div class="fxlist">' + fxItems('shop', 'sleeve') + '</div>';
-    else if (sec === 'finish') body = '<h2 class="dedh">Victoria y derrota</h2><p class="mut colhint">Cada pack trae la animación de victoria y la de derrota, con banner y efectos propios. Pruébalo antes de comprar; una vez tuyo, lo equipas en Colección → Efectos.</p><div class="fxlist">' + fxItems('shop', 'finish') + '</div>' + finPrevHtml();
-    else body = '<h2 class="dedh">Despliegues</h2><p class="mut colhint">Cambian cómo aparecen tus cartas en la mesa. Pruébalos antes de comprar; una vez tuyos, los equipas en Colección → Efectos.</p>' + fxDemo() + '<div class="fxlist">' + fxItems('shop', 'deploy') + '</div>';
+    if (sec === 'sleeve') body = '<h2 class="dedh">Fundas</h2>' + slvDemo() + '<div class="fxlist">' + fxItems('shop', 'sleeve') + '</div>';
+    else if (sec === 'finish') body = '<h2 class="dedh">Victoria y derrota</h2><div class="fxlist">' + fxItems('shop', 'finish') + '</div>' + finPrevHtml();
+    else body = '<h2 class="dedh">Despliegues</h2>' + fxDemo() + '<div class="fxlist">' + fxItems('shop', 'deploy') + '</div>';
     return '<div class="fxlayout">' + nav + '<div class="fxmain">' + body + '</div></div>';
   }
   function packPanel(a, pk) {
     var can = a.coins >= a.packCost && !ui.pack;
     var name = pk === 'anime' ? 'Sobre Anime' : pk === 'set2' ? 'Set 2' : 'Set 1';
     var txt = pk === 'anime' ? ' cartas al azar de la sinergia Anime (sus tropas y su acción). ' : pk === 'set2' ? ' cartas al azar de las sinergias Goblins y Magic Botlane (sus tropas y su acción). ' : ' cartas al azar del juego (tropas y acciones, sin las sinergias Anime ni las cartas Goblins y Magic Botlane del Set 2). ';
-    return '<div class="panel packbox">' + bpkHtml('', pk) + '<h2>' + name + '</h2><p class="mut">' + a.packSize + txt + 'La última siempre es Rara o mejor. Las cartas que ya tengas suben su nivel.</p>' +
+    return '<div class="panel packbox">' + bpkHtml('', pk) + '<h2>' + name + '</h2>' +
       '<button class="btn cta big" data-act="openpack" data-pack="' + pk + '"' + (can ? '' : ' disabled') + '>' + (a.packCost ? 'Abrir sobre · ' + a.packCost + ' ' + ic('moneda') + '' : 'Abrir sobre · gratis') + '</button>' + (a.coins < a.packCost ? '<p class="mut">Te faltan ' + (a.packCost - a.coins) + ' monedas.</p>' : '') + '</div>';
   }
   function packsTab(a) {
@@ -2163,7 +2163,7 @@ var GOB_SVG = '<svg class="gobsvg" viewBox="0 0 100 100"><g class="gobleg a"><re
       var eq = e.id === cur, has = fxHas(e.id) || e.price === 0, btn;
       if (where === 'shop') btn = has ? '<button class="btn sec sm" disabled>' + ic('check') + ' Ya lo tienes</button>' : '<button class="btn sm" data-act="fxbuy" data-id="' + e.id + '"' + (a.coins < (a.admin ? 0 : e.price) ? ' disabled' : '') + '>Comprar · ' + (a.admin ? 'gratis' : e.price + ' ' + ic('moneda')) + '</button>';
       else btn = eq ? '' : has ? '<button class="btn sm" data-act="fxequip" data-kind="' + kind + '" data-id="' + e.id + '">Equipar</button>' : '<button class="btn sm" disabled title="Cómpralo en la tienda">' + ic('candado') + (e.pass ? ' Pase de batalla' : ' Sin comprar') + '</button>' + (e.pass ? '' : '<button class="btn sec sm" data-act="fxgoshop">Ir a la tienda</button>');
-      return '<div class="fxitem' + (eq && where === 'col' ? ' eq' : '') + (has ? '' : ' nofx') + '"><div class="fxinfo"><b>' + esc(e.name) + (eq && where === 'col' ? ' <span class="fxbadge">' + ic('check') + ' Equipado</span>' : '') + (has || e.price === 0 ? '' : e.pass ? ' <span class="fxprice">Pase de batalla</span>' : ' <span class="fxprice">' + e.price + ' ' + ic('moneda') + '</span>') + '</b><span class="mut">' + esc(e.desc) + '</span></div><div class="fxbtns"><button class="btn sec sm" data-act="' + prev + '" data-id="' + e.id + '">' + ic('ojo') + ' Probar</button>' + btn + '</div></div>';
+      return '<div class="fxitem' + (eq && where === 'col' ? ' eq' : '') + (has ? '' : ' nofx') + '"><div class="fxinfo"><b>' + esc(e.name) + (eq && where === 'col' ? ' <span class="fxbadge">' + ic('check') + ' Equipado</span>' : '') + (has || e.price === 0 ? '' : e.pass ? ' <span class="fxprice">Pase de batalla</span>' : ' <span class="fxprice">' + e.price + ' ' + ic('moneda') + '</span>') + '</b>' + (where === 'shop' ? '' : '<span class="mut">' + esc(e.desc) + '</span>') + '</div><div class="fxbtns"><button class="btn sec sm" data-act="' + prev + '" data-id="' + e.id + '">' + ic('ojo') + ' Probar</button>' + btn + '</div></div>';
     }).join('');
   }
   function effectsTab() {

@@ -18,7 +18,7 @@
     pokemon: { cap: 1e9, probs: [[70, 25, 5], [45, 40, 15], [25, 45, 30]], bonus: [0, 1, 2], names: ['Pokéball', 'Superball', 'Ultraball'] },
     comebacker: { atk: [1, 2, 2], others: [0, 0, 1], cap: 8 },
     lol: { atk: [1, 1, 2], hp: [0, 1, 2], cap: [4, 6, 8] },
-    trabajo: { shop: [0, 0, 2] },
+    trabajo: { inc: [2, 4, 6], shop: [0, 0, 5] },
     anime: { store: [0.5, 0.75, 1] }, // Genkidama: fracción del daño recibido que almacenan las Anime, por nivel
     koi: { atk: [1, 1, 2], cap: 5, heir: [0.5, 0.75, 1] }, // mejora al caer (tope por tropa) + herencia: % del ataque de la KOI caída pasa, solo esa ronda, a una KOI viva al azar
     voley: { atk: [1, 2, 3], red: [1, 1, 2], cap: 8 },
@@ -105,7 +105,7 @@
   function lunarSync(s, p) {
     var P = s.p[p], t = P.mesa[6];
     var on = P.arma === 'crescendum' && P.mesa.some(function (i) { return i && !i.dead && PAS[i.id] === 'armas'; });
-    if (on && !t) { var tu = mk(s, 'torreta-lunar', p); tu.turret = true; P.mesa[6] = tu; }
+    if (on && !t) { var tu = mk(s, 'torreta-lunar', p); tu.perm = { atk: 0, hp: 0 }; tu.hp = CARD['torreta-lunar'].hp; tu.turret = true; P.mesa[6] = tu; }
     else if (!on && t && t.turret) { delete P.target[t.uid]; P.mesa[6] = null; }
   }
   // Mejora del hueco 5 (acción Regalo): la tiene el hueco, no la novia. Se aplica a la novia que lo ocupe y se retira al salir.
@@ -204,8 +204,7 @@
     P.lastInt = ik; extra += ik;
     if (mesaTroops(P).some(function (i) { return has(i, 'Trabajo'); })) {
       var tw = t['Trabajo'] || 0;
-      if (tw === 1 && s.round % 2 === 0) extra = 1;
-      else if (tw >= 2) extra = 1;
+      if (tw >= 1) extra += FX.trabajo.inc[Math.min(tw, 3) - 1];
     }
     P.gold += g + extra;
     return g + extra;
@@ -487,6 +486,9 @@
     kamehameha: { ok: function (s, p) { if ((tiers(s.p[p])['Anime'] || 0) < 1) return 'Necesitas el nivel 1 de Anime (2 cartas distintas).'; if (genStored(s.p[p]) <= 0) return 'La Genkidama está vacía: tus Anime aún no han recibido daño.'; return targetable(s.p[1 - p]).length ? '' : 'El rival no tiene tropas.'; },
       run: function (s, p) { var P = s.p[p], tot = genStored(P), foes = targetable(s.p[1 - p]), n = Math.floor(tot / foes.length); P.gen = 0; foes.forEach(function (i) { genCharge(s, i, Math.min(n, Math.max(0, i.hp))); i.hp -= n; if (i.hp <= 0) dropDead(s, 1 - p, i); }); return n + ' de daño a cada tropa rival (Genkidama repartida: ' + tot + ')'; } },
     'golpe-certero': { run: function (s, p, t) { var n = sc(s, 6); genCharge(s, t, Math.min(n, Math.max(0, t.hp))); t.hp -= n; if (t.hp <= 0) dropDead(s, 1 - p, t); return n + ' de daño'; } },
+    'reparto-de-botin': {
+      ok: function (s, p, t) { if (!t || !has(t, 'Goblins')) return 'Elige un Goblin desplegado en tu mesa.'; return s.p[p].hand.length >= handCap(s) ? 'Tu mano está llena.' : ''; },
+      run: function (s, p, t) { var c = mk(s, t.id, p); s.p[p].hand.push(c); mergeCheck(s, p); return 'recibes una copia de ' + card(t).name + ' a nivel 1'; } },
     'mordisco-del-invierno': {
       ok: function (s, p, t) { if ((tiers(s.p[p])['Magic Botlane'] || 0) < 1) return 'Necesitas el nivel 1 de Magic Botlane (Javihi Dúo + Sech Dúo).'; return t && t.tmp.noAtk ? 'Esa tropa ya no puede actuar este turno.' : ''; },
       run: function (s, p, t) { t.tmp.noAtk = true; t.tmp.stun = true; return card(t).name + ' no podrá actuar en este combate'; } },

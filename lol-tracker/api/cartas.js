@@ -37,6 +37,7 @@ const levelOf = (u, id) => { const c = 1 + ((u.dups || {})[id] || 0); return c >
 const skinsOf = (u, deck) => { const o = {}; Object.keys(u.skinSel || {}).forEach((c) => { if (deck.includes(c) && (u.skins || []).includes(u.skinSel[c])) o[c] = u.skinSel[c]; }); return o; };
 const levelsOf = (u, deck) => { const o = {}; deck.forEach((id) => { const l = levelOf(u, id); if (l > 1) o[id] = l; }); return o; };
 const DUP_COINS = { 'Común': 0, 'Rara': 0, 'Épica': 0, 'Legendaria': 0 }; // las repetidas ya no dan monedas
+const MAXED_DUP_COINS = 5; // una copia de una carta que ya tienes a nivel 3 se canjea por monedas, sea cual sea su rareza
 const WEIGHTS = { 'Común': 50, 'Rara': 30, 'Épica': 15, 'Legendaria': 5 };
 const TOKEN_DAYS = 30;
 const MAX_FAILS = 10, BLOCK_SECONDS = 900;
@@ -155,6 +156,7 @@ function rollBox(u) {
   const pools = [['card', cards, 5], ['skin', skins, 3], ['fx', fxs, 2]].filter((p) => p[1].length);
   if (!pools.length) { // lo tiene todo: carta repetida
     const c = ALL[crypto.randomInt(0, ALL.length)];
+    if (levelOf(u, c.id) >= 3) { u.coins += MAXED_DUP_COINS; return { kind: 'card', id: c.id, isNew: false, dup: true, lvl: 3, lvlUp: false, coins: MAXED_DUP_COINS }; } // ya a nivel 3: la copia da oro
     u.dups = u.dups || {}; const before = levelOf(u, c.id); u.dups[c.id] = (u.dups[c.id] || 0) + 1;
     return { kind: 'card', id: c.id, isNew: false, dup: true, lvl: levelOf(u, c.id), lvlUp: levelOf(u, c.id) > before };
   }
@@ -923,10 +925,12 @@ module.exports = async function handler(req, res) {
         const isNew = u.owned.indexOf(id) < 0;
         let dup = 0;
         let lvl = 1, lvlUp = false, copies = 1;
+        let dupCoins = 0;
         if (isNew) u.owned.push(id);
+        else if (levelOf(u, id) >= 3) { dupCoins = MAXED_DUP_COINS; u.coins += dupCoins; lvl = 3; } // ya a nivel 3: la copia da oro
         else { u.dups = u.dups || {}; const before = levelOf(u, id); u.dups[id] = (u.dups[id] || 0) + 1; lvl = levelOf(u, id); lvlUp = lvl > before; }
-        if (!isNew) copies = 1 + u.dups[id]; else lvl = 1;
-        return { id, isNew, dupCoins: 0, lvl, lvlUp, copies };
+        if (!isNew) copies = 1 + ((u.dups || {})[id] || 0); else lvl = 1;
+        return { id, isNew, dupCoins, lvl, lvlUp, copies };
       });
       u.st = u.st || {}; u.st.packs = (u.st.packs || 0) + 1; seasonBump(u, 'packs');
       await saveUser(cfg, u);

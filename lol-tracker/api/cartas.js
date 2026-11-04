@@ -242,6 +242,11 @@ async function loadUser(cfg, name) {
     if ((u.owned || []).includes('haikyuu-lihone')) giveSkin(u, 'lihone-setter');
     await redis(cfg, ['SET', uKey(u.name), JSON.stringify(u)]);
   }
+  // Chipy Llorón (chipy-lloron) se eliminó: quien la tenía recibe su ilustración como skin de Chipy Correa en el inventario
+  if (u && ((u.owned || []).includes('chipy-lloron') || (u.dups || {})['chipy-lloron'] != null)) {
+    if ((u.owned || []).includes('chipy-lloron')) giveSkin(u, 'chipy-correa-lloron');
+    await redis(cfg, ['SET', uKey(u.name), JSON.stringify(u)]);
+  }
   const GONE = ['capitulo-especial', 'rabia-contenida', 'fiesta-del-pueblo', 'hermano-del-alma', 'sofa-compartido', 'madrugon', 'haikyuu-lihone', 'chipy-lloron']; // cartas eliminadas del juego
   if (u && ((u.owned || []).some((x) => GONE.includes(x)) || GONE.some((g) => JSON.stringify(u.decks || '').includes(g)))) {
     u.owned = (u.owned || []).filter((x) => !GONE.includes(x));

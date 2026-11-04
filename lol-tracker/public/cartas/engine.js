@@ -1166,6 +1166,12 @@
     var pool = goblinIds().filter(function (id) { return s.rumble || P.deck.indexOf(id) >= 0; });
     if (!pool.length) return;
     var id = pool[Math.floor(s.rng() * pool.length)];
+    if ((tiers(P)['Goblins'] || 0) === 1) { // nivel 1 (2 Goblins): 60 % Común, 30 % Rara, 10 % Épica (se reparte a partes iguales dentro de cada rareza)
+      var W = { 'Común': 60, 'Rara': 30, 'Épica': 10 }, cnt = {};
+      pool.forEach(function (x) { cnt[CARD[x].rarity] = (cnt[CARD[x].rarity] || 0) + 1; });
+      var ws = pool.map(function (x) { return (W[CARD[x].rarity] || 0) / cnt[CARD[x].rarity]; }), tot = ws.reduce(function (a, b) { return a + b; }, 0), r = s.rng() * tot;
+      if (tot > 0) { id = pool[pool.length - 1]; for (var q = 0; q < pool.length; q++) { r -= ws[q]; if (r < 0) { id = pool[q]; break; } } }
+    }
     P.hand.push(mk(s, id, p));
     if (p === 0 || s.pvp) say(s, pv(s, p, 'Sinergia Goblins: recibes una copia de ' + CARD[id].name + '.', 'El rival recibe un Goblin.'));
     mergeCheck(s, p);

@@ -1200,7 +1200,7 @@ var D={
    ],
    "color": "#84cc16",
    "tx": [
-    "Cada ronda (combate o tienda) consigues en tu mano una copia al azar de un Goblin (en clásico y Resurrección debe estar en tu mazo).",
+    "Cada ronda (combate o tienda) consigues en tu mano una copia de un Goblin: 60 % Común, 30 % Rara y 10 % Épica (en clásico y Resurrección debe estar en tu mazo). Con los 4 Goblins todos tienen la misma probabilidad.",
     "Cada vez que una carta Goblin sube de nivel ganas 5 de oro. Con los 4 Goblins en la mesa y todos al nivel 3, aparece el Rey Goblin en un hueco extra (50/50, Avaricia: el daño sobrante a una tropa golpea la vida del rival)."
    ]
   },

@@ -1,6 +1,10 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-04', tag: 'Equilibrio', title: 'Goblins: probabilidades de la copia gratuita',
+      art: ['petea-goblin'],
+      items: ['Con 2 Goblins distintos, la copia que recibes cada ronda es Común el 60 % de las veces, Rara el 30 % y Épica el 10 % (antes, cualquiera con la misma probabilidad).',
+        'Con los 4 Goblins, todos tienen la misma probabilidad.'] },
     { date: '2026-11-04', tag: 'Corrección', title: 'Goblins en Versus de 4',
       art: ['mertens-goblin'],
       items: ['Arreglado: en Versus de 4 la sinergia Goblins no entregaba la copia de un Goblin al empezar cada ronda. Ahora funciona igual que en 1 vs 1.'] },
@@ -14,7 +18,7 @@
     { date: '2026-11-04', tag: 'Novedad', title: '2.1 · Nueva sinergia: Goblins',
       art: ['hellbramn-goblin', 'mertens-goblin', 'lihone-goblin', 'petea-goblin', 'rey-goblin'],
       items: ['Cuatro cartas: Hellbramn Goblin y Mertens Goblin (Comunes), Lihone Goblin (Rara) y Petea Goblin (Épica). Salen en el sobre Set 2; no se venden en la tienda.',
-        'Con 2 Goblins distintos: cada ronda (combate o tienda) consigues una copia al azar de un Goblin en tu mano. En clásico y Resurrección debe estar en tu mazo.',
+        'Con 2 Goblins distintos: cada ronda (combate o tienda) consigues una copia de un Goblin en tu mano: 60 % Común, 30 % Rara y 10 % Épica (con los 4, todos igual de probables). En clásico y Resurrección debe estar en tu mazo.',
         'Con los 4 Goblins: cada vez que una carta Goblin sube de nivel ganas 5 de oro. Si los 4 están en la mesa y todos al nivel 3, aparece el Rey Goblin en un hueco extra: 50/50 con «Avaricia» (el daño sobrante a una tropa golpea directamente la vida del rival). Si cae, no vuelve en esa partida.',
         'Petea Goblin — Loot Infinito: los Goblins ganan +5/+5 por nivel de su carta durante el combate.',
         'Nueva acción «Reparto de Botín» (coste 2, Rara): recibes una copia a nivel 1 de un Goblin desplegado en tu mesa. Sale en el Set 2.',

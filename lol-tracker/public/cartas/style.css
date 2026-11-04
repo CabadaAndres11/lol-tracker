@@ -2668,3 +2668,13 @@ body.soc-open #app { margin-right: 286px; }
 .card .cprog { position: absolute; left: 3cqw; top: 25cqw; z-index: 4; padding: .5cqw 4cqw; border-radius: 999px; font: 800 9cqw/1.25 Inter, sans-serif; letter-spacing: .02em; color: #e9efff; background: linear-gradient(180deg, #34406a, #1b2340); border: .6cqw solid rgba(160, 185, 255, .6); box-shadow: 0 2px 6px rgba(0, 0, 0, .5); white-space: nowrap; pointer-events: none; }
 .card .cprog.max { color: #2a1a00; background: linear-gradient(180deg, #ffe28a, #e0a82b); border-color: #fff1b8; }
 .pdup { font-weight: 800; }
+
+/* Magic Botlane: Armas Lunares */
+.row4.ex3 { grid-template-columns: repeat(7, minmax(0, calc(var(--ch) * 5 / 7))); }
+@media (max-width: 720px) { .row4.ex3 { grid-template-columns: repeat(7, 1fr); } }
+.slot.nov.lun { border-color: #7dd3fc; color: #bae6fd; background: rgba(56,189,248,.1); }
+.slot .lunimg { display: block; margin: 0 auto 4px; max-width: 70%; max-height: 38px; object-fit: contain; }
+.wpnb { position: absolute; top: 4px; left: 4px; z-index: 6; display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 3px 4px 2px; border-radius: 8px; background: rgba(7,11,23,.82); border: 1px solid #7dd3fc; box-shadow: 0 0 10px rgba(125,211,252,.55); max-width: 62%; pointer-events: auto; }
+.wpnb img { width: 100%; max-height: 30px; object-fit: contain; display: block; }
+.wpnb b { font-size: .55rem; letter-spacing: .04em; color: #bae6fd; text-transform: uppercase; line-height: 1; }
+.card.turretc, .turretc .card { filter: saturate(.7) hue-rotate(160deg); box-shadow: 0 0 18px 2px rgba(56,189,248,.7); }

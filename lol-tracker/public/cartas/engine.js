@@ -138,7 +138,7 @@
   function rumbleDeck() { return DATA.cards.concat(DATA.actions).map(function (c) { return c.id; }); }
 
   function newPlayer(deck) {
-    return { life: CFG.life, gold: CFG.gold, deck: deck.slice(), hand: [], mesa: [null, null, null, null, null, null], nvs: [], novGiven: false, grave: [], target: {}, voley: {}, fl: {}, offers: [], refreshes: 0, pickUsed: false, anime: 0, gen: 0, lost: false };
+    return { life: CFG.life, gold: CFG.gold, deck: deck.slice(), hand: [], mesa: [null, null, null, null, null, null, null], nvs: [], novGiven: false, grave: [], target: {}, voley: {}, fl: {}, offers: [], refreshes: 0, pickUsed: false, anime: 0, gen: 0, lost: false };
   }
 
   function newGame(deckA, deckB, seed, opts) {
@@ -193,6 +193,7 @@
     s.round++;
     var shopRd = s.round % shopEvery(s) === 1;
     if (!shopRd) s.cn = (s.cn || 0) + 1; // combates jugados hasta ahora (las rondas de tienda no cuentan)
+    s.p.forEach(function (P) { pickArma(s, P); });
     s.first = ((s.cn || 0) + (shopRd ? 1 : 0) + (s.first0 || 0)) % 2; // en tienda: quién abrirá el próximo combate
     s.frames = [];
     s.shopOpen = false;
@@ -801,9 +802,24 @@
 
   // Efectos al caer una tropa (KOI). Devuelve texto de registro y animación.
   // ---------- Pasivas de legendarias ----------
-  var PAS = { 'dashlight-sun-jin-woo': 'sombra', 'aitorlg-maomao': 'boticaria', 'javihi-duo': 'duo', 'sech-duo': 'duo', 'javihi-prime': 'remate', 'sech': 'embargo', 'potango': 'aliento', 'mertens-prime': 'pereza', 'lihone-viego': 'racha', 'aitorlg-renata': 'prorroga', 'lihone': 'captura', 'pampert-koisito': 'cabezon', 'aitorlg-koisito': 'heredero', 'mertens-gambler': 'malaracha', 'computer-dashlight': 'medallas', 'pampert-gambler': 'colega' };
+  var PAS = { 'dashlight-sun-jin-woo': 'sombra', 'aitorlg-maomao': 'boticaria', 'javihi-duo': 'muro', 'sech-duo': 'armas', 'javihi-prime': 'remate', 'sech': 'embargo', 'potango': 'aliento', 'mertens-prime': 'pereza', 'lihone-viego': 'racha', 'aitorlg-renata': 'prorroga', 'lihone': 'captura', 'pampert-koisito': 'cabezon', 'aitorlg-koisito': 'heredero', 'mertens-gambler': 'malaracha', 'computer-dashlight': 'medallas', 'pampert-gambler': 'colega' };
   function pas(i) { return PAS[i.id] || ''; }
-  function duoLinked(s, i) { var o = i.id === 'javihi-duo' ? 'sech-duo' : 'javihi-duo'; return mesaTroops(s.p[i.owner]).some(function (x) { return x.id === o; }); }
+  // ---------- Magic Botlane: Armas Lunares (Sech Dúo) y Muro de Hielo (Javihi Dúo) ----------
+  var ARMAS = ['calibrum', 'severum', 'gravitum', 'infernum', 'crescendum'];
+  var ARMA_TX = { calibrum: '+5 de ataque esta ronda', severum: 'cura la mitad del daño que inflige', gravitum: 'retrasa al enemigo golpeado al último puesto', infernum: 'reparte su daño entre todos los enemigos', crescendum: 'hueco extra y torreta 7/7 esta ronda' };
+  var ARMA_NM = { calibrum: 'Calibrum', severum: 'Severum', gravitum: 'Gravitum', infernum: 'Infernum', crescendum: 'Crescendum' };
+  // Arma de la ronda de cada jugador: al azar, nunca la misma dos veces seguidas
+  function pickArma(s, P) {
+    var opts = ARMAS.filter(function (a) { return a !== P.arma; });
+    P.arma = opts[Math.floor(s.rng() * opts.length)];
+  }
+  // Magic Botlane activa y ambas vivas en la mesa: devuelve a Javihi Dúo para redirigir los ataques a Sech Dúo
+  function botlaneGuard(s, owner) {
+    if (!s.tiers || !s.tiers[owner] || !s.tiers[owner]['Magic Botlane']) return null;
+    var m = mesaTroops(s.p[owner]), j = m.filter(function (i) { return i.id === 'javihi-duo'; })[0];
+    return j && m.some(function (i) { return i.id === 'sech-duo'; }) && !immune(j) ? j : null;
+  }
+  function muroDmg(tgt, n) { return tgt.id === 'javihi-duo' && n > 0 ? Math.ceil(n / 2) : n; }
   // Prórroga (AitoRLG Renata): la tropa a su derecha no cae a 0 de vida hasta que haya atacado
   function wardSave(s, v) {
     if (v.dead || v.tmp.acted || v.tmp.noAtk) return false;
@@ -855,6 +871,18 @@
     startEffects(s);
     // Cabezón (Pampert Koisito): recibe 2 de daño menos por golpe
     [0, 1].forEach(function (p) { mesaTroops(s.p[p]).forEach(function (i) { if (pas(i) === 'cabezon') i.tmp.red += 2; }); });
+    // Armas Lunares (Sech Dúo): el arma de la ronda actúa al empezar el combate
+    [0, 1].forEach(function (p) {
+      var P = s.p[p], sd = mesaTroops(P).filter(function (i) { return pas(i) === 'armas'; })[0];
+      P.armaOn = sd ? P.arma : null;
+      if (!sd) return;
+      var an = ARMA_NM[P.arma];
+      if (P.arma === 'calibrum') { sd.tmp.atk += 5; fxFrame(s, p, 'armas', 'Armas Lunares · ' + an, '+5 de ataque esta ronda', [sd.uid]); }
+      else if (P.arma === 'crescendum') {
+        var tu = mk(s, 'torreta-lunar', p); tu.turret = true; P.mesa[6] = tu;
+        fxFrame(s, p, 'armas', 'Armas Lunares · ' + an, 'hueco extra y torreta 7/7 hasta el final de la ronda', [sd.uid, tu.uid]);
+      } else fxFrame(s, p, 'armas', 'Armas Lunares · ' + an, ARMA_TX[P.arma], [sd.uid]);
+    });
     var seq = order(s);
     // Remate doble: los Voley en ataque golpean dos veces; en defensa no atacan y reciben como mucho 1
     var dbl = {};
@@ -883,7 +911,13 @@
       if (P.target[a.uid]) tgt = foes.filter(function (f) { return f.uid === P.target[a.uid]; })[0] || null;
       if (!tgt && foes.length) { tgt = foes[Math.floor(s.rng() * foes.length)]; retarget = !!P.target[a.uid]; }
       if (!tgt && a.tmp.loan != null) delete a.tmp.loan;
-      var dmg = atk(a);
+      var redir = false;
+      if (tgt && tgt.id === 'sech-duo') { var bg = botlaneGuard(s, tgt.owner); if (bg && bg !== tgt) { tgt = bg; redir = true; } } // Magic Botlane: los ataques a Sech Dúo van a Javihi Dúo
+      var dmg = atk(a), splash = [], share = 0;
+      if (tgt && pas(a) === 'armas' && P.armaOn === 'infernum' && dmg > 0) { // Infernum: reparte el daño entre todos los enemigos
+        splash = foes.filter(function (f) { return f !== tgt; });
+        if (splash.length) { share = Math.max(1, Math.floor(dmg / (splash.length + 1))); dmg = Math.max(share, dmg - share * splash.length); }
+      }
       if (!tgt) {
         E.life -= dmg;
         frame(s, card(a).name + ' golpea directamente: ' + dmg + ' de daño a ' + pv(s, a.owner, 'la vida del rival', 'tu vida') + '.', { att: a.uid, life: 1 - a.owner, dmg: dmg });
@@ -895,11 +929,12 @@
       }
       var fxk = null, real = Math.max(0, dmg - tgt.tmp.red);
       if (tgt.tmp.cap1) real = Math.min(real, 1);
+      real = muroDmg(tgt, real); // Muro de Hielo (Javihi Dúo)
       var ariSave = false;
       if (real > 0 && mesaTroops(s.p[tgt.owner]).some(function (x) { return x.id === 'ari'; }) && s.rng() < FX.novias.ari[Math.max(0, (s.tiers[tgt.owner]['Correa'] || 1) - 1)]) { real = 0; ariSave = true; }
       genCharge(s, tgt, Math.min(real, Math.max(0, tgt.hp)));
       tgt.hp -= real;
-      var line = card(a).name + (retarget ? ' (su objetivo ya cayó) ataca a ' : ' ataca a ') + card(tgt).name + ': ' + real + ' de daño' + (tgt.tmp.red && real < dmg ? ' (reducido)' : '') + (ariSave ? ' (¡Ari lo evita!)' : '') + '.';
+      var line = card(a).name + (redir ? ' (redirigido por Magic Botlane) ataca a ' : retarget ? ' (su objetivo ya cayó) ataca a ' : ' ataca a ') + card(tgt).name + ': ' + real + ' de daño' + (tgt.tmp.red && real < dmg ? ' (reducido)' : '') + (ariSave ? ' (¡Ari lo evita!)' : '') + (tgt.id === 'javihi-duo' && real < dmg ? ' (Muro de Hielo)' : '') + '.';
       if (real > 0) {
         var ta = s.tiers[a.owner], tt = s.tiers[tgt.owner];
         if (has(a, 'Lol') && ta['Lol']) {
@@ -915,13 +950,8 @@
         tgt.dead = true; tgt.hp = 0; line += ' ¡Cae!';
         var df = deathFx(s, tgt); line += df.line; fxk = df.fx;
       }
-      // Pasivas al golpear (Dúo en sintonía, Embargo)
+      // Pasivas al golpear (Embargo)
       var plife = null, pdmg = 0;
-      if (real > 0 && pas(tgt) === 'duo' && duoLinked(s, tgt)) {
-        var dn = Math.ceil(real / 2);
-        line += ' Dúo en sintonía: ' + dn + ' de daño a todas las tropas rivales.';
-        mesaTroops(s.p[a.owner]).forEach(function (v) { line += passiveHit(s, v, dn, 0); });
-      }
       if (tgt.dead && pas(a) === 'sombra' && !isNov(tgt)) line += shadowRaise(s, a, tgt); // el soldado tiene su propio hueco extra: si ya había uno, el nuevo lo sustituye
       if (tgt.dead && pas(a) === 'embargo' && !a.dead) {
         E.life -= 2; P.gold += 1; plife = tgt.owner; pdmg = 2;
@@ -954,6 +984,23 @@
           else if (a.hp <= 0 && !a.dead) { a.dead = true; a.hp = 0; line += ' ¡Cae!'; var df2 = deathFx(s, a); line += df2.line; if (!fxk) fxk = df2.fx; }
         }
       }
+      if (pas(a) === 'armas' && !a.dead) {
+        if (P.armaOn === 'severum' && real > 0) { // Severum: se cura la mitad del daño realizado
+          var hl = Math.min(Math.ceil(real / 2), maxHp(a) - a.hp);
+          if (hl > 0) { a.hp += hl; line += ' Severum: ' + card(a).name + ' se cura ' + hl + '.'; }
+        }
+        if (P.armaOn === 'gravitum' && !tgt.dead && !tgt.tmp.acted && !tgt.tmp.noAtk) { // Gravitum: el enemigo golpeado pasa a actuar el último
+          var gc = 0; for (var gq = seq.length - 1; gq > n; gq--) if (seq[gq] === tgt) { seq.splice(gq, 1); gc++; }
+          if (gc) { for (var gk = 0; gk < gc; gk++) seq.push(tgt); line += ' Gravitum: ' + card(tgt).name + ' pasa a actuar el último.'; }
+        }
+        splash.forEach(function (v0) { // Infernum: el resto del daño se reparte
+          var v = v0; if (v.dead) return;
+          if (v.id === 'sech-duo') { var bg2 = botlaneGuard(s, v.owner); if (bg2) v = bg2; }
+          if (v.dead) return;
+          var sn = muroDmg(v, Math.max(0, share - v.tmp.red));
+          if (sn > 0) line += ' Infernum:' + passiveHit(s, v, sn, 0);
+        });
+      }
       if (pas(a) === 'remate') { // Javihi Prime: el balón rebota a otra tropa rival
         var rb = targetable(E).filter(function (x) { return x !== tgt; });
         if (rb.length) { var rv = rb[Math.floor(s.rng() * rb.length)], rn = Math.ceil(atk(a) / 2); line += ' Remate: rebota ' + rn + ' en ' + card(rv).name + '.'; line += passiveHit(s, rv, rn, 0); }
@@ -964,18 +1011,10 @@
       finishDying(a);
     }
     if (!s.over) {
-      var al = [mesaTroops(s.p[0]).length, mesaTroops(s.p[1]).length];
+      var al = [mesaTroops(s.p[0]).filter(function (i) { return !i.turret; }).length, mesaTroops(s.p[1]).filter(function (i) { return !i.turret; }).length];
       [0, 1].forEach(function (p) {
         var P = s.p[p], won = al[p] > al[1 - p];
         if (P.fl.work && won) { var wg = P.fl.work === true ? 5 : P.fl.work; P.gold += wg; fxFrame(s, p, 'trabajo', 'Horas extra', '+' + wg + ' de oro por ganar la ronda', []); }
-      });
-      // Dúo en sintonía: si acaban las dos vivas, el jugador se cura 1
-      [0, 1].forEach(function (p) {
-        var m = mesaTroops(s.p[p]);
-        if (m.some(function (i) { return i.id === 'javihi-duo'; }) && m.some(function (i) { return i.id === 'sech-duo'; })) {
-          var ML = s.maxLife || CFG.life;
-          if (s.p[p].life < ML) { s.p[p].life += 1; fxFrame(s, p, 'duo', 'Dúo en sintonía', '+1 de vida', m.filter(function (i) { return pas(i) === 'duo'; }).map(function (i) { return i.uid; })); }
-        }
       });
       [0, 1].forEach(function (p) { // Gambling: ronda sin daño directo a tu vida = orbes
         var P = s.p[p], g = gamState(P), hit = g.hit, t = (s.tiers && s.tiers[p] && s.tiers[p]['Gambling']) || tiers(P)['Gambling']; g.hit = false; // nivel con el que empezó el combate (aunque las Gambling hayan caído)
@@ -1018,6 +1057,7 @@
     s.p.forEach(function (P, pi) {
       P.mesa.forEach(function (i, k) {
         if (!i) return;
+        if (i.turret) { P.mesa[k] = null; delete P.target[i.uid]; return; } // la torreta de Crescendum dura solo una ronda
         if (i.shadow && (i.dead || i.hp <= 0)) { P.mesa[k] = null; delete P.target[i.uid]; return; } // el soldado de sombra caído desaparece (tampoco revive)
         if (isNov(i) && s.mode !== 'revive' && (i.dead || i.hp <= 0)) { P.mesa[k] = null; novLose(P, i); return; } // en clásico, la novia caída queda eliminada
         if (s.mode === 'revive') { i.dead = false; i.tmp = { atk: 0, hp: 0, red: 0 }; i.hp = maxHp(i); return; } // Resurrección: todas vuelven con la vida completa
@@ -1137,6 +1177,7 @@
 
   // ---------- Utilidades para la interfaz ----------
   var API = {
+    ARMA_NM: ARMA_NM, ARMA_TX: ARMA_TX, ARMAS: ARMAS,
     _mk: mk, _startEffects: startEffects, _tiers: tiers,
     bindRng: bindRng, revive: revive, income: income, openShop: openShop, noTroops: noTroops, shopStuck: shopStuck, cleanup: cleanup, newPlayer: newPlayer, resolveText: function (x, seat) { return x.replace(/\u0001(\d)\u0002([^\u0002]*)\u0002([^\u0003]*)\u0003/g, function (m, p, a, b) { return +p === seat ? a : b; }); }, mirror: mirror, pv: pv, CFG: CFG, FX: FX, CARD: CARD, DATA: DATA,
     newGame: newGame, randomDeck: randomDeck, deckSize: deckSize, mulberry32: mulberry32,

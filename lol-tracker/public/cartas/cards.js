@@ -206,17 +206,17 @@ var D={
    "name": "Javihi Dúo",
    "person": "Javihi",
    "themes": [
-
+    "Magic Botlane"
    ],
-   "cost": 4,
-   "atk": 5,
-   "hp": 14,
-   "rarity": "Épica",
+   "cost": 5,
+   "atk": 3,
+   "hp": 12,
+   "rarity": "Legendaria",
    "type": "tropa",
    "size": 2,
    "pas": {
-    "n": "Dúo en sintonía",
-    "t": "Solo con su pareja Dúo (Javihi Dúo + Sech Dúo) viva en la mesa: cuando una recibe un ataque, hace la mitad de ese daño (redondeado hacia arriba) a todas las tropas rivales. Si acaban el combate las dos vivas, tu jugador recupera 1 de vida."
+    "n": "Muro de Hielo",
+    "t": "Los ataques que recibe le hacen la mitad del daño (redondeado hacia arriba)."
    }
   },
   {
@@ -272,17 +272,17 @@ var D={
    "name": "Sech Dúo",
    "person": "Sech",
    "themes": [
-
+    "Magic Botlane"
    ],
-   "cost": 4,
+   "cost": 5,
    "atk": 5,
-   "hp": 14,
-   "rarity": "Épica",
+   "hp": 12,
+   "rarity": "Legendaria",
    "type": "tropa",
    "size": 2,
    "pas": {
-    "n": "Dúo en sintonía",
-    "t": "Solo con su pareja Dúo (Javihi Dúo + Sech Dúo) viva en la mesa: cuando una recibe un ataque, hace la mitad de ese daño (redondeado hacia arriba) a todas las tropas rivales. Si acaban el combate las dos vivas, tu jugador recupera 1 de vida."
+    "n": "Armas Lunares",
+    "t": "Cada ronda una arma distinta (nunca la misma dos veces seguidas): Calibrum: +5 de ataque esa ronda. Severum: se cura la mitad del daño que inflige (no pasa de su vida máxima). Gravitum: si el enemigo al que ataca aún no ha atacado, su acción pasa a ser la última. Infernum: reparte su daño entre todos los enemigos. Crescendum: añade un hueco extra al equipo y crea una torreta 7/7 que cuenta como una tropa más y desaparece al acabar la ronda."
    }
   },
   {
@@ -964,6 +964,18 @@ var D={
  ],
  "tokens": [
   {
+   "id": "torreta-lunar",
+   "name": "Torreta Lunar",
+   "cost": 0,
+   "atk": 7,
+   "hp": 7,
+   "rarity": "Legendaria",
+   "type": "tropa",
+   "size": 0,
+   "themes": [],
+   "token": true
+  },
+  {
    "id": "remedio",
    "name": "Remedio",
    "cost": 0,
@@ -1092,6 +1104,15 @@ var D={
     "Cuando muere una KOI, tus tropas vivas ganan +1 ataque permanente (tope +5 por tropa) y la mitad de su ataque pasa, solo durante esa ronda, a una KOI viva al azar.",
     "+1 ataque permanente (tope +5) y 3/4 de su ataque pasan a una KOI viva al azar.",
     "+2 ataque permanente (tope +5) y todo su ataque pasa a una KOI viva al azar."
+   ]
+  },
+  "Magic Botlane": {
+   "th": [
+    2
+   ],
+   "color": "#7dd3fc",
+   "tx": [
+    "Con Javihi Dúo y Sech Dúo en la mesa, los ataques dirigidos a Sech Dúo se redirigen a Javihi Dúo."
    ]
   },
   "Voley": {

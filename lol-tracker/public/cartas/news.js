@@ -1,6 +1,13 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-04', tag: 'Novedad', title: 'Nueva sinergia: Magic Botlane',
+      art: ['javihi-duo', 'sech-duo'],
+      items: ['Nueva sinergia «Magic Botlane» (Javihi Dúo + Sech Dúo). Con ambos en la mesa, los ataques dirigidos a Sech Dúo se redirigen a Javihi Dúo.',
+        'Javihi Dúo y Sech Dúo vuelven a ser Legendarias (coste 5, ocupan 2 de espacio): Javihi Dúo 3/12 y Sech Dúo 5/12. Se elimina «Dúo en sintonía».',
+        'Javihi Dúo: «Muro de Hielo». Los ataques que recibe le hacen la mitad del daño (redondeado hacia arriba).',
+        'Sech Dúo: «Armas Lunares». Cada ronda cambia de arma (nunca repite dos veces seguidas): Calibrum (+5 de ataque), Severum (se cura la mitad del daño que inflige), Gravitum (el enemigo al que golpea, si aún no ha atacado, pasa a actuar el último), Infernum (reparte su daño entre todos los enemigos) y Crescendum (hueco extra y una torreta 7/7 que desaparece al acabar la ronda).',
+        'El arma de la ronda se ve sobre Sech Dúo desde la fase de preparación.'] },
     { date: '2026-11-04', tag: 'Cambio', title: 'Nuevas ilustraciones de Javihi Dúo y Sech Dúo',
       art: ['javihi-duo', 'sech-duo'],
       items: ['Javihi Dúo y Sech Dúo estrenan ilustración.'] },

@@ -1,6 +1,9 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-04', tag: 'Cambio', title: 'Nuevas ilustraciones de Javihi Dúo y Sech Dúo',
+      art: ['javihi-duo', 'sech-duo'],
+      items: ['Javihi Dúo y Sech Dúo estrenan ilustración.'] },
     { date: '2026-11-04', tag: 'Cambio', title: 'Chipy Llorón desaparece y nace AitoRLG Palomitero',
       art: ['aitorlg-regla'],
       items: ['Se elimina la carta «Chipy Llorón» (y su pasiva Llanto final). Desaparece de las colecciones y los mazos.',

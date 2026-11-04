@@ -430,8 +430,8 @@ var D={
    "type": "tropa",
    "size": 2,
    "pas": {
-    "n": "Aliento final",
-    "t": "Si un ataque rival la mataría antes de haber atacado en este combate, ataca primero y después cae."
+    "n": "Amor Verdadero",
+    "t": "Si la novia seleccionada en el hueco extra es Lucía, PotAnGo duplica sus estadísticas. Si cambias de novia, vuelve a las originales."
    }
   },
   {

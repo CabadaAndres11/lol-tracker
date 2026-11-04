@@ -84,6 +84,21 @@
     }
     if (c < 1 && P.mesa[4]) { s5out(P, P.mesa[4]); P.nvs.push(P.mesa[4]); delete P.target[P.mesa[4].uid]; P.mesa[4] = null; } // sin la sinergia, la novia vuelve a la reserva
     lunarSync(s, p);
+    loveSync(s, p);
+  }
+  // Amor Verdadero (PotAnGo): con Lucía como novia seleccionada duplica sus estadísticas (lo que tenía al activarse); al cambiar de novia vuelve a las originales.
+  function loveSync(s, p) {
+    var P = s.p[p], nv = P.mesa[4], lucia = !!(nv && !nv.dead && nv.id === 'lucia');
+    P.mesa.concat(P.hand).forEach(function (i) {
+      if (!i || !isTroop(i)) return;
+      var on = lucia && pas(i) === 'amor' && !i.dead && P.mesa.indexOf(i) >= 0;
+      if (on && !i.love) {
+        i.love = { atk: card(i).atk + i.perm.atk, hp: card(i).hp + i.perm.hp };
+        i.perm.atk += i.love.atk; i.perm.hp += i.love.hp; i.hp += i.love.hp;
+      } else if (!on && i.love) {
+        i.perm.atk -= i.love.atk; i.perm.hp -= i.love.hp; i.hp = Math.max(1, i.hp - i.love.hp); i.love = null;
+      }
+    });
   }
   // Crescendum (Sech Dúo): con esa arma y Sech Dúo en la mesa hay una torreta 7/7 en el hueco extra 7 (mesa[6]) desde la preparación, para poder elegirle objetivo; se retira al acabar la ronda.
   function lunarSync(s, p) {
@@ -414,7 +429,7 @@
   }
   function retire(s, p, slot) {
     var P = s.p[p], i = P.mesa[slot];
-    if (slot === 4 && i && s.phase === 'prep') { s5out(P, i); P.mesa[4] = null; P.nvs.push(i); delete P.target[i.uid]; return true; } // la novia vuelve a la reserva
+    if (slot === 4 && i && s.phase === 'prep') { s5out(P, i); P.mesa[4] = null; P.nvs.push(i); delete P.target[i.uid]; loveSync(s, p); return true; } // la novia vuelve a la reserva
     if (!s.shopOpen || s.phase !== 'prep' || !i || i.dead || i.shadow || i.turret) return false;
     if (has(i, 'Lol')) return false;
     if (P.hand.length >= handCap(s)) return false;
@@ -433,6 +448,7 @@
       P.nvs.splice(k, 1);
       if (P.mesa[4]) { s5out(P, P.mesa[4]); P.nvs.push(P.mesa[4]); delete P.target[P.mesa[4].uid]; }
       s5in(P, n); P.mesa[4] = n;
+      loveSync(s, p);
       return true;
     }
     var i = P.hand[handIdx];
@@ -809,7 +825,7 @@
 
   // Efectos al caer una tropa (KOI). Devuelve texto de registro y animación.
   // ---------- Pasivas de legendarias ----------
-  var PAS = { 'dashlight-sun-jin-woo': 'sombra', 'aitorlg-maomao': 'boticaria', 'javihi-duo': 'muro', 'sech-duo': 'armas', 'javihi-friki': 'remate', 'sech': 'embargo', 'potango': 'aliento', 'lihone-viego': 'racha', 'aitorlg-renata': 'prorroga', 'lihone': 'captura', 'pampert-koisito': 'cabezon', 'aitorlg-koisito': 'heredero', 'mertens-gambler': 'malaracha', 'computer-dashlight': 'medallas', 'pampert-gambler': 'colega' };
+  var PAS = { 'dashlight-sun-jin-woo': 'sombra', 'aitorlg-maomao': 'boticaria', 'javihi-duo': 'muro', 'sech-duo': 'armas', 'javihi-friki': 'remate', 'sech': 'embargo', 'potango': 'amor', 'lihone-viego': 'racha', 'aitorlg-renata': 'prorroga', 'lihone': 'captura', 'pampert-koisito': 'cabezon', 'aitorlg-koisito': 'heredero', 'mertens-gambler': 'malaracha', 'computer-dashlight': 'medallas', 'pampert-gambler': 'colega' };
   function pas(i) { return PAS[i.id] || ''; }
   // ---------- Magic Botlane: Armas Lunares (Sech Dúo) y Muro de Hielo (Javihi Dúo) ----------
   var ARMAS = ['calibrum', 'severum', 'gravitum', 'infernum', 'crescendum'];
@@ -952,8 +968,6 @@
       }
       if (tgt.hp <= 0 && wardSave(s, tgt)) {
         line += ' ¡Prórroga! ' + card(tgt).name + ' aguanta a 0 de vida hasta que ataque.';
-      } else if (tgt.hp <= 0 && pas(tgt) === 'aliento' && !tgt.tmp.acted && !tgt.tmp.noAtk && !tgt.tmp.dying && !tgt.dead) {
-        tgt.tmp.dying = true; line += ' ¡Aliento final! ' + card(tgt).name + ' ataca antes de caer.'; seq.splice(n + 1, 0, tgt);
       } else if (tgt.hp <= 0) {
         tgt.dead = true; tgt.hp = 0; line += ' ¡Cae!';
         var df = deathFx(s, tgt); line += df.line; fxk = df.fx;

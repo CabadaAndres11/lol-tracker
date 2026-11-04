@@ -1,6 +1,10 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-04', tag: 'Cambio', title: 'PotAnGo: Amor Verdadero',
+      art: ['potango'],
+      items: ['PotAnGo cambia su pasiva «Aliento final» por «Amor Verdadero»: si la novia seleccionada en el hueco extra es Lucía, PotAnGo duplica sus estadísticas. Si cambias de novia (o la retiras), vuelve a las originales.',
+        'Las mejoras que gane mientras el efecto está activo se conservan al desactivarse; el duplicado se calcula con las estadísticas que tenía al activarse.'] },
     { date: '2026-11-04', tag: 'Cambio', title: 'Mertens PRIME desaparece',
       art: ['mertens'],
       items: ['Se elimina la carta «Mertens PRIME» (y su pasiva Pereza contagiosa). Desaparece de las colecciones y los mazos.',

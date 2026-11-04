@@ -1,6 +1,9 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-04', tag: 'Corrección', title: 'Armas Lunares en Versus de 4',
+      art: ['sech-duo'],
+      items: ['Arreglado: en Versus de 4 Sech Dúo no recibía arma ni la usaba. Ahora cada ronda cambia de arma, se ve sobre la carta y actúa en combate, igual que en 1 vs 1 (incluida la torreta de Crescendum).'] },
     { date: '2026-11-04', tag: 'Equilibrio', title: 'Goblins: probabilidades de la copia gratuita',
       art: ['petea-goblin'],
       items: ['Con 2 Goblins distintos, la copia que recibes cada ronda es Común el 60 % de las veces, Rara el 30 % y Épica el 10 % (antes, cualquiera con la misma probabilidad).',

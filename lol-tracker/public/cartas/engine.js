@@ -24,6 +24,7 @@
     voley: { atk: [1, 2, 3], red: [1, 1, 2], cap: 8 },
     novias: { eriko: [2, 3, 4], eCap: [10, 15, 20], helena: [0, 2, 4], lucia: [3, 4, 5], ari: [0.5, 0.6, 0.7] }, // por nivel de Correa // novias del hueco 5 (sinergia Correa)
     gambling: { orbs: [1, 2, 3], probs: [[60, 30, 10], [40, 40, 20], [20, 40, 40]] }, // orbes por ronda sin daño directo; probabilidad (%) de que cada orbe dé +1/+1, +2/+2 o +3/+3
+    kpop: { stat: [0, 5, 10], kdaAtk: 1, kdaHp: 2, kdaGold: 1, beat: 3, shield: [1, 2], sajaEvery: 2, sajaStat: 1 }, // K-Pop: +ataque/vida del grupo por nivel; KDA asistencia (+ataque) y golpe de gracia (+vida); True Damage Beat Drop cada 3 ataques; Huntrix escudo (x vida de la marca); Saja Boys: Singer cada 2 combates
   };
 
   var CARD = {};
@@ -86,6 +87,51 @@
     lunarSync(s, p);
     loveSync(s, p);
     goblinSync(s, p);
+    kpopSync(s, p);
+  }
+  // ---------- K-Pop: grupos ----------
+  var KGROUPS = ['KDA', 'True Damage', 'Huntrix', 'Saja Boys'];
+  function isSinger(i) { return !!(i && i.id === 'aitorlg-singer'); }
+  // Cartas distintas de cada grupo entre mesa y mano; AitoRLG Singer cuenta +1 en todos.
+  function kpopCounts(P) {
+    var seen = {}, out = {}, sing = false;
+    KGROUPS.forEach(function (g) { out[g] = 0; });
+    P.mesa.concat(P.hand).forEach(function (i) {
+      if (!i || !isTroop(i) || i.dead || i.shadow || seen[i.id]) return;
+      seen[i.id] = 1;
+      var g = card(i).grp;
+      if (g) out[g]++; else if (isSinger(i)) sing = true;
+    });
+    if (sing) KGROUPS.forEach(function (g) { out[g]++; });
+    return out;
+  }
+  // Grupo activo: el elegido si sigue teniendo 2 cartas; si no, el que más tenga (nivel 1 de K-Pop necesario)
+  function kpopGroup(P) {
+    if ((tiers(P)['K-Pop'] || 0) < 1) return null;
+    var c = kpopCounts(P);
+    if (P.kgrp && c[P.kgrp] >= 2) return P.kgrp;
+    var best = null;
+    KGROUPS.forEach(function (g) { if (c[g] >= 2 && (!best || c[g] > c[best])) best = g; });
+    return best;
+  }
+  function kpMember(i, g) { return !!(g && i && (card(i).grp === g || isSinger(i))); }
+  // Elegir grupo (fase de preparación o tienda)
+  function kpopPick(s, p, g) {
+    var P = s.p[p];
+    if (s.phase !== 'prep' || KGROUPS.indexOf(g) < 0 || (tiers(P)['K-Pop'] || 0) < 1 || kpopCounts(P)[g] < 2) return false;
+    P.kgrp = g; kpopSync(s, p); return true;
+  }
+  // Fija el grupo activo y reparte la mejora de estadísticas de los niveles 2 y 3 (solo al grupo elegido)
+  function kpopSync(s, p) {
+    var P = s.p[p], g = kpopGroup(P), lv = tiers(P)['K-Pop'] || 0, b = g && lv ? FX.kpop.stat[lv - 1] || 0 : 0;
+    P.kact = g; if (g) P.kgrp = g;
+    P.mesa.concat(P.hand).forEach(function (i) {
+      if (!i || !isTroop(i)) return;
+      var want = kpMember(i, g) ? b : 0, have = i.kp || 0, d = want - have;
+      if (!d) return;
+      i.kp = want; i.perm.atk += d; i.perm.hp += d;
+      i.hp = d > 0 ? i.hp + d : Math.max(1, i.hp + d);
+    });
   }
   // Amor Verdadero (PotAnGo): con Lucía como novia seleccionada duplica sus estadísticas (lo que tenía al activarse); al cambiar de novia vuelve a las originales.
   function loveSync(s, p) {
@@ -691,7 +737,7 @@
       life: [s.p[0].life, s.p[1].life],
       mesa: s.p.map(function (P) {
         return P.mesa.map(function (i) {
-          return i ? { uid: i.uid, id: i.id, atk: atk(i), hp: Math.max(0, i.hp), max: maxHp(i), dead: !!i.dead, red: i.tmp.red, stun: !!i.tmp.stun, baseAtk: card(i).atk, baseHp: card(i).hp } : null;
+          return i ? { uid: i.uid, id: i.id, atk: atk(i), hp: Math.max(0, i.hp), max: maxHp(i), dead: !!i.dead, red: i.tmp.red, sh: i.tmp.sh || 0, stun: !!i.tmp.stun, baseAtk: card(i).atk, baseHp: card(i).hp } : null;
         });
       }),
     };
@@ -812,6 +858,35 @@
     });
   }
 
+  // K-Pop al empezar el combate: Huntrix marca al rival con más vida, Saja Boys encandila y la Singer de Saja mejora al grupo
+  function kpopStart(s) {
+    [0, 1].forEach(function (p) {
+      var P = s.p[p], k = s.kp[p], E = s.p[1 - p];
+      if (!k.g) return;
+      var mem = mesaTroops(P).filter(function (i) { return kpMember(i, k.g); });
+      if (!mem.length) return;
+      if (k.g === 'Huntrix') {
+        var foes = targetable(E).slice().sort(function (a, b) { return b.hp - a.hp; });
+        if (foes.length) {
+          s.mark[p] = foes[0].uid;
+          fxFrame(s, p, 'kpop', 'Huntrix · Marca', card(foes[0]).name + ' queda marcado: si cae, el equipo gana ' + Math.round(maxHp(foes[0]) * FX.kpop.shield[k.sg ? 1 : 0]) + ' de escudo', mem.map(function (i) { return i.uid; }).concat([foes[0].uid]));
+        }
+      } else if (k.g === 'Saja Boys') {
+        var n = mem.length, ch = targetable(E).filter(function (i) { return card(i).rarity !== 'Legendaria' && !i.turret; }).sort(function (a, b) { return atk(b) - atk(a); }).slice(0, n);
+        ch.forEach(function (i) { i.tmp.charm = true; });
+        if (ch.length) fxFrame(s, p, 'kpop', 'Saja Boys · Encanto', ch.map(function (i) { return card(i).name; }).join(', ') + ': su primer ataque golpea a un aliado', mem.map(function (i) { return i.uid; }).concat(ch.map(function (i) { return i.uid; })));
+        if (k.sg) {
+          P.sajaN = (P.sajaN || 0) + 1;
+          if (P.sajaN % FX.kpop.sajaEvery === 0) {
+            var oth = P.mesa.concat(P.hand).filter(function (i) { return i && isTroop(i) && !isSinger(i) && card(i).grp === 'Saja Boys'; });
+            oth.forEach(function (i) { grow(i, 'atk', FX.kpop.sajaStat); grow(i, 'hp', FX.kpop.sajaStat); });
+            if (oth.length) fxFrame(s, p, 'kpop', 'Saja Boys · Productora', '+' + FX.kpop.sajaStat + '/+' + FX.kpop.sajaStat + ' permanente al grupo', oth.map(function (i) { return i.uid; }));
+          }
+        }
+      }
+    });
+  }
+
   function order(s) {
     // Ataques de uno en uno, alternando bandos.
     var f = s.first, seq = [];
@@ -835,7 +910,7 @@
 
   // Efectos al caer una tropa (KOI). Devuelve texto de registro y animación.
   // ---------- Pasivas de legendarias ----------
-  var PAS = { 'dashlight-sun-jin-woo': 'sombra', 'aitorlg-maomao': 'boticaria', 'javihi-duo': 'muro', 'sech-duo': 'armas', 'javihi-friki': 'remate', 'sech': 'embargo', 'potango': 'amor', 'petea-goblin': 'loot', 'rey-goblin': 'avaricia', 'lihone-viego': 'racha', 'aitorlg-renata': 'prorroga', 'lihone': 'captura', 'pampert-koisito': 'cabezon', 'aitorlg-koisito': 'heredero', 'mertens-gambler': 'malaracha', 'computer-dashlight': 'medallas', 'pampert-gambler': 'colega' };
+  var PAS = { 'dashlight-sun-jin-woo': 'sombra', 'aitorlg-maomao': 'boticaria', 'javihi-duo': 'muro', 'sech-duo': 'armas', 'javihi-friki': 'remate', 'sech': 'embargo', 'potango': 'amor', 'petea-goblin': 'loot', 'rey-goblin': 'avaricia', 'lihone-viego': 'racha', 'aitorlg-renata': 'prorroga', 'lihone': 'captura', 'pampert-koisito': 'cabezon', 'aitorlg-koisito': 'heredero', 'mertens-gambler': 'malaracha', 'computer-dashlight': 'medallas', 'pampert-gambler': 'colega', 'aitorlg-singer': 'singer' };
   function pas(i) { return PAS[i.id] || ''; }
   // ---------- Magic Botlane: Armas Lunares (Sech Dúo) y Muro de Hielo (Javihi Dúo) ----------
   var ARMAS = ['calibrum', 'severum', 'gravitum', 'infernum', 'crescendum'];
@@ -864,6 +939,7 @@
   // Daño de pasiva a una tropa (sin contraataque). Devuelve texto de registro.
   function passiveHit(s, v, n, depth) {
     if (!v || v.dead || n <= 0 || immune(v)) return '';
+    if (v.tmp.sh > 0) { var ab = Math.min(v.tmp.sh, n); v.tmp.sh -= ab; n -= ab; if (n <= 0) return ' ' + card(v).name + ' absorbe el golpe con su escudo.'; }
     genCharge(s, v, Math.min(n, Math.max(0, v.hp)));
     v.hp -= n;
     var tv = s.tiers[v.owner];
@@ -875,6 +951,7 @@
   // Efectos al caer una tropa (KOI). Devuelve texto de registro y animación.
   function deathFx(s, d, depth) {
     var line = '', fxk = null; depth = depth || 0;
+    var killer = s.killer; s.killer = null;
         var tt2 = s.tiers[d.owner];
         if (has(d, 'KOI') && tt2['KOI']) {
           var kb = FX.koi.atk[tt2['KOI'] - 1];
@@ -890,6 +967,28 @@
             fxk.sub += ' · herencia +' + hm + ' (solo esta ronda) a ' + card(hv).name; fxk.uids = fxk.uids.concat(heirs.indexOf(hv) >= 0 ? [] : [hv.uid]);
           }
         }
+    var oe = 1 - d.owner, kk = s.kp && s.kp[oe];
+    if (kk && kk.g === 'KDA' && d.tmp.hitBy) { // KDA: asistencias (+ataque) a quienes lo golpearon y +vida a quien lo derriba
+      var asst = mesaTroops(s.p[oe]).filter(function (i) { return d.tmp.hitBy[i.uid] && kpMember(i, 'KDA'); });
+      if (asst.length) {
+        asst.forEach(function (i) { grow(i, 'atk', FX.kpop.kdaAtk); });
+        var kh = killer && !killer.dead && kpMember(killer, 'KDA') ? killer : null;
+        if (kh) grow(kh, 'hp', FX.kpop.kdaHp);
+        if (kk.sg) s.p[oe].gold += FX.kpop.kdaGold * asst.length;
+        line += ' KDA: asistencia, +' + FX.kpop.kdaAtk + ' de ataque permanente a ' + asst.map(function (i) { return card(i).name; }).join(', ') + (kh ? ' y +' + FX.kpop.kdaHp + ' de vida a ' + card(kh).name : '') + (kk.sg ? ' (+' + FX.kpop.kdaGold * asst.length + ' de oro)' : '') + '.';
+        if (!fxk) fxk = { type: 'kpop', side: oe, title: 'KDA · Asistencia', sub: '+' + FX.kpop.kdaAtk + ' ataque permanente' + (kk.sg ? ' y oro' : ''), uids: asst.map(function (i) { return i.uid; }), neg: false };
+      }
+    }
+    if (kk && kk.g === 'Huntrix' && s.mark && s.mark[oe] === d.uid) { // Huntrix: la marca cae, su vida pasa a ser un escudo para el equipo
+      s.mark[oe] = null;
+      var al = mesaTroops(s.p[oe]);
+      if (al.length) {
+        var tot = Math.round(maxHp(d) * FX.kpop.shield[kk.sg ? 1 : 0]), per = Math.floor(tot / al.length), rem = tot - per * al.length;
+        al.forEach(function (i, k) { i.tmp.sh = (i.tmp.sh || 0) + per + (k < rem ? 1 : 0); });
+        line += ' Huntrix: la marca cae y el equipo gana ' + tot + ' de escudo.';
+        if (!fxk) fxk = { type: 'kpop', side: oe, title: 'Huntrix · Barrera', sub: tot + ' de escudo para el equipo', uids: al.map(function (i) { return i.uid; }), neg: false };
+      }
+    }
     return { line: line, fx: fxk };
   }
   function fight(s) {
@@ -902,6 +1001,7 @@
     if (!s.pvp) aiTargets(s, 1);
     frame(s, 'Empieza el combate. ' + pv(s, s.first, 'Atacas primero.', 'Ataca primero el rival.'), null);
     novSync(s, 0); novSync(s, 1);
+    s.kp = [0, 1].map(function (p) { var P = s.p[p]; return { g: P.kact || null, sg: mesaTroops(P).some(isSinger) }; }); s.mark = [null, null]; s.killer = null;
     startEffects(s);
     // Cabezón (Pampert Koisito): recibe 2 de daño menos por golpe
     [0, 1].forEach(function (p) { mesaTroops(s.p[p]).forEach(function (i) { if (pas(i) === 'cabezon') i.tmp.red += 2; }); });
@@ -917,6 +1017,7 @@
         fxFrame(s, p, 'armas', 'Armas Lunares · ' + an, 'hueco extra y torreta 7/7 hasta el final de la ronda', [sd.uid, tu.uid].filter(function (u) { return u >= 0; }));
       } else fxFrame(s, p, 'armas', 'Armas Lunares · ' + an, ARMA_TX[P.arma], [sd.uid]);
     });
+    kpopStart(s);
     var seq = order(s);
     // Remate doble: los Voley en ataque golpean dos veces; en defensa no atacan y reciben como mucho 1
     var dbl = {};
@@ -945,8 +1046,13 @@
       if (P.target[a.uid]) tgt = foes.filter(function (f) { return f.uid === P.target[a.uid]; })[0] || null;
       if (!tgt && foes.length) { tgt = foes[Math.floor(s.rng() * foes.length)]; retarget = !!P.target[a.uid]; }
       if (!tgt && a.tmp.loan != null) delete a.tmp.loan;
-      var redir = false;
-      if (tgt && tgt.id === 'sech-duo') { var bg = botlaneGuard(s, tgt.owner); if (bg && bg !== tgt) { tgt = bg; redir = true; } } // Magic Botlane: los ataques a Sech Dúo van a Javihi Dúo
+      var redir = false, charmed = false;
+      if (a.tmp.charm && !a.tmp.charmUsed) { // Saja Boys: el primer ataque del encandilado golpea a un aliado suyo
+        a.tmp.charmUsed = true;
+        var cal = targetable(P).filter(function (x) { return x !== a; });
+        if (cal.length) { tgt = cal[Math.floor(s.rng() * cal.length)]; charmed = true; }
+      }
+      if (tgt && !charmed && tgt.id === 'sech-duo') { var bg = botlaneGuard(s, tgt.owner); if (bg && bg !== tgt) { tgt = bg; redir = true; } } // Magic Botlane: los ataques a Sech Dúo van a Javihi Dúo
       var dmg = atk(a), splash = [], share = 0;
       if (tgt && pas(a) === 'armas' && P.armaOn === 'infernum' && dmg > 0) { // Infernum: reparte el daño entre todos los enemigos
         splash = foes.filter(function (f) { return f !== tgt; });
@@ -961,15 +1067,22 @@
         finishDying(a);
         continue;
       }
-      var fxk = null, real = Math.max(0, dmg - tgt.tmp.red);
-      if (tgt.tmp.cap1) real = Math.min(real, 1);
-      real = muroDmg(tgt, real); // Muro de Hielo (Javihi Dúo)
+      var fxk = null, kga = s.kp[a.owner], kmem = !charmed && kga.g && kpMember(a, kga.g), tdm = kmem && kga.g === 'True Damage', beat = false;
+      if (tdm && kga.sg) { a.tmp.kpn = (a.tmp.kpn || 0) + 1; if (a.tmp.kpn % FX.kpop.beat === 0) { dmg *= 2; beat = true; } } // Singer: Beat Drop
+      var real = tdm ? dmg : Math.max(0, dmg - tgt.tmp.red); // True Damage atraviesa el 100% de las reducciones y los escudos
+      if (!tdm) {
+        if (tgt.tmp.cap1) real = Math.min(real, 1);
+        real = muroDmg(tgt, real); // Muro de Hielo (Javihi Dúo)
+      }
       var ariSave = false;
       if (real > 0 && mesaTroops(s.p[tgt.owner]).some(function (x) { return x.id === 'ari'; }) && s.rng() < FX.novias.ari[Math.max(0, (s.tiers[tgt.owner]['Correa'] || 1) - 1)]) { real = 0; ariSave = true; }
-      var over = pas(a) === 'avaricia' ? Math.max(0, real - Math.max(0, tgt.hp)) : 0; // Avaricia (Rey Goblin): el daño sobrante va a la vida rival
+      var over = pas(a) === 'avaricia' && !charmed ? Math.max(0, real - Math.max(0, tgt.hp)) : 0; // Avaricia (Rey Goblin): el daño sobrante va a la vida rival
+      var absorbed = 0;
+      if (!tdm && real > 0 && tgt.tmp.sh > 0) { absorbed = Math.min(tgt.tmp.sh, real); tgt.tmp.sh -= absorbed; real -= absorbed; over = 0; } // escudo de Huntrix
+      if (kmem && kga.g === 'KDA' && dmg > 0) (tgt.tmp.hitBy = tgt.tmp.hitBy || {})[a.uid] = 1;
       genCharge(s, tgt, Math.min(real, Math.max(0, tgt.hp)));
       tgt.hp -= real;
-      var line = card(a).name + (redir ? ' (redirigido por Magic Botlane) ataca a ' : retarget ? ' (su objetivo ya cayó) ataca a ' : ' ataca a ') + card(tgt).name + ': ' + real + ' de daño' + (tgt.tmp.red && real < dmg ? ' (reducido)' : '') + (ariSave ? ' (¡Ari lo evita!)' : '') + (tgt.id === 'javihi-duo' && real < dmg ? ' (Muro de Hielo)' : '') + '.';
+      var line = card(a).name + (charmed ? ' (encandilado) ataca a ' : redir ? ' (redirigido por Magic Botlane) ataca a ' : retarget ? ' (su objetivo ya cayó) ataca a ' : ' ataca a ') + card(tgt).name + ': ' + real + ' de daño' + (tgt.tmp.red && real < dmg ? ' (reducido)' : '') + (ariSave ? ' (¡Ari lo evita!)' : '') + (tdm ? ' (daño verdadero)' : '') + (beat ? ' ¡Beat Drop: daño doble!' : '') + (absorbed ? ' (escudo absorbe ' + absorbed + ')' : '') + (tgt.id === 'javihi-duo' && real < dmg ? ' (Muro de Hielo)' : '') + '.';
       if (real > 0) {
         var ta = s.tiers[a.owner], tt = s.tiers[tgt.owner];
         if (has(a, 'Lol') && ta['Lol']) {
@@ -981,13 +1094,14 @@
         line += ' ¡Prórroga! ' + card(tgt).name + ' aguanta a 0 de vida hasta que ataque.';
       } else if (tgt.hp <= 0) {
         tgt.dead = true; tgt.hp = 0; line += ' ¡Cae!';
+        s.killer = charmed ? null : a;
         var df = deathFx(s, tgt); line += df.line; fxk = df.fx;
       }
       // Pasivas al golpear (Embargo)
       var plife = null, pdmg = 0;
       if (over > 0) { E.life -= over; plife = tgt.owner; pdmg = (pdmg || 0) + over; line += ' Avaricia: ' + over + ' de daño sobrante ' + pv(s, a.owner, 'a la vida del rival.', 'a tu vida.'); }
-      if (tgt.dead && pas(a) === 'sombra' && !isNov(tgt)) line += shadowRaise(s, a, tgt); // el soldado tiene su propio hueco extra: si ya había uno, el nuevo lo sustituye
-      if (tgt.dead && pas(a) === 'embargo' && !a.dead) {
+      if (tgt.dead && !charmed && pas(a) === 'sombra' && !isNov(tgt)) line += shadowRaise(s, a, tgt); // el soldado tiene su propio hueco extra: si ya había uno, el nuevo lo sustituye
+      if (tgt.dead && !charmed && pas(a) === 'embargo' && !a.dead) {
         E.life -= 2; P.gold += 1; plife = tgt.owner; pdmg = 2;
         line += ' Embargo: ' + pv(s, a.owner, 'el rival pierde 2 de vida y ganas 1 de oro.', 'pierdes 2 de vida y el rival gana 1 de oro.');
       }
@@ -998,7 +1112,7 @@
         else if (!a.dead) { a.dead = true; a.hp = 0; line += ' ' + card(a).name + ' no derriba a nadie y cae.'; var dw = deathFx(s, a); line += dw.line; if (!fxk) fxk = dw.fx; }
       }
       // Racha de bajas (Lihone Viego): al derrotar a una tropa toma su ataque y vuelve a atacar
-      if (pas(a) === 'racha') {
+      if (pas(a) === 'racha' && !charmed) {
         if (tgt.dead && !a.dead && targetable(E).length) { a.tmp.loan = atk(tgt); line += ' Racha de bajas: toma ' + a.tmp.loan + ' de ataque y vuelve a atacar.'; seq.splice(n + 1, 0, a); }
         else if (tgt.dead && !a.dead) { // mató a la última tropa rival: su ataque golpea al jugador rival
           var rd = atk(tgt);
@@ -1038,7 +1152,7 @@
           if (sn > 0) line += ' Infernum:' + passiveHit(s, v, sn, 0);
         });
       }
-      if (pas(a) === 'remate') { // Javihi Prime: el balón rebota a otra tropa rival
+      if (pas(a) === 'remate' && !charmed) { // Javihi Prime: el balón rebota a otra tropa rival
         var rb = targetable(E).filter(function (x) { return x !== tgt; });
         if (rb.length) { var rv = rb[Math.floor(s.rng() * rb.length)], rn = Math.ceil(atk(a) / 2); line += ' Remate: rebota ' + rn + ' en ' + card(rv).name + '.'; line += passiveHit(s, rv, rn, 0); }
       }
@@ -1247,7 +1361,7 @@
     newGame: newGame, randomDeck: randomDeck, deckSize: deckSize, mulberry32: mulberry32,
     place: place, playAction: playAction, setTarget: setTarget, clearTargets: clearTargets, forfeit: forfeit, setVoley: setVoley, actionBlock: actionBlock, validTarget: validTarget,
     sell: sell, sellValue: sellValue, handCap: handCap, dupBlock: dupBlock, buy: buy, mergeCheck: mergeCheck, willMerge: willMerge, shopOdds: shopOdds, refresh: refresh, refreshCost: refreshCost, pickFromDeck: pickFromDeck, retire: retire,
-    aiDeck: aiDeck, rumbleDeck: rumbleDeck, shopEvery: shopEvery, genGive: genGive, goblinGive: goblinGive, pickArma: pickArma, lunarSync: lunarSync, shopStart: shopStart, genStored: genStored, aiBonus: aiBonus, aiLv: aiLv, aiShop: aiShop, aiPrep: aiPrep, aiTargets: aiTargets, fight: fight, endShop: endShop, pendingTargets: pendingTargets, freeze: freeze, nextRound: nextRound,
+    aiDeck: aiDeck, rumbleDeck: rumbleDeck, shopEvery: shopEvery, genGive: genGive, goblinGive: goblinGive, pickArma: pickArma, lunarSync: lunarSync, shopStart: shopStart, genStored: genStored, aiBonus: aiBonus, aiLv: aiLv, aiShop: aiShop, aiPrep: aiPrep, aiTargets: aiTargets, fight: fight, kpopPick: kpopPick, kpopCounts: kpopCounts, kpopGroup: kpopGroup, KGROUPS: KGROUPS, endShop: endShop, pendingTargets: pendingTargets, freeze: freeze, nextRound: nextRound,
     interest: interest, isNov: isNov, immune: immune, targetable: targetable, novSync: novSync, themeCounts: themeCounts, tiers: tiers, tierOf: tierOf, atk: atk, maxHp: maxHp, card: card, isTroop: isTroop, has: has, mesaTroops: mesaTroops, viewOf: viewOf,
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.CartasEngine = API;

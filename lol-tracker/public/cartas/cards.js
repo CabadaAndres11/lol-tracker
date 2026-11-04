@@ -697,6 +697,174 @@ var D={
     "n": "Loot Infinito",
     "t": "Si está en la mesa, los Goblins ganan +5/+5 por el nivel de su carta durante el combate (nivel 1: +5/+5, nivel 2: +10/+10, nivel 3: +15/+15)."
    }
+  },
+  {
+   "id": "hellbramn-kda",
+   "name": "Hellbramn KDA",
+   "person": "Hellbramn",
+   "themes": [
+    "K-Pop"
+   ],
+   "grp": "KDA",
+   "cost": 2,
+   "atk": 4,
+   "hp": 6,
+   "rarity": "Común",
+   "type": "tropa",
+   "size": 1
+  },
+  {
+   "id": "javihi-kda",
+   "name": "Javihi KDA",
+   "person": "Javihi",
+   "themes": [
+    "K-Pop"
+   ],
+   "grp": "KDA",
+   "cost": 3,
+   "atk": 5,
+   "hp": 10,
+   "rarity": "Rara",
+   "type": "tropa",
+   "size": 1
+  },
+  {
+   "id": "aitorlg-kda",
+   "name": "AitoRLG KDA",
+   "person": "AitoRLG",
+   "themes": [
+    "K-Pop"
+   ],
+   "grp": "KDA",
+   "cost": 4,
+   "atk": 5,
+   "hp": 15,
+   "rarity": "Épica",
+   "type": "tropa",
+   "size": 2
+  },
+  {
+   "id": "chipy-td",
+   "name": "Chipy True Damage",
+   "person": "Chipy",
+   "themes": [
+    "K-Pop"
+   ],
+   "grp": "True Damage",
+   "cost": 2,
+   "atk": 4,
+   "hp": 6,
+   "rarity": "Común",
+   "type": "tropa",
+   "size": 1
+  },
+  {
+   "id": "pampert-td",
+   "name": "Pampert True Damage",
+   "person": "Pampert",
+   "themes": [
+    "K-Pop"
+   ],
+   "grp": "True Damage",
+   "cost": 3,
+   "atk": 5,
+   "hp": 10,
+   "rarity": "Rara",
+   "type": "tropa",
+   "size": 1
+  },
+  {
+   "id": "dashlight-td",
+   "name": "Dashlight True Damage",
+   "person": "Dashlight",
+   "themes": [
+    "K-Pop"
+   ],
+   "grp": "True Damage",
+   "cost": 4,
+   "atk": 8,
+   "hp": 12,
+   "rarity": "Épica",
+   "type": "tropa",
+   "size": 2
+  },
+  {
+   "id": "sech-huntrix",
+   "name": "Sech Huntrix",
+   "person": "Sech",
+   "themes": [
+    "K-Pop"
+   ],
+   "grp": "Huntrix",
+   "cost": 3,
+   "atk": 4,
+   "hp": 11,
+   "rarity": "Rara",
+   "type": "tropa",
+   "size": 2
+  },
+  {
+   "id": "mertens-huntrix",
+   "name": "Mertens Huntrix",
+   "person": "Mertens",
+   "themes": [
+    "K-Pop"
+   ],
+   "grp": "Huntrix",
+   "cost": 4,
+   "atk": 5,
+   "hp": 15,
+   "rarity": "Épica",
+   "type": "tropa",
+   "size": 2
+  },
+  {
+   "id": "lihone-saja",
+   "name": "Lihone Saja Boys",
+   "person": "Lihone",
+   "themes": [
+    "K-Pop"
+   ],
+   "grp": "Saja Boys",
+   "cost": 3,
+   "atk": 5,
+   "hp": 10,
+   "rarity": "Rara",
+   "type": "tropa",
+   "size": 1
+  },
+  {
+   "id": "petea-saja",
+   "name": "Petea Saja Boys",
+   "person": "Petea",
+   "themes": [
+    "K-Pop"
+   ],
+   "grp": "Saja Boys",
+   "cost": 4,
+   "atk": 5,
+   "hp": 15,
+   "rarity": "Épica",
+   "type": "tropa",
+   "size": 2
+  },
+  {
+   "id": "aitorlg-singer",
+   "name": "AitoRLG Singer",
+   "person": "AitoRLG",
+   "themes": [
+    "K-Pop"
+   ],
+   "cost": 5,
+   "atk": 6,
+   "hp": 18,
+   "rarity": "Legendaria",
+   "type": "tropa",
+   "size": 2,
+   "pas": {
+    "n": "Productora",
+    "t": "Cuenta como una carta más de cualquier grupo K-Pop y recibe sus mejoras de estadísticas. Potencia el grupo elegido: KDA: cada asistencia da además 1 de oro. True Damage: cada tercer ataque de tus tropas del grupo es un Beat Drop de daño doble. Huntrix: el escudo vale el 200% de la vida de la marca. Saja Boys: cada 2 combates da +1/+1 permanente a las demás cartas del grupo."
+   }
   }
  ],
  "novias": [
@@ -1191,6 +1359,19 @@ var D={
    "color": "#7dd3fc",
    "tx": [
     "Con Javihi Dúo y Sech Dúo en la mesa, los ataques dirigidos a Sech Dúo se redirigen a Javihi Dúo."
+   ]
+  },
+  "K-Pop": {
+   "th": [
+    2,
+    4,
+    6
+   ],
+   "color": "#e879f9",
+   "tx": [
+    "Elige un grupo del que tengas 2 cartas distintas (AitoRLG Singer cuenta como +1 en cualquiera). KDA: las que golpeen a un enemigo que cae ganan +1 de ataque permanente (asistencia) y quien lo derriba +2 de vida. True Damage: sus golpes atraviesan el 100% de las reducciones de daño y escudos. Huntrix: marcan al rival con más vida; si cae, el equipo gana un escudo con toda su vida. Saja Boys: un rival no legendario por cada Saja Boys queda encandilado y su primer ataque golpea a un aliado suyo.",
+    "Las cartas del grupo elegido ganan +5/+5 permanente.",
+    "Las cartas del grupo elegido ganan +10/+10 permanente."
    ]
   },
   "Goblins": {

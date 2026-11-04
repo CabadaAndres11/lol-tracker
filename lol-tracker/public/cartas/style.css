@@ -2795,3 +2795,10 @@ body.soc-open #app { margin-right: 286px; }
 .dcfx .fxrow.collab { align-items: center; gap: 1.2cqw; }
 .dcfx .fxrar.rk .rr.gift i { background: linear-gradient(160deg, #f0abfc, #7e22ce); border: .25cqw solid #f5d0fe; display: grid; place-items: center; font: 900 3.4cqw/1 Inter, sans-serif; color: #fff; font-style: normal; animation: dcblink 1.2s steps(1) infinite; }
 .rnmain.chatnews .cnc.c3 { right: 17%; bottom: -6%; height: 50%; z-index: 2; }
+
+/* K-Pop: selector de grupo */
+.kpick .kgs { display: grid; grid-template-columns: 1fr 1fr; gap: .35rem; }
+.kg { display: flex; flex-direction: column; align-items: flex-start; gap: .1rem; padding: .4rem .55rem; border-radius: 12px; border: 1px solid var(--line); background: rgba(255,255,255,.04); color: inherit; cursor: pointer; text-align: left; }
+.kg b { font-size: .82rem; } .kg em { font-style: normal; font-size: .7rem; opacity: .7; }
+.kg:disabled { opacity: .4; cursor: not-allowed; }
+.kg.on { border-color: #e879f9; background: linear-gradient(135deg, rgba(232,121,249,.28), rgba(129,140,248,.2)); box-shadow: 0 0 14px rgba(232,121,249,.35); }

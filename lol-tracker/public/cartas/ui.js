@@ -63,7 +63,12 @@
   function copyProg(n) { return n >= 4 ? { n: n, need: 4, next: 0, max: true } : n >= 2 ? { n: n, need: 4, next: 3, max: false } : { n: n, need: 2, next: 2, max: false }; }
   function copiesOf(id) { return 1 + ((ui.acct && ui.acct.dups && ui.acct.dups[id]) || 0); }
   function lvOf(id) { var n = 1 + ((ui.acct && ui.acct.dups && ui.acct.dups[id]) || 0); return n >= 4 ? 3 : n >= 2 ? 2 : 1; }
-  function skG(side, id) { var s = ui.s; return (s && s.sk && s.sk[side] && s.sk[side][id]) || ''; }
+  var KSLUG = { 'KDA': 'kda', 'True Damage': 'td', 'Huntrix': 'huntrix', 'Saja Boys': 'saja' };
+  function skG(side, id) {
+    var s = ui.s;
+    if (id === 'aitorlg-singer' && s && s.p && s.p[side] && s.p[side].kact && ARTS['aitorlg-singer-' + KSLUG[s.p[side].kact]]) return 'aitorlg-singer-' + KSLUG[s.p[side].kact]; // la Singer cambia de ilustración según el grupo
+    return (s && s.sk && s.sk[side] && s.sk[side][id]) || '';
+  }
   function lvG(side, id) { var s = ui.s; return (s && s.lv && s.lv[side] && s.lv[side][id]) || 1; }
   function cardHtml(c, o) {
     o = o || {};
@@ -1578,6 +1583,17 @@
     for (k = 0; k < show; k++) sp += '<i class="gsp' + (fresh && k === show - 1 ? ' new' : '') + '" style="--k:' + (k % 3) + '"></i>';
     return '<div class="gorbbox' + (g.done ? ' done' : '') + (side ? ' foe' : '') + '" title="' + (g.done ? 'Orbes canjeadas: ya no se ganan más' : 'Una orbe por ronda sin daño directo; se abren al recibir el primer golpe') + '"><span class="gl">' + ic('dado') + ' Orbes Gambling</span><div class="gsph">' + (g.done ? '<em>canjeadas</em>' : n ? sp + (n > 8 ? '<b>+' + (n - 8) + '</b>' : '') : '<em>' + (t ? 'sin orbes aún' : '') + '</em>') + '</div>' + (!g.done && n ? '<span class="gn">×' + n + '</span>' : '') + '</div>';
   }
+  // K-Pop: selector de grupo (cada grupo necesita 2 cartas; AitoRLG Singer cuenta +1 en cualquiera)
+  var KDESC = { 'KDA': 'Asistencias: +ataque a quien golpea al caído; +vida a quien lo derriba', 'True Damage': 'Sus golpes atraviesan reducciones y escudos', 'Huntrix': 'Marcan al rival con más vida; si cae, escudo para el equipo', 'Saja Boys': 'Encandilan: el primer ataque de un rival golpea a un aliado suyo' };
+  function kpopHtml(s) {
+    var P = s.p[0], lv = E.tiers(P)['K-Pop'] || 0;
+    if (lv < 1) return '';
+    var cn = E.kpopCounts(P), can = s.phase === 'prep' && !ui.playing;
+    return '<div class="synside panel kpick"><h2>' + ic('estrella') + ' Grupo K-Pop</h2><div class="kgs">' + E.KGROUPS.map(function (g) {
+      var ok = cn[g] >= 2;
+      return '<button class="kg' + (P.kact === g ? ' on' : '') + '" data-act="kpop" data-g="' + esc(g) + '"' + (ok && can ? '' : ' disabled') + ' title="' + esc(KDESC[g] + (ok ? '' : ' (necesitas 2 cartas del grupo)')) + '"><b>' + esc(g) + '</b><em>' + cn[g] + '/2</em></button>';
+    }).join('') + '</div><p class="mut">' + (P.kact ? esc(KDESC[P.kact]) : 'Reúne 2 cartas de un grupo para activarlo.') + '</p></div>';
+  }
   function synergyHtml(P, foe) {
     var c = E.themeCounts(P), keys = Object.keys(c).filter(function (t) { return !foe || E.tierOf(t, c[t]) > 0; }).sort(function (a, b) { return E.tierOf(b, c[b]) - E.tierOf(a, c[a]) || c[b] - c[a]; });
     var h = '<div class="synside panel' + (foe ? ' foe' : '') + '"><h2>' + (foe ? '' + ic('aviso') + ' Sinergias del RIVAL' : 'Sinergias') + '</h2>';
@@ -1680,7 +1696,7 @@
     var shopMode = s.shopOpen && !ui.playing, shop = shopMode && s.phase === 'prep', prep = s.phase === 'prep' && !ui.playing && !s.shopOpen;
     var pend = prep ? E.pendingTargets(s).length : 0, hasT = Object.keys(P.target).length > 0;
     var h = '<div class="gwrap' + (shopMode ? ' shopmode' : '') + '"><div class="top"><div><h1>Ronda ' + s.round + ' · ' + (s.shopOpen ? '' + ic('carrito') + ' Tienda' + (s.round === 1 ? ' inicial' : '') : '' + ic('espadas') + ' Combate') + (!s.shopOpen ? ' <span class="mut">· ' + (s.first === 0 ? 'atacas primero' : 'ataca primero el rival') + '</span>' : '') + '</h1></div><div class="tright"><span class="tlinks"><button class="lnk" data-act="menu" data-to="deck">' + ic('cartas') + ' Colección</button> · <button class="lnk" data-act="menu" data-to="home">' + ic('casa') + ' Menú</button></span>' + (s.over ? '' : ui.tut ? '<button class="surrbtn" data-act="tutexit">' + ic('puerta') + ' Salir del tutorial</button>' : '<button class="surrbtn" data-act="surrender" title="Abandonar la partida y darla por perdida">' + ic('bandera') + ' Rendirse</button>') + '</div></div>' + (sorBtn() ? '<div class="sorrow">' + sorBtn() + '</div>' : '') + timerHtml(prep || shop) + '';
-    h += '<div class="gmain"><aside class="gl">' + boardHtml(s) + synergyHtml(P) + '</aside><section class="gc"><div class="board" id="board">';
+    h += '<div class="gmain"><aside class="gl">' + boardHtml(s) + synergyHtml(P) + kpopHtml(s) + '</aside><section class="gc"><div class="board" id="board">';
     var ML = s.maxLife || CFG.life;
     if (s.vs4 && s.spec && ui.playing) h += '<div class="v4spec">' + ic('ojo') + ' Descansas: estás viendo el duelo <b>' + esc(s.spec[0]) + '</b> contra <b>' + esc(s.spec[1]) + '</b></div>';
     else if (s.vs4 && !shopMode && !s.rest) h += '<div class="v4vs"><span>Duelo contra</span><b>' + esc(PV.names[1]) + '</b></div>';
@@ -2322,7 +2338,7 @@ var GOB_SVG = '<svg class="gobsvg" viewBox="0 0 100 100"><g class="gobleg a"><re
   }
 
     // ---------- Efectos de sinergia: cartel, bola, números flotantes ----------
-  var FXICON = { loot: 'moneda', duo: 'duo', armas: 'duo', novia: 'corazon', eriko: 'corazon', lucia: 'ojo', voley: 'voley', comeback: 'fuego', koi: 'trofeo', trabajo: 'maletin', gorb: 'dado', gambling: 'dado', malaracha: 'dado', colega: 'dado' };
+  var FXICON = { loot: 'moneda', duo: 'duo', armas: 'duo', novia: 'corazon', eriko: 'corazon', lucia: 'ojo', voley: 'voley', comeback: 'fuego', kpop: 'estrella', koi: 'trofeo', trabajo: 'maletin', gorb: 'dado', gambling: 'dado', malaracha: 'dado', colega: 'dado' };
   // Gambling: ruleta de casino (una sola tirada) que termina mostrando el total de mejora de todas las orbes
   function gamWheelSvg(win, total) {
     var N = 24, step = 360 / N, h = '', k, hi = Math.max(3, total + 2), vals = [];
@@ -2859,6 +2875,7 @@ var GOB_SVG = '<svg class="gobsvg" viewBox="0 0 100 100"><g class="gobleg a"><re
     if (act === 'freeze') { if (PV.on) { pvpSend('freeze'); } else E.freeze(s, 0); return render(); }
     if (act === 'refresh') { if (PV.on) { pvpSend('refresh'); ui.hint = 'Actualizando tienda…'; return render(); } E.refresh(s, 0); return render(); }
     if (act === 'pick') { var pk = document.getElementById('pick-sel').value; if (E.pickFromDeck(s, 0, pk)) pvs('pick', [pk]); return render(); }
+    if (act === 'kpop') { if (E.kpopPick(s, 0, el.dataset.g)) pvs('kpop', [el.dataset.g]); return render(); }
     if (act === 'voley') { E.setVoley(s, 0, +el.dataset.uid, el.dataset.m); pvs('voley', [+el.dataset.uid, el.dataset.m]); return render(); }
     if (act === 'sell') { e.stopPropagation(); var sf = el.dataset.from === 'mesa' ? 'mesa' : 'hand', si = +el.dataset.i; if (E.sell(s, 0, sf, si)) pvs('sell', [sf, si]); ui.sel = null; return render(); }
     if (act === 'retire') { e.stopPropagation(); if (E.retire(s, 0, +el.dataset.slot)) pvs('retire', [+el.dataset.slot]); ui.sel = null; return render(); }

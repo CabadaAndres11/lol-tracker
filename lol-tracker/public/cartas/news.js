@@ -1,6 +1,17 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-04', tag: 'Sinergia', title: 'Nueva sinergia K-Pop (2.2)',
+      items: [
+        'Nueva sinergia <b>K-Pop</b> con 4 grupos: <b>KDA</b>, <b>True Damage</b>, <b>Huntrix</b> y <b>Saja Boys</b> (11 cartas, incluida la legendaria AitoRLG Singer).',
+        'Al activarla eliges un grupo: cada grupo necesita 2 cartas suyas y la Singer cuenta como +1 en cualquiera. Puedes cambiar de grupo en la preparación.',
+        '<b>KDA</b>: las que golpean a un enemigo que cae ganan +1 de ataque permanente (asistencia) y quien lo derriba +2 de vida.',
+        '<b>True Damage</b>: sus golpes atraviesan el 100% de las reducciones de daño y los escudos.',
+        '<b>Huntrix</b>: marcan al rival con más vida; si cae, el equipo gana un escudo igual a toda su vida.',
+        '<b>Saja Boys</b>: por cada Saja Boys, un rival no legendario queda encandilado y su primer ataque golpea a un aliado suyo.',
+        '<b>AitoRLG Singer</b> potencia al grupo: KDA gana oro por asistencia, True Damage hace un Beat Drop (daño doble) cada 3 ataques, Huntrix duplica el escudo y Saja Boys mejora +1/+1 al resto del grupo cada 2 combates.',
+        'Con 4 cartas K-Pop distintas, el grupo elegido gana +5/+5 permanente; con 6, +10/+10.'
+      ] },
     { date: '2026-11-04', tag: 'Avance', title: 'Charla con los Desarrolladores: bajas, 2.2 y más', pet: true,
       items: ['Segunda charla con los desarrolladores: confirmamos lo que se ha retirado en la 2.1 y adelantamos lo que viene en la 2.2 y más allá. Con una visita inesperada.'],
       chat: [

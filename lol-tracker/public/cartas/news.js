@@ -1,6 +1,10 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-04', tag: 'Novedad', title: 'Sortear victoria',
+      items: ['En partidas 1 vs 1 online, pasada la ronda 20 aparece el botón «Sortear victoria», pensado para cuando la partida se queda en un punto muerto.',
+        'Al pulsarlo, tu rival recibe un aviso: si acepta, se lanza una moneda al aire (50 % cada uno) y quien gane se lleva la partida.',
+        'Si lo rechaza, el botón no se puede volver a usar hasta dentro de 5 rondas.'] },
     { date: '2026-11-04', tag: 'Cambio', title: 'Nuevo logo de Informático',
       items: ['La sinergia Informático estrena icono: un chip de circuitos azul eléctrico.'] },
     { date: '2026-11-04', tag: 'Corrección', title: 'KOI: la herencia ya no es permanente',

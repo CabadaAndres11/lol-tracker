@@ -1267,7 +1267,7 @@
   // El servidor guarda la partida; aquí se aplican tus acciones al momento y se envían en cola. Cada respuesta del servidor
   // trae tu vista (tú siempre eres p[0]) y sustituye a la copia local.
   var PV = { px: 'pvp', on: false, id: null, seat: 0, v: 0, rdy: [false, false], q: [], busy: false, tm: null, wait: null, seenFight: 0, seenAct: 0, names: ['Tú', 'Rival'], pend: null };
-  function pvpReset() { clearTimeout(PV.tm); PV.on = false; PV.id = null; PV.q = []; PV.busy = false; PV.wait = null; PV.pend = null; PV.v = 0; PV.rdy = [false, false]; }
+  function pvpReset() { clearTimeout(PV.tm); PV.on = false; PV.id = null; PV.q = []; PV.busy = false; PV.wait = null; PV.pend = null; PV.v = 0; PV.rdy = [false, false]; PV.sor = null; ui.coinUntil = 0; }
   function pvpSchedule(ms) { clearTimeout(PV.tm); PV.tm = setTimeout(pvpTick, ms); }
   function pvpTick() {
     var call;
@@ -1321,6 +1321,7 @@
   }
   function pvpBegin(d) {
     pvpReset(); PV.on = true; PV.id = d.id; PV.seat = d.seat; PV.names = d.names; PV.rdy = d.rdy; PV.v = d.v;
+    PV.sor = d.sor || null;
     PV.seenFight = d.s.fightN || 0; PV.seenAct = 0;
     d.s.acts.forEach(function (a) { PV.seenAct = Math.max(PV.seenAct, a.n); }); d.s.acts = [];
     ui.s = d.s; ui.screen = 'game'; ui.reward = d.reward || null; ui.sel = null; ui.view = null; ui.playing = false; ui.hint = ''; ui.landed = null; ui.busy = false; ui.seenKey = null;
@@ -1334,6 +1335,8 @@
   }
   function pvpApply(d) {
     var old = ui.s, ns = d.s; PV.pend = null; PV.v = d.v; PV.rdy = d.rdy; PV.names = d.names;
+    if (d.sor && d.sor.coin && !(PV.sor && PV.sor.coin)) { ui.coinUntil = Date.now() + 2800; setTimeout(function () { if (ui.screen === 'game' && !ui.playing) render(); }, 2900); }
+    PV.sor = d.sor || null;
     ns.acts = ns.acts.filter(function (a) { return a.n > PV.seenAct; });
     ns.acts.forEach(function (a) { PV.seenAct = Math.max(PV.seenAct, a.n); });
     if (d.hint) ui.hint = d.hint;
@@ -1558,13 +1561,28 @@
     return h + '</div>';
   }
   var REFRESH_SVG = '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>';
+  // Sortear victoria (solo 1 vs 1 online, pasada la ronda 20)
+  function sorBtn() {
+    var o = PV.on && PV.px === 'pvp' && !ui.s.over && PV.sor && PV.sor.show ? PV.sor : null;
+    if (!o) return '';
+    if (o.pend === 'out') return '<button class="sorbtn" data-act="sorcancel" title="Cancelar la propuesta">' + ic('dado') + ' Esperando al rival… (cancelar)</button>';
+    if (o.can) return '<button class="sorbtn go" data-act="sor" title="Propón echar la victoria a cara o cruz">' + ic('dado') + ' Sortear victoria</button>';
+    return '<button class="sorbtn" disabled title="Tras un rechazo, hay que esperar unas rondas">' + ic('dado') + ' Sortear victoria' + (o.wait ? ' · en ' + o.wait + (o.wait === 1 ? ' ronda' : ' rondas') : '') + '</button>';
+  }
+  function sorOverlay(s) {
+    var o = PV.on && PV.px === 'pvp' && PV.sor;
+    if (!o) return '';
+    if (o.coin && Date.now() < (ui.coinUntil || 0)) return '<div class="overlay sorcoinov"><div class="panel sorcoinp"><h2>' + ic('dado') + ' Sorteo a cara o cruz</h2><div class="sorc3d"><div class="sorcface"><span class="scf scf-a">' + ic('moneda') + '</span><span class="scf scf-b">' + ic('moneda') + '</span></div></div><p class="mut">La moneda decide la partida…</p></div></div>';
+    if (o.pend === 'in' && !s.over) return '<div class="overlay surro sorov"><div class="panel surrp"><h2>' + ic('dado') + ' ' + esc(PV.names[1] || 'Tu rival') + ' propone sortear la victoria</h2><p class="mut">Si aceptas, se lanza una moneda al aire (50 % cada uno) y quien gane se lleva la partida. Si lo rechazas, no se podrá volver a proponer hasta dentro de 5 rondas.</p><div class="btnrow"><button class="btn" data-act="soryes">Aceptar sorteo</button><button class="btn sec" data-act="sorno">Rechazar</button></div></div></div>';
+    return '';
+  }
   function renderGame() {
     var gk0 = (PV.on ? PV.id : '') + ':' + ui.s.rs; ui.seedSeen = ui.seenKey !== gk0; if (ui.seedSeen) { ui.seenKey = gk0; ui.seen = {}; ui.hideUntil = {}; }
     ui.fl = [];
     var s = ui.s, view = ui.view || E.viewOf(s), P = s.p[0], R = s.p[1];
     var shopMode = s.shopOpen && !ui.playing, shop = shopMode && s.phase === 'prep', prep = s.phase === 'prep' && !ui.playing && !s.shopOpen;
     var pend = prep ? E.pendingTargets(s).length : 0, hasT = Object.keys(P.target).length > 0;
-    var h = '<div class="gwrap' + (shopMode ? ' shopmode' : '') + '"><div class="top"><div><h1>Ronda ' + s.round + ' · ' + (s.shopOpen ? '' + ic('carrito') + ' Tienda' + (s.round === 1 ? ' inicial' : '') : '' + ic('espadas') + ' Combate') + (!s.shopOpen ? ' <span class="mut">· ' + (s.first === 0 ? 'atacas primero' : 'ataca primero el rival') + '</span>' : '') + '</h1></div><div class="tright"><span class="tlinks"><button class="lnk" data-act="menu" data-to="deck">' + ic('cartas') + ' Colección</button> · <button class="lnk" data-act="menu" data-to="home">' + ic('casa') + ' Menú</button></span>' + (s.over ? '' : ui.tut ? '<button class="surrbtn" data-act="tutexit">' + ic('puerta') + ' Salir del tutorial</button>' : '<button class="surrbtn" data-act="surrender" title="Abandonar la partida y darla por perdida">' + ic('bandera') + ' Rendirse</button>') + '</div></div>' + timerHtml(prep || shop) + '';
+    var h = '<div class="gwrap' + (shopMode ? ' shopmode' : '') + '"><div class="top"><div><h1>Ronda ' + s.round + ' · ' + (s.shopOpen ? '' + ic('carrito') + ' Tienda' + (s.round === 1 ? ' inicial' : '') : '' + ic('espadas') + ' Combate') + (!s.shopOpen ? ' <span class="mut">· ' + (s.first === 0 ? 'atacas primero' : 'ataca primero el rival') + '</span>' : '') + '</h1></div><div class="tright"><span class="tlinks"><button class="lnk" data-act="menu" data-to="deck">' + ic('cartas') + ' Colección</button> · <button class="lnk" data-act="menu" data-to="home">' + ic('casa') + ' Menú</button></span>' + (s.over ? '' : ui.tut ? '<button class="surrbtn" data-act="tutexit">' + ic('puerta') + ' Salir del tutorial</button>' : '<button class="surrbtn" data-act="surrender" title="Abandonar la partida y darla por perdida">' + ic('bandera') + ' Rendirse</button>') + '</div></div>' + (sorBtn() ? '<div class="sorrow">' + sorBtn() + '</div>' : '') + timerHtml(prep || shop) + '';
     h += '<div class="gmain"><aside class="gl">' + boardHtml(s) + synergyHtml(P) + '</aside><section class="gc"><div class="board" id="board">';
     var ML = s.maxLife || CFG.life;
     if (s.vs4 && s.spec && ui.playing) h += '<div class="v4spec">' + ic('ojo') + ' Descansas: estás viendo el duelo <b>' + esc(s.spec[0]) + '</b> contra <b>' + esc(s.spec[1]) + '</b></div>';
@@ -1615,7 +1633,7 @@
     var shown = s.log.slice(-14);
     h += '<div class="panel logp"><h2>Registro</h2><div class="log" id="log">' + shown.map(function (l, n) { return '<div' + (n === shown.length - 1 ? ' class="cur"' : '') + '>' + esc(l.text) + '</div>'; }).join('') + '</div></div></aside></div>';
     if (s.phase !== 'over') ui.endSnd = 0;
-    if (s.phase === 'over' && !ui.playing) {
+    if (s.phase === 'over' && !ui.playing && !(ui.coinUntil && Date.now() < ui.coinUntil)) {
       var win = s.winner === 0;
       if (!ui.endSnd) { ui.endSnd = 1; snd(win ? 'win' : 'lose', 350); }
       if (!s.rep && PV.on) s.rep = 1;
@@ -1633,6 +1651,7 @@
       h += finOverlay(finId(), win, win ? '¡Victoria!' : (s.vs4 ? 'Eliminado · puesto ' + s.place + 'º de 4' : 'Derrota'), esc(s.reason) + ' · ronda ' + s.round, rw, btns, '');
     }
     if (ui.confirmSurr && !s.over) h += '<div class="overlay surro"><div class="panel surrp"><h2>' + ic('aviso') + ' ¿Seguro que quieres rendirte?</h2><p class="mut">Darás la partida por perdida' + (s.vs4 ? ' y quedarás eliminado.' : '.') + ' Esta acción no se puede deshacer.</p><div class="btnrow"><button class="btn" data-act="surrender-yes">Sí, rendirme</button><button class="btn sec" data-act="surrender-no">Cancelar</button></div></div></div>';
+    h += sorOverlay(s);
     h += '</div>';
     app.innerHTML = h;
     document.body.classList.toggle('shopbg', !!shopMode);
@@ -2674,6 +2693,7 @@
     if (act === 'skip') { clearTimeout(timer); ui.shown = ui.frames.length; return stopPlay(); }
     if (act === 'surrender') { if (s && !s.over) { ui.confirmSurr = true; render(); } return; }
     if (act === 'surrender-no') { ui.confirmSurr = false; return render(); }
+    if (act === 'sor' || act === 'sorcancel' || act === 'soryes' || act === 'sorno') { if (PV.on) pvpSend(act === 'sor' ? 'sor' : act === 'sorcancel' ? 'sorCancel' : act === 'soryes' ? 'sorYes' : 'sorNo'); return; }
     if (act === 'surrender-yes') {
       ui.confirmSurr = false;
       if (!s || s.over) return render();

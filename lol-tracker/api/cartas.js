@@ -330,6 +330,37 @@ async function payPvp(cfg, g) {
     await saveUser(cfg, u);
   }
 }
+// ---- Sortear victoria (1 vs 1): tras la ronda SORTEO_MIN_ROUND se puede proponer una moneda al aire; el rival acepta o rechaza ----
+const SORTEO_MIN_ROUND = 20, SORTEO_COOLDOWN = 5;
+function sorView(g, seat) {
+  const s = g.s, wait = Math.max(0, (g.sorAt || 0) - s.round);
+  return {
+    show: s.round > SORTEO_MIN_ROUND || g.coin != null,
+    can: !s.over && s.round > SORTEO_MIN_ROUND && !g.sor && !wait,
+    wait, pend: g.sor ? (g.sor.by === seat ? 'out' : 'in') : '',
+    coin: g.coin == null ? '' : (g.coin === seat ? 'win' : 'lose'),
+  };
+}
+function sorteoOp(g, seat, op) { // devuelve un aviso (texto) si no se puede
+  const s = g.s;
+  if (op === 'sor') {
+    if (s.round <= SORTEO_MIN_ROUND) return 'El sorteo se desbloquea pasada la ronda ' + SORTEO_MIN_ROUND + '.';
+    if (g.sor) return 'Ya hay un sorteo propuesto.';
+    if ((g.sorAt || 0) > s.round) return 'Podrás volver a proponerlo en ' + (g.sorAt - s.round) + ' rondas.';
+    g.sor = { by: seat }; g.v++; return '';
+  }
+  if (!g.sor) return '';
+  if (op === 'sorCancel') { if (g.sor.by === seat) { g.sor = null; g.v++; } return ''; }
+  if (g.sor.by === seat) return ''; // solo responde el rival
+  if (op === 'sorNo') { g.sor = null; g.sorAt = s.round + SORTEO_COOLDOWN; g.v++; return ''; }
+  if (op === 'sorYes') {
+    const w = crypto.randomInt(0, 2), loser = 1 - w;
+    g.sor = null; g.coin = w;
+    E.forfeit(s, loser, E.pv(s, w, 'Sorteo a cara o cruz: ¡la moneda te da la victoria!', 'Sorteo a cara o cruz: la moneda da la victoria al rival.'));
+    g.dl = 0; g.v++;
+  }
+  return '';
+}
 function viewFor(g, seat) {
   const s = E.mirror(g.s, seat);
   s.acts = s.acts.filter((a) => a.p === 1); // solo lo que ha jugado el rival (lo tuyo ya lo ves)
@@ -338,6 +369,7 @@ function viewFor(g, seat) {
     ok: true, id: g.id, v: g.v, seat, names: seat ? [g.names[1], g.names[0]] : g.names.slice(),
     rdy: seat ? [g.rdy[1], g.rdy[0]] : g.rdy.slice(), dl: g.dl ? Math.max(0, g.dl - Date.now()) : 0,
     reward: g.rew[seat], s,
+    sor: sorView(g, seat),
     em: g.em ? (seat ? [emView(g.em[1]), emView(g.em[0])] : g.em.map(emView)) : [null, null],
   };
 }
@@ -432,6 +464,8 @@ async function pvpHandle(cfg, act, body, u) {
         else { g.rdy[seat] = true; g.v++; resolveIfReady(g, false); }
       } else if (op === 'unready') {
         if (g.rdy[seat]) { g.rdy[seat] = false; g.v++; }
+      } else if (op === 'sor' || op === 'sorYes' || op === 'sorNo' || op === 'sorCancel') {
+        hint = sorteoOp(g, seat, op);
       } else if (SEAT_OPS[op] && !g.rdy[seat]) {
         s.err = '';
         const ok = SEAT_OPS[op](s, seat, a, x);

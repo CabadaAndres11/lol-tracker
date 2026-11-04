@@ -1,6 +1,10 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-04', tag: 'Cambio', title: 'Tienda: Mordisco Del Invierno entra y las cartas Anime salen',
+      art: ['sech-duo'],
+      items: ['«Mordisco Del Invierno» pasa al sobre Set 2 y se vende en la tienda (Cartas · Acciones) por 100 monedas.',
+        'Las cartas Anime dejan de venderse sueltas en la tienda (siguen saliendo en los sobres Anime y en el pase). Las cartas Goblin no se venden en la tienda: solo salen en el Set 2.'] },
     { date: '2026-11-04', tag: 'Novedad', title: 'Nuevo sobre: Set 2',
       art: ['petea-goblin', 'sech-duo'],
       items: ['Nuevo sobre «Set 2» en la tienda, al mismo precio que los demás (50 monedas). Trae 5 cartas al azar de las sinergias Goblins y Magic Botlane: Hellbramn Goblin, Mertens Goblin, Lihone Goblin, Petea Goblin, Javihi Dúo y Sech Dúo. La última siempre es Rara o mejor.',

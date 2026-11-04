@@ -554,7 +554,7 @@
   function invItems() {
     var a = ui.acct || {}, ps = a.packSize, items = [];
     function opt(act, icn, t, d, extra, dis) { return '<button class="invopt" data-act="' + act + '"' + (extra || '') + (dis ? ' disabled' : '') + '>' + ic(icn) + '<span><b>' + t + '</b><small>' + d + '</small></span></button>'; }
-    [['set1', 'Sobre Set 1', a.packs, 'Trae ' + ps + ' cartas al azar del juego (sin las sinergias Anime, Goblins ni las cartas Magic Botlane); la última es Rara o mejor.'], ['set2', 'Sobre Set 2', a.packsSet2, 'Trae ' + ps + ' cartas al azar de las sinergias Goblins y Magic Botlane; la última es Rara o mejor.'], ['anime', 'Sobre Anime', a.packsAnime, 'Trae ' + ps + ' cartas al azar de la sinergia Anime y su acción; la última es Rara o mejor.']].forEach(function (p) {
+    [['set1', 'Sobre Set 1', a.packs, 'Trae ' + ps + ' cartas al azar del juego (sin las sinergias Anime ni las cartas del Set 2); la última es Rara o mejor.'], ['set2', 'Sobre Set 2', a.packsSet2, 'Trae ' + ps + ' cartas al azar de las sinergias Goblins y Magic Botlane; la última es Rara o mejor.'], ['anime', 'Sobre Anime', a.packsAnime, 'Trae ' + ps + ' cartas al azar de la sinergia Anime y su acción; la última es Rara o mejor.']].forEach(function (p) {
       if (!p[2]) return;
       items.push({ k: p[0], n: p[2], name: p[1], img: '<img class="bximg" src="/cartas/img/pack-' + p[0] + '.webp" alt="">', desc: p[3],
         opts: opt('openpack', 'sobre', 'Abrir', 'Abre un sobre', ' data-inv="1" data-pack="' + p[0] + '"', !!ui.pack) });
@@ -919,7 +919,7 @@
   function packPanel(a, pk) {
     var can = a.coins >= a.packCost && !ui.pack;
     var name = pk === 'anime' ? 'Sobre Anime' : pk === 'set2' ? 'Set 2' : 'Set 1';
-    var txt = pk === 'anime' ? ' cartas al azar de la sinergia Anime (sus tropas y su acción). ' : pk === 'set2' ? ' cartas al azar de las sinergias Goblins y Magic Botlane (Javihi Dúo y Sech Dúo). ' : ' cartas al azar del juego (tropas y acciones, sin las sinergias Anime, Goblins ni las cartas Magic Botlane del Set 2). ';
+    var txt = pk === 'anime' ? ' cartas al azar de la sinergia Anime (sus tropas y su acción). ' : pk === 'set2' ? ' cartas al azar de las sinergias Goblins y Magic Botlane (sus tropas y su acción). ' : ' cartas al azar del juego (tropas y acciones, sin las sinergias Anime ni las cartas Goblins y Magic Botlane del Set 2). ';
     return '<div class="panel packbox">' + bpkHtml('', pk) + '<h2>' + name + '</h2><p class="mut">' + a.packSize + txt + 'La última siempre es Rara o mejor. Las cartas que ya tengas suben su nivel.</p>' +
       '<button class="btn cta big" data-act="openpack" data-pack="' + pk + '"' + (can ? '' : ' disabled') + '>' + (a.packCost ? 'Abrir sobre · ' + a.packCost + ' ' + ic('moneda') + '' : 'Abrir sobre · gratis') + '</button>' + (a.coins < a.packCost ? '<p class="mut">Te faltan ' + (a.packCost - a.coins) + ' monedas.</p>' : '') + '</div>';
   }

@@ -998,6 +998,7 @@ var D={
   },
   {
    "id": "mordisco-del-invierno",
+   "pack": "set2",
    "name": "Mordisco Del Invierno",
    "cost": 3,
    "rarity": "Épica",
@@ -1240,36 +1241,8 @@ var D={
    "price": 50
   },
   {
-   "id": "javihi-smiley",
-   "price": 40
-  },
-  {
-   "id": "mertens-meliodas",
-   "price": 40
-  },
-  {
-   "id": "lihone-rudeus",
-   "price": 70
-  },
-  {
-   "id": "chipy-goku",
-   "price": 70
-  },
-  {
-   "id": "pampert-asta",
-   "price": 70
-  },
-  {
-   "id": "dashlight-sun-jin-woo",
+   "id": "mordisco-del-invierno",
    "price": 100
-  },
-  {
-   "id": "aitorlg-maomao",
-   "price": 150
-  },
-  {
-   "id": "kamehameha",
-   "price": 50
   }
  ]
 };

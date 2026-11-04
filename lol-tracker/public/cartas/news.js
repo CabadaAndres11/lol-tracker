@@ -1,6 +1,9 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-04', tag: 'Novedad', title: 'Skins de cartas eliminadas para todas las cuentas',
+      items: ['Todas las cuentas creadas hasta ahora reciben en su inventario las skins de las cartas eliminadas: PokeAitoRLG, Javihi Prime, Lihone Setter y Chipy Llorón (las que ya tenías desbloqueadas no se repiten).',
+        'Las cuentas que se creen a partir de ahora no podrán conseguirlas.'] },
     { date: '2026-11-04', tag: 'Cambio', title: 'Skin de Chipy Llorón',
       art: ['chipy-correa'],
       items: ['La ilustración de Chipy Llorón, carta eliminada, pasa a ser una skin de Chipy Correa, regalada a todos los que tenían Chipy Llorón. Te llega al inventario para que la desbloquees o la veas en 3D.'] },

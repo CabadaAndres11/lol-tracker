@@ -247,6 +247,13 @@ async function loadUser(cfg, name) {
     if ((u.owned || []).includes('chipy-lloron')) giveSkin(u, 'chipy-correa-lloron');
     await redis(cfg, ['SET', uKey(u.name), JSON.stringify(u)]);
   }
+  // Regalo único: todas las cuentas que existían cuando se eliminaron esas cartas reciben en el inventario las skins de compensación
+  // (las cuentas nuevas nacen con legacyGift y no las reciben).
+  if (u && !u.legacyGift) {
+    SKINS.filter((k) => k.legacy).forEach((k) => giveSkin(u, k.id));
+    u.legacyGift = true;
+    await redis(cfg, ['SET', uKey(u.name), JSON.stringify(u)]);
+  }
   const GONE = ['capitulo-especial', 'rabia-contenida', 'fiesta-del-pueblo', 'hermano-del-alma', 'sofa-compartido', 'madrugon', 'haikyuu-lihone', 'chipy-lloron']; // cartas eliminadas del juego
   if (u && ((u.owned || []).some((x) => GONE.includes(x)) || GONE.some((g) => JSON.stringify(u.decks || '').includes(g)))) {
     u.owned = (u.owned || []).filter((x) => !GONE.includes(x));
@@ -818,7 +825,7 @@ module.exports = async function handler(req, res) {
         if (!STARTER_THEMES.includes(starter) && name.toLowerCase() !== 'admin') { res.status(400).json({ error: 'Elige un mazo inicial.' }); return; }
         if (await loadUser(cfg, name)) { res.status(409).json({ error: 'Ese nombre ya está cogido.' }); return; }
         const salt = crypto.randomBytes(16).toString('hex');
-        const u = { name, salt, hash: hashPin(pin, salt), coins: START_COINS, owned: starterFor(STARTER_THEMES.includes(starter) ? starter : STARTER_THEMES[0]), lastDaily: '', rewardDay: '', rewardCount: 0, startedAt: 0, c100: true, createdAt: Date.now() };
+        const u = { legacyGift: true, name, salt, hash: hashPin(pin, salt), coins: START_COINS, owned: starterFor(STARTER_THEMES.includes(starter) ? starter : STARTER_THEMES[0]), lastDaily: '', rewardDay: '', rewardCount: 0, startedAt: 0, c100: true, createdAt: Date.now() };
         if (isAdmin(u)) u.owned = ALL.map((c) => c.id);
         await saveUser(cfg, u);
         res.status(200).json({ token: await newSession(cfg, name), user: publicUser(u) });

@@ -218,6 +218,7 @@ var D={
    "hp": 21,
    "rarity": "Legendaria",
    "type": "tropa",
+   "pack": "set2",
    "size": 2,
    "pas": {
     "n": "Muro de Hielo",
@@ -266,6 +267,7 @@ var D={
    "hp": 10,
    "rarity": "Legendaria",
    "type": "tropa",
+   "pack": "set2",
    "size": 2,
    "pas": {
     "n": "Armas Lunares",
@@ -644,8 +646,8 @@ var D={
    "hp": 6,
    "rarity": "Común",
    "type": "tropa",
-   "size": 1,
-   "nopack": true
+   "pack": "set2",
+   "size": 1
   },
   {
    "id": "mertens-goblin",
@@ -659,8 +661,8 @@ var D={
    "hp": 5,
    "rarity": "Común",
    "type": "tropa",
-   "size": 1,
-   "nopack": true
+   "pack": "set2",
+   "size": 1
   },
   {
    "id": "lihone-goblin",
@@ -674,8 +676,8 @@ var D={
    "hp": 7,
    "rarity": "Rara",
    "type": "tropa",
-   "size": 1,
-   "nopack": true
+   "pack": "set2",
+   "size": 1
   },
   {
    "id": "petea-goblin",
@@ -689,8 +691,8 @@ var D={
    "hp": 12,
    "rarity": "Épica",
    "type": "tropa",
+   "pack": "set2",
    "size": 2,
-   "nopack": true,
    "pas": {
     "n": "Loot Infinito",
     "t": "Si está en la mesa, los Goblins ganan +5/+5 por el nivel de su carta durante el combate (nivel 1: +5/+5, nivel 2: +10/+10, nivel 3: +15/+15)."

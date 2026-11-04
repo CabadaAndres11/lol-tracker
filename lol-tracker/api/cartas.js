@@ -71,9 +71,9 @@ function pickRarity() {
   return 'Común';
 }
 const isAnime = (c) => (c.themes || []).includes('Anime') || c.theme === 'Anime';
-const PACK_POOLS = { set1: ALL.filter((c) => !isAnime(c) && !c.nopack), anime: ALL.filter((c) => isAnime(c) && !c.nopack) }; // el sobre Anime solo trae la sinergia Anime y su acción; el Set 1, todo lo demás
-const packKey = (v) => (v === 'anime' ? 'anime' : 'set1');
-const packField = (k) => (k === 'anime' ? 'packsAnime' : 'packs');
+const PACK_POOLS = { set1: ALL.filter((c) => !isAnime(c) && !c.pack), anime: ALL.filter((c) => isAnime(c) && !c.pack), set2: ALL.filter((c) => c.pack === 'set2') }; // Set 2: Goblins y Magic Botlane; // el sobre Anime solo trae la sinergia Anime y su acción; el Set 1, todo lo demás
+const packKey = (v) => (v === 'anime' ? 'anime' : v === 'set2' ? 'set2' : 'set1');
+const packField = (k) => (k === 'anime' ? 'packsAnime' : k === 'set2' ? 'packsSet2' : 'packs');
 function drawCard(minRarity, poolAll) {
   const order = ['Común', 'Rara', 'Épica', 'Legendaria'];
   let rar = pickRarity();
@@ -150,7 +150,7 @@ function missionStats(u) {
 const rankReached = (u) => Math.max(u.ptsMax || 0, u.pts || 0);
 // Caja: una carta, una skin o un efecto que aún no tengas. Si lo tienes todo desbloqueado no se pueden abrir cajas.
 function boxPools(u) {
-  const cards = ALL.filter((c) => !c.nopack && !(u.owned || []).includes(c.id)); // las cartas sin lanzar (nopack) no salen en cajas
+  const cards = ALL.filter((c) => !(u.owned || []).includes(c.id));
   const skins = SKINS.filter((s) => !s.pass && !(u.skins || []).includes(s.id));
   const fxs = FX_DEPLOY.filter((id) => FX_PRICE[id] > 0 && !FX_PASS.includes(id) && !fxOwned(u).includes(id));
   return [['card', cards, 5], ['skin', skins, 3], ['fx', fxs, 2]].filter((p) => p[1].length);
@@ -174,7 +174,7 @@ function rollBox(u) {
 }
 function publicUser(u) {
   return {
-    name: u.name, boxLocked: boxLocked(u), pts: u.pts || 0, coins: u.coins, owned: u.owned, dups: u.dups || {}, skins: u.skins || [], skinSel: u.skinSel || {}, decks: u.decks || null, avatar: u.avatar || '', fx: { deploy: fxSel(u, 'deploy'), sleeve: fxSel(u, 'sleeve'), finish: fxSel(u, 'finish') }, fxOwned: fxOwned(u), boxes: u.boxes || 0, invSkins: (u.invSkins || []).filter((id) => !(u.skins || []).includes(id)), ms: { stats: missionStats(u), claimed: u.msClaimed || [] }, packs: u.packs || 0, packsAnime: u.packsAnime || 0, emoteSets: emoteSetsOf(u), rkClaimed: u.rkClaimed || [], season: seasonPublic(u), ptsMax: rankReached(u),
+    name: u.name, boxLocked: boxLocked(u), pts: u.pts || 0, coins: u.coins, owned: u.owned, dups: u.dups || {}, skins: u.skins || [], skinSel: u.skinSel || {}, decks: u.decks || null, avatar: u.avatar || '', fx: { deploy: fxSel(u, 'deploy'), sleeve: fxSel(u, 'sleeve'), finish: fxSel(u, 'finish') }, fxOwned: fxOwned(u), boxes: u.boxes || 0, invSkins: (u.invSkins || []).filter((id) => !(u.skins || []).includes(id)), ms: { stats: missionStats(u), claimed: u.msClaimed || [] }, packs: u.packs || 0, packsAnime: u.packsAnime || 0, packsSet2: u.packsSet2 || 0, emoteSets: emoteSetsOf(u), rkClaimed: u.rkClaimed || [], season: seasonPublic(u), ptsMax: rankReached(u),
     dailyAvailable: u.lastDaily !== today(),
     gamesToday: u.rewardDay === today() ? u.rewardCount : 0,
     maxGamesToday: MAX_GAME_REWARDS_PER_DAY,

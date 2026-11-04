@@ -2704,3 +2704,11 @@ body.soc-open #app { margin-right: 286px; }
 /* Goblins: Rey Goblin en el hueco extra 8 */
 .row4.ex4n { grid-template-columns: repeat(8, minmax(0, calc(var(--ch) * 5 / 7))); }
 @media (max-width: 720px) { .row4.ex4n { grid-template-columns: repeat(8, 1fr); } }
+
+/* Sobre Set 2 */
+.bpk.set2 .bpk-lid, .bpk.set2 .bpk-main { background: url(img/pack-set2.webp) center / 100% 100% no-repeat; }
+.bpk.set2 .bpk-lid::after, .bpk.set2 .bpk-main::after { display: none; }
+.bpk.set2 { filter: drop-shadow(0 14px 18px rgba(90,200,40,.5)); }
+.bpk.set2.rip, .bpk.set2.shake { filter: none; }
+.packs-grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); max-width: 1100px; }
+@media (max-width: 900px) { .packs-grid.three { grid-template-columns: 1fr; } }

@@ -1,6 +1,9 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-04', tag: 'Cambio', title: 'Logo de Magic Botlane',
+      art: ['javihi-duo', 'sech-duo'],
+      items: ['La sinergia Magic Botlane estrena su logo, que aparece en las etiquetas de las cartas, la colección, las guías de sinergia y el resto de pantallas.'] },
     { date: '2026-11-04', tag: 'Novedad', title: 'Magic Botlane: contraataques y Mordisco Del Invierno',
       art: ['javihi-duo', 'sech-duo'],
       items: ['Con la sinergia Magic Botlane activa, los contraataques dirigidos a Sech Dúo también se redirigen a Javihi Dúo (modo Resurrección).',

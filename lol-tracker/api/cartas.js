@@ -613,7 +613,7 @@ async function payV4(cfg, g) {
     if (valid && !abandoned && u.rewardCount < MAX_GAME_REWARDS_PER_DAY) {
       gained = g.bots ? Math.round((BOT_COINS.played + (BOT_COINS.place[T.place[seat]] || 0)) * DIFF_MULT[g.diff | 0]) : PVP_COINS.played + (V4.PLACE_BONUS[T.place[seat]] || 0); u.rewardCount++; u.coins += gained;
     }
-    const pd = g.bots ? (g.diff === 2 && valid && !abandoned && T.place[seat] === 1 && gained > 0 ? EXPERT_PTS : 0) : PTS_V4[T.place[seat]] || 0;
+    const pd = g.bots ? (g.diff === 2 && valid && !abandoned && T.place[seat] === 1 ? EXPERT_PTS : 0) : PTS_V4[T.place[seat]] || 0;
     const pts = (valid || (abandoned && pd < 0)) && pd ? await addPts(cfg, u, pd) : 0;
     g.rew[seat] = { gained, capped: valid && !abandoned && gained === 0, place: T.place[seat], pts, total: u.pts || 0 };
     await saveUser(cfg, u);
@@ -1074,8 +1074,8 @@ module.exports = async function handler(req, res) {
       if (valid && u.rewardCount < MAX_GAME_REWARDS_PER_DAY) {
         gained = Math.round((GAME_COINS.played + (body.won ? GAME_COINS.win : 0)) * DIFF_MULT[diff]);
         u.rewardCount++; u.coins += gained;
-        if (body.won && diff === 2) pts = await addPts(cfg, u, EXPERT_PTS);
       }
+      if (valid && body.won && diff === 2) pts = await addPts(cfg, u, EXPERT_PTS); // los puntos no dependen del límite diario de monedas
       await saveUser(cfg, u);
       res.status(200).json({ gained, pts, user: publicUser(u), capped: valid && gained === 0 }); return;
     }

@@ -801,7 +801,7 @@
 
   // Efectos al caer una tropa (KOI). Devuelve texto de registro y animación.
   // ---------- Pasivas de legendarias ----------
-  var PAS = { 'dashlight-sun-jin-woo': 'sombra', 'aitorlg-maomao': 'boticaria', 'javihi-duo': 'duo', 'sech-duo': 'duo', 'javihi-prime': 'remate', 'sech': 'embargo', 'potango': 'aliento', 'mertens-prime': 'pereza', 'chipy-lloron': 'llanto', 'lihone-viego': 'racha', 'aitorlg-renata': 'prorroga', 'haikyuu-lihone': 'saque', 'lihone': 'captura', 'pampert-koisito': 'cabezon', 'aitorlg-koisito': 'heredero', 'mertens-gambler': 'malaracha', 'computer-dashlight': 'medallas', 'pampert-gambler': 'colega' };
+  var PAS = { 'dashlight-sun-jin-woo': 'sombra', 'aitorlg-maomao': 'boticaria', 'javihi-duo': 'duo', 'sech-duo': 'duo', 'javihi-prime': 'remate', 'sech': 'embargo', 'potango': 'aliento', 'mertens-prime': 'pereza', 'chipy-lloron': 'llanto', 'lihone-viego': 'racha', 'aitorlg-renata': 'prorroga', 'lihone': 'captura', 'pampert-koisito': 'cabezon', 'aitorlg-koisito': 'heredero', 'mertens-gambler': 'malaracha', 'computer-dashlight': 'medallas', 'pampert-gambler': 'colega' };
   function pas(i) { return PAS[i.id] || ''; }
   function duoLinked(s, i) { var o = i.id === 'javihi-duo' ? 'sech-duo' : 'javihi-duo'; return mesaTroops(s.p[i.owner]).some(function (x) { return x.id === o; }); }
   // Prórroga (AitoRLG Renata): la tropa a su derecha no cae a 0 de vida hasta que haya atacado
@@ -957,10 +957,6 @@
           if (a.hp <= 0 && !a.dead && wardSave(s, a)) { line += ' (aguanta a 0 de vida)'; }
           else if (a.hp <= 0 && !a.dead) { a.dead = true; a.hp = 0; line += ' ¡Cae!'; var df2 = deathFx(s, a); line += df2.line; if (!fxk) fxk = df2.fx; }
         }
-      }
-      if (pas(a) === 'saque' && (P.voley[a.uid] || 'atk') !== 'def') { // Haikyuu Lihone: el saque golpea a las tropas contiguas al objetivo
-        var sk = E.mesa.indexOf(tgt);
-        [sk - 1, sk + 1].forEach(function (q) { var v = q >= 0 ? E.mesa[q] : null; if (v && !v.dead) { line += ' Saque:'; line += passiveHit(s, v, 1, 0); } });
       }
       if (pas(a) === 'remate') { // Javihi Prime: el balón rebota a otra tropa rival
         var rb = targetable(E).filter(function (x) { return x !== tgt; });

@@ -37,29 +37,12 @@ var D={
    }
   },
   {
-   "id": "haikyuu-lihone",
-   "name": "Lihone Setter",
-   "person": "Lihone",
-   "themes": [
-    "Voley"
-   ],
-   "cost": 4,
-   "atk": 6,
-   "hp": 14,
-   "rarity": "Épica",
-   "type": "tropa",
-   "size": 2,
-   "pas": {
-    "n": "Saque",
-    "t": "Si está en modo atacar, cada golpe hace 1 de daño a las tropas rivales contiguas a su objetivo."
-   }
-  },
-  {
    "id": "lihone",
    "name": "Lihone",
    "person": "Lihone",
    "themes": [
-    "Pokémon"
+    "Pokémon",
+    "Voley"
    ],
    "cost": 4,
    "atk": 4,

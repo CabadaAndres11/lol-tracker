@@ -192,7 +192,7 @@ async function loadUser(cfg, name) {
     if (u.dups && u.dups['dashlight-gambler'] != null) { u.dups['pampert-gambler'] = u.dups['dashlight-gambler']; delete u.dups['dashlight-gambler']; }
     await redis(cfg, ['SET', uKey(u.name), JSON.stringify(u)]);
   }
-  const GONE = ['capitulo-especial', 'rabia-contenida', 'fiesta-del-pueblo', 'hermano-del-alma', 'sofa-compartido', 'madrugon']; // cartas eliminadas del juego
+  const GONE = ['capitulo-especial', 'rabia-contenida', 'fiesta-del-pueblo', 'hermano-del-alma', 'sofa-compartido', 'madrugon', 'haikyuu-lihone']; // cartas eliminadas del juego
   if (u && ((u.owned || []).some((x) => GONE.includes(x)) || GONE.some((g) => JSON.stringify(u.decks || '').includes(g)))) {
     u.owned = (u.owned || []).filter((x) => !GONE.includes(x));
     const clean = (v) => Array.isArray(v) ? v.filter((x) => !GONE.includes(x)).map(clean) : v && typeof v === 'object' ? Object.fromEntries(Object.entries(v).map(([k, x]) => [k, clean(x)])) : v;

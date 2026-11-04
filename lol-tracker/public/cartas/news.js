@@ -1,6 +1,10 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-04', tag: 'Cambio', title: 'Lihone Setter desaparece; Lihone entra en Voley',
+      art: ['lihone'],
+      items: ['Se elimina la carta «Lihone Setter» (y su pasiva Saque). Desaparece de las colecciones y los mazos de los jugadores.',
+        'Lihone (Pokémon) gana la sinergia Voley: ahora cuenta para las dos sinergias y mantiene su pasiva Captura.'] },
     { date: '2026-11-04', tag: 'Cambio', title: 'Sin cajas cuando lo tienes todo',
       items: ['Si ya tienes desbloqueadas todas las cartas, skins y efectos que pueden salir de una caja, no se pueden abrir cajas: no podría tocarte nada nuevo. Tus cajas se conservan.'] },
     { date: '2026-11-04', tag: 'Cambio', title: 'Progreso de copias',

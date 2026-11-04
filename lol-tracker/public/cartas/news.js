@@ -1,6 +1,9 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-04', tag: 'Cambio', title: 'Skin de Lihone Setter',
+      art: ['lihone'],
+      items: ['La ilustración de Lihone Setter, carta eliminada, pasa a ser una skin de Lihone, regalada a todos los que tenían Lihone Setter. Te llega al inventario para que la desbloquees o la veas en 3D.'] },
     { date: '2026-11-04', tag: 'Cambio', title: 'Skins de compensación en el inventario',
       art: ['javihi-friki', 'aitorlg-regla'],
       items: ['Las skins que se entregan como compensación por cartas eliminadas (PokeAitoRLG, Javihi Prime...) ahora llegan a tu inventario en vez de añadirse directamente.',

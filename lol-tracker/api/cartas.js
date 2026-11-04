@@ -237,6 +237,11 @@ async function loadUser(cfg, name) {
     if (u.skinSel && u.skinSel[OLD_PRIME]) delete u.skinSel[OLD_PRIME];
     await redis(cfg, ['SET', uKey(u.name), JSON.stringify(u)]);
   }
+  // Lihone Setter (haikyuu-lihone) se eliminó: quien la tenía recibe su ilustración como skin de Lihone en el inventario
+  if (u && ((u.owned || []).includes('haikyuu-lihone') || (u.dups || {})['haikyuu-lihone'] != null)) {
+    if ((u.owned || []).includes('haikyuu-lihone')) giveSkin(u, 'lihone-setter');
+    await redis(cfg, ['SET', uKey(u.name), JSON.stringify(u)]);
+  }
   const GONE = ['capitulo-especial', 'rabia-contenida', 'fiesta-del-pueblo', 'hermano-del-alma', 'sofa-compartido', 'madrugon', 'haikyuu-lihone', 'chipy-lloron']; // cartas eliminadas del juego
   if (u && ((u.owned || []).some((x) => GONE.includes(x)) || GONE.some((g) => JSON.stringify(u.decks || '').includes(g)))) {
     u.owned = (u.owned || []).filter((x) => !GONE.includes(x));

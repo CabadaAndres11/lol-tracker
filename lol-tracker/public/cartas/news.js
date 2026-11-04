@@ -1,6 +1,9 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-04', tag: 'Cambio', title: 'Nuevo inventario',
+      items: ['El inventario se rediseña: ya no hay un hueco reservado para cada cosa. Tus objetos (sobres Set 1, sobres Anime, cajas...) aparecen agrupados en cuadrados con su cantidad, y solo los que tienes.',
+        'Pulsa un cuadrado para ver sus opciones: «Abrir» (si está disponible) y, en las cajas, «Probabilidades».'] },
     { date: '2026-11-04', tag: 'Cambio', title: 'Javihi vs 9 pasa a ser Javihi vs All; Javihi Prime desaparece',
       art: ['javihi-friki'],
       items: ['Javihi vs 9 se llama ahora «Javihi vs All»: gana la sinergia Voley (cuenta para Lol y Voley), pasa a Épica (coste 4, ocupa 2 de espacio) con 8/12, y recibe la pasiva Remate de Javihi Prime (cada ataque rebota con la mitad de su ataque en otra tropa rival).',

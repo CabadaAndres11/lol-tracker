@@ -550,19 +550,30 @@
       '<div class="panel msbar">' + boxImg('sm') + '<div><h2>' + (a.boxes || 0) + ' ' + ((a.boxes || 0) === 1 ? 'caja' : 'cajas') + ' en tu inventario</h2><p class="mut">Cada misión te da una caja con una carta, una skin o un efecto que aún no tengas. Las cajas no se abren al recogerlas: las guardas en tu inventario. Misiones completadas: ' + done + ' / ' + MSN.MISSIONS.length + '.</p></div><button class="btn sec" data-act="goinv">' + ic('cartas') + ' Ir al inventario</button></div>' +
       '<ul class="mslist">' + items + '</ul></div>';
   }
-  function invPacks() {
-    var PK = [['set1', 'Sobres Set 1', 'packs', 'Cada sobre trae ' + ui.acct.packSize + ' cartas al azar de todo el juego (sin la sinergia Anime); la última es Rara o mejor.'], ['anime', 'Sobres Anime', 'packsAnime', 'Cada sobre trae ' + ui.acct.packSize + ' cartas al azar de la sinergia Anime y su acción; la última es Rara o mejor.']];
-    return PK.map(function (p) {
-      var n = (ui.acct && ui.acct[p[2]]) || 0;
-      return '<div class="invwrap"><div class="invbox invpk' + (n ? '' : ' empty') + '"><img class="bximg" src="/cartas/img/pack-' + (p[0] === 'anime' ? 'anime' : 'set1') + '.webp" alt="Sobre">' + (n ? '<span class="invn">×' + n + '</span>' : '') + '</div><div class="invinfo"><h2 class="dedh">' + p[1] + '</h2><p class="mut colhint">' + p[3] + '</p>' + (n ? '<button class="btn cta big" data-act="openpack" data-inv="1" data-pack="' + p[0] + '"' + (ui.pack ? ' disabled' : '') + '>' + ic('sobre') + ' Abrir sobre</button><p class="mut">Tienes ' + n + (n === 1 ? ' sobre' : ' sobres') + ' sin abrir.</p>' : '<p class="mut">No tienes sobres de este tipo ahora mismo. Consíguelos en el pase de batalla o cómpralos en la tienda.</p><div class="btnrow"><button class="btn sec" data-act="nav" data-to="pass">' + ic('estrella') + ' Pase de batalla</button></div>') + '</div></div>';
-    }).join('');
+  // Inventario: cuadrícula de objetos (sobres, cajas...). Solo aparecen los que tienes; al pulsar uno se despliega el menú con sus opciones.
+  function invItems() {
+    var a = ui.acct || {}, ps = a.packSize, items = [];
+    function opt(act, icn, t, d, extra, dis) { return '<button class="invopt" data-act="' + act + '"' + (extra || '') + (dis ? ' disabled' : '') + '>' + ic(icn) + '<span><b>' + t + '</b><small>' + d + '</small></span></button>'; }
+    [['set1', 'Sobre Set 1', a.packs, 'Trae ' + ps + ' cartas al azar de todo el juego (sin la sinergia Anime); la última es Rara o mejor.'], ['anime', 'Sobre Anime', a.packsAnime, 'Trae ' + ps + ' cartas al azar de la sinergia Anime y su acción; la última es Rara o mejor.']].forEach(function (p) {
+      if (!p[2]) return;
+      items.push({ k: p[0], n: p[2], name: p[1], img: '<img class="bximg" src="/cartas/img/pack-' + p[0] + '.webp" alt="">', desc: p[3],
+        opts: opt('openpack', 'sobre', 'Abrir', 'Abre un sobre', ' data-inv="1" data-pack="' + p[0] + '"', !!ui.pack) });
+    });
+    if (a.boxes) items.push({ k: 'box', n: a.boxes, name: 'Caja', img: boxImg(), desc: 'Dentro hay una carta que no tengas, una skin o un efecto. Nunca te tocará algo repetido.',
+      opts: (a.boxLocked ? opt('boxopen', 'caja', 'Abrir', 'Lo tienes todo desbloqueado: no se pueden abrir cajas', '', true) : opt('boxopen', 'caja', 'Abrir', 'Abre una caja')) + opt('boxinfo', 'ojo', 'Probabilidades', ui.boxInfo ? 'Ocultar las probabilidades' : 'Qué te puede tocar') });
+    return items;
   }
   function invTab() {
-    var n = (ui.acct && ui.acct.boxes) || 0;
-    return (ui.msg ? '<p class="err">' + esc(ui.msg) + '</p>' : '') + invPacks() + '<div class="invwrap"><div class="invbox' + (n ? '' : ' empty') + '">' + boxImg() + (n ? '<span class="invn">×' + n + '</span>' : '') + '<button class="bxinfo" data-act="boxinfo" aria-label="Probabilidades de la caja" title="Probabilidades">i</button></div><div class="invinfo"><h2 class="dedh">Cajas</h2>' +
-      (ui.boxInfo ? boxOddsHtml() : '') + '<p class="mut colhint">Dentro de cada caja hay una carta que no tengas, una skin o un efecto. Nunca te tocará algo repetido; cuando lo tengas todo desbloqueado, no se podrán abrir.</p>' +
-      (n && ui.acct.boxLocked ? '<button class="btn cta big" disabled>' + ic('caja') + ' Abrir caja</button><p class="mut">Lo tienes todo desbloqueado: no se pueden abrir cajas porque no podría salir nada nuevo. Conservas tus ' + n + (n === 1 ? ' caja.' : ' cajas.') + '</p>' : n ? '<button class="btn cta big" data-act="boxopen">' + ic('caja') + ' Abrir caja</button><p class="mut">Tienes ' + n + (n === 1 ? ' caja' : ' cajas') + ' sin abrir.</p>' :
-        '<p class="mut">No tienes cajas ahora mismo. Consíguelas completando misiones y subiendo de rango.</p><div class="btnrow"><button class="btn sec" data-act="nav" data-to="missions">' + ic('mision') + ' Misiones</button><button class="btn sec" data-act="nav" data-to="ladder">' + ic('trofeo') + ' Clasificación</button></div>') + '</div></div>';
+    var items = invItems(), sel = ui.invSel;
+    if (sel && !items.some(function (x) { return x.k === sel; })) sel = ui.invSel = '';
+    var h = (ui.msg ? '<p class="err">' + esc(ui.msg) + '</p>' : '');
+    if (!items.length) return h + '<div class="invempty"><p class="mut">Tu inventario está vacío. Consigue cajas completando misiones y subiendo de rango, y sobres en el pase de batalla o en la tienda.</p><div class="btnrow"><button class="btn sec" data-act="nav" data-to="missions">' + ic('mision') + ' Misiones</button><button class="btn sec" data-act="nav" data-to="ladder">' + ic('trofeo') + ' Clasificación</button><button class="btn sec" data-act="nav" data-to="pass">' + ic('estrella') + ' Pase de batalla</button></div></div>';
+    h += '<p class="mut colhint">Pulsa un objeto para ver qué puedes hacer con él.</p><div class="invgrid">' + items.map(function (it) {
+      var on = sel === it.k;
+      return '<div class="invcell' + (on ? ' on' : '') + '"><button class="invtile" data-act="invsel" data-k="' + it.k + '" title="' + it.name + '">' + it.img + '<span class="invn">×' + it.n + '</span></button>' +
+        (on ? '<div class="invmenu"><div class="invmh"><b>' + it.name + '</b><small>' + it.desc + '</small></div>' + it.opts + (it.k === 'box' && ui.boxInfo ? boxOddsHtml() : '') + '</div>' : '') + '</div>';
+    }).join('') + '</div>';
+    return h;
   }
   function boxOddsHtml() {
     var a = ui.acct || {}, W = { 'Común': 50, 'Rara': 30, 'Épica': 15, 'Legendaria': 5 };
@@ -2580,6 +2591,7 @@
     }
     if (act === 'rkclaim') { return api('rankClaim', { id: el.dataset.id }).then(function (r) { if (r.data && r.data.user) setAcct(r.data.user); if (r.ok) snd('claim'); ui.msg = r.ok ? '' : (r.data.error || ''); render(); }); }
     if (act === 'goinv') { ui.screen = 'deck'; ui.colTab = 'inv'; ui.dedit = null; window.scrollTo(0, 0); return render(); }
+    if (act === 'invsel') { ui.invSel = ui.invSel === el.dataset.k ? '' : el.dataset.k; ui.boxInfo = false; return renderDeck(); }
     if (act === 'boxinfo') { ui.boxInfo = !ui.boxInfo; return renderDeck(); }
     if (act === 'boxclose') { ui.box = null; return renderDeck(); }
     if (act === 'boxopen') {

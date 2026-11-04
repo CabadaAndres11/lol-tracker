@@ -1,6 +1,8 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-04', tag: 'Cambio', title: 'Nuevo logo de Informático',
+      items: ['La sinergia Informático estrena icono: un chip de circuitos azul eléctrico.'] },
     { date: '2026-11-04', tag: 'Corrección', title: 'KOI: la herencia ya no es permanente',
       items: ['Cuando cae una KOI, el ataque que cede a otra KOI viva ahora dura solo esa ronda (antes se quedaba para siempre). El refuerzo de ataque permanente al resto del equipo no cambia.'] },
     { date: '2026-11-04', tag: 'Cambio', title: 'Nuevos mazos iniciales',

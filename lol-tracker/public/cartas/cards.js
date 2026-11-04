@@ -189,17 +189,22 @@ var D={
   },
   {
    "id": "javihi-friki",
-   "name": "Javihi vs 9",
+   "name": "Javihi vs All",
    "person": "Javihi",
    "themes": [
-    "Lol"
+    "Lol",
+    "Voley"
    ],
-   "cost": 3,
-   "atk": 5,
-   "hp": 10,
-   "rarity": "Rara",
+   "cost": 4,
+   "atk": 8,
+   "hp": 12,
+   "rarity": "Épica",
    "type": "tropa",
-   "size": 1
+   "size": 2,
+   "pas": {
+    "n": "Remate",
+    "t": "Cada vez que ataca, el balón rebota: la mitad de su ataque (redondeado hacia arriba) golpea a otra tropa rival al azar."
+   }
   },
   {
    "id": "javihi-duo",
@@ -233,24 +238,6 @@ var D={
    "rarity": "Común",
    "type": "tropa",
    "size": 1
-  },
-  {
-   "id": "javihi-prime",
-   "name": "Javihi Prime",
-   "person": "Javihi",
-   "themes": [
-    "Voley"
-   ],
-   "cost": 5,
-   "atk": 6,
-   "hp": 19,
-   "rarity": "Legendaria",
-   "type": "tropa",
-   "size": 2,
-   "pas": {
-    "n": "Remate",
-    "t": "Cada vez que ataca, el balón rebota: la mitad de su ataque (redondeado hacia arriba) golpea a otra tropa rival al azar."
-   }
   },
   {
    "id": "sech-thresh",

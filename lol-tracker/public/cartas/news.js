@@ -1,6 +1,10 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-04', tag: 'Cambio', title: 'Javihi vs 9 pasa a ser Javihi vs All; Javihi Prime desaparece',
+      art: ['javihi-friki'],
+      items: ['Javihi vs 9 se llama ahora «Javihi vs All»: gana la sinergia Voley (cuenta para Lol y Voley), pasa a Épica (coste 4, ocupa 2 de espacio) con 8/12, y recibe la pasiva Remate de Javihi Prime (cada ataque rebota con la mitad de su ataque en otra tropa rival).',
+        'Se elimina la carta «Javihi Prime». Su ilustración pasa a ser una skin de Javihi vs All, regalada a todos los que tenían Javihi Prime. Sus copias se suman a las de Javihi vs All y los mazos con Javihi Prime usan ahora Javihi vs All.'] },
     { date: '2026-11-04', tag: 'Corrección', title: 'KOI: textos revisados',
       art: ['aitorlg-koisito'],
       items: ['Revisados los textos de KOI: la herencia de ataque indica ahora en todos los niveles, en Heredero y en Campeones de Europa que dura solo esa ronda.',
@@ -90,7 +94,7 @@
         { w: 'g', p: 'e', t: '¡¿Cinco?! ¿Y por qué tantas a la vez?' },
         { w: 'd', t: 'Queremos hacer sitio. Preferimos rehacer el juego alrededor de sinergias que den de verdad mucho juego antes que arrastrar algunas que se han quedado atrás. Aún estamos decidiendo qué pasa con cada carta; os iremos contando.' },
         { w: 'g', t: 'Vale, vale… ¿Y las cartas que se quedan? ¿Siguen igual?' },
-        { w: 'd', fx: { k: 'cards', ids: ['javihi-duo', 'sech-duo', 'potango', 'chipy-lloron', 'mertens-prime', 'javihi-prime'] }, t: 'No todas. Hay cartas que van a <b>cambiar por completo</b>, no solo de números: <b>Javihi Dúo</b>, <b>Sech Dúo</b>, <b>PotAnGo</b>, <b>Chipy Llorón</b>, <b>Mertens Prime</b> y <b>Javihi Prime</b>.' },
+        { w: 'd', fx: { k: 'cards', ids: ['javihi-duo', 'sech-duo', 'potango', 'chipy-lloron', 'mertens-prime', 'javihi-friki'] }, t: 'No todas. Hay cartas que van a <b>cambiar por completo</b>, no solo de números: <b>Javihi Dúo</b>, <b>Sech Dúo</b>, <b>PotAnGo</b>, <b>Chipy Llorón</b>, <b>Mertens Prime</b> y <b>Javihi Prime</b>.' },
         { w: 'g', t: '¿Cambian solo sus habilidades o también su aspecto?' },
         { w: 'd', fx: { k: 'art' }, t: 'Te cuento un <b>spoiler</b>: a algunas cartas les cambiaremos también la <b>ilustración</b>. Todavía no os enseñamos cuáles.' },
         { w: 'g', t: 'Eso da un poco de vértigo… ¿Y qué llega para compensar?' },
@@ -142,7 +146,7 @@
         'El sonido, las animaciones de versiones anteriores y el cierre de sesión pasan a una pantalla propia: botón «Ajustes» en tu perfil o en el menú de tu cuenta.',
         'Las partidas de Royal Rumble ahora se cuentan aparte (siguen contando también como Resurrección para las misiones).',
         'En la lista de amigos, el botón del muñeco abre el perfil de ese amigo: foto de perfil, estado, rango y todas sus estadísticas. Solo puedes ver el perfil de tus amigos.'] },
-    { date: '2026-11-03', tag: 'Novedad', title: '2.0 · Nuevo modo: Royal Rumble', art: ['javihi-prime', 'mertens-meliodas'],
+    { date: '2026-11-03', tag: 'Novedad', title: '2.0 · Nuevo modo: Royal Rumble', art: ['javihi-friki', 'mertens-meliodas'],
       items: [
         'Nuevo modo de juego «Royal Rumble»: funciona como Resurrección, pero se entra sin mazo. En la tienda puede salir cualquier carta del juego y vas construyendo tu composición sobre la marcha.',
         'Salen muchas más tropas y muy pocas cartas de acción. Además, las copias de tropas que ya tienes (para subir de nivel) y las cartas de tus temáticas activas tienen más probabilidad de aparecer.',

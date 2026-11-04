@@ -213,6 +213,28 @@ async function loadUser(cfg, name) {
     if (u.decks) u.decks = swap(u.decks);
     await redis(cfg, ['SET', uKey(u.name), JSON.stringify(u)]);
   }
+  // Fusión: Javihi Prime pasa a ser una skin de Javihi vs All (id javihi-friki, que conserva su pasiva Remate). Quien tenía Javihi Prime
+  // recibe la skin, conserva la carta (si no tenía Javihi vs All) y sus copias se suman; en los mazos se sustituye por Javihi vs All.
+  const OLD_PRIME = 'javihi-prime';
+  if (u && ((u.owned || []).includes(OLD_PRIME) || JSON.stringify(u.decks || '').includes(OLD_PRIME) || (u.dups || {})[OLD_PRIME] != null)) {
+    const had = (u.owned || []).includes(OLD_PRIME), hadNew = (u.owned || []).includes('javihi-friki');
+    u.dups = u.dups || {};
+    if (had) {
+      u.skins = u.skins || []; if (!u.skins.includes('javihi-friki-prime')) u.skins.push('javihi-friki-prime');
+      if (!hadNew) u.owned.push('javihi-friki');
+      u.dups['javihi-friki'] = (u.dups['javihi-friki'] || 0) + (hadNew ? 1 : 0) + (u.dups[OLD_PRIME] || 0);
+    }
+    delete u.dups[OLD_PRIME];
+    u.owned = (u.owned || []).filter((x) => x !== OLD_PRIME);
+    const swapP = (v) => {
+      if (v === OLD_PRIME) return 'javihi-friki';
+      if (Array.isArray(v)) { const m = v.map(swapP); return m.every((x) => typeof x === 'string') ? [...new Set(m)] : m; }
+      return v && typeof v === 'object' ? Object.fromEntries(Object.entries(v).map(([k, x]) => [k, swapP(x)])) : v;
+    };
+    if (u.decks) u.decks = swapP(u.decks);
+    if (u.skinSel && u.skinSel[OLD_PRIME]) delete u.skinSel[OLD_PRIME];
+    await redis(cfg, ['SET', uKey(u.name), JSON.stringify(u)]);
+  }
   const GONE = ['capitulo-especial', 'rabia-contenida', 'fiesta-del-pueblo', 'hermano-del-alma', 'sofa-compartido', 'madrugon', 'haikyuu-lihone', 'chipy-lloron']; // cartas eliminadas del juego
   if (u && ((u.owned || []).some((x) => GONE.includes(x)) || GONE.some((g) => JSON.stringify(u.decks || '').includes(g)))) {
     u.owned = (u.owned || []).filter((x) => !GONE.includes(x));

@@ -2,6 +2,7 @@
 (function (root) {
   var NEWS = [
     { date: '2026-11-04', tag: 'Novedad', title: 'Nueva sinergia: Goblins',
+      art: ['hellbramn-goblin', 'mertens-goblin', 'lihone-goblin', 'petea-goblin'],
       items: ['Nueva sinergia «Goblins» con 4 cartas: Hellbramn Goblin y Mertens Goblin (Comunes), Lihone Goblin (Rara) y Petea Goblin (Épica). Por ahora no salen en los sobres.',
         'Con 2 Goblins distintos: cada ronda (combate o tienda) consigues en tu mano una copia al azar de un Goblin. En clásico y Resurrección debe estar en tu mazo.',
         'Con los 4 Goblins: cada vez que una carta Goblin sube de nivel ganas 5 de oro. Si los 4 están en la mesa y todos al nivel 3, aparece el Rey Goblin en un hueco extra: 50/50, pasiva «Avaricia» (el daño sobrante a una tropa golpea directamente la vida del rival). Si cae, no vuelve a aparecer en esa partida.',

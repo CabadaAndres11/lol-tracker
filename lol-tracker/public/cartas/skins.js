@@ -7,6 +7,7 @@
     { id: 'potango-real', card: 'potango', name: 'Real PotAnGo', price: 200 },
     { id: 'pampert-oikawa', card: 'pampert', name: 'Pampert Oikawa', pass: true },
     { id: 'dashlight-kingambit', card: 'computer-dashlight', name: 'Dashlight Kingambit', pass: true },
+    { id: 'aitorlg-pokeaito', card: 'aitorlg-regla', name: 'PokeAitoRLG', pass: true, legacy: true }, // antigua carta PokeAitoRLG: regalo a quien la tenía
     { id: 'dashlight-correa-gambler', card: 'dashlight-correa', name: 'Dashlight Gambler', price: 120 },
   ];
   if (typeof module !== 'undefined' && module.exports) module.exports = SKINS; else root.CARTAS_SKINS = SKINS;

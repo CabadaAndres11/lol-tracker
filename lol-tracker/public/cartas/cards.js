@@ -109,24 +109,11 @@ var D={
    }
   },
   {
-   "id": "aitorlg-friki",
-   "name": "PokeAitoRLG",
-   "person": "AitoRLG",
-   "themes": [
-    "Pokémon"
-   ],
-   "cost": 3,
-   "atk": 4,
-   "hp": 11,
-   "rarity": "Rara",
-   "type": "tropa",
-   "size": 2
-  },
-  {
    "id": "aitorlg-regla",
-   "name": "AitoRLG Regla",
+   "name": "AitoRLG Palomitero",
    "person": "AitoRLG",
    "themes": [
+    "Pokémon",
     "Trabajo"
    ],
    "cost": 3,
@@ -521,24 +508,6 @@ var D={
    "rarity": "Rara",
    "type": "tropa",
    "size": 2
-  },
-  {
-   "id": "chipy-lloron",
-   "name": "Chipy Llorón",
-   "person": "Chipy",
-   "themes": [
-
-   ],
-   "cost": 5,
-   "atk": 7,
-   "hp": 18,
-   "rarity": "Legendaria",
-   "type": "tropa",
-   "size": 3,
-   "pas": {
-    "n": "Llanto final",
-    "t": "Al caer, hace la mitad de su ataque (redondeado hacia arriba) a todas las tropas rivales."
-   }
   },
   {
    "id": "pampert-friki",

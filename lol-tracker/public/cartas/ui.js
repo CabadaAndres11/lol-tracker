@@ -57,7 +57,7 @@
   function pips(n) { var h = ''; for (var k = 0; k < 3; k++) h += '<i' + (k < n ? ' class="on"' : '') + '></i>'; return h; }
   var AICON = { entrenamiento: 'espadas', arenga: 'megafono', armadura: 'escudo', banquete: 'carne', intimidacion: 'enfado', 'mal-de-ojo': 'ojo', 'golpe-certero': 'diana', lluvia: 'arco',
     'bola-extra': 'beisbol', 'segundo-aliento': 'viento', 'cambio-de-linea': 'cambio', parche: 'disquete', 'horas-extra': 'maletin', 'segunda-temporada': 'trofeo', 'campeones-de-europa': 'trofeo', 'remate-doble': 'voley', 'cita-sorpresa': 'corazon', 'golpe-de-suerte': 'dado', genkidama: 'fuego', remedio: 'corazon', kamehameha: 'estrella' };
-  var ARTS = {"aitorlg-maomao":1,"chipy-goku":1,"dashlight-sun-jin-woo":1,"javihi-smiley":1,"lihone-rudeus":1,"mertens-meliodas":1,"pampert-asta":1,"eriko":1,"helena":1,"lucia":1,"ari":1,"aitorlg-friki":1,"aitorlg-koisito":1,"aitorlg-regla":1,"aitorlg-renata":1,"chipy-correa":1,"chipy-lloron":1,"computer-chipy":1,"computer-dashlight":1,"computer-hellbramn":1,"computer-lihone":1,"computer-petea":1,"dashlight-akali":1,"dashlight-correa":1,"hellbramn":1,"javihi":1,"javihi-duo":1,"javihi-friki":1,"javihi-koisito":1,"javihi-prime":1,"lihone":1,"lihone-correa":1,"lihone-viego":1,"mertens":1,"mertens-gambler":1,"pampert-gambler":1,"mertens-prime":1,"pampert":1,"pampert-friki":1,"pampert-koisito":1,"petea-koisito":1,"petea-pokemaniaco":1,"potango":1,"sech":1,"sech-duo":1,"sech-koisito":1,"sech-thresh":1};
+  var ARTS = {"aitorlg-maomao":1,"chipy-goku":1,"dashlight-sun-jin-woo":1,"javihi-smiley":1,"lihone-rudeus":1,"mertens-meliodas":1,"pampert-asta":1,"eriko":1,"helena":1,"lucia":1,"ari":1,"aitorlg-koisito":1,"aitorlg-regla":1,"aitorlg-renata":1,"chipy-correa":1,"computer-chipy":1,"computer-dashlight":1,"computer-hellbramn":1,"computer-lihone":1,"computer-petea":1,"dashlight-akali":1,"dashlight-correa":1,"hellbramn":1,"javihi":1,"javihi-duo":1,"javihi-friki":1,"javihi-koisito":1,"javihi-prime":1,"lihone":1,"lihone-correa":1,"lihone-viego":1,"mertens":1,"mertens-gambler":1,"pampert-gambler":1,"mertens-prime":1,"pampert":1,"pampert-friki":1,"pampert-koisito":1,"petea-koisito":1,"petea-pokemaniaco":1,"potango":1,"sech":1,"sech-duo":1,"sech-koisito":1,"sech-thresh":1};
   // Nivel de carta por repetidas: 2 copias = ★2, 4 copias = ★3
   // Copias de una carta y cuántas hacen falta para la siguiente mejora: 2 copias = ★2, 4 copias = ★3
   function copyProg(n) { return n >= 4 ? { n: n, need: 4, next: 0, max: true } : n >= 2 ? { n: n, need: 4, next: 3, max: false } : { n: n, need: 2, next: 2, max: false }; }
@@ -416,7 +416,7 @@
   }
 
   function heroCards() {
-    var pick = ['Rara', 'Legendaria', 'Épica'].map(function (r) { return D.cards.filter(function (c) { return r === 'Legendaria' ? c.id === 'chipy-lloron' : c.rarity === r && (r !== 'Rara' || c.person === 'AitoRLG'); })[0] || D.cards.filter(function (c) { return c.rarity === r; })[0]; }).filter(Boolean);
+    var pick = ['Rara', 'Legendaria', 'Épica'].map(function (r) { return D.cards.filter(function (c) { return r === 'Legendaria' ? c.id === 'aitorlg-maomao' : c.rarity === r && (r !== 'Rara' || c.person === 'AitoRLG'); })[0] || D.cards.filter(function (c) { return c.rarity === r; })[0]; }).filter(Boolean);
     return '<div class="fan">' + pick.map(function (c, k) { return '<div class="fc f' + k + '">' + cardHtml(c, { atk: c.atk, hp: c.hp, max: c.hp, cls: '' }) + '</div>'; }).join('') + '</div>';
   }
   function ensureLadder() {
@@ -640,7 +640,7 @@
     if (f.k === 'syn') {
       h = '<div class="fxrow">' + f.ids.map(function (t, i) { return '<div class="sy" style="--i:' + i + '"><span class="sic">' + tic(t) + '<i class="slash"></i></span><b>' + esc(t) + '</b></div>'; }).join('') + '</div><div class="fxlab bad">Sinergias que se retiran</div>';
     } else if (f.k === 'cards') {
-      h = '<div class="fxgrid">' + f.ids.map(function (id, i) { var c = CARD[id]; return '<div class="ct" style="--i:' + i + '"><span class="ctp" style="background-image:url(/cartas/art/' + id + '.webp)"></span><i class="cts">↻</i><b>' + esc(c ? c.name : id) + '</b></div>'; }).join('') + '</div><div class="fxlab warn">Cartas que cambian por completo</div>';
+      h = '<div class="fxgrid">' + f.ids.filter(function (id) { return CARD[id]; }).map(function (id, i) { var c = CARD[id]; return '<div class="ct" style="--i:' + i + '"><span class="ctp" style="background-image:url(/cartas/art/' + id + '.webp)"></span><i class="cts">↻</i><b>' + esc(c ? c.name : id) + '</b></div>'; }).join('') + '</div><div class="fxlab warn">Cartas que cambian por completo</div>';
     } else if (f.k === 'art') {
       h = '<span class="fxspoil">Spoiler</span><div class="fxrow art">' + [0, 1, 2].map(function (i) { return '<div class="ct q" style="--i:' + i + '"><span class="ctq">?</span><i class="brush"></i></div>'; }).join('') + '</div><div class="fxlab new">Nuevas ilustraciones</div>';
     } else if (f.k === 'newsyn') {
@@ -841,6 +841,7 @@
   function skinBtn(a, s) {
     var hasCard = a.owned.indexOf(s.card) >= 0, own = (a.skins || []).indexOf(s.id) >= 0, eq = a.skinSel && a.skinSel[s.card] === s.id;
     return own ? (eq ? '<button class="btn sec sm" data-act="skinequip" data-skin="" data-card="' + s.card + '">' + ic('check') + ' Equipada · usar clásica</button>' : '<button class="btn sm" data-act="skinequip" data-skin="' + s.id + '" data-card="' + s.card + '">Equipar</button>')
+      : s.legacy ? '<button class="btn sm" disabled>Ya no disponible</button>'
       : s.pass ? '<button class="btn sm" disabled>Exclusiva del pase</button>'
       : !hasCard ? '<button class="btn sm" disabled>Necesitas la carta</button>'
       : '<button class="btn sm" data-act="skinbuy" data-skin="' + s.id + '"' + (a.coins < (a.admin ? 0 : s.price) ? ' disabled' : '') + '>Comprar · ' + (a.admin ? 'gratis' : s.price + ' ' + ic('moneda')) + '</button>';
@@ -949,7 +950,7 @@
     { id: 'rumble', name: 'Royal Rumble', icon: 'fuego', sub: 'Sin mazo: sale todo el juego', desc: 'Reglas de Resurrección, pero sin mazo: en la tienda puede salir cualquier carta del juego. Salen muchas más tropas y muy pocas acciones, y es más fácil encontrar copias para subir de nivel y cartas de tus temáticas. Construye tu composición sobre la marcha.', nodeck: 1 },
   ];
   var QART = {
-    ia: { classic: { '1v1': 'dashlight-akali', vs4: 'aitorlg-koisito' }, revive: { '1v1': 'chipy-lloron', vs4: 'potango' }, rumble: { '1v1': 'javihi-prime', vs4: 'mertens-meliodas' } },
+    ia: { classic: { '1v1': 'dashlight-akali', vs4: 'aitorlg-koisito' }, revive: { '1v1': 'chipy-correa', vs4: 'potango' }, rumble: { '1v1': 'javihi-prime', vs4: 'mertens-meliodas' } },
     pl: { classic: { '1v1': 'hellbramn', vs4: 'pampert-friki' }, revive: { '1v1': 'lihone', vs4: 'mertens-prime' }, rumble: { '1v1': 'lihone-rudeus', vs4: 'javihi-friki-volibear' } },
   };
   var QOPTS = {
@@ -1070,7 +1071,7 @@
     if (!SK.length) return h + '<p class="mut">Aún no hay skins.</p>';
     return h + '<div class="skgrid">' + SK.slice().reverse().map(function (s) {
       var c = CARD[s.card], own = (a.skins || []).indexOf(s.id) >= 0;
-      return '<div class="skitem"><div class="skcard">' + cardHtml(c, { skin: s.id, lv: 1, cls: own ? '' : 'locked', extra: own ? '' : '<span class="lockb">' + ic('candado') + '</span>', attrs: 'data-act="zoom" data-id="' + s.card + '" data-skin="' + s.id + '" title="Ver en 3D"', tag: 'button' }) + '</div><b>' + esc(c.name) + '</b><span class="mut">' + esc(s.name) + (own ? ' · ' + ic('check') + ' tuya' : s.pass ? ' · Pase de batalla' : ' · ' + s.price + ' monedas') + '</span>' + skinBtn(a, s) + '</div>';
+      return '<div class="skitem"><div class="skcard">' + cardHtml(c, { skin: s.id, lv: 1, cls: own ? '' : 'locked', extra: own ? '' : '<span class="lockb">' + ic('candado') + '</span>', attrs: 'data-act="zoom" data-id="' + s.card + '" data-skin="' + s.id + '" title="Ver en 3D"', tag: 'button' }) + '</div><b>' + esc(c.name) + '</b><span class="mut">' + esc(s.name) + (own ? ' · ' + ic('check') + ' tuya' : s.legacy ? ' · Ya no disponible' : s.pass ? ' · Pase de batalla' : ' · ' + s.price + ' monedas') + '</span>' + skinBtn(a, s) + '</div>';
     }).join('') + '</div>';
   }
   function decksTab() {

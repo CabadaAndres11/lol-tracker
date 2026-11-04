@@ -1,6 +1,11 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-04', tag: 'Cambio', title: 'Chipy Llorón desaparece y nace AitoRLG Palomitero',
+      art: ['aitorlg-regla'],
+      items: ['Se elimina la carta «Chipy Llorón» (y su pasiva Llanto final). Desaparece de las colecciones y los mazos.',
+        'PokeAitoRLG y AitoRLG Regla se fusionan en «AitoRLG Palomitero»: tiene las sinergias Pokémon y Trabajo, y mantiene las estadísticas (6/9, coste 3) y la ilustración de AitoRLG Regla.',
+        'La ilustración de PokeAitoRLG pasa a ser una skin de Palomitero, regalada a todos los que tenían PokeAitoRLG. Sus copias se suman a las de Palomitero y los mazos con PokeAitoRLG usan ahora Palomitero.'] },
     { date: '2026-11-04', tag: 'Cambio', title: 'Lihone Setter desaparece; Lihone entra en Voley',
       art: ['lihone'],
       items: ['Se elimina la carta «Lihone Setter» (y su pasiva Saque). Desaparece de las colecciones y los mazos de los jugadores.',

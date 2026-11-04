@@ -801,7 +801,7 @@
 
   // Efectos al caer una tropa (KOI). Devuelve texto de registro y animación.
   // ---------- Pasivas de legendarias ----------
-  var PAS = { 'dashlight-sun-jin-woo': 'sombra', 'aitorlg-maomao': 'boticaria', 'javihi-duo': 'duo', 'sech-duo': 'duo', 'javihi-prime': 'remate', 'sech': 'embargo', 'potango': 'aliento', 'mertens-prime': 'pereza', 'chipy-lloron': 'llanto', 'lihone-viego': 'racha', 'aitorlg-renata': 'prorroga', 'lihone': 'captura', 'pampert-koisito': 'cabezon', 'aitorlg-koisito': 'heredero', 'mertens-gambler': 'malaracha', 'computer-dashlight': 'medallas', 'pampert-gambler': 'colega' };
+  var PAS = { 'dashlight-sun-jin-woo': 'sombra', 'aitorlg-maomao': 'boticaria', 'javihi-duo': 'duo', 'sech-duo': 'duo', 'javihi-prime': 'remate', 'sech': 'embargo', 'potango': 'aliento', 'mertens-prime': 'pereza', 'lihone-viego': 'racha', 'aitorlg-renata': 'prorroga', 'lihone': 'captura', 'pampert-koisito': 'cabezon', 'aitorlg-koisito': 'heredero', 'mertens-gambler': 'malaracha', 'computer-dashlight': 'medallas', 'pampert-gambler': 'colega' };
   function pas(i) { return PAS[i.id] || ''; }
   function duoLinked(s, i) { var o = i.id === 'javihi-duo' ? 'sech-duo' : 'javihi-duo'; return mesaTroops(s.p[i.owner]).some(function (x) { return x.id === o; }); }
   // Prórroga (AitoRLG Renata): la tropa a su derecha no cae a 0 de vida hasta que haya atacado
@@ -841,10 +841,6 @@
             fxk.sub += ' · herencia +' + hm + ' (solo esta ronda) a ' + card(hv).name; fxk.uids = fxk.uids.concat(heirs.indexOf(hv) >= 0 ? [] : [hv.uid]);
           }
         }
-    if (pas(d) === 'llanto' && depth < 4) { // Chipy Llorón: la mitad de su ataque a todas las tropas rivales
-      var ln = Math.ceil(atk(d) / 2), lf = mesaTroops(s.p[1 - d.owner]);
-      if (lf.length && ln > 0) { line += ' Llanto final: ' + ln + ' de daño a todas las tropas rivales.'; lf.forEach(function (f) { line += passiveHit(s, f, ln, depth); }); }
-    }
     return { line: line, fx: fxk };
   }
   function fight(s) {

@@ -192,7 +192,28 @@ async function loadUser(cfg, name) {
     if (u.dups && u.dups['dashlight-gambler'] != null) { u.dups['pampert-gambler'] = u.dups['dashlight-gambler']; delete u.dups['dashlight-gambler']; }
     await redis(cfg, ['SET', uKey(u.name), JSON.stringify(u)]);
   }
-  const GONE = ['capitulo-especial', 'rabia-contenida', 'fiesta-del-pueblo', 'hermano-del-alma', 'sofa-compartido', 'madrugon', 'haikyuu-lihone']; // cartas eliminadas del juego
+  // Fusión: PokeAitoRLG pasa a ser AitoRLG Palomitero (id aitorlg-regla). Quien tenía PokeAitoRLG recibe su ilustración como skin
+  // de Palomitero, conserva la carta (si no tenía Regla) y sus copias se suman; en los mazos se sustituye por Palomitero.
+  const OLD_FRIKI = 'aitorlg-friki';
+  if (u && ((u.owned || []).includes(OLD_FRIKI) || JSON.stringify(u.decks || '').includes(OLD_FRIKI) || (u.dups || {})[OLD_FRIKI] != null)) {
+    const had = (u.owned || []).includes(OLD_FRIKI), hadRegla = (u.owned || []).includes('aitorlg-regla');
+    u.dups = u.dups || {};
+    if (had) {
+      u.skins = u.skins || []; if (!u.skins.includes('aitorlg-pokeaito')) u.skins.push('aitorlg-pokeaito');
+      if (!hadRegla) u.owned.push('aitorlg-regla');
+      u.dups['aitorlg-regla'] = (u.dups['aitorlg-regla'] || 0) + (hadRegla ? 1 : 0) + (u.dups[OLD_FRIKI] || 0);
+    }
+    delete u.dups[OLD_FRIKI];
+    u.owned = (u.owned || []).filter((x) => x !== OLD_FRIKI);
+    const swap = (v) => {
+      if (v === OLD_FRIKI) return 'aitorlg-regla';
+      if (Array.isArray(v)) { const m = v.map(swap); return m.every((x) => typeof x === 'string') ? [...new Set(m)] : m; } // las listas de ids no repiten cartas
+      return v && typeof v === 'object' ? Object.fromEntries(Object.entries(v).map(([k, x]) => [k, swap(x)])) : v;
+    };
+    if (u.decks) u.decks = swap(u.decks);
+    await redis(cfg, ['SET', uKey(u.name), JSON.stringify(u)]);
+  }
+  const GONE = ['capitulo-especial', 'rabia-contenida', 'fiesta-del-pueblo', 'hermano-del-alma', 'sofa-compartido', 'madrugon', 'haikyuu-lihone', 'chipy-lloron']; // cartas eliminadas del juego
   if (u && ((u.owned || []).some((x) => GONE.includes(x)) || GONE.some((g) => JSON.stringify(u.decks || '').includes(g)))) {
     u.owned = (u.owned || []).filter((x) => !GONE.includes(x));
     const clean = (v) => Array.isArray(v) ? v.filter((x) => !GONE.includes(x)).map(clean) : v && typeof v === 'object' ? Object.fromEntries(Object.entries(v).map(([k, x]) => [k, clean(x)])) : v;

@@ -450,24 +450,6 @@ var D={
    "size": 1
   },
   {
-   "id": "mertens-prime",
-   "name": "Mertens PRIME",
-   "person": "Mertens",
-   "themes": [
-
-   ],
-   "cost": 5,
-   "atk": 3,
-   "hp": 22,
-   "rarity": "Legendaria",
-   "type": "tropa",
-   "size": 3,
-   "pas": {
-    "n": "Pereza contagiosa",
-    "t": "Al empezar cada combate, todas las tropas rivales pierden 1/1 de forma permanente (máximo -4/-4 por tropa)."
-   }
-  },
-  {
    "id": "computer-chipy",
    "name": "Computer Chipy",
    "person": "Chipy",

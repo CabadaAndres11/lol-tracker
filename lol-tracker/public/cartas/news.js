@@ -1,6 +1,10 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-04', tag: 'Cambio', title: 'Mertens PRIME desaparece',
+      art: ['mertens'],
+      items: ['Se elimina la carta «Mertens PRIME» (y su pasiva Pereza contagiosa). Desaparece de las colecciones y los mazos.',
+        'Su ilustración pasa a ser una skin de Mertens, regalada en el inventario a todas las cuentas creadas hasta ahora.'] },
     { date: '2026-11-04', tag: 'Novedad', title: 'Skins de cartas eliminadas para todas las cuentas',
       items: ['Todas las cuentas creadas hasta ahora reciben en su inventario las skins de las cartas eliminadas: PokeAitoRLG, Javihi Prime, Lihone Setter y Chipy Llorón (las que ya tenías desbloqueadas no se repiten).',
         'Las cuentas que se creen a partir de ahora no podrán conseguirlas.'] },
@@ -110,7 +114,7 @@
         { w: 'g', p: 'e', t: '¡¿Cinco?! ¿Y por qué tantas a la vez?' },
         { w: 'd', t: 'Queremos hacer sitio. Preferimos rehacer el juego alrededor de sinergias que den de verdad mucho juego antes que arrastrar algunas que se han quedado atrás. Aún estamos decidiendo qué pasa con cada carta; os iremos contando.' },
         { w: 'g', t: 'Vale, vale… ¿Y las cartas que se quedan? ¿Siguen igual?' },
-        { w: 'd', fx: { k: 'cards', ids: ['javihi-duo', 'sech-duo', 'potango', 'chipy-lloron', 'mertens-prime', 'javihi-friki'] }, t: 'No todas. Hay cartas que van a <b>cambiar por completo</b>, no solo de números: <b>Javihi Dúo</b>, <b>Sech Dúo</b>, <b>PotAnGo</b>, <b>Chipy Llorón</b>, <b>Mertens Prime</b> y <b>Javihi Prime</b>.' },
+        { w: 'd', fx: { k: 'cards', ids: ['javihi-duo', 'sech-duo', 'potango', 'chipy-lloron', 'mertens', 'javihi-friki'] }, t: 'No todas. Hay cartas que van a <b>cambiar por completo</b>, no solo de números: <b>Javihi Dúo</b>, <b>Sech Dúo</b>, <b>PotAnGo</b>, <b>Chipy Llorón</b>, <b>Mertens Prime</b> y <b>Javihi Prime</b>.' },
         { w: 'g', t: '¿Cambian solo sus habilidades o también su aspecto?' },
         { w: 'd', fx: { k: 'art' }, t: 'Te cuento un <b>spoiler</b>: a algunas cartas les cambiaremos también la <b>ilustración</b>. Todavía no os enseñamos cuáles.' },
         { w: 'g', t: 'Eso da un poco de vértigo… ¿Y qué llega para compensar?' },

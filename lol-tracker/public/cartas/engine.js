@@ -727,11 +727,6 @@
           fxFrame(s, p, 'inf', 'Actualizaciones', '+1/+1 por cada 3 actualizaciones de tienda (' + s.refreshN[p] + ' en total)', inf.map(function (i) { return i.uid; }));
         }
       }
-      // Mertens PRIME: Pereza contagiosa, -1/-1 permanente a las tropas rivales (tope -4/-4)
-      if (troops.some(function (i) { return pas(i) === 'pereza'; })) {
-        var pz = mesaTroops(s.p[1 - p]).filter(function (i) { var d = Math.min(1, 4 - (i.caps.mert || 0)); if (d <= 0) return false; i.caps.mert = (i.caps.mert || 0) + d; i.perm.atk -= d; i.perm.hp -= d; i.hp = Math.min(i.hp, maxHp(i)); return true; });
-        if (pz.length) fxFrame(s, p, 'pereza', 'Pereza contagiosa', '-1/-1 permanente a las tropas rivales', pz.map(function (i) { return i.uid; }), true);
-      }
       // Pokémon: bola (las acciones pueden añadir bolas extra esta ronda)
       if (t['Pokémon']) {
         for (var bn = 0; bn < 1 + (P.fl.pk || 0); bn++) {
@@ -814,7 +809,7 @@
 
   // Efectos al caer una tropa (KOI). Devuelve texto de registro y animación.
   // ---------- Pasivas de legendarias ----------
-  var PAS = { 'dashlight-sun-jin-woo': 'sombra', 'aitorlg-maomao': 'boticaria', 'javihi-duo': 'muro', 'sech-duo': 'armas', 'javihi-friki': 'remate', 'sech': 'embargo', 'potango': 'aliento', 'mertens-prime': 'pereza', 'lihone-viego': 'racha', 'aitorlg-renata': 'prorroga', 'lihone': 'captura', 'pampert-koisito': 'cabezon', 'aitorlg-koisito': 'heredero', 'mertens-gambler': 'malaracha', 'computer-dashlight': 'medallas', 'pampert-gambler': 'colega' };
+  var PAS = { 'dashlight-sun-jin-woo': 'sombra', 'aitorlg-maomao': 'boticaria', 'javihi-duo': 'muro', 'sech-duo': 'armas', 'javihi-friki': 'remate', 'sech': 'embargo', 'potango': 'aliento', 'lihone-viego': 'racha', 'aitorlg-renata': 'prorroga', 'lihone': 'captura', 'pampert-koisito': 'cabezon', 'aitorlg-koisito': 'heredero', 'mertens-gambler': 'malaracha', 'computer-dashlight': 'medallas', 'pampert-gambler': 'colega' };
   function pas(i) { return PAS[i.id] || ''; }
   // ---------- Magic Botlane: Armas Lunares (Sech Dúo) y Muro de Hielo (Javihi Dúo) ----------
   var ARMAS = ['calibrum', 'severum', 'gravitum', 'infernum', 'crescendum'];

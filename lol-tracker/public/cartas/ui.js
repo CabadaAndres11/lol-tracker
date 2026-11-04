@@ -57,7 +57,7 @@
   function pips(n) { var h = ''; for (var k = 0; k < 3; k++) h += '<i' + (k < n ? ' class="on"' : '') + '></i>'; return h; }
   var AICON = { 'mordisco-del-invierno': 'candado', entrenamiento: 'espadas', arenga: 'megafono', armadura: 'escudo', banquete: 'carne', intimidacion: 'enfado', 'mal-de-ojo': 'ojo', 'golpe-certero': 'diana', lluvia: 'arco',
     'bola-extra': 'beisbol', 'segundo-aliento': 'viento', 'cambio-de-linea': 'cambio', parche: 'disquete', 'horas-extra': 'maletin', 'segunda-temporada': 'trofeo', 'campeones-de-europa': 'trofeo', 'remate-doble': 'voley', 'cita-sorpresa': 'corazon', 'golpe-de-suerte': 'dado', genkidama: 'fuego', remedio: 'corazon', kamehameha: 'estrella' };
-  var ARTS = {"torreta-lunar":1,"aitorlg-maomao":1,"chipy-goku":1,"dashlight-sun-jin-woo":1,"javihi-smiley":1,"lihone-rudeus":1,"mertens-meliodas":1,"pampert-asta":1,"eriko":1,"helena":1,"lucia":1,"ari":1,"aitorlg-koisito":1,"aitorlg-regla":1,"aitorlg-renata":1,"chipy-correa":1,"computer-chipy":1,"computer-dashlight":1,"computer-hellbramn":1,"computer-lihone":1,"computer-petea":1,"dashlight-akali":1,"dashlight-correa":1,"hellbramn":1,"javihi":1,"javihi-duo":1,"javihi-friki":1,"javihi-koisito":1,"lihone":1,"lihone-correa":1,"lihone-viego":1,"mertens":1,"mertens-gambler":1,"pampert-gambler":1,"mertens-prime":1,"pampert":1,"pampert-friki":1,"pampert-koisito":1,"petea-koisito":1,"petea-pokemaniaco":1,"potango":1,"sech":1,"sech-duo":1,"sech-koisito":1,"sech-thresh":1};
+  var ARTS = {"torreta-lunar":1,"aitorlg-maomao":1,"chipy-goku":1,"dashlight-sun-jin-woo":1,"javihi-smiley":1,"lihone-rudeus":1,"mertens-meliodas":1,"pampert-asta":1,"eriko":1,"helena":1,"lucia":1,"ari":1,"aitorlg-koisito":1,"aitorlg-regla":1,"aitorlg-renata":1,"chipy-correa":1,"computer-chipy":1,"computer-dashlight":1,"computer-hellbramn":1,"computer-lihone":1,"computer-petea":1,"dashlight-akali":1,"dashlight-correa":1,"hellbramn":1,"javihi":1,"javihi-duo":1,"javihi-friki":1,"javihi-koisito":1,"lihone":1,"lihone-correa":1,"lihone-viego":1,"mertens":1,"mertens-gambler":1,"pampert-gambler":1,"pampert":1,"pampert-friki":1,"pampert-koisito":1,"petea-koisito":1,"petea-pokemaniaco":1,"potango":1,"sech":1,"sech-duo":1,"sech-koisito":1,"sech-thresh":1};
   // Nivel de carta por repetidas: 2 copias = ★2, 4 copias = ★3
   // Copias de una carta y cuántas hacen falta para la siguiente mejora: 2 copias = ★2, 4 copias = ★3
   function copyProg(n) { return n >= 4 ? { n: n, need: 4, next: 0, max: true } : n >= 2 ? { n: n, need: 4, next: 3, max: false } : { n: n, need: 2, next: 2, max: false }; }
@@ -289,8 +289,8 @@
     });
     var gk = '<div class="i13s s2"><div class="i13rv">' + cardHtml(CARD['lihone-viego'], { lv: 1 }) + '<em class="i13dmg">-36</em><i class="i13boom"></i></div>' + troops + orbs + '<i class="i13sph"></i>' +
       '<div class="i13pc"><span>Nivel 1 · 50%</span><span>Nivel 2 · 75%</span><span>Nivel 3 · 100%</span></div></div>';
-    var sh = '<div class="i13s s3"><div class="i13jin">' + cardHtml(CARD['dashlight-sun-jin-woo'], { lv: 1 }) + '</div><div class="i13foe">' + cardHtml(CARD['mertens-prime'], { lv: 1 }) + '<i class="i13wisp"></i></div>' +
-      '<div class="i13slot"><span>Hueco 5</span></div><div class="i13ghost">' + cardHtml(CARD['mertens-prime'], { lv: 1 }) + '<b>50%</b></div><div class="i13lab">Soldado de Sombra</div></div>';
+    var sh = '<div class="i13s s3"><div class="i13jin">' + cardHtml(CARD['dashlight-sun-jin-woo'], { lv: 1 }) + '</div><div class="i13foe">' + cardHtml(CARD['mertens'], { lv: 1 }) + '<i class="i13wisp"></i></div>' +
+      '<div class="i13slot"><span>Hueco 5</span></div><div class="i13ghost">' + cardHtml(CARD['mertens'], { lv: 1 }) + '<b>50%</b></div><div class="i13lab">Soldado de Sombra</div></div>';
     var fx = '<div class="i13s s4"><div class="i13col"><h4>Despliegue</h4><div class="i13row">' +
       '<div class="i13d d1"><i></i><i></i><i></i></div><div class="i13d d2"><i></i></div><div class="i13d d3">' + FIN_ICO.trebol + '</div></div><small>Sombras · Kamehameha · Grimorio</small></div>' +
       '<div class="i13col"><h4>Fundas</h4><div class="i13row">' + ['dragonball', 'trebol', 'petalos'].map(function (s) { return '<div class="i13sv">' + cardHtml(CARD['lihone-rudeus'], { lv: 1, slv: s }) + '</div>'; }).join('') + '</div><small>Dragon Ball · Trébol · Boticaria</small></div>' +
@@ -967,7 +967,7 @@
   ];
   var QART = {
     ia: { classic: { '1v1': 'dashlight-akali', vs4: 'aitorlg-koisito' }, revive: { '1v1': 'chipy-correa', vs4: 'potango' }, rumble: { '1v1': 'javihi-friki', vs4: 'mertens-meliodas' } },
-    pl: { classic: { '1v1': 'hellbramn', vs4: 'pampert-friki' }, revive: { '1v1': 'lihone', vs4: 'mertens-prime' }, rumble: { '1v1': 'lihone-rudeus', vs4: 'javihi-friki-volibear' } },
+    pl: { classic: { '1v1': 'hellbramn', vs4: 'pampert-friki' }, revive: { '1v1': 'lihone', vs4: 'mertens' }, rumble: { '1v1': 'lihone-rudeus', vs4: 'javihi-friki-volibear' } },
   };
   var QOPTS = {
     ia: [
@@ -2211,7 +2211,7 @@
   }
 
     // ---------- Efectos de sinergia: cartel, bola, números flotantes ----------
-  var FXICON = { pereza: 'sofa', duo: 'duo', armas: 'duo', novia: 'corazon', eriko: 'corazon', lucia: 'ojo', voley: 'voley', comeback: 'fuego', koi: 'trofeo', trabajo: 'maletin', gorb: 'dado', gambling: 'dado', malaracha: 'dado', colega: 'dado' };
+  var FXICON = { duo: 'duo', armas: 'duo', novia: 'corazon', eriko: 'corazon', lucia: 'ojo', voley: 'voley', comeback: 'fuego', koi: 'trofeo', trabajo: 'maletin', gorb: 'dado', gambling: 'dado', malaracha: 'dado', colega: 'dado' };
   // Gambling: ruleta de casino (una sola tirada) que termina mostrando el total de mejora de todas las orbes
   function gamWheelSvg(win, total) {
     var N = 24, step = 360 / N, h = '', k, hi = Math.max(3, total + 2), vals = [];

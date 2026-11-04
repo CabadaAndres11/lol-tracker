@@ -1,6 +1,9 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-04', tag: 'Corrección', title: 'Goblins en Versus de 4',
+      art: ['mertens-goblin'],
+      items: ['Arreglado: en Versus de 4 la sinergia Goblins no entregaba la copia de un Goblin al empezar cada ronda. Ahora funciona igual que en 1 vs 1.'] },
     { date: '2026-11-04', tag: 'Novedad', title: '¡Ya está aquí la versión 2.1! Goblins y Magic Botlane', art: ['petea-goblin', 'javihi-duo', 'sech-duo'],
       items: [
         'Versión 2.1: pasamos de la 2.0 a la 2.1. Las novedades están agrupadas en las noticias de abajo para que las encuentres fácil.',

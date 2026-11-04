@@ -1,6 +1,9 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-04', tag: 'Cambio', title: 'Sobres: las acciones repetidas dan oro',
+      items: ['Las cartas de acción repetidas que salen en un sobre ya no cuentan como copias para subir de nivel: te dan 5 monedas directamente (y se ve así en la apertura). En Colección, las acciones ya no muestran el contador de copias.',
+        'Las tropas siguen funcionando igual: las copias suben su nivel y, a nivel 3, también dan 5 monedas.'] },
     { date: '2026-11-04', tag: 'Cambio', title: 'Javihi pasa a ser Computer Javihi',
       art: ['javihi'],
       items: ['La carta «Javihi» (Informático y Trabajo) se llama ahora «Computer Javihi» y estrena ilustración. Sus estadísticas y su sinergia no cambian.',

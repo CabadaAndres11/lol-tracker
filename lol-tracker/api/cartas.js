@@ -1001,10 +1001,11 @@ module.exports = async function handler(req, res) {
         let lvl = 1, lvlUp = false, copies = 1;
         let dupCoins = 0;
         if (isNew) u.owned.push(id);
+        else if ((DATA.actions || []).some((a) => a.id === id)) { dupCoins = MAXED_DUP_COINS; u.coins += dupCoins; lvl = levelOf(u, id); } // acción repetida: no cuenta copias, da oro directamente
         else if (levelOf(u, id) >= 3) { dupCoins = MAXED_DUP_COINS; u.coins += dupCoins; lvl = 3; } // ya a nivel 3: la copia da oro
         else { u.dups = u.dups || {}; const before = levelOf(u, id); u.dups[id] = (u.dups[id] || 0) + 1; lvl = levelOf(u, id); lvlUp = lvl > before; }
-        if (!isNew) copies = 1 + ((u.dups || {})[id] || 0); else lvl = 1;
-        return { id, isNew, dupCoins, lvl, lvlUp, copies };
+        if (!isNew && !dupCoins) copies = 1 + ((u.dups || {})[id] || 0); else if (isNew) lvl = 1;
+        return { id, isNew, dupCoins, lvl, lvlUp, copies, act: (DATA.actions || []).some((a) => a.id === id) || undefined };
       });
       u.st = u.st || {}; u.st.packs = (u.st.packs || 0) + 1; seasonBump(u, 'packs');
       await saveUser(cfg, u);

@@ -1013,7 +1013,7 @@
     return '<div class="packov best-' + best + (best === 'Legendaria' ? ' rainbowpost' : '') + '" data-act="packbg"><div class="pcards' + (sleeveId() !== 'sin' ? ' slv-' + sleeveId() : '') + '">' + pk.cards.map(function (c, i) {
       var cd = CARD[c.id];
       return '<div class="pcard r-' + cd.rarity + (pk.rev[i] ? ' flipped' : '') + '" data-act="flipcard" data-i="' + i + '" style="--d:' + i * 0.12 + 's"><div class="pin"><div class="pback"><span>' + GEM[cd.rarity] + '</span></div><div class="pfront">' + cardHtml(cd, {}) +
-        (c.isNew ? '<span class="pnew">¡NUEVA!</span>' : '<span class="pdup">' + (c.dupCoins ? '¡Copia! Nivel 3 · +' + c.dupCoins + ' monedas' : c.lvlUp ? '¡Copia! Sube a ★' + c.lvl + ' (' + c.copies + '/' + copyProg(c.copies).need + ')' : '¡Copia! ' + c.copies + '/' + copyProg(c.copies).need + ' para ★' + copyProg(c.copies).next) + '</span>') + '</div></div></div>';
+        (c.isNew ? '<span class="pnew">¡NUEVA!</span>' : '<span class="pdup">' + (c.dupCoins ? (c.act ? '¡Copia! +' + c.dupCoins + ' monedas' : '¡Copia! Nivel 3 · +' + c.dupCoins + ' monedas') : c.lvlUp ? '¡Copia! Sube a ★' + c.lvl + ' (' + c.copies + '/' + copyProg(c.copies).need + ')' : '¡Copia! ' + c.copies + '/' + copyProg(c.copies).need + ' para ★' + copyProg(c.copies).next) + '</span>') + '</div></div></div>';
     }).join('') + '</div><div class="pactions"><button class="btn sec" data-act="flipall"' + (allRev ? ' style="visibility:hidden"' : '') + '>Girar todas</button></div>' + (gain ? '<p class="pgain">+' + gain + ' ' + ic('moneda') + ' por cartas repetidas</p>' : '') + '<p class="pmsg' + (allRev ? ' pulse' : '') + '">' + (allRev ? 'Haz clic en un espacio vacío para continuar' : 'Pulsa cada carta para girarla · el color del reverso te dice su rareza') + '</p></div>';
   }
   var QMODES = [
@@ -1075,7 +1075,7 @@
       thumb = '<span class="novt' + (ALTWHO[gid] ? '' : ' alt') + '" data-act="novtog" data-id="' + c.id + '" title="' + (girlView ? 'Ver a ' + esc(c.name) : 'Ver a ' + esc(CARD[gid].name) + ALTWHO[gid]) + '"><img src="/cartas/art/' + (girlView ? c.id : gid) + '.webp" alt=""></span>';
       if (girlView) show = CARD[gid];
     }
-    return cardHtml(show, { skin: '', lv: own ? lvOf(c.id) : 1, size: true, cls: own ? '' : 'locked', extra: thumb + (own ? cprogHtml(c.id) : '<span class="lockb">' + ic('candado') + '</span>'), attrs: 'data-act="zoom" data-id="' + show.id + '" data-skin="" title="Ver en 3D"', tag: 'button' });
+    return cardHtml(show, { skin: '', lv: own ? lvOf(c.id) : 1, size: true, cls: own ? '' : 'locked', extra: thumb + (own ? (c.type === 'accion' ? '' : cprogHtml(c.id)) : '<span class="lockb">' + ic('candado') + '</span>'), attrs: 'data-act="zoom" data-id="' + show.id + '" data-skin="" title="Ver en 3D"', tag: 'button' });
   }
   function byLv(arr) { if (!ui.sortLv) return arr; return arr.map(function (c, i) { return [c, i]; }).sort(function (a, b) { return (owns(b[0].id) ? lvOf(b[0].id) : 1) - (owns(a[0].id) ? lvOf(a[0].id) : 1) || a[1] - b[1]; }).map(function (x) { return x[0]; }); }
   function filtered() {

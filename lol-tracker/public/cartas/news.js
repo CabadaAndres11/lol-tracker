@@ -1,6 +1,11 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-04', tag: 'Novedad', title: 'Nuevos efectos de oro: Lluvia de monedas y Moneda de oro',
+      art: ['petea-goblin'],
+      items: ['Nuevo despliegue «Lluvia de monedas» (30 monedas): la carta cae desde arriba entre una lluvia de monedas de oro y vuela a su hueco con un estallido de monedas.',
+        'Nueva funda «Moneda de oro» (40 monedas): borde de oro macizo y reverso dorado con el icono de la moneda en el centro.',
+        'Ambos están en Tienda → Efectos y se pueden probar antes de comprar.'] },
     { date: '2026-11-04', tag: 'Novedad', title: 'Nuevo efecto de Victoria y Derrota: Botín del goblin',
       art: ['petea-goblin'],
       items: ['Nuevo pack «Botín del goblin» en Tienda → Efectos → Victoria y derrota (50 monedas). Banner de oro macizo con lluvia de monedas: un goblin irrumpe corriendo y se lleva la palabra «Victoria» o «Derrota» en su saco.',

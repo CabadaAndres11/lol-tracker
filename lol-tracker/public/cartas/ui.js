@@ -1702,6 +1702,7 @@
     { id: 'sombras', name: 'Soldados de sombra', desc: 'Un charco de sombras moradas se abre en el suelo, la carta se va formando como una silueta de humo con ojos brillantes y, al completarse, vuela a su hueco.', price: 30, ms: 3200, gap: 650 },
     { id: 'kame', name: 'Kamehameha', desc: 'Un guerrero carga su energía, dispara un Kamehameha que cruza la pantalla y el rayo deja la carta en su hueco.', price: 30, ms: 3300, gap: 700 },
     { id: 'grimorio', name: 'Grimorio de cinco hojas', desc: 'Un grimorio negro con un trébol de cinco hojas flota entre humo, se abre con un destello y de sus páginas sale la carta, que vuela a su hueco.', price: 30, ms: 3400, gap: 700 },
+    { id: 'monedas', name: 'Lluvia de monedas', desc: 'La carta cae desde arriba en mitad de una lluvia de monedas de oro que rebotan a su alrededor, brilla y vuela hasta su hueco levantando un estallido de monedas al aterrizar.', price: 30, ms: 3000, gap: 600 },
     { pass: true, id: 'grieta', name: 'Grieta dimensional', desc: 'La pantalla se resquebraja desde el centro, la grieta se abre en un resplandor y la carta surge de ella antes de volar a su hueco.', price: 30, ms: 3300, gap: 700 }
   ];
   try { new Image().src = 'img/dog.webp'; } catch (e) {}
@@ -1713,6 +1714,7 @@
     { id: 'dragonball', name: 'Dragon Ball', desc: 'Borde naranja y azul de kimono de combate y reverso naranja con el emblema de la escuela de la Tortuga en el centro.', price: 40 },
     { id: 'trebol', name: 'Trébol de cinco hojas', desc: 'Borde de cobre oscuro y reverso de grimorio gastado con un trébol negro de cinco hojas en el centro.', price: 40 },
     { id: 'petalos', name: 'Pétalos de la boticaria', desc: 'Borde que va del rosa al verde y reverso de jardín de hierbas con pétalos rosas y hojas verdes cayendo alrededor de una flor.', price: 40 },
+    { id: 'moneda', name: 'Moneda de oro', desc: 'Borde de oro macizo con destellos y reverso dorado grabado con el icono de la moneda en el centro.', price: 40 },
     { pass: true, id: 'pokeball', name: 'Pokéball', desc: 'Borde negro y blanco de Pokéball y reverso rojo con una Pokéball en el centro.', price: 40 }
   ];
   // ---------- Efectos de victoria y derrota (cada pack trae los dos) ----------
@@ -1870,6 +1872,43 @@ var GOB_SVG = '<svg class="gobsvg" viewBox="0 0 100 100"><g class="gobleg a"><re
         { transform: T(cx, cy - 12, sc * 1.03, 360, 0), filter: G(.8), opacity: 1, offset: .72, easing: 'cubic-bezier(.5,0,.8,.4)' },
         { transform: T(0, 6, .92, 360, 0), filter: G(.6), opacity: 1, offset: .9, easing: 'cubic-bezier(.2,.9,.3,1)' },
         { transform: T(0, 0, 1, 360, 0), filter: G(0), opacity: 1, offset: 1 }
+      ], { duration: dur, delay: delay, fill: 'both' });
+    },
+    'monedas': function (wrap, r, delay, dur) {
+      var W = window.innerWidth, H = window.innerHeight, cx = W / 2 - (r.left + r.width / 2), cy = H / 2 - (r.top + r.height / 2) - 10;
+      var sc = Math.max(1.4, Math.min(3, Math.min(300, W * .62, H * .5 * 5 / 7) / r.width)) * 1.05, mx = r.left + r.width / 2 + cx, my = r.top + r.height / 2 + cy;
+      var T = function (x, y, z, ry, rz) { return 'perspective(1100px) translate(' + x + 'px,' + y + 'px) scale(' + z + ') rotateY(' + (ry || 0) + 'deg) rotateZ(' + (rz || 0) + 'deg)'; };
+      var G = function (a) { return 'drop-shadow(0 0 ' + Math.round(6 + a * 22) + 'px rgba(250,204,21,' + (.15 + a * .6).toFixed(2) + ')) drop-shadow(0 18px 24px rgba(0,0,0,.5))'; };
+            var chip = function (x, y, size, k) { var e = document.createElement('i'); e.className = 'fxcoin'; e.style.cssText = 'left:' + x + 'px;top:' + y + 'px;width:' + size + 'px;height:' + size + 'px'; document.body.appendChild(e); return e; };
+      var i, k;
+      for (i = 0; i < 34; i++) { // lluvia de fichas que se apilan alrededor de la carta y se desvanecen antes de que salga volando
+        var x = mx + (Math.random() - .5) * sc * r.width * 1.6, y = my + (Math.random() - .5) * sc * r.height * .95, sz = 26 + Math.random() * 14, st = dur * (.05 + Math.random() * .36), life = dur * .78 - st, ro = (Math.random() - .5) * 720;
+        var c = chip(x, y, sz, i);
+        c.animate([
+          { transform: 'translate(-50%,' + (-(y + 90)) + 'px) rotate(' + ro + 'deg)', opacity: 0, offset: 0 },
+          { transform: 'translate(-50%,-50%) rotate(' + (ro * .1) + 'deg)', opacity: 1, offset: .22, easing: 'cubic-bezier(.5,0,.9,.5)' },
+          { transform: 'translate(-50%,-90%) rotate(' + (ro * .08) + 'deg)', opacity: 1, offset: .3, easing: 'ease-in' },
+          { transform: 'translate(-50%,-50%) rotate(0deg)', opacity: 1, offset: .38 },
+          { transform: 'translate(-50%,-50%) rotate(0deg)', opacity: 1, offset: .82 },
+          { transform: 'translate(-50%,-50%) rotate(0deg) scale(.6)', opacity: 0, offset: 1 }
+        ], { duration: life, delay: delay + st, fill: 'both' }).onfinish = (function (n) { return function () { n.remove(); }; })(c);
+      }
+      // al aterrizar en el hueco, las fichas salen disparadas
+      var sx = r.left + r.width / 2, sy = r.top + r.height / 2, tl = delay + dur * .9;
+      for (k = 0; k < 12; k++) {
+        var a = (k / 12) * Math.PI * 2 + Math.random() * .4, dist = 80 + Math.random() * 90, b = chip(sx, sy, 22 + Math.random() * 8, k + 2);
+        b.animate([{ transform: 'translate(-50%,-50%) scale(.3)', opacity: 0, offset: 0 }, { transform: 'translate(-50%,-50%) scale(1)', opacity: 1, offset: .1 }, { transform: 'translate(' + (Math.cos(a) * dist - 12) + 'px,' + (Math.sin(a) * dist - 40) + 'px) rotate(' + (360 + Math.random() * 360) + 'deg) scale(.7)', opacity: 0, offset: 1 }], { duration: 750 + Math.random() * 300, delay: tl, fill: 'both', easing: 'cubic-bezier(.1,.7,.3,1)' }).onfinish = (function (n) { return function () { n.remove(); }; })(b);
+      }
+      snd('chips', delay + dur * .14); snd('chips', delay + dur * .5);
+      impact(sx, sy, tl);
+      return wrap.animate([
+        { transform: T(cx, cy - H * .7, sc * .6, 0, 0), filter: G(.3), opacity: 0, offset: 0 },
+        { transform: T(cx, cy, sc, 0, 0), filter: G(.6), opacity: 1, offset: .17, easing: 'cubic-bezier(.2,.8,.3,1)' },
+        { transform: T(cx, cy + 6, sc * .98, 0, 0), filter: G(.6), opacity: 1, offset: .24 },
+        { transform: T(cx, cy, sc, 0, 0), filter: G(1), opacity: 1, offset: .52, easing: 'ease-in-out' },
+        { transform: T(cx, cy - 12, sc * 1.03, 0, 0), filter: G(.8), opacity: 1, offset: .72, easing: 'cubic-bezier(.5,0,.8,.4)' },
+        { transform: T(0, 6, .92, 0, 0), filter: G(.6), opacity: 1, offset: .9, easing: 'cubic-bezier(.2,.9,.3,1)' },
+        { transform: T(0, 0, 1, 0, 0), filter: G(0), opacity: 1, offset: 1 }
       ], { duration: dur, delay: delay, fill: 'both' });
     },
     'sombras': function (wrap, r, delay, dur) {

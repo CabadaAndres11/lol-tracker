@@ -200,6 +200,59 @@
     document.addEventListener('keydown', introKey);
   }
 
+  // ---------- Pop-up de bienvenida de la versión 2.1 ----------
+  function intro21Off() { try { return localStorage.getItem(lk('intro-v21')) === '1'; } catch (e) { return false; } }
+  function maybeIntro21() {
+    if (ui.intro21Seen || !ui.acct || intro21Off() || introEl) return;
+    ui.intro21Seen = true;
+    setTimeout(function () { if (ui.screen === 'home' && !introEl) openIntro21(); }, 700);
+  }
+  function openIntro21() {
+    closeIntro();
+    var k, bg = '<i class="bgimg"></i><i class="aur a1"></i><i class="aur a2"></i><i class="aur a3"></i><i class="gr"></i><i class="sw"></i>';
+    for (k = 0; k < 22; k++) bg += '<i class="pt" style="left:' + (2 + k * 4.5) + '%;--d:' + ((k * 7) % 13) * .5 + 's;--c:' + ['#fde047', '#84cc16', '#7dd3fc', '#fbbf24'][k % 4] + '"></i>';
+    var tk = 'GOBLINS ✦ MAGIC BOTLANE ✦ SET 2 ✦ CAMBIOS DE CARTAS ✦ NUEVO INVENTARIO ✦ EFECTOS DE ORO ✦ ';
+    var title = '<div class="i20s st" data-s="0,6"><i class="i20flash"></i><i class="i20ring"></i><i class="i20ring r2"></i><div class="i20ti"><small>¡Ya está aquí la versión!</small><b data-t="2.1">2.1</b></div><div class="i20tk"><span>' + tk + tk + '</span></div></div>';
+    var FLY = [['-90cqw', '-30cqw', '-40deg'], ['-40cqw', '50cqw', '35deg'], ['0', '-60cqw', '-15deg'], ['50cqw', '50cqw', '-30deg'], ['90cqw', '-30cqw', '40deg']];
+    function chips(cls, arr) { return '<div class="i20chips ' + cls + '">' + arr.map(function (t) { return '<span>' + t + '</span>'; }).join('') + '</div>'; }
+    function row(ids) { return '<div class="i20row">' + ids.map(function (id, i) { return '<div class="c" style="--i:' + i + ';--fx:' + FLY[i % 5][0] + ';--fy:' + FLY[i % 5][1] + ';--fr:' + FLY[i % 5][2] + '">' + cardHtml(CARD[id], { lv: 1 }) + '</div>'; }).join('') + '</div>'; }
+    var s1 = '<div class="i20s" data-s="1"><div class="i20h" style="--hc:#84cc16">Goblins</div>' + chips('g', ['Cada ronda, un Goblin', '+5 de oro al subir de nivel', 'Rey Goblin 50/50']) + row(['hellbramn-goblin', 'mertens-goblin', 'lihone-goblin', 'petea-goblin', 'rey-goblin']) + '</div>';
+    var s2 = '<div class="i20s" data-s="2"><div class="i20h" style="--hc:#7dd3fc">Magic Botlane</div>' + chips('b', ['Muro de Hielo', 'Armas Lunares', 'Mordisco Del Invierno']) + row(['javihi-duo', 'sech-duo', 'torreta-lunar', 'mordisco-del-invierno']) + '</div>';
+    var s3 = '<div class="i20s" data-s="3"><div class="i20h" style="--hc:#fbbf24">Cambios en cartas</div>' + chips('y', ['Javihi vs All', 'PotAnGo', 'Palomitero y Lihone']) + row(['javihi-friki', 'potango', 'aitorlg-regla', 'lihone']) + '</div>';
+    var s4 = '<div class="i20s" data-s="4"><div class="i20h" style="--hc:#fb7185">Adiós a cinco sinergias</div>' + chips('x', ['Tilt', 'Pueblo', 'NINI', 'Pelayos', 'Dúo Inseparable']) +
+      '<div class="i20tg two"><div class="t" style="--i:0"><div class="v"><div class="i20gk x"><b>✕</b></div></div><div><b>Cartas eliminadas</b><span>Mertens PRIME, Javihi Prime, Chipy Llorón y Lihone Setter</span></div></div>' +
+      '<div class="t" style="--i:1"><div class="v am"><span style="background-image:url(art/lihone.webp)"></span><span style="background-image:url(art/chipy-correa.webp)"></span><span style="background-image:url(art/mertens.webp)"></span><i>✦</i></div><div><b>Skins de compensación</b><span>Sus ilustraciones, en el inventario de las cuentas actuales</span></div></div></div></div>';
+    var s5 = '<div class="i20s" data-s="5"><div class="i20h" style="--hc:#fde047">Y mucho más</div><div class="i20tg">' +
+      '<div class="t" style="--i:0"><div class="v"><img src="img/pack-set2.webp" alt=""><i class="shn"></i></div><div><b>Sobre Set 2</b><span>Goblins y Magic Botlane, por 50 monedas</span></div></div>' +
+      '<div class="t" style="--i:1"><div class="v"><img src="img/box.webp" alt=""></div><div><b>Nuevo inventario</b><span>Cuadrados agrupados con sus opciones</span></div></div>' +
+      '<div class="t" style="--i:2"><div class="v"><img src="img/coin.webp" alt=""></div><div><b>Efectos de oro</b><span>Lluvia de monedas, Moneda de oro y Botín del goblin</span></div></div>' +
+      '<div class="t" style="--i:3"><div class="v"><div class="i20gk g"><b>+6</b></div></div><div><b>Trabajo, mucho más oro</b><span>Hasta +6 por ronda y +5 al abrir la tienda</span></div></div></div></div>';
+    var h = '<div class="intropanel"><div class="introst i20 i21" data-sc="0"><div class="i20bg">' + bg + '</div>' + title + s1 + s2 + s3 + s4 + s5 +
+      '<div class="icap"><span></span></div></div>' +
+      '<label class="ibtns inever"><input type="checkbox" data-i="never21"' + (intro21Off() ? ' checked' : '') + '> No mostrar más</label><p class="zhint">Pulsa fuera de la animación para cerrarla</p></div>';
+    introEl = document.createElement('div'); introEl.className = 'introov'; introEl.innerHTML = h;
+    document.body.appendChild(introEl);
+    var st = introEl.querySelector('.introst'), cap = st.querySelector('.icap span'), scs = st.querySelectorAll('.i20s');
+    var CAPS = ['', 'Goblins: una copia gratis cada ronda, oro al subir de nivel y el Rey Goblin', 'Magic Botlane: Javihi Dúo y Sech Dúo, con armas lunares y una torreta', 'Javihi vs All, PotAnGo, Palomitero y Lihone cambian de sinergia o de pasiva', 'Se eliminan cinco sinergias y cuatro cartas; sus ilustraciones pasan a ser skins', 'Sobre Set 2, nuevo inventario, efectos de oro y Trabajo con mucho más oro', ''];
+    function go(n) {
+      st.dataset.sc = n; cap.textContent = CAPS[n] || ''; cap.parentNode.classList.toggle('on', !!CAPS[n]);
+      Array.prototype.forEach.call(scs, function (el) { el.classList.toggle('on', el.dataset.s.split(',').indexOf(String(n)) >= 0); });
+    }
+    function run() {
+      introT.forEach(clearTimeout); introT = [];
+      st.classList.add('reset'); go(0);
+      introT.push(setTimeout(function () { st.classList.remove('reset'); go(0); }, 80));
+      [[3800, 1], [11000, 2], [18200, 3], [25400, 4], [33600, 5], [42000, 6]].forEach(function (x) { introT.push(setTimeout(function () { go(x[1]); }, x[0])); });
+      introT.push(setTimeout(run, 46000));
+    }
+    run();
+    introEl.addEventListener('change', function (e) {
+      if (e.target.dataset.i !== 'never21') return;
+      try { if (e.target.checked) localStorage.setItem(lk('intro-v21'), '1'); else localStorage.removeItem(lk('intro-v21')); } catch (er) {}
+    });
+    introEl.addEventListener('click', function (e) { if (e.target === introEl || e.target.classList.contains('intropanel')) closeIntro(); });
+    document.addEventListener('keydown', introKey);
+  }
   // ---------- Pop-up de bienvenida de la versión 2.0 ----------
   function intro20Off() { try { return localStorage.getItem(lk('intro-v20')) === '1'; } catch (e) { return false; } }
   function maybeIntro20() {
@@ -732,10 +785,11 @@
       ].map(function (m) { return '<button class="ricon" data-act="nav" data-to="' + m[0] + '"><span class="rii">' + m[1] + '</span><b>' + m[2] + '</b><span class="mut">' + m[3] + '</span></button>'; }).join('') + '</div>' + homeNews() + '</div>';
     h += '<p class="mut" style="text-align:center">' + D.cards.length + ' tropas · ' + D.actions.length + ' acciones</p></div>';
     app.innerHTML = h;
-    maybeIntro20();
+    maybeIntro21();
   }
   // Animaciones de versiones anteriores: se pueden volver a ver desde el perfil
   var ANIM_LIST = [
+    { id: 'v21', ver: 'v2.1', name: 'Bienvenida a la 2.1: Goblins y Magic Botlane', desc: 'Pop-up de la versión 2.1: sinergias Goblins y Magic Botlane, cambios de cartas, sinergias eliminadas, sobre Set 2, inventario y efectos de oro.' },
     { id: 'v20', ver: 'v2.0', name: 'Bienvenida a la 2.0: Amigos y Pase de batalla', desc: 'Pop-up de la versión 2.0: amigos y chat, perfil y emoticonos, pase de batalla, Royal Rumble, Sobre Anime, montaje automático y nuevos efectos.' },
     { id: 'v13', ver: 'v1.3', name: 'Bienvenida a la 1.3: Anime', desc: 'Pop-up de la versión 1.3: cartas nuevas de Anime, la Genkidama, el Soldado de Sombra y los nuevos efectos de despliegue, funda y victoria/derrota.' },
     { id: 'v12', ver: 'v1.2', name: 'Bienvenida a la 1.2: Gambling', desc: 'Pop-up de la versión 1.2: sinergia Gambling, nuevas cartas, ruleta de orbes, interés por ahorrar y nuevos efectos de casino.' },
@@ -2564,7 +2618,7 @@ var GOB_SVG = '<svg class="gobsvg" viewBox="0 0 100 100"><g class="gobleg a"><re
     if (act === 'sfxtest') { var tc = el.dataset.cat; snd(tc === 'ui' ? 'buy' : tc === 'combat' ? 'heavy' : tc === 'pack' ? 'rev-Épica' : 'win'); return; }
     if (ui.finPrev && act !== 'finprev' && act !== 'passfin' && act !== 'finflip' && act !== 'finclose') ui.finPrev = null;
     if (ui.dedit) { var ne = document.getElementById('de-name'); if (ne) ui.dedit.name = ne.value; }
-    if (act === 'playanim') { if (el.dataset.id === 'correa') openIntro(); else if (el.dataset.id === 'v12') openIntro12(); else if (el.dataset.id === 'v13') openIntro13(); else if (el.dataset.id === 'v20') openIntro20(); return; }
+    if (act === 'playanim') { if (el.dataset.id === 'correa') openIntro(); else if (el.dataset.id === 'v12') openIntro12(); else if (el.dataset.id === 'v13') openIntro13(); else if (el.dataset.id === 'v20') openIntro20(); else if (el.dataset.id === 'v21') openIntro21(); return; }
     if (act === 'avedit') { ui.avEdit = !ui.avEdit; return render(); }
     if (act === 'acctmenu') { var w = el.closest('.acctw'); if (w) w.classList.toggle('open'); return; }
     if (act === 'logout') return logout();

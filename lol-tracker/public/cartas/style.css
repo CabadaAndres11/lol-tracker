@@ -2756,3 +2756,25 @@ body.soc-open #app { margin-right: 286px; }
 .slv-moneda .slvback { box-shadow: 0 0 0 1px #7a4d05, 0 12px 24px rgba(0,0,0,.55), 0 0 22px rgba(255,200,50,.6); }
 .slv-moneda .slvback span { display: none; }
 .card .novt.alt { border-color: #fcd34d; }
+
+/* ---------- Pop-up de bienvenida 2.1 (reutiliza la base de la 2.0 con otra paleta) ---------- */
+.introst.i21 { border-color: rgba(253,224,71,.75); background: #07110a; box-shadow: 0 20px 60px rgba(0,0,0,.75), 0 0 50px rgba(132,204,22,.3), 0 0 90px rgba(125,211,252,.22); }
+.i21 .icap span { border-color: rgba(253,224,71,.7); background: rgba(6,16,8,.82); }
+.i21 .i20bg .bgimg { background: radial-gradient(ellipse 70% 60% at 50% 40%, rgba(120,90,10,.55), transparent 70%), linear-gradient(#0a140b, #050a06); }
+.i21 .i20bg .a1 { background: #65a30d; } .i21 .i20bg .a2 { background: #ca8a04; } .i21 .i20bg .a3 { background: #0284c7; }
+.i21 .i20bg .gr { background-image: linear-gradient(rgba(253,224,71,.45) 1px, transparent 1px), linear-gradient(90deg, rgba(132,204,22,.45) 1px, transparent 1px); }
+.i21 .i20ti small { color: #fef08a; text-shadow: 0 0 1.5cqw #eab308; }
+.i21 .i20ti b { background: linear-gradient(180deg, #fff 0%, #fde047 40%, #84cc16 100%); -webkit-background-clip: text; background-clip: text; filter: drop-shadow(0 0 2cqw rgba(253,224,71,.7)) drop-shadow(0 0 5cqw rgba(132,204,22,.5)); }
+.i21 .i20ti b::before { color: #fde047; } .i21 .i20ti b::after { color: #7dd3fc; }
+.i21 .i20ring { border-color: #fde047; box-shadow: 0 0 2cqw #fde047, inset 0 0 2cqw #fde047; } .i21 .i20ring.r2 { border-color: #84cc16; box-shadow: 0 0 2cqw #84cc16, inset 0 0 2cqw #84cc16; }
+.i21 .i20tk span { color: #fef9c3; text-shadow: 0 0 1.2cqw #eab308; }
+.i21 .i20chips.g span { background: rgba(132,204,22,.2); border-color: rgba(163,230,53,.85); color: #ecfccb; }
+.i21 .i20chips.b span { background: rgba(125,211,252,.18); border-color: rgba(125,211,252,.85); color: #e0f2fe; }
+.i21 .i20chips.y span { background: rgba(251,191,36,.18); border-color: rgba(251,191,36,.85); color: #fef3c7; }
+.i21 .i20chips.x span { text-decoration: line-through; text-decoration-thickness: .35cqw; }
+.i21 .i20row .card { box-shadow: 0 1cqw 3cqw rgba(0,0,0,.7), 0 0 2cqw rgba(253,224,71,.35); }
+.i21 .i20tg.two { top: 31cqw; } .i21 .i20tg.two .t { height: 17cqw; }
+.i21 .i20gk.x { background: radial-gradient(circle at 40% 35%, #fff 0 12%, #fecdd3 30%, #fb7185 58%, rgba(159,18,57,.25) 72%); box-shadow: 0 0 3cqw #fb7185, 0 0 7cqw rgba(251,113,133,.5); }
+.i21 .i20gk.x b { color: #fff; animation: none; text-shadow: 0 0 1cqw #be123c; }
+.i21 .i20gk.g { background: radial-gradient(circle at 40% 35%, #fff 0 12%, #fef08a 30%, #eab308 58%, rgba(161,98,7,.25) 72%); box-shadow: 0 0 3cqw #eab308, 0 0 7cqw rgba(253,224,71,.5); }
+.i21 .i20gk.g b { color: #713f12; animation: none; text-shadow: 0 0 1cqw #fff; }

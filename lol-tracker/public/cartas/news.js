@@ -1,6 +1,8 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-04', tag: 'Cambio', title: 'Sin cajas cuando lo tienes todo',
+      items: ['Si ya tienes desbloqueadas todas las cartas, skins y efectos que pueden salir de una caja, no se pueden abrir cajas: no podría tocarte nada nuevo. Tus cajas se conservan.'] },
     { date: '2026-11-04', tag: 'Cambio', title: 'Progreso de copias',
       items: ['Al abrir un sobre, las cartas repetidas muestran «¡Copia!» con tu progreso hacia la siguiente mejora (por ejemplo 3/4 para ★3).',
         'En la colección, cada carta que tienes muestra cuántas copias llevas hasta la siguiente mejora (1/2 para ★2, 2/4 o 3/4 para ★3) y «MÁX» cuando ya está al máximo.'] },

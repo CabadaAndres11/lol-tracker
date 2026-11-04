@@ -560,8 +560,8 @@
   function invTab() {
     var n = (ui.acct && ui.acct.boxes) || 0;
     return (ui.msg ? '<p class="err">' + esc(ui.msg) + '</p>' : '') + invPacks() + '<div class="invwrap"><div class="invbox' + (n ? '' : ' empty') + '">' + boxImg() + (n ? '<span class="invn">×' + n + '</span>' : '') + '<button class="bxinfo" data-act="boxinfo" aria-label="Probabilidades de la caja" title="Probabilidades">i</button></div><div class="invinfo"><h2 class="dedh">Cajas</h2>' +
-      (ui.boxInfo ? boxOddsHtml() : '') + '<p class="mut colhint">Dentro de cada caja hay una carta que no tengas, una skin o un efecto. Nunca te tocará algo repetido hasta que lo tengas todo.</p>' +
-      (n ? '<button class="btn cta big" data-act="boxopen">' + ic('caja') + ' Abrir caja</button><p class="mut">Tienes ' + n + (n === 1 ? ' caja' : ' cajas') + ' sin abrir.</p>' :
+      (ui.boxInfo ? boxOddsHtml() : '') + '<p class="mut colhint">Dentro de cada caja hay una carta que no tengas, una skin o un efecto. Nunca te tocará algo repetido; cuando lo tengas todo desbloqueado, no se podrán abrir.</p>' +
+      (n && ui.acct.boxLocked ? '<button class="btn cta big" disabled>' + ic('caja') + ' Abrir caja</button><p class="mut">Lo tienes todo desbloqueado: no se pueden abrir cajas porque no podría salir nada nuevo. Conservas tus ' + n + (n === 1 ? ' caja.' : ' cajas.') + '</p>' : n ? '<button class="btn cta big" data-act="boxopen">' + ic('caja') + ' Abrir caja</button><p class="mut">Tienes ' + n + (n === 1 ? ' caja' : ' cajas') + ' sin abrir.</p>' :
         '<p class="mut">No tienes cajas ahora mismo. Consíguelas completando misiones y subiendo de rango.</p><div class="btnrow"><button class="btn sec" data-act="nav" data-to="missions">' + ic('mision') + ' Misiones</button><button class="btn sec" data-act="nav" data-to="ladder">' + ic('trofeo') + ' Clasificación</button></div>') + '</div></div>';
   }
   function boxOddsHtml() {
@@ -2578,7 +2578,7 @@
     if (act === 'boxinfo') { ui.boxInfo = !ui.boxInfo; return renderDeck(); }
     if (act === 'boxclose') { ui.box = null; return renderDeck(); }
     if (act === 'boxopen') {
-      if (ui.box || !ui.acct || !ui.acct.boxes) return;
+      if (ui.box || !ui.acct || !ui.acct.boxes || ui.acct.boxLocked) return;
       var bx = ui.box = { stage: 'shake' }, t0 = Date.now(); ui.msg = ''; renderDeck(); snd('shake');
       return api('boxOpen').then(function (r) {
         setTimeout(function () {

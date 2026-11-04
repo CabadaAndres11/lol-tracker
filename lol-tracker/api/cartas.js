@@ -148,17 +148,17 @@ function missionStats(u) {
   };
 }
 const rankReached = (u) => Math.max(u.ptsMax || 0, u.pts || 0);
-// Caja: una carta, una skin o un efecto que aún no tengas; si lo tienes todo, una carta repetida.
-function rollBox(u) {
+// Caja: una carta, una skin o un efecto que aún no tengas. Si lo tienes todo desbloqueado no se pueden abrir cajas.
+function boxPools(u) {
   const cards = ALL.filter((c) => !(u.owned || []).includes(c.id));
   const skins = SKINS.filter((s) => !s.pass && !(u.skins || []).includes(s.id));
   const fxs = FX_DEPLOY.filter((id) => FX_PRICE[id] > 0 && !FX_PASS.includes(id) && !fxOwned(u).includes(id));
-  const pools = [['card', cards, 5], ['skin', skins, 3], ['fx', fxs, 2]].filter((p) => p[1].length);
-  if (!pools.length) { // lo tiene todo: carta repetida
-    const c = ALL[crypto.randomInt(0, ALL.length)];
-    u.dups = u.dups || {}; const before = levelOf(u, c.id); u.dups[c.id] = (u.dups[c.id] || 0) + 1;
-    return { kind: 'card', id: c.id, isNew: false, dup: true, lvl: levelOf(u, c.id), lvlUp: levelOf(u, c.id) > before };
-  }
+  return [['card', cards, 5], ['skin', skins, 3], ['fx', fxs, 2]].filter((p) => p[1].length);
+}
+const boxLocked = (u) => !boxPools(u).length;
+function rollBox(u) {
+  const pools = boxPools(u);
+  if (!pools.length) return null;
   let r = crypto.randomInt(0, pools.reduce((a, p) => a + p[2], 0)), pool = pools[0];
   for (const p of pools) { if (r < p[2]) { pool = p; break; } r -= p[2]; }
   const [kind, list] = pool;
@@ -174,7 +174,7 @@ function rollBox(u) {
 }
 function publicUser(u) {
   return {
-    name: u.name, pts: u.pts || 0, coins: u.coins, owned: u.owned, dups: u.dups || {}, skins: u.skins || [], skinSel: u.skinSel || {}, decks: u.decks || null, avatar: u.avatar || '', fx: { deploy: fxSel(u, 'deploy'), sleeve: fxSel(u, 'sleeve'), finish: fxSel(u, 'finish') }, fxOwned: fxOwned(u), boxes: u.boxes || 0, ms: { stats: missionStats(u), claimed: u.msClaimed || [] }, packs: u.packs || 0, packsAnime: u.packsAnime || 0, emoteSets: emoteSetsOf(u), rkClaimed: u.rkClaimed || [], season: seasonPublic(u), ptsMax: rankReached(u),
+    name: u.name, boxLocked: boxLocked(u), pts: u.pts || 0, coins: u.coins, owned: u.owned, dups: u.dups || {}, skins: u.skins || [], skinSel: u.skinSel || {}, decks: u.decks || null, avatar: u.avatar || '', fx: { deploy: fxSel(u, 'deploy'), sleeve: fxSel(u, 'sleeve'), finish: fxSel(u, 'finish') }, fxOwned: fxOwned(u), boxes: u.boxes || 0, ms: { stats: missionStats(u), claimed: u.msClaimed || [] }, packs: u.packs || 0, packsAnime: u.packsAnime || 0, emoteSets: emoteSetsOf(u), rkClaimed: u.rkClaimed || [], season: seasonPublic(u), ptsMax: rankReached(u),
     dailyAvailable: u.lastDaily !== today(),
     gamesToday: u.rewardDay === today() ? u.rewardCount : 0,
     maxGamesToday: MAX_GAME_REWARDS_PER_DAY,
@@ -979,6 +979,7 @@ module.exports = async function handler(req, res) {
     }
     if (act === 'boxOpen') { // abrir una caja del inventario
       if ((u.boxes || 0) < 1) { res.status(409).json({ error: 'No tienes cajas.', user: publicUser(u) }); return; }
+      if (boxLocked(u)) { res.status(409).json({ error: 'Lo tienes todo desbloqueado: no hay nada nuevo que pueda salir de una caja.', user: publicUser(u) }); return; }
       u.boxes -= 1;
       const reward = rollBox(u);
       await saveUser(cfg, u);

@@ -574,7 +574,7 @@
     return '<div class="bxodds"><button class="bxclose" data-act="boxinfo" aria-label="Ocultar">×</button><h3>Probabilidades</h3><p class="mut">Se calculan con lo que aún no tienes: base 50% carta, 30% skin y 20% efecto. Si una categoría ya está completa, su parte se reparte entre las demás. Nunca sale algo repetido hasta que lo tengas todo.</p><ul>' + rows + '</ul>' + rr + '</div>';
   }
   function rewardInfo(r) {
-    if (r.kind === 'card') { var c = CARD[r.id]; return { best: c.rarity, label: r.dup ? '¡Carta repetida!' : '¡Nueva carta!', name: c.name, sub: r.dup ? (r.coins ? 'Ya está a nivel 3: +' + r.coins + ' monedas' : (r.lvlUp || r.lvUp) ? 'Sube a nivel ' + r.lvl : 'Ya lo tenías todo: +1 copia') : c.rarity, visual: cardHtml(c, { lv: r.dup ? r.lvl : 1, skin: '' }) }; }
+    if (r.kind === 'card') { var c = CARD[r.id]; return { best: c.rarity, label: r.dup ? '¡Carta repetida!' : '¡Nueva carta!', name: c.name, sub: r.dup ? ((r.lvlUp || r.lvUp) ? 'Sube a nivel ' + r.lvl : 'Ya lo tenías todo: +1 copia') : c.rarity, visual: cardHtml(c, { lv: r.dup ? r.lvl : 1, skin: '' }) }; }
     if (r.kind === 'skin') {
       var sk = (window.CARTAS_SKINS || []).filter(function (k) { return k.id === r.id; })[0] || {}, bc = CARD[sk.card];
       return { best: 'Épica', label: '¡Nueva skin!', name: sk.name || r.id, sub: bc ? 'Para ' + bc.name + (ui.ownedSet && ui.ownedSet[sk.card] ? '' : ' (aún no tienes la carta)') : '', visual: bc ? cardHtml(bc, { lv: 1, skin: sk.id }) : '' };

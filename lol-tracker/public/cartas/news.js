@@ -2,7 +2,7 @@
 (function (root) {
   var NEWS = [
     { date: '2026-11-04', tag: 'Cambio', title: 'Copias de cartas nivel 3 = oro',
-      items: ['Si ya tienes una carta a nivel 3, las copias que te salgan en sobres y cajas te dan 5 monedas, sea cual sea su rareza (antes no servían para nada).'] },
+      items: ['Si ya tienes una carta a nivel 3, las copias que te salgan en los sobres te dan 5 monedas, sea cual sea su rareza (antes no servían para nada).'] },
     { date: '2026-11-04', tag: 'Novedad', title: 'Sortear victoria',
       items: ['En partidas 1 vs 1 online, pasada la ronda 20 aparece el botón «Sortear victoria», pensado para cuando la partida se queda en un punto muerto.',
         'Al pulsarlo, tu rival recibe un aviso: si acepta, se lanza una moneda al aire (50 % cada uno) y quien gane se lleva la partida.',

@@ -156,7 +156,6 @@ function rollBox(u) {
   const pools = [['card', cards, 5], ['skin', skins, 3], ['fx', fxs, 2]].filter((p) => p[1].length);
   if (!pools.length) { // lo tiene todo: carta repetida
     const c = ALL[crypto.randomInt(0, ALL.length)];
-    if (levelOf(u, c.id) >= 3) { u.coins += MAXED_DUP_COINS; return { kind: 'card', id: c.id, isNew: false, dup: true, lvl: 3, lvlUp: false, coins: MAXED_DUP_COINS }; } // ya a nivel 3: la copia da oro
     u.dups = u.dups || {}; const before = levelOf(u, c.id); u.dups[c.id] = (u.dups[c.id] || 0) + 1;
     return { kind: 'card', id: c.id, isNew: false, dup: true, lvl: levelOf(u, c.id), lvlUp: levelOf(u, c.id) > before };
   }

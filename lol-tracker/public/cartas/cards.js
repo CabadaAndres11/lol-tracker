@@ -174,7 +174,7 @@ var D={
   },
   {
    "id": "javihi",
-   "name": "Javihi",
+   "name": "Computer Javihi",
    "person": "Javihi",
    "themes": [
     "Informático",

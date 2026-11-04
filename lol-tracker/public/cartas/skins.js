@@ -11,6 +11,7 @@
     { id: 'javihi-friki-prime', card: 'javihi-friki', name: 'Javihi Prime', pass: true, legacy: true }, // antigua carta Javihi Prime: regalo a quien la tenía
     { id: 'lihone-setter', card: 'lihone', name: 'Lihone Setter', pass: true, legacy: true }, // antigua carta Lihone Setter: regalo a quien la tenía
     { id: 'chipy-correa-lloron', card: 'chipy-correa', name: 'Chipy Llorón', pass: true, legacy: true }, // antigua carta Chipy Llorón: regalo a quien la tenía
+    { id: 'javihi-clasico', card: 'javihi', name: 'Javihi clásico', pass: true, legacy: true }, // antigua ilustración de Javihi (ahora Computer Javihi): regalo a todas las cuentas
     { id: 'mertens-skin-prime', card: 'mertens', name: 'Mertens PRIME', pass: true, legacy: true }, // antigua carta Mertens PRIME: regalo a todas las cuentas
     { id: 'dashlight-correa-gambler', card: 'dashlight-correa', name: 'Dashlight Gambler', price: 120 },
   ];

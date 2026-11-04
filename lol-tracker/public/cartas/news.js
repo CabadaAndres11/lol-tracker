@@ -1,6 +1,10 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-04', tag: 'Cambio', title: 'Javihi pasa a ser Computer Javihi',
+      art: ['javihi'],
+      items: ['La carta «Javihi» (Informático y Trabajo) se llama ahora «Computer Javihi» y estrena ilustración. Sus estadísticas y su sinergia no cambian.',
+        'Su ilustración anterior pasa a ser la skin «Javihi clásico», regalada a todas las cuentas creadas hasta ahora. Te llega al inventario para que la desbloquees o la veas en 3D.'] },
     { date: '2026-11-04', tag: 'Cambio', title: 'Sin límite diario de puntos de clasificación',
       items: ['Los puntos de clasificación que se ganan al vencer a la IA Experto (+10, en 1 contra IA y en Versus de 4 contra IAs) ya no dependen del límite diario de partidas con recompensa: aunque hayas agotado las monedas del día, la victoria suma puntos.',
         'El límite diario de monedas se mantiene. Las partidas de menos de 60 segundos o 3 rondas siguen sin contar.'] },

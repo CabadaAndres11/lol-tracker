@@ -63,7 +63,7 @@
   function copyProg(n) { return n >= 4 ? { n: n, need: 4, next: 0, max: true } : n >= 2 ? { n: n, need: 4, next: 3, max: false } : { n: n, need: 2, next: 2, max: false }; }
   function copiesOf(id) { return 1 + ((ui.acct && ui.acct.dups && ui.acct.dups[id]) || 0); }
   function lvOf(id) { var n = 1 + ((ui.acct && ui.acct.dups && ui.acct.dups[id]) || 0); return n >= 4 ? 3 : n >= 2 ? 2 : 1; }
-  var KSLUG = { 'KDA': 'kda', 'True Damage': 'td', 'Huntrix': 'huntrix', 'SayaBoys': 'saja' };
+  var KSLUG = { 'KDA': 'kda', 'True Damage': 'td', 'Huntrix': 'huntrix', 'SajaBoys': 'saja' };
   function skG(side, id) { var s = ui.s; return (s && s.sk && s.sk[side] && s.sk[side][id]) || ''; }
   // La Singer cambia de ilustración según el grupo elegido (en la colección o sin grupo, la primera disponible)
   function singerArt(o) {
@@ -1594,14 +1594,14 @@
     return '<div class="gorbbox' + (g.done ? ' done' : '') + (side ? ' foe' : '') + '" title="' + (g.done ? 'Orbes canjeadas: ya no se ganan más' : 'Una orbe por ronda sin daño directo; se abren al recibir el primer golpe') + '"><span class="gl">' + ic('dado') + ' Orbes Gambling</span><div class="gsph">' + (g.done ? '<em>canjeadas</em>' : n ? sp + (n > 8 ? '<b>+' + (n - 8) + '</b>' : '') : '<em>' + (t ? 'sin orbes aún' : '') + '</em>') + '</div>' + (!g.done && n ? '<span class="gn">×' + n + '</span>' : '') + '</div>';
   }
   // K-Pop: selector de grupo (cada grupo necesita 2 cartas; AitoRLG Singer cuenta +1 en cualquiera)
-  var KDESC = { 'KDA': 'Asistencias: +ataque a quien golpea al caído; +vida a quien lo derriba', 'True Damage': 'Sus golpes atraviesan reducciones y escudos', 'Huntrix': 'Marcan al rival con más vida; si cae, escudo para el equipo', 'SayaBoys': 'Encandilan: el primer ataque de un rival golpea a un aliado suyo' };
+  var KDESC = { 'KDA': 'Asistencias: +ataque a quien golpea al caído; +vida a quien lo derriba', 'True Damage': 'Sus golpes atraviesan reducciones y escudos', 'Huntrix': 'Marcan al rival con más vida; si cae, escudo para el equipo', 'SajaBoys': 'Encandilan: el primer ataque de un rival golpea a un aliado suyo' };
   function kpopHtml(s) {
     var P = s.p[0], lv = E.tiers(P)['K-Pop'] || 0;
     if (lv < 1) return '';
     var cn = E.kpopCounts(P), can = s.phase === 'prep' && !ui.playing && !P.kgrp;
     return '<div class="synside panel kpick"><h2>' + ic('estrella') + ' Grupo K-Pop</h2><div class="kgs">' + E.KGROUPS.map(function (g) {
       var ok = cn[g] >= 2;
-      return '<button class="kg' + (P.kgrp === g ? ' on' : '') + '" data-act="kpop" data-g="' + esc(g) + '"' + (ok && can ? '' : ' disabled') + ' title="' + esc(KDESC[g] + (ok ? '' : ' (necesitas 2 cartas del grupo)')) + '"><b>' + esc(g) + '</b><em>' + cn[g] + '/2</em></button>';
+      return '<button class="kg' + (P.kgrp === g ? ' on' : '') + '" data-act="kpop" data-g="' + esc(g) + '"' + (ok && can ? '' : ' disabled') + ' title="' + esc(KDESC[g] + (ok ? '' : ' (necesitas 2 cartas del grupo)')) + '"><img class="kglogo" src="/cartas/img/kg-' + KSLUG[g] + '.webp" alt="' + esc(g) + '"><em>' + cn[g] + '/2</em></button>';
     }).join('') + '</div><p class="mut">' + (P.kgrp ? (P.kact ? esc(KDESC[P.kact]) + ' · Grupo fijado: solo cambia con Cambio de Escenario.' : 'Grupo fijado (' + esc(P.kgrp) + '): inactivo, necesitas 2 cartas suyas. Solo cambia con Cambio de Escenario.') : 'Elige un grupo antes del combate (si no, se fija el que más cartas tenga). No podrás cambiarlo sin Cambio de Escenario.') + '</p></div>';
   }
   function synergyHtml(P, foe) {

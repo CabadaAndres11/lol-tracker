@@ -2837,3 +2837,9 @@ body.soc-open #app { margin-right: 286px; }
 @keyframes gl-fall { from { opacity: 0; transform: translateY(-60vh) rotate(-40deg); } 70% { transform: translateY(.14em) rotate(calc(var(--r) * 1.6)); } to { transform: translateY(.1em) rotate(var(--r)); } }
 .fin-gato .finsub { color: #cfe3ff; } .fin-gato.olose .finsub { color: #a3acc0; }
 @media (prefers-reduced-motion: reduce) { .fin-gato .gburst, .fin-gato .gp, .fin-gato .gcr, .fin-gato .gct, .fin-gato .gtxt span { animation: none !important; } .fin-gato .gp { display: none; } }
+
+/* K-Pop: logos de los grupos en el selector */
+.kg { align-items: center; justify-content: center; min-height: 3.4rem; gap: .25rem; }
+.kg .kglogo { display: block; max-width: 100%; height: 1.5rem; object-fit: contain; filter: drop-shadow(0 0 4px rgba(255,255,255,.25)); }
+.kg[data-g="Huntrix"] .kglogo { height: 1.1rem; } .kg[data-g="True Damage"] .kglogo { height: 1.35rem; } .kg[data-g="SajaBoys"] .kglogo { height: 2rem; } .kg[data-g="KDA"] .kglogo { height: 1.6rem; }
+.kg:disabled .kglogo { opacity: .5; filter: grayscale(.6); } .kg.on .kglogo { filter: drop-shadow(0 0 8px rgba(232,121,249,.9)); }

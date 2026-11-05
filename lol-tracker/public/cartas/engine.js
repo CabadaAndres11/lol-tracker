@@ -11,8 +11,8 @@
     reviveLife: 20, // modo Resurrección: vida inicial (la vida solo se pierde con golpes directos; la carta que ataca recibe el ataque de la atacada)
     merge: [1, 2, 4], // fusión de 3 copias iguales (estilo TFT): multiplicador de las estadísticas base por estrella
     rumble: { act: .18, copy: 2.5, theme: 1.5 }, // Royal Rumble: multiplicadores de la tienda (acciones, copia que ya tienes, temática que ya llevas)
-    rarityWeight: { 'Común': 50, 'Rara': 30, 'Épica': 15, 'Legendaria': 5 },
-    rarityRamp: { 'Común': -8, 'Rara': 2, 'Épica': 5, 'Legendaria': 3 }, // cambio de peso por cada tienda tras la primera (mín. 10, máx. 40)
+    rarityWeight: { 'Común': 50, 'Rara': 30, 'Épica': 15, 'Legendaria': 5, 'Mítica': 5 },
+    rarityRamp: { 'Común': -8, 'Rara': 2, 'Épica': 5, 'Legendaria': 3, 'Mítica': 3 }, // cambio de peso por cada tienda tras la primera (mín. 10, máx. 40)
   };
   var FX = {
     pokemon: { cap: 1e9, probs: [[70, 25, 5], [45, 40, 15], [25, 45, 30]], bonus: [0, 1, 2], names: ['Pokéball', 'Superball', 'Ultraball'] },
@@ -340,7 +340,7 @@
     var pool = offerPool(s, p), tot = 0, by = {};
     pool.forEach(function (x) { by[CARD[x.id].rarity] = (by[CARD[x.id].rarity] || 0) + x.w; tot += x.w; });
     var out = {}, sum = 0, last = null;
-    ['Común', 'Rara', 'Épica', 'Legendaria'].forEach(function (r) { if (by[r]) { out[r] = Math.round(by[r] / tot * 100); sum += out[r]; last = r; } });
+    ['Común', 'Rara', 'Épica', 'Legendaria', 'Mítica'].forEach(function (r) { if (by[r]) { out[r] = Math.round(by[r] / tot * 100); sum += out[r]; last = r; } });
     if (last && sum !== 100) out[last] += 100 - sum;
     return out;
   }
@@ -640,7 +640,7 @@
         c.themes.forEach(function (t) { if (held[t] > 0) sc += 2.2; });
         var copies = P.hand.concat(mesaTroops(P)).filter(function (i) { return i && i.id === c.id; }).length;
         if (copies >= 2) sc += lv >= 2 ? 7 : 4; else if (copies === 1) sc += 2.5;
-        if (lv >= 2 && c.rarity === 'Legendaria') sc += 2;
+        if (lv >= 2 && (c.rarity === 'Legendaria' || c.rarity === 'Mítica')) sc += 2;
       } else if (c.theme && held[c.theme] >= 2) sc += 2;
     }
     return sc;
@@ -881,7 +881,7 @@
           fxFrame(s, p, 'kpop', 'Huntrix · Marca', card(foes[0]).name + ' queda marcado: si cae, el equipo gana ' + Math.round(maxHp(foes[0]) * FX.kpop.shield[k.sg ? 1 : 0]) + ' de escudo', mem.map(function (i) { return i.uid; }).concat([foes[0].uid]));
         }
       } else if (k.g === 'SajaBoys') {
-        var n = mem.length, ch = targetable(E).filter(function (i) { return card(i).rarity !== 'Legendaria' && !i.turret; }).sort(function (a, b) { return atk(b) - atk(a); }).slice(0, n);
+        var n = mem.length, ch = targetable(E).filter(function (i) { return card(i).rarity !== 'Legendaria' && card(i).rarity !== 'Mítica' && !i.turret; }).sort(function (a, b) { return atk(b) - atk(a); }).slice(0, n);
         ch.forEach(function (i) { i.tmp.charm = true; });
         if (ch.length) fxFrame(s, p, 'kpop', 'SajaBoys · Encanto', ch.map(function (i) { return card(i).name; }).join(', ') + ': su primer ataque golpea a un aliado', mem.map(function (i) { return i.uid; }).concat(ch.map(function (i) { return i.uid; })));
         if (k.sg) {

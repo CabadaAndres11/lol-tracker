@@ -3,7 +3,8 @@
   var NEWS = [
     { date: '2026-11-05', tag: 'Cartas', title: 'AitoRLG Singer con reflejos de grupo',
       items: [
-        'Las cartas K-Pop (tropas y Cambio de Escenario) pasan al <b>Sobre Set 2</b> y salen de los sobres del Set 1.',
+        'AitoRLG Singer pasa a rareza <b>Mítica</b> (gema hexágono rojo): coste 6, 8/22, ocupa 3 del mazo. Ya no sale en sobres ni en cajas. En partida tiene la misma probabilidad y efectos que una Legendaria.',
+        'Las demás cartas K-Pop (tropas y Cambio de Escenario) pasan al <b>Sobre Set 2</b> y salen de los sobres del Set 1.',
         'La sinergia K-Pop estrena logo propio.',
         'AitoRLG Singer brilla con reflejos holográficos del color de su grupo: <b>rojo</b> en KDA, <b>azul</b> en True Damage, <b>dorado</b> en Huntrix y <b>violeta-rosa</b> en SajaBoys.'
       ] },

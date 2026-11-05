@@ -876,18 +876,18 @@ var D={
   },
   {
    "id": "aitorlg-singer",
-   "pack": "set2",
+   "nopack": true,
    "name": "AitoRLG Singer",
    "person": "AitoRLG",
    "themes": [
     "K-Pop"
    ],
-   "cost": 5,
-   "atk": 6,
-   "hp": 18,
-   "rarity": "Legendaria",
+   "cost": 6,
+   "atk": 8,
+   "hp": 22,
+   "rarity": "Mítica",
    "type": "tropa",
-   "size": 2,
+   "size": 3,
    "pas": {
     "n": "Vocalista Principal",
     "t": "Cuenta como una carta más de cualquier grupo K-Pop y recibe sus mejoras de estadísticas. Potencia el grupo elegido: KDA: cada asistencia da además 1 de oro. True Damage: cada tercer ataque de tus tropas del grupo es un Beat Drop de daño doble. Huntrix: el escudo vale el 200% de la vida de la marca. SajaBoys: cada 2 combates da +1/+1 permanente a las demás cartas del grupo."

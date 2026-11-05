@@ -85,7 +85,8 @@
     var artId = c.id === 'aitorlg-singer' ? singerArt(o) : c.id, art = troop && artId && ARTS[artId];
     if (o.skin === undefined) o.skin = ui.screen === 'game' ? '' : (ui.acct && ui.acct.skinSel && ui.acct.skinSel[c.id] && ui.acct.skins.indexOf(ui.acct.skinSel[c.id]) >= 0 ? ui.acct.skinSel[c.id] : '');
     var h = '<' + tag + ' class="card r-' + c.rarity + (troop ? '' : ' accion') + (art ? ' art' : '') + (o.slv && o.slv !== 'sin' ? ' slv-' + o.slv : '') + (o.cls ? ' ' + o.cls : '') + '" style="--c1:' + c1 + ';--c2:' + c2 + (art ? ';--art:url(/cartas/art/' + (o.skin || artId) + '.webp)' : '') + '"' + (o.attrs ? ' ' + o.attrs : '') + '>';
-    h += '<span class="rgem" title="Rareza: ' + c.rarity + '"><svg viewBox="0 0 20 24" aria-hidden="true"><path d="M10 0L20 8L10 24L0 8Z" fill="var(--gm)"/><path d="M10 0L20 8H0Z" fill="#fff" opacity=".38"/><path d="M10 0L14.5 8L10 24L5.5 8Z" fill="#fff" opacity=".2"/><path d="M0 8H20L10 24Z" fill="#000" opacity=".25"/><path d="M10 0L20 8L10 24L0 8Z" fill="none" stroke="rgba(255,255,255,.8)" stroke-width="1" stroke-linejoin="round"/></svg></span>';
+    var rgSvg = c.rarity === 'Mítica' ? '<svg viewBox="0 0 20 24" aria-hidden="true"><path d="M10 0L20 6V18L10 24L0 18V6Z" fill="var(--gm)"/><path d="M10 0L20 6L10 12L0 6Z" fill="#fff" opacity=".34"/><path d="M10 12L20 6V18L10 24Z" fill="#000" opacity=".22"/></svg>' : null;
+    h += '<span class="rgem" title="Rareza: ' + c.rarity + '">' + (rgSvg || '<svg viewBox="0 0 20 24" aria-hidden="true"><path d="M10 0L20 8L10 24L0 8Z" fill="var(--gm)"/><path d="M10 0L20 8H0Z" fill="#fff" opacity=".38"/><path d="M10 0L14.5 8L10 24L5.5 8Z" fill="#fff" opacity=".2"/><path d="M0 8H20L10 24Z" fill="#000" opacity=".25"/><path d="M10 0L20 8L10 24L0 8Z" fill="none" stroke="rgba(255,255,255,.8)" stroke-width="1" stroke-linejoin="round"/></svg>') + '</span>';
     if (c.id === 'aitorlg-singer' && artId) h += '<span class="holo hk-' + artId.replace('aitorlg-singer-', '') + '"></span>'; // reflejos del color del grupo
     else if (o.skin && c.rarity === 'Legendaria') h += '<span class="holo"></span>'; // skin de una legendaria: efecto holográfico
     if (!c.novia) h += '<span class="coin" title="Coste en oro para comprarla">' + c.cost + '</span>';
@@ -646,8 +647,8 @@
     return h;
   }
   function boxOddsHtml() {
-    var a = ui.acct || {}, W = { 'Común': 50, 'Rara': 30, 'Épica': 15, 'Legendaria': 5 };
-    var cards = D.cards.filter(function (c) { return !ui.ownedSet[c.id]; });
+    var a = ui.acct || {}, W = { 'Común': 50, 'Rara': 30, 'Épica': 15, 'Legendaria': 5, 'Mítica': 0 };
+    var cards = D.cards.filter(function (c) { return !ui.ownedSet[c.id] && !c.nopack; });
     var skins = (window.CARTAS_SKINS || []).filter(function (k) { return !k.pass && (a.skins || []).indexOf(k.id) < 0; });
     var fxs = DEPLOY_LIST.concat(SLEEVE_LIST, FIN_LIST).filter(function (e) { return e.price > 0 && !e.pass && fxHas && !fxHas(e.id); });
     var pools = [['Carta nueva', cards.length, 5], ['Skin nueva', skins.length, 3], ['Efecto nuevo', fxs.length, 2]], tot = 0;
@@ -906,8 +907,8 @@
   function bpkHtml(cls, pack) {
     return '<div class="bpk ' + (pack === 'anime' ? 'anime ' : pack === 'set2' ? 'set2 ' : '') + (cls || '') + '"><div class="bpk-glow"></div><div class="bpk-rays"></div><div class="bpk-main"></div><div class="bpk-lid"></div></div>';
   }
-  var GEM = { 'Común': '●', 'Rara': '◆', 'Épica': '✦', 'Legendaria': '★' };
-  var RANK = ['Común', 'Rara', 'Épica', 'Legendaria'];
+  var GEM = { 'Común': '●', 'Rara': '◆', 'Épica': '✦', 'Legendaria': '★', 'Mítica': '⬢' };
+  var RANK = ['Común', 'Rara', 'Épica', 'Legendaria', 'Mítica'];
   function skinShop(a) {
     var SK = (window.CARTAS_SKINS || []).filter(function (k) { return !k.pass; });
     if (!SK.length) return '';
@@ -1084,7 +1085,7 @@
       '<div class="qconfirm"><button class="qgo" data-act="' + cur.act[qm.id] + '"><span class="qx">' + ic('avance') + '</span><span class="qgot">Confirmar</span></button></div></div>' + (ui.pick ? pickHtml() : '');
   }
   function themeCards(t) { return D.cards.filter(function (c) { return c.themes.indexOf(t) >= 0; }).concat(D.actions.filter(function (a) { return a.theme === t; })); }
-  var RARS = ['Común', 'Rara', 'Épica', 'Legendaria'], RCOL = { 'Común': '#9ca3af', 'Rara': '#60a5fa', 'Épica': '#c084fc', 'Legendaria': '#fbbf24' };
+  var RARS = ['Común', 'Rara', 'Épica', 'Legendaria', 'Mítica'], RCOL = { 'Común': '#9ca3af', 'Rara': '#60a5fa', 'Épica': '#c084fc', 'Legendaria': '#fbbf24', 'Mítica': '#ef4444' };
   // Cada Correa tiene su novia: una miniatura en la carta permite alternar entre los dos
   var GIRL = { 'lihone-correa': 'eriko', 'dashlight-correa': 'helena', 'potango': 'lucia', 'chipy-correa': 'ari', 'hellbramn-goblin': 'rey-goblin', 'mertens-goblin': 'rey-goblin', 'lihone-goblin': 'rey-goblin', 'petea-goblin': 'rey-goblin', 'sech-duo': 'torreta-lunar' };
   var ALTWHO = { 'eriko': ', su novia', 'helena': ', su novia', 'lucia': ', su novia', 'ari': ', su novia', 'rey-goblin': '', 'torreta-lunar': '' };
@@ -1129,7 +1130,7 @@
     if (!troops.some(function (id) { return CARD[id].rarity === 'Común'; })) return 'Necesitas al menos una tropa Común: la tienda inicial solo ofrece Comunes.';
     return '';
   }
-  var RORD = { 'Legendaria': 0, 'Épica': 1, 'Rara': 2, 'Común': 3 };
+  var RORD = { 'Mítica': -1, 'Legendaria': 0, 'Épica': 1, 'Rara': 2, 'Común': 3 };
   function deckCoverId(sl) {
     if (sl.cover && artOk(sl.cover)) return sl.cover;
     var t = sl.ids.filter(function (id) { return ARTS[id] && CARD[id].type === 'tropa'; }).sort(function (a, b) { return RORD[CARD[a].rarity] - RORD[CARD[b].rarity]; })[0];
@@ -1217,7 +1218,7 @@
   }
   // ---------- Montaje automático de mazos ----------
   var AUTO_ACT = ['entrenamiento', 'armadura', 'golpe-certero', 'arenga', 'intimidacion', 'banquete', 'lluvia', 'mal-de-ojo']; // acciones generales por orden de preferencia
-  var RBON = { 'Común': 0, 'Rara': 2, 'Épica': 4, 'Legendaria': 6 };
+  var RBON = { 'Común': 0, 'Rara': 2, 'Épica': 4, 'Legendaria': 6, 'Mítica': 8 };
   function autoBuild(sel) {
     var B = CFG.deckBudget, deck = [], used = 0, has = function (id) { return deck.indexOf(id) >= 0; };
     var matches = function (c) { return c.themes.filter(function (t) { return sel.indexOf(t) >= 0; }).length; };

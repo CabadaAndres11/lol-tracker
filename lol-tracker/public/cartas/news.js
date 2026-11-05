@@ -1,10 +1,11 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
-    { date: '2026-11-05', tag: 'Novedad', title: 'Nuevo efecto de victoria y derrota: Gato y cuervo',
+    { date: '2026-11-05', tag: 'Novedad', title: 'Nuevo efecto de victoria y derrota: Demon Hunters',
       items: [
-        'Nuevo efecto de <b>Victoria y derrota</b> en Tienda → Efectos: <b>Gato y cuervo</b> (50 monedas).',
+        'Nuevo efecto de <b>Victoria y derrota</b> en Tienda → Efectos: <b>Demon Hunters</b> (50 monedas).',
         'Sin banner rectangular: la palabra se alza en letras gigantes y el gato azul y el cuervo se asoman encima, moviendo la cabeza de lado a lado.',
+        'En la Colección, los efectos muestran solo su título, sin la descripción.',
         'Victoria: rayos y confeti azul y dorado. Derrota: las letras se desploman, el dúo se apaga y cae lluvia.'
       ] },
     { date: '2026-11-04', tag: 'Sinergia', title: 'Nueva sinergia K-Pop (2.2)',

@@ -1820,7 +1820,7 @@
     { id: 'trebol', name: 'Grimorio del trébol', desc: 'Victoria: banner de cuero y cobre con tréboles de cinco hojas dorados que caen como polvo de magia. Derrota: el grimorio se oscurece y tréboles negros se desmoronan en ceniza.', price: 50 },
     { id: 'petalos', name: 'Jardín de la boticaria', desc: 'Victoria: banner rosa y verde bajo una lluvia de pétalos y hojas. Derrota: los pétalos se marchitan y el banner se agrieta entre hojas secas.', price: 50 },
     { id: 'goblin', name: 'Botín del goblin', desc: 'Victoria: banner de oro macizo, lluvia de monedas y un goblin que irrumpe y se lleva la palabra «Victoria» en su saco. Derrota: oro deslucido y agrietado; el goblin se lleva «Derrota» entre monedas oxidadas.', price: 50 },
-    { id: 'gato', name: 'Gato y cuervo', desc: 'Sin banner: la palabra se alza en letras gigantes y el gato azul y el cuervo se asoman encima, moviendo la cabeza de lado a lado. Victoria: rayos y confeti azul y dorado. Derrota: las letras se desploman, el dúo se apaga y cae lluvia.', price: 50 },
+    { id: 'gato', name: 'Demon Hunters', desc: 'Sin banner: la palabra se alza en letras gigantes y el gato azul y el cuervo se asoman encima, moviendo la cabeza de lado a lado. Victoria: rayos y confeti azul y dorado. Derrota: las letras se desploman, el dúo se apaga y cae lluvia.', price: 50 },
     { pass: true, id: 'mascara', name: 'Máscara de neón', desc: 'Sin banner: una explosión de neón da paso a una máscara de tubos luminosos. Victoria: sonrisa cosida en azul eléctrico. Derrota: ceño y lágrimas en rojo parpadeante.', price: 50 }
   ];
   var FIN_THEME = { eclipse: 'eclipse', hechizo: 'arcano', poker: 'poker', dball: 'dball', trebol: 'trebol', petalos: 'petalos', goblin: 'goblin' };
@@ -1851,7 +1851,7 @@ var GOB_SVG = '<svg class="gobsvg" viewBox="0 0 100 100"><g class="gobleg a"><re
     var face = '<svg class="nxface" viewBox="0 0 400 480">' + gl + co + '</svg>';
     return '<div class="overlay fin fin-neon ' + (win ? 'owin' : 'olose') + (extra ? ' finprev' : '') + '">' + fx + face + '<div class="nxtitle">' + esc(title.replace(/[¡!]/g, '').toUpperCase()) + '</div><p class="finsub">' + sub + '</p><div class="finpanel">' + rw + '<div class="finbtns">' + btns + '</div></div></div>';
   }
-  // Gato y cuervo: sin banner. Letras gigantes como suelo y el dúo encima, moviendo la cabeza de lado a lado
+  // Demon Hunters (gato y cuervo): sin banner. Letras gigantes como suelo y el dúo encima, moviendo la cabeza de lado a lado
   function gatoFin(win, title, sub, rw, btns, extra) {
     var txt = title.replace(/[¡!]/g, '').toUpperCase(), q, fx = '';
     var letters = txt.split('').map(function (ch, k) { return '<span style="--i:' + k + ';--r:' + (((k % 3) - 1) * 6) + 'deg">' + (ch === ' ' ? '&nbsp;' : esc(ch)) + '</span>'; }).join('');
@@ -2264,7 +2264,7 @@ var GOB_SVG = '<svg class="gobsvg" viewBox="0 0 100 100"><g class="gobleg a"><re
       var eq = e.id === cur, has = fxHas(e.id) || e.price === 0, btn;
       if (where === 'shop') btn = has ? '<button class="btn sec sm" disabled>' + ic('check') + ' Ya lo tienes</button>' : '<button class="btn sm" data-act="fxbuy" data-id="' + e.id + '"' + (a.coins < (a.admin ? 0 : e.price) ? ' disabled' : '') + '>Comprar · ' + (a.admin ? 'gratis' : e.price + ' ' + ic('moneda')) + '</button>';
       else btn = eq ? '' : has ? '<button class="btn sm" data-act="fxequip" data-kind="' + kind + '" data-id="' + e.id + '">Equipar</button>' : '<button class="btn sm" disabled title="Cómpralo en la tienda">' + ic('candado') + (e.pass ? ' Pase de batalla' : ' Sin comprar') + '</button>' + (e.pass ? '' : '<button class="btn sec sm" data-act="fxgoshop">Ir a la tienda</button>');
-      return '<div class="fxitem' + (eq && where === 'col' ? ' eq' : '') + (has ? '' : ' nofx') + '"><div class="fxinfo"><b>' + esc(e.name) + (eq && where === 'col' ? ' <span class="fxbadge">' + ic('check') + ' Equipado</span>' : '') + (has || e.price === 0 ? '' : e.pass ? ' <span class="fxprice">Pase de batalla</span>' : ' <span class="fxprice">' + e.price + ' ' + ic('moneda') + '</span>') + '</b>' + (where === 'shop' ? '' : '<span class="mut">' + esc(e.desc) + '</span>') + '</div><div class="fxbtns"><button class="btn sec sm" data-act="' + prev + '" data-id="' + e.id + '">' + ic('ojo') + ' Probar</button>' + btn + '</div></div>';
+      return '<div class="fxitem' + (eq && where === 'col' ? ' eq' : '') + (has ? '' : ' nofx') + '"><div class="fxinfo"><b>' + esc(e.name) + (eq && where === 'col' ? ' <span class="fxbadge">' + ic('check') + ' Equipado</span>' : '') + (has || e.price === 0 ? '' : e.pass ? ' <span class="fxprice">Pase de batalla</span>' : ' <span class="fxprice">' + e.price + ' ' + ic('moneda') + '</span>') + '</b>' + '' + '</div><div class="fxbtns"><button class="btn sec sm" data-act="' + prev + '" data-id="' + e.id + '">' + ic('ojo') + ' Probar</button>' + btn + '</div></div>';
     }).join('');
   }
   function effectsTab() {

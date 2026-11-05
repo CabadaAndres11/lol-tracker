@@ -2819,12 +2819,13 @@ body.soc-open #app { margin-right: 286px; }
 .fin-gato .gstage { position: relative; z-index: 3; display: flex; flex-direction: column; align-items: center; }
 .fin-gato .gpair { position: relative; z-index: 4; width: clamp(210px, 36vw, 410px); aspect-ratio: 746 / 581; margin-bottom: calc(clamp(2.6rem, 11vw, 6.6rem) * -.3); animation: gpairin .8s .9s cubic-bezier(.2,1.5,.4,1) both; pointer-events: none; }
 @keyframes gpairin { from { opacity: 0; transform: translateY(55%) scale(.55); } }
-.fin-gato .gcr, .fin-gato .gct { position: absolute; inset: 0; background: url(/cartas/img/fin-gato.webp) center / 100% 100% no-repeat; filter: drop-shadow(0 6px 10px rgba(0,0,0,.55)); will-change: transform; }
+.fin-gato .gcr, .fin-gato .gct { position: absolute; inset: 0; background: url(/cartas/img/fin-gato.webp) center / 100% 100% no-repeat; will-change: transform; }
+.fin-gato .gpair { filter: drop-shadow(0 6px 10px rgba(0,0,0,.55)); }
 .fin-gato .gcr { clip-path: inset(0 71% 0 0); transform-origin: 13% 96%; animation: gsway 1.5s 1.7s ease-in-out infinite alternate-reverse; }
 .fin-gato .gct { clip-path: inset(0 0 0 28%); transform-origin: 58% 96%; animation: gsway 2.3s 1.7s ease-in-out infinite alternate; }
 @keyframes gsway { from { transform: rotate(-7deg) translateY(0); } 50% { transform: rotate(0deg) translateY(-1.5%); } to { transform: rotate(7deg) translateY(0); } }
 .fin-gato .gcr { --k: 1; }
-.fin-gato.olose .gpair { filter: grayscale(.7) brightness(.78); }
+.fin-gato.olose .gpair { filter: grayscale(.7) brightness(.78) drop-shadow(0 6px 10px rgba(0,0,0,.55)); }
 .fin-gato.olose .gcr { animation: gdroop 3.2s 1.7s ease-in-out infinite alternate-reverse; }
 .fin-gato.olose .gct { animation: gdroop 4.4s 1.7s ease-in-out infinite alternate; }
 @keyframes gdroop { from { transform: rotate(-3deg) translateY(2%); } to { transform: rotate(5deg) translateY(4%); } }

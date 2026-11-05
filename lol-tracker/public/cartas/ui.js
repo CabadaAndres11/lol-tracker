@@ -234,7 +234,7 @@
       '<div class="i20tg two"><div class="t" style="--i:0"><div class="v"><div class="i20gk x"><b>✕</b></div></div><div><b>Cartas eliminadas</b><span>Mertens PRIME, Javihi Prime, Chipy Llorón y Lihone Setter</span></div></div>' +
       '<div class="t" style="--i:1"><div class="v am"><span style="background-image:url(art/lihone.webp)"></span><span style="background-image:url(art/chipy-correa.webp)"></span><span style="background-image:url(art/mertens.webp)"></span><i>✦</i></div><div><b>Skins de compensación</b><span>Sus ilustraciones, en el inventario de las cuentas actuales</span></div></div></div></div>';
     var s5 = '<div class="i20s" data-s="5"><div class="i20h" style="--hc:#fde047">Y mucho más</div><div class="i20tg">' +
-      '<div class="t" style="--i:0"><div class="v"><img src="img/pack-set2.webp" alt=""><i class="shn"></i></div><div><b>Sobre Set 2</b><span>Goblins y Magic Botlane, por 50 monedas</span></div></div>' +
+      '<div class="t" style="--i:0"><div class="v"><img src="img/pack-set2.webp" alt=""><i class="shn"></i></div><div><b>Sobre Set 2</b><span>Goblins, Magic Botlane y K-Pop, por 50 monedas</span></div></div>' +
       '<div class="t" style="--i:1"><div class="v"><img src="img/box.webp" alt=""></div><div><b>Nuevo inventario</b><span>Cuadrados agrupados con sus opciones</span></div></div>' +
       '<div class="t" style="--i:2"><div class="v"><img src="img/coin.webp" alt=""></div><div><b>Efectos de oro</b><span>Lluvia de monedas, Moneda de oro y Botín del goblin</span></div></div>' +
       '<div class="t" style="--i:3"><div class="v"><div class="i20gk g"><b>+6</b></div></div><div><b>Trabajo, mucho más oro</b><span>Hasta +6 por ronda y +5 al abrir la tienda</span></div></div></div></div>';
@@ -619,7 +619,7 @@
   function invItems() {
     var a = ui.acct || {}, ps = a.packSize, items = [];
     function opt(act, icn, t, d, extra, dis) { return '<button class="invopt" data-act="' + act + '"' + (extra || '') + (dis ? ' disabled' : '') + '>' + ic(icn) + '<span><b>' + t + '</b><small>' + d + '</small></span></button>'; }
-    [['set1', 'Sobre Set 1', a.packs, 'Trae ' + ps + ' cartas al azar del juego (sin las sinergias Anime ni las cartas del Set 2); la última es Rara o mejor.'], ['set2', 'Sobre Set 2', a.packsSet2, 'Trae ' + ps + ' cartas al azar de las sinergias Goblins y Magic Botlane; la última es Rara o mejor.'], ['anime', 'Sobre Anime', a.packsAnime, 'Trae ' + ps + ' cartas al azar de la sinergia Anime y su acción; la última es Rara o mejor.']].forEach(function (p) {
+    [['set1', 'Sobre Set 1', a.packs, 'Trae ' + ps + ' cartas al azar del juego (sin las sinergias Anime ni las cartas del Set 2); la última es Rara o mejor.'], ['set2', 'Sobre Set 2', a.packsSet2, 'Trae ' + ps + ' cartas al azar de las sinergias Goblins, Magic Botlane y K-Pop; la última es Rara o mejor.'], ['anime', 'Sobre Anime', a.packsAnime, 'Trae ' + ps + ' cartas al azar de la sinergia Anime y su acción; la última es Rara o mejor.']].forEach(function (p) {
       if (!p[2]) return;
       items.push({ k: p[0], n: p[2], name: p[1], img: '<img class="bximg" src="/cartas/img/pack-' + p[0] + '.webp" alt="">', desc: p[3],
         opts: opt('openpack', 'sobre', 'Abrir', 'Abre un sobre', ' data-inv="1" data-pack="' + p[0] + '"', !!ui.pack) });
@@ -997,7 +997,7 @@
   function packPanel(a, pk) {
     var can = a.coins >= a.packCost && !ui.pack;
     var name = pk === 'anime' ? 'Sobre Anime' : pk === 'set2' ? 'Set 2' : 'Set 1';
-    var txt = pk === 'anime' ? ' cartas al azar de la sinergia Anime (sus tropas y su acción). ' : pk === 'set2' ? ' cartas al azar de las sinergias Goblins y Magic Botlane (sus tropas y su acción). ' : ' cartas al azar del juego (tropas y acciones, sin las sinergias Anime ni las cartas Goblins y Magic Botlane del Set 2). ';
+    var txt = pk === 'anime' ? ' cartas al azar de la sinergia Anime (sus tropas y su acción). ' : pk === 'set2' ? ' cartas al azar de las sinergias Goblins, Magic Botlane y K-Pop (sus tropas y su acción). ' : ' cartas al azar del juego (tropas y acciones, sin las sinergias Anime ni las cartas del Set 2 (Goblins, Magic Botlane y K-Pop)). ';
     return '<div class="panel packbox">' + bpkHtml('', pk) + '<h2>' + name + '</h2>' +
       '<button class="btn cta big" data-act="openpack" data-pack="' + pk + '"' + (can ? '' : ' disabled') + '>' + (a.packCost ? 'Abrir sobre · ' + a.packCost + ' ' + ic('moneda') + '' : 'Abrir sobre · gratis') + '</button>' + (a.coins < a.packCost ? '<p class="mut">Te faltan ' + (a.packCost - a.coins) + ' monedas.</p>' : '') + '</div>';
   }

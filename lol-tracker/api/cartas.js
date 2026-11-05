@@ -71,7 +71,7 @@ function pickRarity() {
   return 'Común';
 }
 const isAnime = (c) => (c.themes || []).includes('Anime') || c.theme === 'Anime';
-const PACK_POOLS = { set1: ALL.filter((c) => !isAnime(c) && !c.pack), anime: ALL.filter((c) => isAnime(c) && !c.pack), set2: ALL.filter((c) => c.pack === 'set2') }; // Set 2: Goblins y Magic Botlane; // el sobre Anime solo trae la sinergia Anime y su acción; el Set 1, todo lo demás
+const PACK_POOLS = { set1: ALL.filter((c) => !isAnime(c) && !c.pack), anime: ALL.filter((c) => isAnime(c) && !c.pack), set2: ALL.filter((c) => c.pack === 'set2') }; // Set 2: Goblins, Magic Botlane y K-Pop; // el sobre Anime solo trae la sinergia Anime y su acción; el Set 1, todo lo demás
 const packKey = (v) => (v === 'anime' ? 'anime' : v === 'set2' ? 'set2' : 'set1');
 const packField = (k) => (k === 'anime' ? 'packsAnime' : k === 'set2' ? 'packsSet2' : 'packs');
 function drawCard(minRarity, poolAll) {

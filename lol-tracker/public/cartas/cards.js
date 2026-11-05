@@ -700,6 +700,7 @@ var D={
   },
   {
    "id": "hellbramn-kda",
+   "pack": "set2",
    "name": "Hellbramn KDA",
    "person": "Hellbramn",
    "themes": [
@@ -719,6 +720,7 @@ var D={
   },
   {
    "id": "javihi-kda",
+   "pack": "set2",
    "name": "Javihi KDA",
    "person": "Javihi",
    "themes": [
@@ -734,6 +736,7 @@ var D={
   },
   {
    "id": "aitorlg-kda",
+   "pack": "set2",
    "name": "AitoRLG KDA",
    "person": "AitoRLG",
    "themes": [
@@ -749,6 +752,7 @@ var D={
   },
   {
    "id": "chipy-td",
+   "pack": "set2",
    "name": "Chipy True Damage",
    "person": "Chipy",
    "themes": [
@@ -764,6 +768,7 @@ var D={
   },
   {
    "id": "pampert-td",
+   "pack": "set2",
    "name": "Pampert True Damage",
    "person": "Pampert",
    "themes": [
@@ -783,6 +788,7 @@ var D={
   },
   {
    "id": "dashlight-td",
+   "pack": "set2",
    "name": "Dashlight True Damage",
    "person": "Dashlight",
    "themes": [
@@ -798,6 +804,7 @@ var D={
   },
   {
    "id": "sech-huntrix",
+   "pack": "set2",
    "name": "Sech Huntrix",
    "person": "Sech",
    "themes": [
@@ -813,6 +820,7 @@ var D={
   },
   {
    "id": "mertens-huntrix",
+   "pack": "set2",
    "name": "Mertens Huntrix",
    "person": "Mertens",
    "themes": [
@@ -832,6 +840,7 @@ var D={
   },
   {
    "id": "lihone-saja",
+   "pack": "set2",
    "name": "Lihone SajaBoys",
    "person": "Lihone",
    "themes": [
@@ -851,6 +860,7 @@ var D={
   },
   {
    "id": "petea-saja",
+   "pack": "set2",
    "name": "Petea SajaBoys",
    "person": "Petea",
    "themes": [
@@ -866,6 +876,7 @@ var D={
   },
   {
    "id": "aitorlg-singer",
+   "pack": "set2",
    "name": "AitoRLG Singer",
    "person": "AitoRLG",
    "themes": [
@@ -1207,6 +1218,7 @@ var D={
   },
   {
    "id": "cambio-de-escenario",
+   "pack": "set2",
    "name": "Cambio de Escenario",
    "cost": 2,
    "rarity": "Rara",

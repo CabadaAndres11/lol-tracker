@@ -57,17 +57,19 @@
   function pips(n) { var h = ''; for (var k = 0; k < 3; k++) h += '<i' + (k < n ? ' class="on"' : '') + '></i>'; return h; }
   var AICON = { 'mordisco-del-invierno': 'candado', 'reparto-de-botin': 'moneda', entrenamiento: 'espadas', arenga: 'megafono', armadura: 'escudo', banquete: 'carne', intimidacion: 'enfado', 'mal-de-ojo': 'ojo', 'golpe-certero': 'diana', lluvia: 'arco',
     'bola-extra': 'beisbol', 'segundo-aliento': 'viento', 'cambio-de-linea': 'cambio', parche: 'disquete', 'horas-extra': 'maletin', 'segunda-temporada': 'trofeo', 'campeones-de-europa': 'trofeo', 'remate-doble': 'voley', 'cita-sorpresa': 'corazon', 'golpe-de-suerte': 'dado', genkidama: 'fuego', remedio: 'corazon', kamehameha: 'estrella' };
-  var ARTS = {"torreta-lunar":1,"rey-goblin":1,"petea-goblin":1,"hellbramn-goblin":1,"mertens-goblin":1,"lihone-goblin":1,"aitorlg-maomao":1,"chipy-goku":1,"dashlight-sun-jin-woo":1,"javihi-smiley":1,"lihone-rudeus":1,"mertens-meliodas":1,"pampert-asta":1,"eriko":1,"helena":1,"lucia":1,"ari":1,"aitorlg-koisito":1,"aitorlg-regla":1,"aitorlg-renata":1,"chipy-correa":1,"computer-chipy":1,"computer-dashlight":1,"computer-hellbramn":1,"computer-lihone":1,"computer-petea":1,"dashlight-akali":1,"dashlight-correa":1,"hellbramn":1,"javihi":1,"javihi-duo":1,"javihi-friki":1,"javihi-koisito":1,"lihone":1,"lihone-correa":1,"lihone-viego":1,"mertens":1,"mertens-gambler":1,"pampert-gambler":1,"pampert":1,"pampert-friki":1,"pampert-koisito":1,"petea-koisito":1,"petea-pokemaniaco":1,"potango":1,"sech":1,"sech-duo":1,"sech-koisito":1,"sech-thresh":1};
+  var ARTS = {"torreta-lunar":1,"hellbramn-kda":1,"javihi-kda":1,"aitorlg-kda":1,"aitorlg-singer-kda":1,"rey-goblin":1,"petea-goblin":1,"hellbramn-goblin":1,"mertens-goblin":1,"lihone-goblin":1,"aitorlg-maomao":1,"chipy-goku":1,"dashlight-sun-jin-woo":1,"javihi-smiley":1,"lihone-rudeus":1,"mertens-meliodas":1,"pampert-asta":1,"eriko":1,"helena":1,"lucia":1,"ari":1,"aitorlg-koisito":1,"aitorlg-regla":1,"aitorlg-renata":1,"chipy-correa":1,"computer-chipy":1,"computer-dashlight":1,"computer-hellbramn":1,"computer-lihone":1,"computer-petea":1,"dashlight-akali":1,"dashlight-correa":1,"hellbramn":1,"javihi":1,"javihi-duo":1,"javihi-friki":1,"javihi-koisito":1,"lihone":1,"lihone-correa":1,"lihone-viego":1,"mertens":1,"mertens-gambler":1,"pampert-gambler":1,"pampert":1,"pampert-friki":1,"pampert-koisito":1,"petea-koisito":1,"petea-pokemaniaco":1,"potango":1,"sech":1,"sech-duo":1,"sech-koisito":1,"sech-thresh":1};
   // Nivel de carta por repetidas: 2 copias = ★2, 4 copias = ★3
   // Copias de una carta y cuántas hacen falta para la siguiente mejora: 2 copias = ★2, 4 copias = ★3
   function copyProg(n) { return n >= 4 ? { n: n, need: 4, next: 0, max: true } : n >= 2 ? { n: n, need: 4, next: 3, max: false } : { n: n, need: 2, next: 2, max: false }; }
   function copiesOf(id) { return 1 + ((ui.acct && ui.acct.dups && ui.acct.dups[id]) || 0); }
   function lvOf(id) { var n = 1 + ((ui.acct && ui.acct.dups && ui.acct.dups[id]) || 0); return n >= 4 ? 3 : n >= 2 ? 2 : 1; }
   var KSLUG = { 'KDA': 'kda', 'True Damage': 'td', 'Huntrix': 'huntrix', 'Saja Boys': 'saja' };
-  function skG(side, id) {
-    var s = ui.s;
-    if (id === 'aitorlg-singer' && s && s.p && s.p[side] && s.p[side].kact && ARTS['aitorlg-singer-' + KSLUG[s.p[side].kact]]) return 'aitorlg-singer-' + KSLUG[s.p[side].kact]; // la Singer cambia de ilustración según el grupo
-    return (s && s.sk && s.sk[side] && s.sk[side][id]) || '';
+  function skG(side, id) { var s = ui.s; return (s && s.sk && s.sk[side] && s.sk[side][id]) || ''; }
+  // La Singer cambia de ilustración según el grupo elegido (en la colección o sin grupo, la primera disponible)
+  function singerArt(o) {
+    var s = ui.s, m = /data-side="(\d)"/.exec(o.attrs || ''), side = m ? +m[1] : 0, g = s && ui.screen === 'game' && s.p && s.p[side] ? s.p[side].kact : null;
+    if (g && ARTS['aitorlg-singer-' + KSLUG[g]]) return 'aitorlg-singer-' + KSLUG[g];
+    return Object.keys(KSLUG).map(function (k) { return 'aitorlg-singer-' + KSLUG[k]; }).filter(function (a) { return ARTS[a]; })[0] || '';
   }
   function lvG(side, id) { var s = ui.s; return (s && s.lv && s.lv[side] && s.lv[side][id]) || 1; }
   function cardHtml(c, o) {
@@ -77,9 +79,9 @@
     else if (troop) { c1 = c.themes[0] && D.themes[c.themes[0]] ? D.themes[c.themes[0]].color : '#8b93a1'; c2 = c.themes[1] && D.themes[c.themes[1]] ? D.themes[c.themes[1]].color : hexMix(c1, '#0b0716', .62); } // sin sinergia: gris neutro
     else if (c.theme) { c1 = D.themes[c.theme].color; c2 = hexMix(c1, '#0b0716', .62); } else { c1 = '#2dd4bf'; c2 = '#0f3f3a'; }
     var tag = o.tag || 'div';
-    var art = troop && ARTS[c.id];
+    var artId = c.id === 'aitorlg-singer' ? singerArt(o) : c.id, art = troop && artId && ARTS[artId];
     if (o.skin === undefined) o.skin = ui.screen === 'game' ? '' : (ui.acct && ui.acct.skinSel && ui.acct.skinSel[c.id] && ui.acct.skins.indexOf(ui.acct.skinSel[c.id]) >= 0 ? ui.acct.skinSel[c.id] : '');
-    var h = '<' + tag + ' class="card r-' + c.rarity + (troop ? '' : ' accion') + (art ? ' art' : '') + (o.slv && o.slv !== 'sin' ? ' slv-' + o.slv : '') + (o.cls ? ' ' + o.cls : '') + '" style="--c1:' + c1 + ';--c2:' + c2 + (art ? ';--art:url(/cartas/art/' + (o.skin || c.id) + '.webp)' : '') + '"' + (o.attrs ? ' ' + o.attrs : '') + '>';
+    var h = '<' + tag + ' class="card r-' + c.rarity + (troop ? '' : ' accion') + (art ? ' art' : '') + (o.slv && o.slv !== 'sin' ? ' slv-' + o.slv : '') + (o.cls ? ' ' + o.cls : '') + '" style="--c1:' + c1 + ';--c2:' + c2 + (art ? ';--art:url(/cartas/art/' + (o.skin || artId) + '.webp)' : '') + '"' + (o.attrs ? ' ' + o.attrs : '') + '>';
     h += '<span class="rgem" title="Rareza: ' + c.rarity + '"><svg viewBox="0 0 20 24" aria-hidden="true"><path d="M10 0L20 8L10 24L0 8Z" fill="var(--gm)"/><path d="M10 0L20 8H0Z" fill="#fff" opacity=".38"/><path d="M10 0L14.5 8L10 24L5.5 8Z" fill="#fff" opacity=".2"/><path d="M0 8H20L10 24Z" fill="#000" opacity=".25"/><path d="M10 0L20 8L10 24L0 8Z" fill="none" stroke="rgba(255,255,255,.8)" stroke-width="1" stroke-linejoin="round"/></svg></span>';
     if (o.skin && c.rarity === 'Legendaria') h += '<span class="holo"></span>'; // skin de una legendaria: efecto holográfico
     if (!c.novia) h += '<span class="coin" title="Coste en oro para comprarla">' + c.cost + '</span>';

@@ -1038,26 +1038,31 @@ module.exports = async function handler(req, res) {
       res.status(200).json({ cards, user: publicUser(u) }); return;
     }
 
-    if (act === 'gachaPull') { // Destino: una tirada
-      const cost = isAdmin(u) ? 0 : GACHA.cost;
-      if (u.coins < cost) { res.status(402).json({ error: `Necesitas ${GACHA.cost} monedas.`, user: publicUser(u) }); return; }
+    if (act === 'gachaPull') { // Destino: una tirada o una multi-tirada (10 por el precio de 10 sueltas)
+      const n = body.n === 10 ? 10 : 1;
+      const cost = isAdmin(u) ? 0 : GACHA.cost * n;
+      if (u.coins < cost) { res.status(402).json({ error: `Necesitas ${GACHA.cost * n} monedas.`, user: publicUser(u) }); return; }
       u.coins -= cost;
-      const r = gachaRoll(u);
-      if (r.kind === 'card') {
-        const isAct = (DATA.actions || []).some((a) => a.id === r.id);
-        r.isNew = u.owned.indexOf(r.id) < 0;
-        if (r.isNew) u.owned.push(r.id);
-        else if (isAct || levelOf(u, r.id) >= 3) { r.dupCoins = MAXED_DUP_COINS; u.coins += r.dupCoins; }
-        else { u.dups = u.dups || {}; const before = levelOf(u, r.id); u.dups[r.id] = (u.dups[r.id] || 0) + 1; r.lvl = levelOf(u, r.id); r.lvlUp = r.lvl > before; r.copies = 1 + u.dups[r.id]; }
-      } else {
-        const own = r.kind === 'skin' ? (u.skins || []).includes(r.id) || (u.invSkins || []).includes(r.id) : fxOwned(u).includes(r.id);
-        r.isNew = !own;
-        if (r.isNew) { if (r.kind === 'skin') { u.skins = u.skins || []; u.skins.push(r.id); } else u.fxOwned = [...(u.fxOwned || []), r.id]; }
-        else { u.invDup = u.invDup || {}; const key = r.kind + ':' + r.id; u.invDup[key] = (u.invDup[key] || 0) + 1; r.inv = true; } // repetido: al inventario (sin opción de desbloquear por ahora)
+      const rewards = [];
+      for (let k = 0; k < n; k++) {
+        const r = gachaRoll(u);
+        if (r.kind === 'card') {
+          const isAct = (DATA.actions || []).some((a) => a.id === r.id);
+          r.isNew = u.owned.indexOf(r.id) < 0;
+          if (r.isNew) u.owned.push(r.id);
+          else if (isAct || levelOf(u, r.id) >= 3) { r.dupCoins = MAXED_DUP_COINS; u.coins += r.dupCoins; }
+          else { u.dups = u.dups || {}; const before = levelOf(u, r.id); u.dups[r.id] = (u.dups[r.id] || 0) + 1; r.lvl = levelOf(u, r.id); r.lvlUp = r.lvl > before; r.copies = 1 + u.dups[r.id]; }
+        } else {
+          const own = r.kind === 'skin' ? (u.skins || []).includes(r.id) || (u.invSkins || []).includes(r.id) : fxOwned(u).includes(r.id);
+          r.isNew = !own;
+          if (r.isNew) { if (r.kind === 'skin') { u.skins = u.skins || []; u.skins.push(r.id); } else u.fxOwned = [...(u.fxOwned || []), r.id]; }
+          else { u.invDup = u.invDup || {}; const key = r.kind + ':' + r.id; u.invDup[key] = (u.invDup[key] || 0) + 1; r.inv = true; } // repetido: al inventario (sin opción de desbloquear por ahora)
+        }
+        rewards.push(r);
       }
-      u.st = u.st || {}; u.st.gacha = (u.st.gacha || 0) + 1;
+      u.st = u.st || {}; u.st.gacha = (u.st.gacha || 0) + n;
       await saveUser(cfg, u);
-      res.status(200).json({ reward: r, user: publicUser(u) }); return;
+      res.status(200).json({ rewards, reward: rewards[0], user: publicUser(u) }); return;
     }
 
     if (act === 'missionClaim') { // recoger la caja de una misión completada

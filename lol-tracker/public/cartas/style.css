@@ -2861,10 +2861,7 @@ img.timg[src$="kpop.png"], .card.accion .tlogo[src$="kpop.png"], .tlogo[src$="kp
 span.chip.r-Mítica { border-color: #ef4444; } .odds .od.r-Mítica { --oc: #ef4444; }
 
 /* ---------- Destino (gacha) ---------- */
-.dest { display: grid; grid-template-columns: minmax(200px, 260px) 1fr; gap: 1.2rem; align-items: start; margin-top: .8rem; }
-.destcard { display: flex; flex-direction: column; gap: .5rem; align-items: center; }
-.destcard .card { width: 100%; max-width: 240px; }
-.destinfo h2 { margin: 0 0 .3rem; }
+.dest { }
 .destpity { margin: .8rem 0; display: flex; flex-direction: column; gap: .3rem; }
 .destodds { list-style: none; padding: 0; margin: .6rem 0 1rem; display: grid; gap: .3rem; }
 .destodds li { display: flex; align-items: center; gap: .5rem; font-size: .9rem; }
@@ -2889,7 +2886,7 @@ span.chip.r-Mítica { border-color: #ef4444; } .odds .od.r-Mítica { --oc: #ef44
 .gachaov.rev .gres { opacity: 1; pointer-events: auto; transform: none; }
 .gglow { position: absolute; width: min(70vw, 420px); height: min(70vw, 420px); border-radius: 50%; background: radial-gradient(circle, var(--gc), transparent 65%); opacity: .45; filter: blur(14px); animation: gpulse 2.2s ease-in-out infinite alternate; }
 @keyframes gpulse { to { opacity: .8; transform: scale(1.12); } }
-.gcardw { position: relative; width: min(54vw, 220px); filter: drop-shadow(0 0 22px var(--gc)); }
+.gcardw { position: relative; width: min(44vw, 190px); filter: drop-shadow(0 0 22px var(--gc)); }
 .gcardw .card { width: 100%; }
 .gfxic { width: 100%; aspect-ratio: 1; display: grid; place-items: center; font-size: 5rem; color: var(--gc); background: rgba(255,255,255,.06); border: 2px solid var(--gc); border-radius: 18px; } .gfxic .ic { width: 1em; height: 1em; }
 .gtxt { position: relative; display: flex; flex-direction: column; align-items: center; gap: .25rem; text-align: center; color: #fff; }
@@ -2902,3 +2899,28 @@ span.chip.r-Mítica { border-color: #ef4444; } .odds .od.r-Mítica { --oc: #ef44
 .destcard .ntag { margin-bottom: .6rem; position: static; }
 .destpity .meter { display: block; width: 100%; height: .6rem; }
 .destpity .meter i { display: block; height: 100%; }
+
+/* Destino integrado en el cielo */
+.destbg { position: fixed; inset: 0; z-index: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 120%, #1b1f4a 0%, #0a0c24 55%, #03030d 100%); }
+body.destmode { background: #03030d; }
+body.destmode #app { position: relative; z-index: 1; background: transparent; transition: opacity .5s; }
+body.gpulling #app { opacity: 0; pointer-events: none; }
+.dest { display: grid; grid-template-columns: minmax(200px, 270px) minmax(260px, 460px); gap: 2.2rem; justify-content: center; align-items: center; margin-top: 1.2rem; }
+.destmain { display: flex; flex-direction: column; align-items: center; gap: .8rem; }
+.destlbl { color: #ef4444; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; font-size: .8rem; text-shadow: 0 0 10px #ef4444; }
+.destcard { width: 100%; max-width: 250px; filter: drop-shadow(0 0 26px rgba(239,68,68,.55)); animation: gpulse 2.6s ease-in-out infinite alternate; }
+.destcard .card { width: 100%; }
+.destinfo { display: flex; flex-direction: column; gap: .2rem; text-shadow: 0 1px 6px rgba(0,0,0,.7); }
+.desttitle { margin: 0; font-size: 2.2rem; letter-spacing: .25em; text-transform: uppercase; color: #fff; text-shadow: 0 0 18px rgba(160,180,255,.8); }
+.destbtns { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: .4rem; }
+.gachaov.nosky { background: transparent; }
+.gm.gw { height: 2px; opacity: 0; }
+.gm.gbig { --sz: 560px; height: 8px; box-shadow: 0 0 26px 4px var(--gc); animation-name: gbig; }
+.gm.gbig::before { left: -8px; top: -9px; width: 26px; height: 26px; box-shadow: 0 0 40px 14px var(--gc); }
+@keyframes gbig { 0% { opacity: 0; transform: translate(0, 0) rotate(-35deg) scale(.35); } 15% { opacity: 1; } 78% { opacity: 1; } 100% { opacity: 0; transform: translate(-150vw, 105vw) rotate(-35deg) scale(1.7); } }
+.glist { display: flex; flex-wrap: wrap; justify-content: center; gap: .35rem; max-width: min(92vw, 640px); margin-top: .5rem; }
+.gchip { display: inline-flex; align-items: center; gap: .35rem; padding: .2rem .55rem; border: 1px solid var(--gc); border-radius: 999px; background: rgba(255,255,255,.07); font-size: .78rem; color: #fff; }
+.gchip i { width: .5rem; height: .5rem; border-radius: 50%; background: var(--gc); box-shadow: 0 0 6px var(--gc); }
+.gchip em { color: var(--gc); font-style: normal; font-size: .7rem; }
+.gres { overflow-y: auto; }
+@media (max-width: 700px) { .dest { grid-template-columns: 1fr; gap: 1rem; } .destcard { max-width: 190px; } }

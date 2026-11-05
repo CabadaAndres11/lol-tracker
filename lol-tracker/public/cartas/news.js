@@ -6,7 +6,8 @@
         'Nuevo apartado en el menú principal: Destino, un gacha donde cada tirada cuesta 25 monedas.',
         'La recompensa principal cambiará de vez en cuando. Ahora es AitoRLG Singer (Mítica): 10% por tirada y asegurada en la tirada 20 si aún no la tienes. Al conseguirla, el contador se reinicia.',
         'También pueden tocar cartas de todos los sets, efectos y skins (menos los exclusivos del pase). Los efectos y skins repetidos van a tu inventario.',
-        'Cada tirada es una estrella fugaz del color de la rareza; si toca la principal, llueven estrellas rojas.'
+        'Destino se ve directamente como un cielo estrellado; al tirar, la interfaz desaparece y pasan varias estrellas fugaces blancas y, mucho más grande y cercana, la del color de la rareza. Si toca la principal, llueven estrellas rojas.',
+        'Multi-tirada: 10 tiradas juntas por lo mismo que 10 sueltas (250 monedas). La estrella de la animación es la de la mejor recompensa y después se listan las 10.'
       ] },
     { date: '2026-11-05', tag: 'Cartas', title: 'AitoRLG Singer con reflejos de grupo',
       items: [

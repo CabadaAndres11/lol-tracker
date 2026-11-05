@@ -1030,50 +1030,62 @@
     var fx = fxInfo(r.id);
     return { name: fx ? fx.name : r.id, sub: 'Efecto' + (r.fxKind === 'deploy' ? ' de despliegue' : r.fxKind === 'sleeve' ? ' de funda' : r.fxKind === 'finish' ? ' de victoria y derrota' : ''), html: '<div class="gfxic">' + ic(FXICON[r.id] || 'brillo') + '</div>' };
   }
-  function gachaClose() { var o = document.getElementById('gachaov'); if (o) o.remove(); (window.__gtm || []).forEach(clearTimeout); window.__gtm = []; ui.gbusy = false; }
-  // Cielo estrellado con estrella(s) fugaz(ces) del color de la rareza; la principal lanza una lluvia de estrellas rojas
-  function gachaPlay(r, demo) {
-    gachaClose(); ui.gbusy = true; window.__gtm = [];
-    var rar = r.rarity, col = GRCOL[rar] || '#fff', main = !!r.main || (demo && rar === 'Mítica'), it = gachaItemHtml(r);
-    var o = document.createElement('div'); o.id = 'gachaov'; o.className = 'gachaov' + (main ? ' gmain' : ''); o.style.setProperty('--gc', col);
-    var st = '', i;
-    for (i = 0; i < 90; i++) st += '<i class="gst" style="left:' + (Math.random() * 100).toFixed(1) + '%;top:' + (Math.random() * 100).toFixed(1) + '%;--s:' + (1 + Math.random() * 2.2).toFixed(1) + 'px;--d:' + (1.5 + Math.random() * 3).toFixed(1) + 's;--dl:' + (Math.random() * 3).toFixed(1) + 's"></i>';
-    var ms = '', n = main ? 22 : 1;
-    for (i = 0; i < n; i++) ms += '<i class="gm" style="top:' + (main ? (-5 + Math.random() * 60).toFixed(0) : '8') + '%;left:' + (main ? (40 + Math.random() * 70).toFixed(0) : '92') + '%;--dl:' + (main ? (0.3 + i * 0.09 + Math.random() * .3).toFixed(2) : '0.55') + 's;--du:' + (main ? (0.9 + Math.random() * .6).toFixed(2) : '1.15') + 's;--sz:' + (main ? (110 + Math.random() * 140).toFixed(0) : '210') + 'px"></i>';
-    var again = !demo && ui.acct && ui.acct.coins >= gachaCfg().cost;
-    var status = demo ? 'Vista previa' : r.isNew ? '¡Nuevo!' : r.inv ? 'Repetido: guardado en tu inventario' : r.dupCoins ? 'Repetida al máximo: +' + r.dupCoins + ' monedas' : r.lvlUp ? '¡Sube a ★' + r.lvl + '!' : 'Copia ' + (r.copies || 2);
-    o.innerHTML = '<div class="gsky">' + st + '</div><div class="gmet">' + ms + '</div><div class="gflash"></div>' +
-      '<div class="gres"><div class="gglow"></div><div class="gcardw">' + it.html + '</div><div class="gtxt"><span class="grar">' + (GEM[rar] || '') + ' ' + rar + '</span><b>' + esc(it.name) + '</b><small>' + esc(it.sub) + ' · ' + esc(status) + '</small>' +
-      '<div class="gbtns"><button class="btn cta" data-g="close">Continuar</button>' + (again ? '<button class="btn sec" data-g="again">Otra tirada · ' + gachaCfg().cost + '</button>' : '') + '</div></div></div><button class="gskip" data-g="skip">Saltar</button>';
+  function gachaClose() { var o = document.getElementById('gachaov'); if (o) o.remove(); (window.__gtm || []).forEach(clearTimeout); window.__gtm = []; ui.gbusy = false; document.body.classList.remove('gpulling'); }
+  var GRANK = { 'Común': 0, 'Rara': 1, 'Épica': 2, 'Legendaria': 3, 'Mítica': 4 };
+  function gachaBest(rs) { return rs.reduce(function (b, r) { return (GRANK[r.rarity] > GRANK[b.rarity] || (GRANK[r.rarity] === GRANK[b.rarity] && r.main && !b.main)) ? r : b; }, rs[0]); }
+  function gachaStars(n) {
+    var st = '';
+    for (var i = 0; i < n; i++) st += '<i class="gst" style="left:' + (Math.random() * 100).toFixed(1) + '%;top:' + (Math.random() * 100).toFixed(1) + '%;--s:' + (1 + Math.random() * 2.2).toFixed(1) + 'px;--d:' + (1.5 + Math.random() * 3).toFixed(1) + 's;--dl:' + (Math.random() * 3).toFixed(1) + 's"></i>';
+    return st;
+  }
+  // Cielo estrellado: pasan varias estrellas fugaces blancas y después la importante, grande y cercana, del color de la rareza (la principal: lluvia de estrellas rojas)
+  function gachaPlay(rs, demo) {
+    gachaClose(); ui.gbusy = true; window.__gtm = []; if (ui.screen === 'destino' && !demo) document.body.classList.add('gpulling');
+    var best = gachaBest(rs), rar = best.rarity, col = GRCOL[rar] || '#fff', main = !!best.main, it = gachaItemHtml(best), multi = rs.length > 1;
+    var ontop = !demo && ui.screen === 'destino';
+    var o = document.createElement('div'); o.id = 'gachaov'; o.className = 'gachaov' + (main ? ' gmain' : '') + (ontop ? ' nosky' : ''); o.style.setProperty('--gc', col);
+    var ms = '', i;
+    for (i = 0; i < 6; i++) ms += '<i class="gm gw" style="--gc:#fff;top:' + (-5 + Math.random() * 45).toFixed(0) + '%;left:' + (60 + Math.random() * 50).toFixed(0) + '%;--dl:' + (0.15 + i * 0.22 + Math.random() * .15).toFixed(2) + 's;--du:' + (0.7 + Math.random() * .4).toFixed(2) + 's;--sz:' + (110 + Math.random() * 120).toFixed(0) + 'px"></i>';
+    if (main) for (i = 0; i < 22; i++) ms += '<i class="gm" style="top:' + (-5 + Math.random() * 60).toFixed(0) + '%;left:' + (40 + Math.random() * 70).toFixed(0) + '%;--dl:' + (1.5 + i * 0.07 + Math.random() * .3).toFixed(2) + 's;--du:' + (0.9 + Math.random() * .6).toFixed(2) + 's;--sz:' + (130 + Math.random() * 160).toFixed(0) + 'px"></i>';
+    ms += '<i class="gm gbig" style="top:-2%;left:105%;--dl:1.5s;--du:1.6s"></i>';
+    var coins = ui.acct ? ui.acct.coins : 0, cost = gachaCfg().cost * rs.length, again = !demo && coins >= cost;
+    var status = demo ? 'Vista previa' : best.isNew ? '¡Nuevo!' : best.inv ? 'Repetido: guardado en tu inventario' : best.dupCoins ? 'Repetida al máximo: +' + best.dupCoins + ' monedas' : best.lvlUp ? '¡Sube a ★' + best.lvl + '!' : 'Copia ' + (best.copies || 2);
+    var list = multi ? '<div class="glist">' + rs.map(function (r) { var x = gachaItemHtml(r); return '<span class="gchip" style="--gc:' + GRCOL[r.rarity] + '" title="' + esc(r.rarity) + '"><i></i><span>' + esc(x.name) + '</span><em>' + (r.isNew ? 'Nuevo' : r.inv ? 'Inventario' : r.dupCoins ? '+' + r.dupCoins + '🪙' : 'Copia') + '</em></span>'; }).join('') + '</div>' : '';
+    o.innerHTML = (ontop ? '' : '<div class="gsky">' + gachaStars(90) + '</div>') + '<div class="gmet">' + ms + '</div><div class="gflash"></div>' +
+      '<div class="gres"><div class="gglow"></div><div class="gcardw">' + it.html + '</div><div class="gtxt"><span class="grar">' + (GEM[rar] || '') + ' ' + rar + (multi ? ' · la mejor de ' + rs.length : '') + '</span><b>' + esc(it.name) + '</b><small>' + esc(it.sub) + ' · ' + esc(status) + '</small>' + list +
+      '<div class="gbtns"><button class="btn cta" data-g="close">Continuar</button>' + (again ? '<button class="btn sec" data-g="again">' + (multi ? 'Otra multi-tirada' : 'Otra tirada') + ' · ' + cost + '</button>' : '') + '</div></div></div><button class="gskip" data-g="skip">Saltar</button>';
     document.body.appendChild(o);
     var reveal = function () { if (o.classList.contains('rev')) return; o.classList.add('rev'); snd('rev-' + (rar === 'Mítica' ? 'Legendaria' : rar), 0); };
     o.addEventListener('click', function (e) {
       var g = e.target.closest && e.target.closest('[data-g]'); var a = g && g.dataset.g;
       if (a === 'close') { gachaClose(); if (ui.screen === 'destino' || ui.screen === 'deck' || ui.screen === 'home') render(); return; }
-      if (a === 'again') { gachaClose(); return gachaPull(); }
+      if (a === 'again') { gachaClose(); return gachaPull(rs.length); }
       if (!o.classList.contains('rev')) reveal();
     });
-    window.__gtm.push(setTimeout(reveal, main ? 2700 : 1900));
+    window.__gtm.push(setTimeout(reveal, main ? 3900 : 3300));
   }
-  function gachaPull() {
+  function gachaPull(n) {
+    n = n === 10 ? 10 : 1;
     if (ui.gbusy) return;
-    var cfg = gachaCfg(); if (ui.acct.coins < cfg.cost) { ui.msg = 'Necesitas ' + cfg.cost + ' monedas.'; return render(); }
-    ui.gbusy = true; ui.msg = '';
-    return api('gachaPull').then(function (r) {
+    var cfg = gachaCfg(); if (ui.acct.coins < cfg.cost * n) { ui.msg = 'Necesitas ' + cfg.cost * n + ' monedas.'; return render(); }
+    ui.gbusy = true; ui.msg = ''; document.body.classList.add('gpulling');
+    return api('gachaPull', { n: n }).then(function (r) {
       ui.gbusy = false;
-      if (!r.ok) { if (r.data && r.data.user) setAcct(r.data.user); ui.msg = (r.data && r.data.error) || 'No se pudo tirar.'; return render(); }
-      setAcct(r.data.user); gachaPlay(r.data.reward, false);
+      if (!r.ok) { document.body.classList.remove('gpulling'); if (r.data && r.data.user) setAcct(r.data.user); ui.msg = (r.data && r.data.error) || 'No se pudo tirar.'; return render(); }
+      setAcct(r.data.user); gachaPlay(r.data.rewards || [r.data.reward], false);
     });
   }
   function renderDestino() {
     var a = ui.acct, cfg = gachaCfg(), c = CARD[cfg.id], n = a.gachaN || 0, left = Math.max(1, cfg.pity - n);
+    document.body.classList.add('destmode');
+    if (!document.getElementById('destbg')) { var bg = document.createElement('div'); bg.id = 'destbg'; bg.className = 'destbg'; bg.innerHTML = gachaStars(130); document.body.insertBefore(bg, document.body.firstChild); }
     var odds = [['Recompensa principal', cfg.rate + '%', GRCOL['Mítica']], ['Cartas (todos los sets)', '~54%', '#9ca3af'], ['Efectos', '~22%', '#c084fc'], ['Skins', '~14%', '#fbbf24']];
-    app.innerHTML = head('destino', ic('brillo') + ' Destino') + (ui.msg ? '<p class="err">' + esc(ui.msg) + '</p>' : '') +
-      '<div class="dest"><div class="destcard"><span class="ntag nt-Cartas">Recompensa principal</span>' + cardHtml(c, { skin: '' }) + '</div>' +
-      '<div class="destinfo panel"><h2>' + esc(c.name) + '</h2><p class="mut">Una tirada cuesta ' + cfg.cost + ' monedas. Puede tocarte la recompensa principal, cartas de todos los sets, efectos y skins. Lo repetido de skins y efectos se guarda en tu inventario.</p>' +
+    app.innerHTML = head('destino') + (ui.msg ? '<p class="err">' + esc(ui.msg) + '</p>' : '') +
+      '<div class="dest"><div class="destmain"><span class="destlbl">Recompensa principal</span><div class="destcard">' + cardHtml(c, { skin: '' }) + '</div></div>' +
+      '<div class="destinfo"><h1 class="desttitle">Destino</h1><p class="mut">Cada tirada cuesta ' + cfg.cost + ' monedas. Pueden tocar cartas de todos los sets, efectos y skins; lo repetido de skins y efectos va a tu inventario.</p>' +
       '<div class="destpity"><div class="meter"><i class="on" style="width:' + Math.round(n / cfg.pity * 100) + '%"></i></div><span class="mut">Tiradas sin conseguirla: <b>' + n + '</b> / ' + cfg.pity + ' · ' + (left === 1 ? 'la próxima tirada la asegura' : 'asegurada en ' + left + ' tiradas') + '</span></div>' +
       '<ul class="destodds">' + odds.map(function (x) { return '<li style="--oc:' + x[2] + '"><i></i><span>' + x[0] + '</span><b>' + x[1] + '</b></li>'; }).join('') + '</ul>' +
-      '<div class="btnrow"><button class="btn cta big" data-act="gpull"' + (a.coins < cfg.cost || ui.gbusy ? ' disabled' : '') + '>' + ic('moneda') + ' Tirar · ' + cfg.cost + '</button><span class="mut">Tienes ' + a.coins + ' monedas</span></div></div></div></div>';
+      '<div class="destbtns"><button class="btn cta big" data-act="gpull" data-n="1"' + (a.coins < cfg.cost || ui.gbusy ? ' disabled' : '') + '>' + ic('moneda') + ' Tirar · ' + cfg.cost + '</button><button class="btn big" data-act="gpull" data-n="10"' + (a.coins < cfg.cost * 10 || ui.gbusy ? ' disabled' : '') + '>' + ic('moneda') + ' Multi-tirada ×10 · ' + cfg.cost * 10 + '</button></div><p class="mut" style="margin-top:.5rem">Tienes ' + a.coins + ' monedas · la multi-tirada cuesta lo mismo que 10 sueltas y se muestra la mejor recompensa.</p></div></div></div>';
   }
   function renderPacks() {
     var a = ui.acct, tab = ui.shopTab || 'feat';
@@ -2577,6 +2589,7 @@ var GOB_SVG = '<svg class="gobsvg" viewBox="0 0 100 100"><g class="gobleg a"><re
     app.style.minHeight = '';
     if (ui.genfx) return; // la animación de la Genkidama pinta el resultado al terminar
     document.body.classList.remove('shopbg');
+    if (ui.screen !== 'destino') { var dbg = document.getElementById('destbg'); if (dbg) dbg.remove(); document.body.classList.remove('destmode'); }
     if (PV.wait && ui.screen !== 'pvp') pvpCancelWait();
     var f = { home: renderHome, deck: renderDeck, modes: renderModes, pvp: renderPvp, login: renderLogin, starter: renderStarter, packs: renderPacks, destino: renderDestino, profile: renderProfile, settings: renderSettings, pass: renderPass, ladder: renderLadder, missions: renderMissions, boot: renderBoot }[ui.screen];
     if (f) f(); else renderGame();
@@ -2795,8 +2808,8 @@ var GOB_SVG = '<svg class="gobsvg" viewBox="0 0 100 100"><g class="gobleg a"><re
     if (act === 'shopsel') { ui.shopSel = +el.dataset.i; ui.shopTab = 'feat'; return render(); }
     if (act === 'newssel') { ui.newsSel = +el.dataset.i; ui.newsFull = false; return refreshNews(); }
     if (act === 'devchat') return openChat(+el.dataset.i);
-    if (act === 'gpull') return gachaPull();
-    if (act === 'gdemo') { var rr = el.dataset.r, dc = rr === 'Mítica' ? CARD['aitorlg-singer'] : D.cards.filter(function (x) { return x.rarity === rr && !x.nopack && ARTS[x.id]; })[0]; return gachaPlay({ kind: 'card', id: dc.id, rarity: rr, main: rr === 'Mítica' }, true); }
+    if (act === 'gpull') return gachaPull(+el.dataset.n || 1);
+    if (act === 'gdemo') { var rr = el.dataset.r, dc = rr === 'Mítica' ? CARD['aitorlg-singer'] : D.cards.filter(function (x) { return x.rarity === rr && !x.nopack && ARTS[x.id]; })[0]; return gachaPlay([{ kind: 'card', id: dc.id, rarity: rr, main: rr === 'Mítica' }], true); }
     if (act === 'newsmore') { ui.newsFull = !ui.newsFull; return refreshNews(); }
     if (act === 'setavatar') { return api('avatarSet', { card: el.dataset.card }).then(function (r) { if (r.ok) { setAcct(r.data.user); ui.msg = ''; ui.avEdit = false; } else ui.msg = (r.data && r.data.error) || 'No se pudo cambiar la foto.'; render(); }); }
     if (PLAYACTS[act]) { if (!ui.picked) return askDeck(act); ui.picked = false; }

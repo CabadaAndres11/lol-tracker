@@ -67,11 +67,13 @@
   function skG(side, id) { var s = ui.s; return (s && s.sk && s.sk[side] && s.sk[side][id]) || ''; }
   // La Singer cambia de ilustración según el grupo elegido (en la colección o sin grupo, la primera disponible)
   function singerArt(o) {
+    if (o.sg && ARTS['aitorlg-singer-' + o.sg]) return 'aitorlg-singer-' + o.sg;
     var s = ui.s, m = /data-side="(\d)"/.exec(o.attrs || ''), side = m ? +m[1] : 0, g = s && ui.screen === 'game' && s.p && s.p[side] ? s.p[side].kact : null;
     if (g && ARTS['aitorlg-singer-' + KSLUG[g]]) return 'aitorlg-singer-' + KSLUG[g];
     return Object.keys(KSLUG).map(function (k) { return 'aitorlg-singer-' + KSLUG[k]; }).filter(function (a) { return ARTS[a]; })[0] || '';
   }
   function lvG(side, id) { var s = ui.s; return (s && s.lv && s.lv[side] && s.lv[side][id]) || 1; }
+  function singerVars() { return Object.keys(KSLUG).filter(function (g) { return ARTS['aitorlg-singer-' + KSLUG[g]]; }); }
   function cardHtml(c, o) {
     o = o || {};
     var troop = c.type === 'tropa', c1, c2;
@@ -392,15 +394,19 @@
     return '<div class="zskins"><span class="zsl">Aspectos</span><button class="zs' + (!cur ? ' on' : '') + '" data-zs="" title="Aspecto clásico"><i style="background-image:url(/cartas/art/' + (ARTS[c.id] ? c.id : '') + '.webp)"></i><em>Clásico</em></button>' +
       SK.map(function (k) { return '<button class="zs' + (cur === k.id ? ' on' : '') + (own(k) ? '' : ' locked') + '" data-zs="' + k.id + '" title="' + esc(k.name) + (own(k) ? '' : ' (no la tienes)') + '"><i style="background-image:url(/cartas/art/' + k.id + '.webp)"></i><em>' + esc(k.name) + '</em></button>'; }).join('') + '</div>';
   }
-  function openZoom(id, skin) {
+  function singerStrip(sg) {
+    return '<div class="zskins"><span class="zsl">Grupo</span>' + singerVars().map(function (g) { var sl = KSLUG[g]; return '<button class="zs' + (sg === sl ? ' on' : '') + '" data-zg="' + sl + '" title="' + esc(g) + '"><i style="background-image:url(/cartas/art/aitorlg-singer-' + sl + '.webp)"></i><em>' + esc(g) + '</em></button>'; }).join('') + '</div>';
+  }
+  function openZoom(id, skin, sg) {
     var c = CARD[id]; if (!c) return;
+    if (c.id === 'aitorlg-singer' && !sg && singerVars().length) sg = KSLUG[singerVars()[0]];
     closeZoom();
     var own = owns(c.id) || !!c.novia, st = { rx: 0, ry: 0, tx: 0, ty: 0, drag: null, auto: true, t0: performance.now() };
-    var face = cardHtml(c, { lv: own && !c.novia ? lvOf(c.id) : 1, cls: 'zface', skin: skin });
+    var face = cardHtml(c, { lv: own && !c.novia ? lvOf(c.id) : 1, cls: 'zface', skin: skin, sg: sg });
     zoomEl = document.createElement('div'); zoomEl.className = 'zoomov';
     zoomEl.innerHTML = '<div class="zbox"><div class="zstage"><div class="zcard"><div class="zfront">' + face + '<span class="zglare"></span></div><div class="zback"><div class="zbk"><b>' + ic('cartas') + '</b><span>' + esc(c.name) + '</span></div></div></div></div>' +
       '<div class="zbtns"><button class="btn sec sm" data-z="flip">' + ic('cambio') + ' Voltear</button><button class="btn sec sm" data-z="reset">Restablecer</button><button class="btn sm" data-z="close">Cerrar</button></div>' +
-      skinStrip(c, skin) + '<p class="zhint">Arrastra para girarla · pasa el ratón para inclinarla · Esc para cerrar</p></div>';
+      skinStrip(c, skin) + (c.id === 'aitorlg-singer' ? singerStrip(sg) : '') + '<p class="zhint">Arrastra para girarla · pasa el ratón para inclinarla · Esc para cerrar</p></div>';
     document.body.appendChild(zoomEl);
     var card = zoomEl.querySelector('.zcard'), glare = zoomEl.querySelector('.zglare'), stage = zoomEl.querySelector('.zstage');
     function paint() { card.style.transform = 'rotateX(' + st.rx.toFixed(1) + 'deg) rotateY(' + st.ry.toFixed(1) + 'deg)'; }
@@ -423,7 +429,8 @@
     function end() { if (!st.drag) return; st.drag = null; card.style.transition = 'transform .45s cubic-bezier(.2,.8,.2,1)'; var n = norm(st.ry); st.ry = Math.abs(n) > 90 ? 180 * (n > 0 ? 1 : -1) : 0; st.rx = 0; paint(); } // se asienta de frente o de espaldas
     stage.addEventListener('pointerup', end); stage.addEventListener('pointercancel', end);
     zoomEl.addEventListener('click', function (e) {
-      var zs = e.target.closest('[data-zs]'); if (zs) { openZoom(id, zs.dataset.zs); return; }
+      var zs = e.target.closest('[data-zs]'); if (zs) { openZoom(id, zs.dataset.zs, sg); return; }
+      var zg = e.target.closest('[data-zg]'); if (zg) { openZoom(id, skin, zg.dataset.zg); return; }
       var z = e.target.closest('[data-z]');
       if (z) {
         card.style.transition = 'transform .6s cubic-bezier(.2,.8,.2,1)'; st.auto = false;
@@ -1088,13 +1095,18 @@
     return '<span class="cprog' + (pr.max ? ' max' : '') + '" title="' + (pr.max ? 'Nivel máximo' : 'Copias hasta ★' + pr.next + ': ' + pr.n + ' de ' + pr.need) + '">' + (pr.max ? 'MÁX' : pr.n + '/' + pr.need) + '</span>';
   }
   function colCard(c) {
-    var own = owns(c.id), gid = GIRL[c.id], show = c, thumb = '';
+    var own = owns(c.id), gid = GIRL[c.id], show = c, thumb = '', sgs = '';
+    if (c.id === 'aitorlg-singer' && singerVars().length > 1) { // AitoRLG Singer: un botón alterna la ilustración de cada grupo
+      var sv = singerVars(), si = (ui.sgView || 0) % sv.length, nx = sv[(si + 1) % sv.length];
+      sgs = KSLUG[sv[si]];
+      thumb = '<span class="novt alt" data-act="sgtog" title="Ilustración actual: ' + esc(sv[si]) + ' · ver la de ' + esc(nx) + '"><img src="/cartas/art/aitorlg-singer-' + KSLUG[nx] + '.webp" alt=""></span>';
+    }
     if (gid) {
       var girlView = !!(ui.novView && ui.novView[c.id]);
       thumb = '<span class="novt' + (ALTWHO[gid] ? '' : ' alt') + '" data-act="novtog" data-id="' + c.id + '" title="' + (girlView ? 'Ver a ' + esc(c.name) : 'Ver a ' + esc(CARD[gid].name) + ALTWHO[gid]) + '"><img src="/cartas/art/' + (girlView ? c.id : gid) + '.webp" alt=""></span>';
       if (girlView) show = CARD[gid];
     }
-    return cardHtml(show, { skin: '', lv: own ? lvOf(c.id) : 1, size: true, cls: own ? '' : 'locked', extra: thumb + (own ? (c.type === 'accion' ? '' : cprogHtml(c.id)) : '<span class="lockb">' + ic('candado') + '</span>'), attrs: 'data-act="zoom" data-id="' + show.id + '" data-skin="" title="Ver en 3D"', tag: 'button' });
+    return cardHtml(show, { skin: '', lv: own ? lvOf(c.id) : 1, size: true, cls: own ? '' : 'locked', extra: thumb + (own ? (c.type === 'accion' ? '' : cprogHtml(c.id)) : '<span class="lockb">' + ic('candado') + '</span>'), sg: sgs, attrs: 'data-act="zoom" data-id="' + show.id + '" data-skin="" data-sg="' + sgs + '" title="Ver en 3D"', tag: 'button' });
   }
   function byLv(arr) { if (!ui.sortLv) return arr; return arr.map(function (c, i) { return [c, i]; }).sort(function (a, b) { return (owns(b[0].id) ? lvOf(b[0].id) : 1) - (owns(a[0].id) ? lvOf(a[0].id) : 1) || a[1] - b[1]; }).map(function (x) { return x[0]; }); }
   function filtered() {
@@ -2757,7 +2769,8 @@ var GOB_SVG = '<svg class="gobsvg" viewBox="0 0 100 100"><g class="gobleg a"><re
     if (act === 'onlyowned') { ui.onlyOwned = el.checked; return render(); }
     if (act === 'sortlv') { ui.sortLv = el.checked; return render(); }
     if (act === 'introplay') { e.preventDefault(); openIntro(); return; }
-    if (act === 'zoom') { e.stopPropagation(); openZoom(el.dataset.id, el.dataset.skin); return; }
+    if (act === 'sgtog') { e.stopPropagation(); ui.sgView = ((ui.sgView || 0) + 1) % Math.max(1, singerVars().length); var y1 = window.scrollY; renderDeck(); window.scrollTo(0, y1); return; }
+    if (act === 'zoom') { e.stopPropagation(); openZoom(el.dataset.id, el.dataset.skin, el.dataset.sg); return; }
     if (act === 'novtog') { e.stopPropagation(); ui.novView = ui.novView || {}; ui.novView[el.dataset.id] = !ui.novView[el.dataset.id]; var y0 = window.scrollY; renderDeck(); window.scrollTo(0, y0); return; }
     if (act === 'onlydeck') { ui.onlyDeck = el.checked; return render(); }
     if (act === 'coltab') { ui.colTab = el.dataset.t; ui.dedit = null; ui.msg = ''; ui.delAsk = null; window.scrollTo(0, 0); return render(); }

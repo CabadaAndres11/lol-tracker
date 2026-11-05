@@ -10,6 +10,7 @@
         '<b>Huntrix</b>: marcan al rival con más vida; si cae, el equipo gana un escudo igual a toda su vida.',
         '<b>SayaBoys</b>: por cada SayaBoys, un rival no legendario queda encandilado y su primer ataque golpea a un aliado suyo.',
         '<b>AitoRLG Singer</b> potencia al grupo: KDA gana oro por asistencia, True Damage hace un Beat Drop (daño doble) cada 3 ataques, Huntrix duplica el escudo y SayaBoys mejora +1/+1 al resto del grupo cada 2 combates.',
+        'Una vez elegido, el grupo queda fijado. Para cambiarlo hay una nueva acción: <b>Cambio de Escenario</b>. La pasiva de la Singer pasa a llamarse <b>Vocalista Principal</b>.',
         'Con 4 cartas K-Pop distintas, el grupo elegido gana +5/+5 permanente; con 6, +10/+10.',
         'Ya están las ilustraciones de los 4 grupos: las cartas de cada grupo y la AitoRLG Singer, que cambia de ilustración según el grupo elegido. En la colección puedes alternar la ilustración de la Singer con el botón de su carta.'
       ] },

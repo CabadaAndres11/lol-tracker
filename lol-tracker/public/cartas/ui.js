@@ -55,7 +55,7 @@
   function tic(t) { return TIMG[t] ? '<img class="ic tic timg" src="/cartas/img/' + TIMG[t] + '.png" alt="">' : ic('t-' + t, 'tic'); }
   function tagHtml(t) { return '<span class="tag" style="--tc:' + D.themes[t].color + '">' + tic(t) + esc(t) + '</span>'; }
   function pips(n) { var h = ''; for (var k = 0; k < 3; k++) h += '<i' + (k < n ? ' class="on"' : '') + '></i>'; return h; }
-  var AICON = { 'mordisco-del-invierno': 'candado', 'reparto-de-botin': 'moneda', entrenamiento: 'espadas', arenga: 'megafono', armadura: 'escudo', banquete: 'carne', intimidacion: 'enfado', 'mal-de-ojo': 'ojo', 'golpe-certero': 'diana', lluvia: 'arco',
+  var AICON = { 'cambio-de-escenario': 'estrella', 'mordisco-del-invierno': 'candado', 'reparto-de-botin': 'moneda', entrenamiento: 'espadas', arenga: 'megafono', armadura: 'escudo', banquete: 'carne', intimidacion: 'enfado', 'mal-de-ojo': 'ojo', 'golpe-certero': 'diana', lluvia: 'arco',
     'bola-extra': 'beisbol', 'segundo-aliento': 'viento', 'cambio-de-linea': 'cambio', parche: 'disquete', 'horas-extra': 'maletin', 'segunda-temporada': 'trofeo', 'campeones-de-europa': 'trofeo', 'remate-doble': 'voley', 'cita-sorpresa': 'corazon', 'golpe-de-suerte': 'dado', genkidama: 'fuego', remedio: 'corazon', kamehameha: 'estrella' };
   var ARTS = {"torreta-lunar":1,"hellbramn-kda":1,"javihi-kda":1,"aitorlg-kda":1,"aitorlg-singer-kda":1,"pampert-td":1,"chipy-td":1,"dashlight-td":1,"aitorlg-singer-td":1,"sech-huntrix":1,"mertens-huntrix":1,"aitorlg-singer-huntrix":1,"lihone-saja":1,"petea-saja":1,"aitorlg-singer-saja":1,"rey-goblin":1,"petea-goblin":1,"hellbramn-goblin":1,"mertens-goblin":1,"lihone-goblin":1,"aitorlg-maomao":1,"chipy-goku":1,"dashlight-sun-jin-woo":1,"javihi-smiley":1,"lihone-rudeus":1,"mertens-meliodas":1,"pampert-asta":1,"eriko":1,"helena":1,"lucia":1,"ari":1,"aitorlg-koisito":1,"aitorlg-regla":1,"aitorlg-renata":1,"chipy-correa":1,"computer-chipy":1,"computer-dashlight":1,"computer-hellbramn":1,"computer-lihone":1,"computer-petea":1,"dashlight-akali":1,"dashlight-correa":1,"hellbramn":1,"javihi":1,"javihi-duo":1,"javihi-friki":1,"javihi-koisito":1,"lihone":1,"lihone-correa":1,"lihone-viego":1,"mertens":1,"mertens-gambler":1,"pampert-gambler":1,"pampert":1,"pampert-friki":1,"pampert-koisito":1,"petea-koisito":1,"petea-pokemaniaco":1,"potango":1,"sech":1,"sech-duo":1,"sech-koisito":1,"sech-thresh":1};
   // Nivel de carta por repetidas: 2 copias = ★2, 4 copias = ★3
@@ -1598,11 +1598,11 @@
   function kpopHtml(s) {
     var P = s.p[0], lv = E.tiers(P)['K-Pop'] || 0;
     if (lv < 1) return '';
-    var cn = E.kpopCounts(P), can = s.phase === 'prep' && !ui.playing;
+    var cn = E.kpopCounts(P), can = s.phase === 'prep' && !ui.playing && !P.kgrp;
     return '<div class="synside panel kpick"><h2>' + ic('estrella') + ' Grupo K-Pop</h2><div class="kgs">' + E.KGROUPS.map(function (g) {
       var ok = cn[g] >= 2;
-      return '<button class="kg' + (P.kact === g ? ' on' : '') + '" data-act="kpop" data-g="' + esc(g) + '"' + (ok && can ? '' : ' disabled') + ' title="' + esc(KDESC[g] + (ok ? '' : ' (necesitas 2 cartas del grupo)')) + '"><b>' + esc(g) + '</b><em>' + cn[g] + '/2</em></button>';
-    }).join('') + '</div><p class="mut">' + (P.kact ? esc(KDESC[P.kact]) : 'Reúne 2 cartas de un grupo para activarlo.') + '</p></div>';
+      return '<button class="kg' + (P.kgrp === g ? ' on' : '') + '" data-act="kpop" data-g="' + esc(g) + '"' + (ok && can ? '' : ' disabled') + ' title="' + esc(KDESC[g] + (ok ? '' : ' (necesitas 2 cartas del grupo)')) + '"><b>' + esc(g) + '</b><em>' + cn[g] + '/2</em></button>';
+    }).join('') + '</div><p class="mut">' + (P.kgrp ? (P.kact ? esc(KDESC[P.kact]) + ' · Grupo fijado: solo cambia con Cambio de Escenario.' : 'Grupo fijado (' + esc(P.kgrp) + '): inactivo, necesitas 2 cartas suyas. Solo cambia con Cambio de Escenario.') : 'Elige un grupo antes del combate (si no, se fija el que más cartas tenga). No podrás cambiarlo sin Cambio de Escenario.') + '</p></div>';
   }
   function synergyHtml(P, foe) {
     var c = E.themeCounts(P), keys = Object.keys(c).filter(function (t) { return !foe || E.tierOf(t, c[t]) > 0; }).sort(function (a, b) { return E.tierOf(b, c[b]) - E.tierOf(a, c[a]) || c[b] - c[a]; });

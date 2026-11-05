@@ -862,7 +862,7 @@ var D={
    "type": "tropa",
    "size": 2,
    "pas": {
-    "n": "Productora",
+    "n": "Vocalista Principal",
     "t": "Cuenta como una carta más de cualquier grupo K-Pop y recibe sus mejoras de estadísticas. Potencia el grupo elegido: KDA: cada asistencia da además 1 de oro. True Damage: cada tercer ataque de tus tropas del grupo es un Beat Drop de daño doble. Huntrix: el escudo vale el 200% de la vida de la marca. SayaBoys: cada 2 combates da +1/+1 permanente a las demás cartas del grupo."
    }
   }
@@ -1188,6 +1188,17 @@ var D={
    "text": "Una tropa rival no puede actuar en este combate (necesitas el nivel 1 de Magic Botlane).",
    "theme": "Magic Botlane",
    "foe": true
+  },
+  {
+   "id": "cambio-de-escenario",
+   "name": "Cambio de Escenario",
+   "cost": 2,
+   "rarity": "Rara",
+   "type": "accion",
+   "size": 1,
+   "target": "none",
+   "text": "Olvidas el grupo K-Pop elegido y puedes elegir otro (necesitas el nivel 1 de K-Pop y un grupo ya elegido).",
+   "theme": "K-Pop"
   }
  ],
  "tokens": [

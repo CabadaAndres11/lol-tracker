@@ -105,26 +105,32 @@
     if (sing) KGROUPS.forEach(function (g) { out[g]++; });
     return out;
   }
-  // Grupo activo: el elegido si sigue teniendo 2 cartas; si no, el que más tenga (nivel 1 de K-Pop necesario)
+  // Grupo activo: el elegido (no se puede cambiar salvo con Cambio de Escenario) mientras siga teniendo 2 cartas
   function kpopGroup(P) {
-    if ((tiers(P)['K-Pop'] || 0) < 1) return null;
-    var c = kpopCounts(P);
-    if (P.kgrp && c[P.kgrp] >= 2) return P.kgrp;
-    var best = null;
+    if (!P.kgrp || (tiers(P)['K-Pop'] || 0) < 1) return null;
+    return kpopCounts(P)[P.kgrp] >= 2 ? P.kgrp : null;
+  }
+  // Si llega el combate sin grupo elegido, se elige el que más cartas tenga (y queda fijado)
+  function kpopAuto(s, p) {
+    var P = s.p[p];
+    if (P.kgrp || (tiers(P)['K-Pop'] || 0) < 1) return;
+    var c = kpopCounts(P), best = null;
     KGROUPS.forEach(function (g) { if (c[g] >= 2 && (!best || c[g] > c[best])) best = g; });
-    return best;
+    if (!best) return;
+    P.kgrp = best;
+    if (p === 0 || s.pvp) say(s, pv(s, p, 'K-Pop: no elegiste grupo, se fija ' + best + '.', 'El rival fija su grupo K-Pop: ' + best + '.'));
   }
   function kpMember(i, g) { return !!(g && i && (card(i).grp === g || isSinger(i))); }
   // Elegir grupo (fase de preparación o tienda)
   function kpopPick(s, p, g) {
     var P = s.p[p];
-    if (s.phase !== 'prep' || KGROUPS.indexOf(g) < 0 || (tiers(P)['K-Pop'] || 0) < 1 || kpopCounts(P)[g] < 2) return false;
+    if (s.phase !== 'prep' || P.kgrp || KGROUPS.indexOf(g) < 0 || (tiers(P)['K-Pop'] || 0) < 1 || kpopCounts(P)[g] < 2) return false; // una vez elegido, solo cambia con Cambio de Escenario
     P.kgrp = g; kpopSync(s, p); return true;
   }
   // Fija el grupo activo y reparte la mejora de estadísticas de los niveles 2 y 3 (solo al grupo elegido)
   function kpopSync(s, p) {
     var P = s.p[p], g = kpopGroup(P), lv = tiers(P)['K-Pop'] || 0, b = g && lv ? FX.kpop.stat[lv - 1] || 0 : 0;
-    P.kact = g; if (g) P.kgrp = g;
+    P.kact = g;
     P.mesa.concat(P.hand).forEach(function (i) {
       if (!i || !isTroop(i)) return;
       var want = kpMember(i, g) ? b : 0, have = i.kp || 0, d = want - have;
@@ -539,6 +545,9 @@
       ok: function (s, p, t) { if ((tiers(s.p[p])['Magic Botlane'] || 0) < 1) return 'Necesitas el nivel 1 de Magic Botlane (Javihi Dúo + Sech Dúo).'; return t && t.tmp.noAtk ? 'Esa tropa ya no puede actuar este turno.' : ''; },
       run: function (s, p, t) { t.tmp.noAtk = true; t.tmp.stun = true; return card(t).name + ' no podrá actuar en este combate'; } },
     lluvia: { ok: function (s, p) { return targetable(s.p[1 - p]).length ? '' : 'El rival no tiene tropas.'; }, run: function (s, p) { var n = sc(s, 2); targetable(s.p[1 - p]).forEach(function (i) { genCharge(s, i, Math.min(n, Math.max(0, i.hp))); i.hp -= n; if (i.hp <= 0) dropDead(s, 1 - p, i); }); return n + ' de daño a todas las rivales'; } },
+    'cambio-de-escenario': {
+      ok: function (s, p) { var P = s.p[p]; if ((tiers(P)['K-Pop'] || 0) < 1) return 'Necesitas el nivel 1 de K-Pop (2 cartas distintas).'; return P.kgrp ? '' : 'Aún no has elegido un grupo K-Pop.'; },
+      run: function (s, p) { var P = s.p[p], old = P.kgrp; P.kgrp = null; kpopSync(s, p); return 'olvidas el grupo ' + old + ': elige otro en el panel de K-Pop'; } },
     'bola-extra': { ok: function (s, p) { return (tiers(s.p[p])['Pokémon'] || 0) >= 1 ? '' : 'Necesitas el nivel 1 de Pokémon (2 cartas distintas).'; }, run: function (s, p) { s.p[p].fl.pk = (s.p[p].fl.pk || 0) + 1; return 'bola extra esta ronda'; } },
     'segundo-aliento': {
       ok: function (s, p) { return mesaTroops(s.p[p]).some(function (i) { return has(i, 'Comebacker') && i.hp < maxHp(i); }) ? '' : 'Ninguna Comebacker en mesa está herida.'; },
@@ -683,7 +692,7 @@
       var i = P.hand[k];
       if (!i || isTroop(i)) continue; // (una acción anterior pudo fusionar cartas y acortar la mano)
       var c = card(i), allies = mesaTroops(P), foes = targetable(s.p[1 - p]);
-      if (c.id === 'cambio-de-linea' || (c.id === 'genkidama' && genStored(P) < 3) || (c.id === 'kamehameha' && genStored(P) < 2 * Math.max(1, foes.length))) continue; // la IA no la usa
+      if (c.id === 'cambio-de-linea' || c.id === 'cambio-de-escenario' || (c.id === 'genkidama' && genStored(P) < 3) || (c.id === 'kamehameha' && genStored(P) < 2 * Math.max(1, foes.length))) continue; // la IA no la usa
       var tgt = null;
       if (c.target === 'ally') { allies.sort(function (a, b) { return atk(b) - atk(a); }); tgt = allies[0]; if (c.id === 'armadura') tgt = allies.slice().sort(function (a, b) { return maxHp(b) - maxHp(a); })[0]; }
       else if (c.target === 'enemy') {
@@ -880,7 +889,7 @@
           if (P.sajaN % FX.kpop.sajaEvery === 0) {
             var oth = P.mesa.concat(P.hand).filter(function (i) { return i && isTroop(i) && !isSinger(i) && card(i).grp === 'SayaBoys'; });
             oth.forEach(function (i) { grow(i, 'atk', FX.kpop.sajaStat); grow(i, 'hp', FX.kpop.sajaStat); });
-            if (oth.length) fxFrame(s, p, 'kpop', 'SayaBoys · Productora', '+' + FX.kpop.sajaStat + '/+' + FX.kpop.sajaStat + ' permanente al grupo', oth.map(function (i) { return i.uid; }));
+            if (oth.length) fxFrame(s, p, 'kpop', 'SayaBoys · Vocalista Principal', '+' + FX.kpop.sajaStat + '/+' + FX.kpop.sajaStat + ' permanente al grupo', oth.map(function (i) { return i.uid; }));
           }
         }
       }
@@ -1000,6 +1009,7 @@
     s.fightN = (s.fightN || 0) + 1;
     if (!s.pvp) aiTargets(s, 1);
     frame(s, 'Empieza el combate. ' + pv(s, s.first, 'Atacas primero.', 'Ataca primero el rival.'), null);
+    kpopAuto(s, 0); kpopAuto(s, 1);
     novSync(s, 0); novSync(s, 1);
     s.kp = [0, 1].map(function (p) { var P = s.p[p]; return { g: P.kact || null, sg: mesaTroops(P).some(isSinger) }; }); s.mark = [null, null]; s.killer = null;
     startEffects(s);

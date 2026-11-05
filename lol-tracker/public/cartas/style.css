@@ -2843,3 +2843,9 @@ body.soc-open #app { margin-right: 286px; }
 .kg .kglogo { display: block; max-width: 100%; height: 1.5rem; object-fit: contain; filter: drop-shadow(0 0 4px rgba(255,255,255,.25)); }
 .kg[data-g="Huntrix"] .kglogo { height: 1.1rem; } .kg[data-g="True Damage"] .kglogo { height: 1.35rem; } .kg[data-g="SajaBoys"] .kglogo { height: 2rem; } .kg[data-g="KDA"] .kglogo { height: 1.6rem; }
 .kg:disabled .kglogo { opacity: .5; filter: grayscale(.6); } .kg.on .kglogo { filter: drop-shadow(0 0 8px rgba(232,121,249,.9)); }
+
+/* reflejos de AitoRLG Singer por grupo */
+.card .holo.hk-kda::before { background: linear-gradient(115deg, transparent 30%, rgba(255,40,60,.42) 38%, rgba(255,120,90,.4) 44%, rgba(255,30,80,.46) 50%, rgba(255,70,40,.4) 56%, transparent 64%); }
+.card .holo.hk-td::before { background: linear-gradient(115deg, transparent 30%, rgba(40,110,255,.42) 38%, rgba(80,180,255,.4) 44%, rgba(60,90,255,.46) 50%, rgba(90,210,255,.4) 56%, transparent 64%); }
+.card .holo.hk-huntrix::before { background: linear-gradient(115deg, transparent 30%, rgba(255,200,50,.42) 38%, rgba(255,230,120,.4) 44%, rgba(255,185,30,.46) 50%, rgba(255,215,90,.4) 56%, transparent 64%); }
+.card .holo.hk-saja::before { background: linear-gradient(115deg, transparent 30%, rgba(180,90,255,.42) 38%, rgba(255,90,200,.4) 44%, rgba(140,80,255,.46) 50%, rgba(255,130,230,.4) 56%, transparent 64%); }

@@ -2924,3 +2924,13 @@ body.gpulling #app { opacity: 0; pointer-events: none; }
 .gchip em { color: var(--gc); font-style: normal; font-size: .7rem; }
 .gres { overflow-y: auto; }
 @media (max-width: 700px) { .dest { grid-template-columns: 1fr; gap: 1rem; } .destcard { max-width: 190px; } }
+
+/* barra de navegación en una sola línea */
+.wrap { max-width: 1180px; }
+.nav { flex-wrap: nowrap; gap: .25rem; }
+.nav .navb { padding: .45rem .6rem; letter-spacing: .03em; white-space: nowrap; }
+.nav .navb.who { padding: .45rem .5rem; }
+@media (max-width: 900px) { .nav { flex-wrap: wrap; } }
+/* la carta de recompensa de Destino late menos */
+.destcard { animation: destpulse 3s ease-in-out infinite alternate; }
+@keyframes destpulse { to { transform: scale(1.025); filter: drop-shadow(0 0 30px rgba(239,68,68,.65)); } }

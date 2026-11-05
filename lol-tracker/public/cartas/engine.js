@@ -919,7 +919,7 @@
 
   // Efectos al caer una tropa (KOI). Devuelve texto de registro y animación.
   // ---------- Pasivas de legendarias ----------
-  var PAS = { 'dashlight-sun-jin-woo': 'sombra', 'aitorlg-maomao': 'boticaria', 'javihi-duo': 'muro', 'sech-duo': 'armas', 'javihi-friki': 'remate', 'sech': 'embargo', 'potango': 'amor', 'petea-goblin': 'loot', 'rey-goblin': 'avaricia', 'lihone-viego': 'racha', 'aitorlg-renata': 'prorroga', 'lihone': 'captura', 'pampert-koisito': 'cabezon', 'aitorlg-koisito': 'heredero', 'mertens-gambler': 'malaracha', 'computer-dashlight': 'medallas', 'pampert-gambler': 'colega', 'aitorlg-singer': 'singer' };
+  var PAS = { 'dashlight-sun-jin-woo': 'sombra', 'aitorlg-maomao': 'boticaria', 'javihi-duo': 'muro', 'sech-duo': 'armas', 'javihi-friki': 'remate', 'sech': 'embargo', 'potango': 'amor', 'petea-goblin': 'loot', 'rey-goblin': 'avaricia', 'lihone-viego': 'racha', 'aitorlg-renata': 'prorroga', 'lihone': 'captura', 'pampert-koisito': 'cabezon', 'aitorlg-koisito': 'heredero', 'mertens-gambler': 'malaracha', 'computer-dashlight': 'medallas', 'pampert-gambler': 'colega', 'aitorlg-singer': 'singer', 'hellbramn-kda': 'firestarter', 'pampert-td': 'giants', 'mertens-huntrix': 'golden', 'lihone-saja': 'idol' };
   function pas(i) { return PAS[i.id] || ''; }
   // ---------- Magic Botlane: Armas Lunares (Sech Dúo) y Muro de Hielo (Javihi Dúo) ----------
   var ARMAS = ['calibrum', 'severum', 'gravitum', 'infernum', 'crescendum'];
@@ -946,9 +946,9 @@
     v.tmp.ward = true; v.hp = 0; return true;
   }
   // Daño de pasiva a una tropa (sin contraataque). Devuelve texto de registro.
-  function passiveHit(s, v, n, depth) {
+  function passiveHit(s, v, n, depth, tru) {
     if (!v || v.dead || n <= 0 || immune(v)) return '';
-    if (v.tmp.sh > 0) { var ab = Math.min(v.tmp.sh, n); v.tmp.sh -= ab; n -= ab; if (n <= 0) return ' ' + card(v).name + ' absorbe el golpe con su escudo.'; }
+    if (!tru && v.tmp.sh > 0) { var ab = Math.min(v.tmp.sh, n); v.tmp.sh -= ab; n -= ab; if (n <= 0) return ' ' + card(v).name + ' absorbe el golpe con su escudo.'; }
     genCharge(s, v, Math.min(n, Math.max(0, v.hp)));
     v.hp -= n;
     var tv = s.tiers[v.owner];
@@ -1011,7 +1011,7 @@
     frame(s, 'Empieza el combate. ' + pv(s, s.first, 'Atacas primero.', 'Ataca primero el rival.'), null);
     kpopAuto(s, 0); kpopAuto(s, 1);
     novSync(s, 0); novSync(s, 1);
-    s.kp = [0, 1].map(function (p) { var P = s.p[p]; return { g: P.kact || null, sg: mesaTroops(P).some(isSinger) }; }); s.mark = [null, null]; s.killer = null;
+    s.kp = [0, 1].map(function (p) { var P = s.p[p]; return { g: P.kact || null, sg: mesaTroops(P).some(isSinger) }; }); s.mark = [null, null]; s.killer = null; s.fs = [false, false];
     startEffects(s);
     // Cabezón (Pampert Koisito): recibe 2 de daño menos por golpe
     [0, 1].forEach(function (p) { mesaTroops(s.p[p]).forEach(function (i) { if (pas(i) === 'cabezon') i.tmp.red += 2; }); });
@@ -1087,8 +1087,8 @@
       var ariSave = false;
       if (real > 0 && mesaTroops(s.p[tgt.owner]).some(function (x) { return x.id === 'ari'; }) && s.rng() < FX.novias.ari[Math.max(0, (s.tiers[tgt.owner]['Correa'] || 1) - 1)]) { real = 0; ariSave = true; }
       var over = pas(a) === 'avaricia' && !charmed ? Math.max(0, real - Math.max(0, tgt.hp)) : 0; // Avaricia (Rey Goblin): el daño sobrante va a la vida rival
-      var absorbed = 0;
-      if (!tdm && real > 0 && tgt.tmp.sh > 0) { absorbed = Math.min(tgt.tmp.sh, real); tgt.tmp.sh -= absorbed; real -= absorbed; over = 0; } // escudo de Huntrix
+      var absorbed = 0, brokeSh = 0;
+      if (!tdm && real > 0 && tgt.tmp.sh > 0) { absorbed = Math.min(tgt.tmp.sh, real); tgt.tmp.sh -= absorbed; real -= absorbed; over = 0; if (tgt.tmp.sh <= 0) brokeSh = absorbed; } // escudo de Huntrix
       if (kmem && kga.g === 'KDA' && dmg > 0) (tgt.tmp.hitBy = tgt.tmp.hitBy || {})[a.uid] = 1;
       genCharge(s, tgt, Math.min(real, Math.max(0, tgt.hp)));
       tgt.hp -= real;
@@ -1130,6 +1130,20 @@
           if (a.tmp.loan != null) delete a.tmp.loan;
         }
         else if (a.tmp.loan != null) { delete a.tmp.loan; line += ' Recupera su ataque.'; }
+      }
+      // Pasivas de las Épicas K-Pop (solo con su grupo activo)
+      if (kmem && kga.g === 'KDA' && tgt.dead && !a.dead && !s.fs[a.owner] && targetable(E).length && mesaTroops(P).some(function (x) { return pas(x) === 'firestarter'; })) { // Firestarter: la primera baja del combate hace que vuelva a atacar
+        s.fs[a.owner] = true; seq.splice(n + 1, 0, a); line += ' Firestarter: ' + card(a).name + ' vuelve a atacar.';
+      }
+      if (tdm && real > 0 && mesaTroops(P).some(function (x) { return pas(x) === 'giants'; })) { // Giants: onda expansiva del 50% (daño verdadero) a los demás enemigos
+        var gh = Math.ceil(real / 2);
+        targetable(E).filter(function (x) { return x !== tgt && !x.dead; }).forEach(function (v) { line += ' Giants:' + passiveHit(s, v, gh, 0, true); });
+      }
+      if (brokeSh > 0 && !charmed && s.kp[tgt.owner].g === 'Huntrix' && mesaTroops(s.p[tgt.owner]).some(function (x) { return pas(x) === 'golden'; })) { // Golden: romper el escudo rebota su valor al atacante
+        line += ' Golden: el escudo roto devuelve ' + brokeSh + ' a ' + card(a).name + '.' + passiveHit(s, a, brokeSh, 0);
+      }
+      if (charmed && !a.dead && !a.tmp.idol2 && s.kp[1 - a.owner].g === 'SayaBoys' && mesaTroops(E).some(function (x) { return pas(x) === 'idol'; }) && s.rng() < .3) { // Your Idol: 30% de que el encandilado ataque una segunda vez a su equipo
+        a.tmp.idol2 = true; a.tmp.charmUsed = false; seq.splice(n + 1, 0, a); line += ' Your Idol: ' + card(a).name + ' vuelve a atacar a los suyos.';
       }
       // Resurrección: la carta que ataca también recibe el ataque de la carta atacada (contraataque)
       var rec = 0;

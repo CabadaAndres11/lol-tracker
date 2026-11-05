@@ -711,7 +711,11 @@ var D={
    "hp": 15,
    "rarity": "Épica",
    "type": "tropa",
-   "size": 2
+   "size": 2,
+   "pas": {
+    "n": "Firestarter",
+    "t": "Con KDA activo: la primera vez por combate que una de tus KDA derriba a un enemigo, vuelve a atacar."
+   }
   },
   {
    "id": "javihi-kda",
@@ -771,7 +775,11 @@ var D={
    "hp": 12,
    "rarity": "Épica",
    "type": "tropa",
-   "size": 2
+   "size": 2,
+   "pas": {
+    "n": "Giants",
+    "t": "Con True Damage activo: cada golpe de tus True Damage reparte además el 50% de su daño, también verdadero, a cada uno de los demás enemigos."
+   }
   },
   {
    "id": "dashlight-td",
@@ -816,7 +824,11 @@ var D={
    "hp": 15,
    "rarity": "Épica",
    "type": "tropa",
-   "size": 2
+   "size": 2,
+   "pas": {
+    "n": "Golden",
+    "t": "Con Huntrix activo: cuando un ataque rompe el escudo de tu tropa, el atacante recibe daño igual al escudo que quedaba antes de romperse."
+   }
   },
   {
    "id": "lihone-saja",
@@ -831,7 +843,11 @@ var D={
    "hp": 15,
    "rarity": "Épica",
    "type": "tropa",
-   "size": 2
+   "size": 2,
+   "pas": {
+    "n": "Your Idol",
+    "t": "Con SayaBoys activo: un enemigo encandilado tiene un 30% de probabilidad de atacar una segunda vez a su propio equipo."
+   }
   },
   {
    "id": "petea-saja",

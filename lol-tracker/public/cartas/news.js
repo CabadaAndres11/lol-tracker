@@ -11,6 +11,7 @@
         '<b>SayaBoys</b>: por cada SayaBoys, un rival no legendario queda encandilado y su primer ataque golpea a un aliado suyo.',
         '<b>AitoRLG Singer</b> potencia al grupo: KDA gana oro por asistencia, True Damage hace un Beat Drop (daño doble) cada 3 ataques, Huntrix duplica el escudo y SayaBoys mejora +1/+1 al resto del grupo cada 2 combates.',
         'Una vez elegido, el grupo queda fijado. Para cambiarlo hay una nueva acción: <b>Cambio de Escenario</b>. La pasiva de la Singer pasa a llamarse <b>Vocalista Principal</b>.',
+        'Pasivas de las Épicas, activas solo con su grupo: <b>Firestarter</b> (Hellbramn KDA: la primera baja del combate le deja atacar otra vez), <b>Giants</b> (Pampert True Damage: el 50% de cada golpe, también verdadero, llega a los demás enemigos), <b>Golden</b> (Mertens Huntrix: al romperse un escudo, el atacante recibe su valor) y <b>Your Idol</b> (Lihone SayaBoys: 30% de que el encandilado ataque una segunda vez a los suyos).',
         'Con 4 cartas K-Pop distintas, el grupo elegido gana +5/+5 permanente; con 6, +10/+10.',
         'Ya están las ilustraciones de los 4 grupos: las cartas de cada grupo y la AitoRLG Singer, que cambia de ilustración según el grupo elegido. En la colección puedes alternar la ilustración de la Singer con el botón de su carta.'
       ] },

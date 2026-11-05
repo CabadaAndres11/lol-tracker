@@ -3,6 +3,7 @@
   var NEWS = [
     { date: '2026-11-05', tag: 'Cartas', title: 'AitoRLG Singer con reflejos de grupo',
       items: [
+        'La sinergia K-Pop estrena logo propio.',
         'AitoRLG Singer brilla con reflejos holográficos del color de su grupo: <b>rojo</b> en KDA, <b>azul</b> en True Damage, <b>dorado</b> en Huntrix y <b>violeta-rosa</b> en SajaBoys.'
       ] },
     { date: '2026-11-05', tag: 'Novedad', title: 'Nuevo efecto de victoria y derrota: Demon Hunters',

@@ -2849,3 +2849,7 @@ body.soc-open #app { margin-right: 286px; }
 .card .holo.hk-td::before { background: linear-gradient(115deg, transparent 30%, rgba(40,110,255,.42) 38%, rgba(80,180,255,.4) 44%, rgba(60,90,255,.46) 50%, rgba(90,210,255,.4) 56%, transparent 64%); }
 .card .holo.hk-huntrix::before { background: linear-gradient(115deg, transparent 30%, rgba(255,200,50,.42) 38%, rgba(255,230,120,.4) 44%, rgba(255,185,30,.46) 50%, rgba(255,215,90,.4) 56%, transparent 64%); }
 .card .holo.hk-saja::before { background: linear-gradient(115deg, transparent 30%, rgba(180,90,255,.42) 38%, rgba(255,90,200,.4) 44%, rgba(140,80,255,.46) 50%, rgba(255,130,230,.4) 56%, transparent 64%); }
+
+/* logo de la sinergia K-Pop (apaisado) */
+img.timg[src$="kpop.png"], .card.accion .tlogo[src$="kpop.png"], .tlogo[src$="kpop.png"] { width: auto; height: auto; max-width: 4em; max-height: 1.5em; }
+.starter .si img.timg[src$="kpop.png"] { width: 4.4rem; height: auto; max-height: 2.6rem; }

@@ -51,9 +51,10 @@
     var x = p(a), y = p(b);
     return '#' + x.map(function (v, i) { return ('0' + Math.round(v * (1 - t) + y[i] * t).toString(16)).slice(-2); }).join('');
   }
-  var TIMG = { 'Pokémon': 'pokemon', 'Lol': 'lol', 'KOI': 'koi', 'Anime': 'anime', 'Comebacker': 'comebacker', 'Voley': 'voley', 'Informático': 'informatico', 'Magic Botlane': 'magic-botlane' };
+  var TIMG = { 'Pokémon': 'pokemon', 'Lol': 'lol', 'KOI': 'koi', 'Anime': 'anime', 'Comebacker': 'comebacker', 'Voley': 'voley', 'Informático': 'informatico', 'Magic Botlane': 'magic-botlane', 'K-Pop': 'kpop' };
   function tic(t) { return TIMG[t] ? '<img class="ic tic timg" src="/cartas/img/' + TIMG[t] + '.png" alt="">' : ic('t-' + t, 'tic'); }
-  function tagHtml(t) { return '<span class="tag" style="--tc:' + D.themes[t].color + '">' + tic(t) + esc(t) + '</span>'; }
+  function tn(t) { return t === 'K-Pop' ? '' : esc(t); } // K-Pop: el logo ya lleva el nombre
+  function tagHtml(t) { return '<span class="tag" style="--tc:' + D.themes[t].color + '">' + tic(t) + tn(t) + '</span>'; }
   function pips(n) { var h = ''; for (var k = 0; k < 3; k++) h += '<i' + (k < n ? ' class="on"' : '') + '></i>'; return h; }
   var AICON = { 'cambio-de-escenario': 'estrella', 'mordisco-del-invierno': 'candado', 'reparto-de-botin': 'moneda', entrenamiento: 'espadas', arenga: 'megafono', armadura: 'escudo', banquete: 'carne', intimidacion: 'enfado', 'mal-de-ojo': 'ojo', 'golpe-certero': 'diana', lluvia: 'arco',
     'bola-extra': 'beisbol', 'segundo-aliento': 'viento', 'cambio-de-linea': 'cambio', parche: 'disquete', 'horas-extra': 'maletin', 'segunda-temporada': 'trofeo', 'campeones-de-europa': 'trofeo', 'remate-doble': 'voley', 'cita-sorpresa': 'corazon', 'golpe-de-suerte': 'dado', genkidama: 'fuego', remedio: 'corazon', kamehameha: 'estrella' };
@@ -1146,7 +1147,7 @@
     var all = D.cards.concat(D.actions), h = colSummary(ui.acct.owned.length, all.length, 'cartas en propiedad');
     var cnt = function (t) { return themeCards(t).length; };
     h += '<div class="chips filt"><button class="chip' + (!ui.filters.length ? ' on' : '') + '" data-act="filterset" data-t="">Todas</button>' +
-      Object.keys(D.themes).map(function (t) { return '<button class="chip' + (ui.filters.indexOf(t) >= 0 ? ' on' : '') + '" style="--tc:' + D.themes[t].color + '" data-act="filter" data-t="' + esc(t) + '">' + tic(t) + esc(t) + ' ' + cnt(t) + '</button>'; }).join('') +
+      Object.keys(D.themes).map(function (t) { return '<button class="chip' + (ui.filters.indexOf(t) >= 0 ? ' on' : '') + '" style="--tc:' + D.themes[t].color + '" data-act="filter" data-t="' + esc(t) + '">' + tic(t) + tn(t) + ' ' + cnt(t) + '</button>'; }).join('') +
       '<button class="chip' + (ui.filters.indexOf('__act') >= 0 ? ' on' : '') + '" data-act="filter" data-t="__act">Acciones</button></div>';
     h += '<div class="chips filt rarf">' + RARS.map(function (r) { var n = all.filter(function (c) { return c.rarity === r; }).length; return '<button class="chip' + (ui.rar.indexOf(r) >= 0 ? ' on' : '') + '" style="--tc:' + RCOL[r] + '" data-act="rarfilter" data-r="' + r + '"><i class="rdot"></i>' + r + ' ' + n + '</button>'; }).join('') + '</div>';
     h += '<div class="bar" style="margin:.2rem 0 .6rem"><label class="grp"><input type="checkbox" data-act="groupr"' + (ui.groupRar ? ' checked' : '') + '> Agrupar por rareza</label><label class="grp"><input type="checkbox" data-act="group"' + (ui.group ? ' checked' : '') + '> Agrupar por sinergia</label><label class="grp"><input type="checkbox" data-act="onlyowned"' + (ui.onlyOwned ? ' checked' : '') + '> Solo las que tengo</label><label class="grp"><input type="checkbox" data-act="sortlv"' + (ui.sortLv ? ' checked' : '') + '> Ordenar por nivel de carta</label>';
@@ -1258,7 +1259,7 @@
     var a = ui.auto, sel = a.sel;
     var chips = Object.keys(D.themes).map(function (t) {
       var n = D.cards.filter(function (c) { return c.themes.indexOf(t) >= 0 && owns(c.id); }).length;
-      return '<button class="chip' + (sel.indexOf(t) >= 0 ? ' on' : '') + '" style="--tc:' + D.themes[t].color + '" data-act="autotog" data-t="' + esc(t) + '">' + tic(t) + esc(t) + ' <small>' + n + '</small></button>';
+      return '<button class="chip' + (sel.indexOf(t) >= 0 ? ' on' : '') + '" style="--tc:' + D.themes[t].color + '" data-act="autotog" data-t="' + esc(t) + '">' + tic(t) + tn(t) + ' <small>' + n + '</small></button>';
     }).join('');
     return '<div class="overlay autoov"><div class="panel autop"><h2>' + ic('dado') + ' Montaje automático</h2><p class="mut">Elige de 1 a 3 sinergias. Montaré un mazo con tus cartas de esas sinergias y acciones generales. El número de cada sinergia son las cartas que tienes de ella.</p><div class="chips filt">' + chips + '</div>' +
       '<p class="mut">' + sel.length + '/3 elegidas' + (a.msg ? ' · <span style="color:var(--bad)">' + esc(a.msg) + '</span>' : '') + '</p>' +
@@ -1276,7 +1277,7 @@
       '<div class="dlbl">En el mazo</div><ul class="delist">' + (d.ids.length ? d.ids.map(function (id) { var c = CARD[id]; return '<li><span>' + esc(c.name) + '</span><i class="pips">' + new Array(c.size + 1).join('●') + '</i><button data-act="detoggle" data-id="' + id + '" title="Quitar">✕</button></li>'; }).join('') : '<li class="mut">Vacío: elige una sinergia y añade cartas.</li>') + '</ul>' +
       '<div class="bar"><button class="btn sec sm" data-act="deauto">' + ic('estrella') + ' Montaje automático</button><button class="btn sec sm" data-act="derand">' + ic('dado') + ' Aleatorio</button><button class="btn sec sm" data-act="declear">Vaciar</button></div>' +
       '<div class="bar"><button class="btn cta" data-act="desave"' + (err ? ' disabled' : '') + '>' + ic('disquete') + ' Guardar mazo</button><button class="btn sec" data-act="decancel">Cancelar</button></div></div>';
-    var th = d.theme, chips = '<div class="chips filt">' + Object.keys(D.themes).map(function (t) { var n = themeCards(t).filter(function (c) { return owns(c.id); }).length; return '<button class="chip' + (th === t ? ' on' : '') + '" style="--tc:' + D.themes[t].color + '" data-act="dethm" data-t="' + esc(t) + '">' + tic(t) + esc(t) + ' ' + n + '</button>'; }).join('') +
+    var th = d.theme, chips = '<div class="chips filt">' + Object.keys(D.themes).map(function (t) { var n = themeCards(t).filter(function (c) { return owns(c.id); }).length; return '<button class="chip' + (th === t ? ' on' : '') + '" style="--tc:' + D.themes[t].color + '" data-act="dethm" data-t="' + esc(t) + '">' + tic(t) + tn(t) + ' ' + n + '</button>'; }).join('') +
       '<button class="chip' + (th === '__gen' ? ' on' : '') + '" data-act="dethm" data-t="__gen">Acciones generales</button></div>';
     var list = !th ? null : (th === '__gen' ? D.actions.filter(function (a) { return !a.theme; }) : themeCards(th)).filter(function (c) { return owns(c.id); });
     var guide = '<div class="bar synbar"><button class="btn sec sm' + (ui.synAll ? ' on' : '') + '" data-act="synall">' + ic('libro') + ' ' + (ui.synAll ? 'Ocultar guía de sinergias' : 'Guía de todas las sinergias') + '</button></div>' + (ui.synAll ? synGuide() : (th && th !== '__gen' ? synInfo(th) : ''));

@@ -2871,8 +2871,8 @@ span.chip.r-Mítica { border-color: #ef4444; } .odds .od.r-Mítica { --oc: #ef44
 .gdemo { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; margin-top: .7rem; }
 .gdemo .btn { border-color: var(--gc); color: var(--gc); }
 .invfx { display: grid; place-items: center; width: 100%; height: 100%; font-size: 2.2rem; } .invfx .ic { width: 1em; height: 1em; }
-.gachaov { position: fixed; inset: 0; z-index: 9000; overflow: hidden; background: radial-gradient(ellipse at 50% 120%, #1b1f4a 0%, #0a0c24 55%, #03030d 100%); animation: gfade .5s ease-out both; }
-@keyframes gfade { from { opacity: 0; } }
+.gachaov { position: fixed; inset: 0; z-index: 9000; overflow: hidden; background: radial-gradient(ellipse at 50% 120%, #1b1f4a 0%, #0a0c24 55%, #03030d 100%); animation: dgfade .5s ease-out both; }
+@keyframes dgfade { from { opacity: 0; } }
 .gsky, .gmet { position: absolute; inset: 0; }
 .gst { position: absolute; width: var(--s); height: var(--s); border-radius: 50%; background: #fff; box-shadow: 0 0 6px #fff; opacity: .25; animation: gtw var(--d) ease-in-out var(--dl) infinite alternate; }
 @keyframes gtw { to { opacity: 1; transform: scale(1.5); } }
@@ -2889,9 +2889,9 @@ span.chip.r-Mítica { border-color: #ef4444; } .odds .od.r-Mítica { --oc: #ef44
 .gcardw { position: relative; width: min(44vw, 190px); filter: drop-shadow(0 0 22px var(--gc)); }
 .gcardw .card { width: 100%; }
 .gfxic { width: 100%; aspect-ratio: 1; display: grid; place-items: center; font-size: 5rem; color: var(--gc); background: rgba(255,255,255,.06); border: 2px solid var(--gc); border-radius: 18px; } .gfxic .ic { width: 1em; height: 1em; }
-.gtxt { position: relative; display: flex; flex-direction: column; align-items: center; gap: .25rem; text-align: center; color: #fff; }
-.gtxt .grar { color: var(--gc); font-weight: 800; letter-spacing: .08em; text-transform: uppercase; text-shadow: 0 0 12px var(--gc); }
-.gtxt b { font-size: 1.5rem; } .gtxt small { color: #c9cfe6; }
+.dgtxt { position: relative; display: flex; flex-direction: column; align-items: center; gap: .25rem; text-align: center; color: #fff; }
+.dgtxt .grar { color: var(--gc); font-weight: 800; letter-spacing: .08em; text-transform: uppercase; text-shadow: 0 0 12px var(--gc); }
+.dgtxt b { font-size: 1.5rem; } .dgtxt small { color: #c9cfe6; }
 .gbtns { display: flex; gap: .6rem; margin-top: .6rem; }
 .gskip { position: absolute; right: 1rem; top: 1rem; background: transparent; border: 1px solid rgba(255,255,255,.3); color: #cbd5e1; border-radius: 6px; padding: .3rem .7rem; cursor: pointer; z-index: 2; }
 .gachaov.rev .gskip { display: none; }

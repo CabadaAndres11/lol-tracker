@@ -394,9 +394,6 @@
     return '<div class="zskins"><span class="zsl">Aspectos</span><button class="zs' + (!cur ? ' on' : '') + '" data-zs="" title="Aspecto clásico"><i style="background-image:url(/cartas/art/' + (ARTS[c.id] ? c.id : '') + '.webp)"></i><em>Clásico</em></button>' +
       SK.map(function (k) { return '<button class="zs' + (cur === k.id ? ' on' : '') + (own(k) ? '' : ' locked') + '" data-zs="' + k.id + '" title="' + esc(k.name) + (own(k) ? '' : ' (no la tienes)') + '"><i style="background-image:url(/cartas/art/' + k.id + '.webp)"></i><em>' + esc(k.name) + '</em></button>'; }).join('') + '</div>';
   }
-  function singerStrip(sg) {
-    return '<div class="zskins"><span class="zsl">Grupo</span>' + singerVars().map(function (g) { var sl = KSLUG[g]; return '<button class="zs' + (sg === sl ? ' on' : '') + '" data-zg="' + sl + '" title="' + esc(g) + '"><i style="background-image:url(/cartas/art/aitorlg-singer-' + sl + '.webp)"></i><em>' + esc(g) + '</em></button>'; }).join('') + '</div>';
-  }
   function openZoom(id, skin, sg) {
     var c = CARD[id]; if (!c) return;
     if (c.id === 'aitorlg-singer' && !sg && singerVars().length) sg = KSLUG[singerVars()[0]];
@@ -406,7 +403,7 @@
     zoomEl = document.createElement('div'); zoomEl.className = 'zoomov';
     zoomEl.innerHTML = '<div class="zbox"><div class="zstage"><div class="zcard"><div class="zfront">' + face + '<span class="zglare"></span></div><div class="zback"><div class="zbk"><b>' + ic('cartas') + '</b><span>' + esc(c.name) + '</span></div></div></div></div>' +
       '<div class="zbtns"><button class="btn sec sm" data-z="flip">' + ic('cambio') + ' Voltear</button><button class="btn sec sm" data-z="reset">Restablecer</button><button class="btn sm" data-z="close">Cerrar</button></div>' +
-      skinStrip(c, skin) + (c.id === 'aitorlg-singer' ? singerStrip(sg) : '') + '<p class="zhint">Arrastra para girarla · pasa el ratón para inclinarla · Esc para cerrar</p></div>';
+      skinStrip(c, skin) + '<p class="zhint">Arrastra para girarla · pasa el ratón para inclinarla · Esc para cerrar</p></div>';
     document.body.appendChild(zoomEl);
     var card = zoomEl.querySelector('.zcard'), glare = zoomEl.querySelector('.zglare'), stage = zoomEl.querySelector('.zstage');
     function paint() { card.style.transform = 'rotateX(' + st.rx.toFixed(1) + 'deg) rotateY(' + st.ry.toFixed(1) + 'deg)'; }
@@ -430,7 +427,6 @@
     stage.addEventListener('pointerup', end); stage.addEventListener('pointercancel', end);
     zoomEl.addEventListener('click', function (e) {
       var zs = e.target.closest('[data-zs]'); if (zs) { openZoom(id, zs.dataset.zs, sg); return; }
-      var zg = e.target.closest('[data-zg]'); if (zg) { openZoom(id, skin, zg.dataset.zg); return; }
       var z = e.target.closest('[data-z]');
       if (z) {
         card.style.transition = 'transform .6s cubic-bezier(.2,.8,.2,1)'; st.auto = false;

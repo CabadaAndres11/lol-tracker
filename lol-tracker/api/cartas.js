@@ -172,9 +172,33 @@ function rollBox(u) {
   const fk = Object.keys(FX_KINDS).find((k) => FX_KINDS[k][id] !== undefined);
   return { kind: 'fx', id, fxKind: fk, isNew: true };
 }
+// ---------- Destino (gacha) ----------
+const GACHA = { id: 'aitorlg-singer', cost: 25, rate: 10, pity: 20 }; // recompensa principal rotativa; rate = % por tirada; pity = tirada en la que está asegurada
+const GACHA_MIX = [['card', 60], ['fx', 25], ['skin', 15]]; // reparto del 90% restante entre cartas, efectos y skins
+const skinRar = (sk) => ((sk.price || 0) >= 200 ? 'Legendaria' : 'Épica');
+const fxRar = (id) => { const pr = FX_PRICE[id] || 0; return pr >= 50 ? 'Legendaria' : pr >= 40 ? 'Épica' : 'Rara'; };
+function pickWeighted(list, w) { const tot = list.reduce((a, x) => a + w(x), 0); let r = crypto.randomInt(0, Math.max(1, Math.round(tot * 100))) / 100; for (const x of list) { const v = w(x); if (r < v) return x; r -= v; } return list[list.length - 1]; }
+function gachaRoll(u) {
+  u.gachaN = u.gachaN || 0;
+  const main = u.gachaN + 1 >= GACHA.pity || crypto.randomInt(0, 100) < GACHA.rate;
+  if (main) { u.gachaN = 0; return { kind: 'card', id: GACHA.id, rarity: 'Mítica', main: true }; }
+  u.gachaN += 1;
+  const cat = pickWeighted(GACHA_MIX, (x) => x[1])[0];
+  if (cat === 'skin') {
+    const list = SKINS.filter((k) => !k.pass);
+    if (list.length) { const sk = pickWeighted(list, (k) => (skinRar(k) === 'Legendaria' ? 1 : 3)); return { kind: 'skin', id: sk.id, rarity: skinRar(sk) }; }
+  }
+  if (cat === 'fx') {
+    const list = FX_DEPLOY.filter((id) => FX_PRICE[id] > 0 && !FX_PASS.includes(id));
+    if (list.length) { const id = pickWeighted(list, (x) => 300 / FX_PRICE[x]); return { kind: 'fx', id, fxKind: Object.keys(FX_KINDS).find((k) => FX_KINDS[k][id] !== undefined), rarity: fxRar(id) }; }
+  }
+  const list = ALL.filter((c) => !c.nopack);
+  const c = pickWeighted(list, (x) => WEIGHTS[x.rarity] || 1);
+  return { kind: 'card', id: c.id, rarity: c.rarity };
+}
 function publicUser(u) {
   return {
-    name: u.name, boxLocked: boxLocked(u), pts: u.pts || 0, coins: u.coins, owned: u.owned, dups: u.dups || {}, skins: u.skins || [], skinSel: u.skinSel || {}, decks: u.decks || null, avatar: u.avatar || '', fx: { deploy: fxSel(u, 'deploy'), sleeve: fxSel(u, 'sleeve'), finish: fxSel(u, 'finish') }, fxOwned: fxOwned(u), boxes: u.boxes || 0, invSkins: (u.invSkins || []).filter((id) => !(u.skins || []).includes(id)), ms: { stats: missionStats(u), claimed: u.msClaimed || [] }, packs: u.packs || 0, packsAnime: u.packsAnime || 0, packsSet2: u.packsSet2 || 0, emoteSets: emoteSetsOf(u), rkClaimed: u.rkClaimed || [], season: seasonPublic(u), ptsMax: rankReached(u),
+    name: u.name, boxLocked: boxLocked(u), pts: u.pts || 0, coins: u.coins, owned: u.owned, dups: u.dups || {}, skins: u.skins || [], skinSel: u.skinSel || {}, decks: u.decks || null, avatar: u.avatar || '', fx: { deploy: fxSel(u, 'deploy'), sleeve: fxSel(u, 'sleeve'), finish: fxSel(u, 'finish') }, fxOwned: fxOwned(u), boxes: u.boxes || 0, invSkins: (u.invSkins || []).filter((id) => !(u.skins || []).includes(id)), invDup: u.invDup || {}, gachaN: u.gachaN || 0, gacha: { id: GACHA.id, cost: GACHA.cost, rate: GACHA.rate, pity: GACHA.pity }, ms: { stats: missionStats(u), claimed: u.msClaimed || [] }, packs: u.packs || 0, packsAnime: u.packsAnime || 0, packsSet2: u.packsSet2 || 0, emoteSets: emoteSetsOf(u), rkClaimed: u.rkClaimed || [], season: seasonPublic(u), ptsMax: rankReached(u),
     dailyAvailable: u.lastDaily !== today(),
     gamesToday: u.rewardDay === today() ? u.rewardCount : 0,
     maxGamesToday: MAX_GAME_REWARDS_PER_DAY,
@@ -1012,6 +1036,28 @@ module.exports = async function handler(req, res) {
       u.st = u.st || {}; u.st.packs = (u.st.packs || 0) + 1; seasonBump(u, 'packs');
       await saveUser(cfg, u);
       res.status(200).json({ cards, user: publicUser(u) }); return;
+    }
+
+    if (act === 'gachaPull') { // Destino: una tirada
+      const cost = isAdmin(u) ? 0 : GACHA.cost;
+      if (u.coins < cost) { res.status(402).json({ error: `Necesitas ${GACHA.cost} monedas.`, user: publicUser(u) }); return; }
+      u.coins -= cost;
+      const r = gachaRoll(u);
+      if (r.kind === 'card') {
+        const isAct = (DATA.actions || []).some((a) => a.id === r.id);
+        r.isNew = u.owned.indexOf(r.id) < 0;
+        if (r.isNew) u.owned.push(r.id);
+        else if (isAct || levelOf(u, r.id) >= 3) { r.dupCoins = MAXED_DUP_COINS; u.coins += r.dupCoins; }
+        else { u.dups = u.dups || {}; const before = levelOf(u, r.id); u.dups[r.id] = (u.dups[r.id] || 0) + 1; r.lvl = levelOf(u, r.id); r.lvlUp = r.lvl > before; r.copies = 1 + u.dups[r.id]; }
+      } else {
+        const own = r.kind === 'skin' ? (u.skins || []).includes(r.id) || (u.invSkins || []).includes(r.id) : fxOwned(u).includes(r.id);
+        r.isNew = !own;
+        if (r.isNew) { if (r.kind === 'skin') { u.skins = u.skins || []; u.skins.push(r.id); } else u.fxOwned = [...(u.fxOwned || []), r.id]; }
+        else { u.invDup = u.invDup || {}; const key = r.kind + ':' + r.id; u.invDup[key] = (u.invDup[key] || 0) + 1; r.inv = true; } // repetido: al inventario (sin opción de desbloquear por ahora)
+      }
+      u.st = u.st || {}; u.st.gacha = (u.st.gacha || 0) + 1;
+      await saveUser(cfg, u);
+      res.status(200).json({ reward: r, user: publicUser(u) }); return;
     }
 
     if (act === 'missionClaim') { // recoger la caja de una misión completada

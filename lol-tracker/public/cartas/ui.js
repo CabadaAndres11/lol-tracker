@@ -444,7 +444,7 @@
   }
 
   // ---------- Navegación ----------
-  var NAV = [['home', 'casa', 'Inicio'], ['play', 'espadas', 'Jugar'], ['deck', 'cartas', 'Colección'], ['packs', 'tienda', 'Tienda'], ['missions', 'mision', 'Misiones'], ['pass', 'estrella', 'Pase'], ['ladder', 'trofeo', 'Clasificación']];
+  var NAV = [['home', 'casa', 'Inicio'], ['play', 'espadas', 'Jugar'], ['deck', 'cartas', 'Colección'], ['packs', 'tienda', 'Tienda'], ['destino', 'brillo', 'Destino'], ['missions', 'mision', 'Misiones'], ['pass', 'estrella', 'Pase'], ['ladder', 'trofeo', 'Clasificación']];
   function artOk(id) { return !!id && (!!ARTS[id] || (window.CARTAS_SKINS || []).some(function (k) { return k.id === id; })); }
   function avatarHtml(cls) {
     var id = ui.acct && ui.acct.avatar, ok = artOk(id);
@@ -630,6 +630,15 @@
       items.push({ k: 'skin:' + id, n: 0, name: 'Skin · ' + sk.name, img: '<img class="invskin" src="/cartas/art/' + id + '.webp" alt="">', desc: 'Skin de ' + (CARD[sk.card] ? CARD[sk.card].name : sk.card) + (sk.legacy ? ', en compensación por una carta eliminada' : '') + '. Solo cambia la ilustración.',
         opts: opt('skinunlock', 'candado', 'Desbloquear', 'Añádela a tus skins', ' data-skin="' + id + '"') + opt('zoom', 'ojo', 'Desplegar', 'Verla en 3D', ' data-id="' + sk.card + '" data-skin="' + id + '"') });
     });
+    Object.keys(a.invDup || {}).forEach(function (key) {
+      var kd = key.split(':')[0], id = key.slice(kd.length + 1), n = a.invDup[key]; if (!n) return;
+      var sk = kd === 'skin' ? (window.CARTAS_SKINS || []).filter(function (k) { return k.id === id; })[0] : null, fx = kd === 'fx' ? fxInfo(id) : null;
+      if (!sk && !fx) return;
+      items.push({ k: 'dup:' + key, n: n, name: (sk ? 'Skin · ' + sk.name : 'Efecto · ' + fx.name) + ' (repetido)',
+        img: sk ? '<img class="invskin" src="/cartas/art/' + id + '.webp" alt="">' : '<span class="invfx">' + ic('brillo') + '</span>',
+        desc: 'Copia repetida conseguida en Destino. Ya tienes ' + (sk ? 'esta skin' : 'este efecto') + '.',
+        opts: opt('invdup', 'candado', 'Desbloquear', 'Todavía no se puede hacer nada con las copias repetidas', '', true) });
+    });
     if (a.boxes) items.push({ k: 'box', n: a.boxes, name: 'Caja', img: boxImg(), desc: 'Dentro hay una carta que no tengas, una skin o un efecto. Nunca te tocará algo repetido.',
       opts: (a.boxLocked ? opt('boxopen', 'caja', 'Abrir', 'Lo tienes todo desbloqueado: no se pueden abrir cajas', '', true) : opt('boxopen', 'caja', 'Abrir', 'Abre una caja')) + opt('boxinfo', 'ojo', 'Probabilidades', ui.boxInfo ? 'Ocultar las probabilidades' : 'Qué te puede tocar') });
     return items;
@@ -788,7 +797,7 @@
     }).join('') + '</ul>' + (isChat ? chatNewsMain(n) : '<div class="rnmain' + (arts.length ? '' : ' nologo') + (ui.newsFull && newsNeedsFull(n) ? ' full' : '') + '" style="' + (arts.length ? '--rart:url(/cartas/art/' + arts[0] + '.webp)' : '') + '">' +
       (arts.length ? '' : '<img class="rnlogo" src="/cartas/logo.webp" alt="">') +
       '<div class="rnbody"><span class="ntag nt-' + esc(n.tag) + '">' + esc(n.tag) + '</span><h2>' + esc(n.title) + '</h2><ul>' + (ui.newsFull && newsNeedsFull(n) ? n.items.map(function (t) { return '<li>' + (t.indexOf('{{intro}}') >= 0 ? esc(t.replace('{{intro}}', '')) + '<a href="#" class="newslink" data-act="introplay">▶ Ver la animación</a>' : esc(t)) + '</li>'; }) : newsSummary(n).map(function (t) { return '<li>' + esc(t) + '</li>'; })).join('') + '</ul>' +
-      (newsNeedsFull(n) ? '<button class="btn sec sm" data-act="newsmore">' + (ui.newsFull ? 'Mostrar menos ▴' : 'Leer la noticia completa ▾') + '</button>' : '') +
+      (n.gacha ? gachaDemoBtns() : '') + (newsNeedsFull(n) ? '<button class="btn sec sm" data-act="newsmore">' + (ui.newsFull ? 'Mostrar menos ▴' : 'Leer la noticia completa ▾') + '</button>' : '') +
       (arts.length > 1 ? '<div class="rnthumbs">' + arts.map(function (id) { return '<span style="background-image:url(/cartas/art/' + id + '.webp)" title="' + esc(CARD[id] ? CARD[id].name : id.replace(/-/g, ' ')) + '"></span>'; }).join('') + '</div>' : '') + '</div></div>') + '</div>';
   }
   // Cambia solo el panel de noticias (así la lista conserva su scroll)
@@ -803,6 +812,7 @@
       '<div class="ricons">' + [
         ['deck', ic('cartas'), 'Colección', ui.acct.owned.length + ' cartas'],
         ['packs', ic('tienda'), 'Tienda', (ui.acct ? ui.acct.coins : 0) + ' monedas'],
+        ['destino', ic('brillo'), 'Destino', 'Gacha · ' + ((ui.acct && ui.acct.gacha) ? ui.acct.gacha.cost : 25) + ' monedas'],
         ['missions', ic('mision'), 'Misiones', claimableCount() ? claimableCount() + ' por recoger' : 'Gana cajas'],
         ['pass', ic('estrella'), 'Pase de batalla', 'Nivel ' + seLevel()],
         ['ladder', ic('trofeo'), 'Clasificación', rankClaimable() ? rankClaimable() + ' por recoger' : ui.acct.pts + ' puntos'],
@@ -1006,6 +1016,65 @@
     return '<div class="packs-grid three">' + packPanel(a, 'set1') + packPanel(a, 'anime') + packPanel(a, 'set2') + '</div>' + (ui.msg ? '<div class="hint" style="color:var(--bad)">' + esc(ui.msg) + '</div>' : '');
   }
   var SHTABS = [['feat', 'Destacados'], ['packs', 'Sobres'], ['skins', 'Skins'], ['cards', 'Cartas'], ['fx', 'Efectos']];
+
+  // ---------- Destino (gacha) ----------
+  var GRCOL = { 'Común': '#cbd5e1', 'Rara': '#60a5fa', 'Épica': '#c084fc', 'Legendaria': '#fbbf24', 'Mítica': '#ef4444' };
+  function fxInfo(id) { return DEPLOY_LIST.concat(SLEEVE_LIST, FIN_LIST).filter(function (e) { return e.id === id; })[0] || null; }
+  function gachaCfg() { return (ui.acct && ui.acct.gacha) || { id: 'aitorlg-singer', cost: 25, rate: 10, pity: 20 }; }
+  function gachaDemoBtns() {
+    return '<div class="gdemo"><span class="mut">Probar la animación de Destino:</span>' + ['Común', 'Rara', 'Épica', 'Legendaria', 'Mítica'].map(function (r) { return '<button class="btn sec sm" style="--gc:' + GRCOL[r] + '" data-act="gdemo" data-r="' + r + '">' + r + '</button>'; }).join('') + '</div>';
+  }
+  function gachaItemHtml(r) {
+    if (r.kind === 'card') { var c = CARD[r.id]; return { name: c.name, sub: c.type === 'tropa' ? 'Carta · ' + c.rarity : 'Acción · ' + c.rarity, html: cardHtml(c, { skin: '' }) }; }
+    if (r.kind === 'skin') { var sk = (window.CARTAS_SKINS || []).filter(function (k) { return k.id === r.id; })[0]; var cc = sk && CARD[sk.card]; return { name: sk ? sk.name : r.id, sub: 'Skin' + (cc ? ' de ' + cc.name : ''), html: cc ? cardHtml(cc, { skin: r.id }) : '' }; }
+    var fx = fxInfo(r.id);
+    return { name: fx ? fx.name : r.id, sub: 'Efecto' + (r.fxKind === 'deploy' ? ' de despliegue' : r.fxKind === 'sleeve' ? ' de funda' : r.fxKind === 'finish' ? ' de victoria y derrota' : ''), html: '<div class="gfxic">' + ic(FXICON[r.id] || 'brillo') + '</div>' };
+  }
+  function gachaClose() { var o = document.getElementById('gachaov'); if (o) o.remove(); (window.__gtm || []).forEach(clearTimeout); window.__gtm = []; ui.gbusy = false; }
+  // Cielo estrellado con estrella(s) fugaz(ces) del color de la rareza; la principal lanza una lluvia de estrellas rojas
+  function gachaPlay(r, demo) {
+    gachaClose(); ui.gbusy = true; window.__gtm = [];
+    var rar = r.rarity, col = GRCOL[rar] || '#fff', main = !!r.main || (demo && rar === 'Mítica'), it = gachaItemHtml(r);
+    var o = document.createElement('div'); o.id = 'gachaov'; o.className = 'gachaov' + (main ? ' gmain' : ''); o.style.setProperty('--gc', col);
+    var st = '', i;
+    for (i = 0; i < 90; i++) st += '<i class="gst" style="left:' + (Math.random() * 100).toFixed(1) + '%;top:' + (Math.random() * 100).toFixed(1) + '%;--s:' + (1 + Math.random() * 2.2).toFixed(1) + 'px;--d:' + (1.5 + Math.random() * 3).toFixed(1) + 's;--dl:' + (Math.random() * 3).toFixed(1) + 's"></i>';
+    var ms = '', n = main ? 22 : 1;
+    for (i = 0; i < n; i++) ms += '<i class="gm" style="top:' + (main ? (-5 + Math.random() * 60).toFixed(0) : '8') + '%;left:' + (main ? (40 + Math.random() * 70).toFixed(0) : '92') + '%;--dl:' + (main ? (0.3 + i * 0.09 + Math.random() * .3).toFixed(2) : '0.55') + 's;--du:' + (main ? (0.9 + Math.random() * .6).toFixed(2) : '1.15') + 's;--sz:' + (main ? (110 + Math.random() * 140).toFixed(0) : '210') + 'px"></i>';
+    var again = !demo && ui.acct && ui.acct.coins >= gachaCfg().cost;
+    var status = demo ? 'Vista previa' : r.isNew ? '¡Nuevo!' : r.inv ? 'Repetido: guardado en tu inventario' : r.dupCoins ? 'Repetida al máximo: +' + r.dupCoins + ' monedas' : r.lvlUp ? '¡Sube a ★' + r.lvl + '!' : 'Copia ' + (r.copies || 2);
+    o.innerHTML = '<div class="gsky">' + st + '</div><div class="gmet">' + ms + '</div><div class="gflash"></div>' +
+      '<div class="gres"><div class="gglow"></div><div class="gcardw">' + it.html + '</div><div class="gtxt"><span class="grar">' + (GEM[rar] || '') + ' ' + rar + '</span><b>' + esc(it.name) + '</b><small>' + esc(it.sub) + ' · ' + esc(status) + '</small>' +
+      '<div class="gbtns"><button class="btn cta" data-g="close">Continuar</button>' + (again ? '<button class="btn sec" data-g="again">Otra tirada · ' + gachaCfg().cost + '</button>' : '') + '</div></div></div><button class="gskip" data-g="skip">Saltar</button>';
+    document.body.appendChild(o);
+    var reveal = function () { if (o.classList.contains('rev')) return; o.classList.add('rev'); snd('rev-' + (rar === 'Mítica' ? 'Legendaria' : rar), 0); };
+    o.addEventListener('click', function (e) {
+      var g = e.target.closest && e.target.closest('[data-g]'); var a = g && g.dataset.g;
+      if (a === 'close') { gachaClose(); if (ui.screen === 'destino' || ui.screen === 'deck' || ui.screen === 'home') render(); return; }
+      if (a === 'again') { gachaClose(); return gachaPull(); }
+      if (!o.classList.contains('rev')) reveal();
+    });
+    window.__gtm.push(setTimeout(reveal, main ? 2700 : 1900));
+  }
+  function gachaPull() {
+    if (ui.gbusy) return;
+    var cfg = gachaCfg(); if (ui.acct.coins < cfg.cost) { ui.msg = 'Necesitas ' + cfg.cost + ' monedas.'; return render(); }
+    ui.gbusy = true; ui.msg = '';
+    return api('gachaPull').then(function (r) {
+      ui.gbusy = false;
+      if (!r.ok) { if (r.data && r.data.user) setAcct(r.data.user); ui.msg = (r.data && r.data.error) || 'No se pudo tirar.'; return render(); }
+      setAcct(r.data.user); gachaPlay(r.data.reward, false);
+    });
+  }
+  function renderDestino() {
+    var a = ui.acct, cfg = gachaCfg(), c = CARD[cfg.id], n = a.gachaN || 0, left = Math.max(1, cfg.pity - n);
+    var odds = [['Recompensa principal', cfg.rate + '%', GRCOL['Mítica']], ['Cartas (todos los sets)', '~54%', '#9ca3af'], ['Efectos', '~22%', '#c084fc'], ['Skins', '~14%', '#fbbf24']];
+    app.innerHTML = head('destino', ic('brillo') + ' Destino') + (ui.msg ? '<p class="err">' + esc(ui.msg) + '</p>' : '') +
+      '<div class="dest"><div class="destcard"><span class="ntag nt-Cartas">Recompensa principal</span>' + cardHtml(c, { skin: '' }) + '</div>' +
+      '<div class="destinfo panel"><h2>' + esc(c.name) + '</h2><p class="mut">Una tirada cuesta ' + cfg.cost + ' monedas. Puede tocarte la recompensa principal, cartas de todos los sets, efectos y skins. Lo repetido de skins y efectos se guarda en tu inventario.</p>' +
+      '<div class="destpity"><div class="meter"><i class="on" style="width:' + Math.round(n / cfg.pity * 100) + '%"></i></div><span class="mut">Tiradas sin conseguirla: <b>' + n + '</b> / ' + cfg.pity + ' · ' + (left === 1 ? 'la próxima tirada la asegura' : 'asegurada en ' + left + ' tiradas') + '</span></div>' +
+      '<ul class="destodds">' + odds.map(function (x) { return '<li style="--oc:' + x[2] + '"><i></i><span>' + x[0] + '</span><b>' + x[1] + '</b></li>'; }).join('') + '</ul>' +
+      '<div class="btnrow"><button class="btn cta big" data-act="gpull"' + (a.coins < cfg.cost || ui.gbusy ? ' disabled' : '') + '>' + ic('moneda') + ' Tirar · ' + cfg.cost + '</button><span class="mut">Tienes ' + a.coins + ' monedas</span></div></div></div></div>';
+  }
   function renderPacks() {
     var a = ui.acct, tab = ui.shopTab || 'feat';
     var body = tab === 'packs' ? packsTab(a) : tab === 'skins' ? (skinShop(a) || '<p class="mut">Aún no hay skins a la venta.</p>') : tab === 'cards' ? (newCards(a) || '<p class="mut">Aún no hay cartas nuevas a la venta.</p>') : tab === 'fx' ? shopFx() : shopFeaturedHtml(a);
@@ -2475,9 +2544,9 @@ var GOB_SVG = '<svg class="gobsvg" viewBox="0 0 100 100"><g class="gobleg a"><re
   window.addEventListener('resize', function () { var o = document.querySelector('#board svg.arrows'); if (o) o.remove(); drawArrows(); });
 
   // ---------- Navegación por URL (#/mazo, #/tienda…): al recargar se vuelve a la misma sección ----------
-  var ROUTES = { home: 'inicio', modes: 'jugar', pvp: 'jugar', game: 'jugar', deck: 'coleccion', packs: 'tienda', profile: 'perfil', settings: 'ajustes', pass: 'pase', ladder: 'clasificacion', missions: 'misiones' };
+  var ROUTES = { home: 'inicio', modes: 'jugar', pvp: 'jugar', game: 'jugar', deck: 'coleccion', packs: 'tienda', destino: 'destino', profile: 'perfil', settings: 'ajustes', pass: 'pase', ladder: 'clasificacion', missions: 'misiones' };
   var ROUTE_SCREEN = { inicio: 'home', jugar: 'modes', coleccion: 'deck', mazo: 'deck', tienda: 'packs', perfil: 'profile', ajustes: 'settings', pase: 'pass', clasificacion: 'ladder', misiones: 'missions' };
-  var ROUTE_TITLE = { home: 'Inicio', modes: 'Jugar', pvp: 'Jugar', game: 'Partida', deck: 'Colección', packs: 'Tienda', profile: 'Perfil', settings: 'Ajustes', pass: 'Pase de batalla', ladder: 'Clasificación', missions: 'Misiones' };
+  var ROUTE_TITLE = { home: 'Inicio', modes: 'Jugar', pvp: 'Jugar', game: 'Partida', deck: 'Colección', packs: 'Tienda', destino: 'Destino', profile: 'Perfil', settings: 'Ajustes', pass: 'Pase de batalla', ladder: 'Clasificación', missions: 'Misiones' };
   function hashScreen() { var m = /^#\/([a-z]+)/.exec(location.hash || ''); return m && ROUTE_SCREEN[m[1]] || null; }
   function landing() { var sc = hashScreen() || 'home'; return sc; }
   function syncHash() {
@@ -2509,7 +2578,7 @@ var GOB_SVG = '<svg class="gobsvg" viewBox="0 0 100 100"><g class="gobleg a"><re
     if (ui.genfx) return; // la animación de la Genkidama pinta el resultado al terminar
     document.body.classList.remove('shopbg');
     if (PV.wait && ui.screen !== 'pvp') pvpCancelWait();
-    var f = { home: renderHome, deck: renderDeck, modes: renderModes, pvp: renderPvp, login: renderLogin, starter: renderStarter, packs: renderPacks, profile: renderProfile, settings: renderSettings, pass: renderPass, ladder: renderLadder, missions: renderMissions, boot: renderBoot }[ui.screen];
+    var f = { home: renderHome, deck: renderDeck, modes: renderModes, pvp: renderPvp, login: renderLogin, starter: renderStarter, packs: renderPacks, destino: renderDestino, profile: renderProfile, settings: renderSettings, pass: renderPass, ladder: renderLadder, missions: renderMissions, boot: renderBoot }[ui.screen];
     if (f) f(); else renderGame();
     if (ui.screen !== 'game') clearFlights();
     if (ui.tut && ui.screen !== 'game') ui.tut = null;
@@ -2726,6 +2795,8 @@ var GOB_SVG = '<svg class="gobsvg" viewBox="0 0 100 100"><g class="gobleg a"><re
     if (act === 'shopsel') { ui.shopSel = +el.dataset.i; ui.shopTab = 'feat'; return render(); }
     if (act === 'newssel') { ui.newsSel = +el.dataset.i; ui.newsFull = false; return refreshNews(); }
     if (act === 'devchat') return openChat(+el.dataset.i);
+    if (act === 'gpull') return gachaPull();
+    if (act === 'gdemo') { var rr = el.dataset.r, dc = rr === 'Mítica' ? CARD['aitorlg-singer'] : D.cards.filter(function (x) { return x.rarity === rr && !x.nopack && ARTS[x.id]; })[0]; return gachaPlay({ kind: 'card', id: dc.id, rarity: rr, main: rr === 'Mítica' }, true); }
     if (act === 'newsmore') { ui.newsFull = !ui.newsFull; return refreshNews(); }
     if (act === 'setavatar') { return api('avatarSet', { card: el.dataset.card }).then(function (r) { if (r.ok) { setAcct(r.data.user); ui.msg = ''; ui.avEdit = false; } else ui.msg = (r.data && r.data.error) || 'No se pudo cambiar la foto.'; render(); }); }
     if (PLAYACTS[act]) { if (!ui.picked) return askDeck(act); ui.picked = false; }

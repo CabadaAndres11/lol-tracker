@@ -2802,3 +2802,38 @@ body.soc-open #app { margin-right: 286px; }
 .kg b { font-size: .82rem; } .kg em { font-style: normal; font-size: .7rem; opacity: .7; }
 .kg:disabled { opacity: .4; cursor: not-allowed; }
 .kg.on { border-color: #e879f9; background: linear-gradient(135deg, rgba(232,121,249,.28), rgba(129,140,248,.2)); box-shadow: 0 0 14px rgba(232,121,249,.35); }
+
+/* Victoria / derrota «Gato y cuervo»: sin banner; letras gigantes y el dúo encima moviendo la cabeza */
+.fin-gato.owin { background: radial-gradient(ellipse 70% 50% at 50% 45%, rgba(40,130,255,.42), transparent 70%), linear-gradient(rgba(6,12,30,.93), rgba(3,6,16,.97)); }
+.fin-gato.olose { background: radial-gradient(ellipse 70% 50% at 50% 45%, rgba(70,90,130,.32), transparent 70%), linear-gradient(rgba(10,12,20,.95), rgba(3,4,8,.98)); }
+.fin-gato .gburst { position: absolute; left: 50%; top: 42%; width: 170vmax; height: 170vmax; margin: -85vmax 0 0 -85vmax; pointer-events: none; background: repeating-conic-gradient(rgba(60,160,255,.2) 0 7deg, transparent 7deg 18deg); -webkit-mask: radial-gradient(circle, #000 0, transparent 38%); mask: radial-gradient(circle, #000 0, transparent 38%); animation: gspin 60s linear infinite, finup .8s .2s ease-out both; }
+.fin-gato.olose .gburst { background: repeating-conic-gradient(rgba(110,130,170,.1) 0 7deg, transparent 7deg 18deg); animation: gspin 120s linear infinite, finup .8s .2s ease-out both; }
+@keyframes gspin { to { transform: rotate(360deg); } }
+.fin-gato .gfx { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 1; }
+.fin-gato .gp { position: absolute; top: -6vh; left: var(--x); width: var(--s); height: var(--s); border-radius: 30%; background: #ffd34d; box-shadow: 0 0 10px rgba(255,211,77,.8); opacity: 0; animation: gfall var(--t) var(--d) linear infinite; }
+.fin-gato .gp:nth-child(2n) { background: #3aa7ff; box-shadow: 0 0 10px rgba(58,167,255,.8); }
+.fin-gato .gp:nth-child(3n) { border-radius: 50%; }
+.fin-gato.olose .gp { height: calc(var(--s) * 2.4); width: calc(var(--s) * .5); border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; background: #7f9cc8; box-shadow: none; }
+.fin-gato.olose .gp:nth-child(2n) { background: #5d7aa6; }
+@keyframes gfall { 0% { opacity: 0; transform: translate(0, 0) rotate(0); } 10% { opacity: 1; } 100% { opacity: .9; transform: translate(var(--w), 112vh) rotate(420deg); } }
+.fin-gato .gstage { position: relative; z-index: 3; display: flex; flex-direction: column; align-items: center; }
+.fin-gato .gpair { position: relative; z-index: 4; width: clamp(210px, 36vw, 410px); aspect-ratio: 746 / 581; margin-bottom: calc(clamp(2.6rem, 11vw, 6.6rem) * -.3); animation: gpairin .8s .9s cubic-bezier(.2,1.5,.4,1) both; pointer-events: none; }
+@keyframes gpairin { from { opacity: 0; transform: translateY(55%) scale(.55); } }
+.fin-gato .gcr, .fin-gato .gct { position: absolute; inset: 0; background: url(/cartas/img/fin-gato.webp) center / 100% 100% no-repeat; filter: drop-shadow(0 6px 10px rgba(0,0,0,.55)); will-change: transform; }
+.fin-gato .gcr { clip-path: inset(0 71% 0 0); transform-origin: 13% 96%; animation: gsway 1.5s 1.7s ease-in-out infinite alternate-reverse; }
+.fin-gato .gct { clip-path: inset(0 0 0 28%); transform-origin: 58% 96%; animation: gsway 2.3s 1.7s ease-in-out infinite alternate; }
+@keyframes gsway { from { transform: rotate(-7deg) translateY(0); } 50% { transform: rotate(0deg) translateY(-1.5%); } to { transform: rotate(7deg) translateY(0); } }
+.fin-gato .gcr { --k: 1; }
+.fin-gato.olose .gpair { filter: grayscale(.7) brightness(.78); }
+.fin-gato.olose .gcr { animation: gdroop 3.2s 1.7s ease-in-out infinite alternate-reverse; }
+.fin-gato.olose .gct { animation: gdroop 4.4s 1.7s ease-in-out infinite alternate; }
+@keyframes gdroop { from { transform: rotate(-3deg) translateY(2%); } to { transform: rotate(5deg) translateY(4%); } }
+.fin-gato .gtxt { position: relative; z-index: 3; display: flex; font-family: var(--serif); font-weight: 800; font-size: clamp(2.6rem, 11vw, 6.6rem); letter-spacing: .05em; line-height: 1; color: #ffd34d; -webkit-text-stroke: .09em #2d1520; paint-order: stroke fill; text-shadow: 0 .06em 0 #2d1520, 0 0 .5em rgba(58,167,255,.85); }
+.fin-gato .gtxt span { display: inline-block; animation: gl-in .65s calc(.3s + var(--i) * .07s) cubic-bezier(.2,1.6,.4,1) both, gl-wave 1.8s calc(1.6s + var(--i) * .09s) ease-in-out infinite; }
+@keyframes gl-in { from { opacity: 0; transform: translateY(-1.4em) scale(1.7) rotate(-14deg); } }
+@keyframes gl-wave { 50% { transform: translateY(-.07em); } }
+.fin-gato.olose .gtxt { color: #98a3b8; text-shadow: 0 .06em 0 #2d1520, 0 0 .35em rgba(90,110,160,.55); }
+.fin-gato.olose .gtxt span { animation: gl-fall .8s calc(.3s + var(--i) * .07s) cubic-bezier(.5,0,.9,.5) both; transform: translateY(.1em) rotate(var(--r)); }
+@keyframes gl-fall { from { opacity: 0; transform: translateY(-60vh) rotate(-40deg); } 70% { transform: translateY(.14em) rotate(calc(var(--r) * 1.6)); } to { transform: translateY(.1em) rotate(var(--r)); } }
+.fin-gato .finsub { color: #cfe3ff; } .fin-gato.olose .finsub { color: #a3acc0; }
+@media (prefers-reduced-motion: reduce) { .fin-gato .gburst, .fin-gato .gp, .fin-gato .gcr, .fin-gato .gct, .fin-gato .gtxt span { animation: none !important; } .fin-gato .gp { display: none; } }

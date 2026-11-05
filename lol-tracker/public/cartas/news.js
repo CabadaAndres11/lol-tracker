@@ -1,6 +1,12 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-05', tag: 'Novedad', title: 'Nuevo efecto de victoria y derrota: Gato y cuervo',
+      items: [
+        'Nuevo efecto de <b>Victoria y derrota</b> en Tienda → Efectos: <b>Gato y cuervo</b> (50 monedas).',
+        'Sin banner rectangular: la palabra se alza en letras gigantes y el gato azul y el cuervo se asoman encima, moviendo la cabeza de lado a lado.',
+        'Victoria: rayos y confeti azul y dorado. Derrota: las letras se desploman, el dúo se apaga y cae lluvia.'
+      ] },
     { date: '2026-11-04', tag: 'Sinergia', title: 'Nueva sinergia K-Pop (2.2)',
       items: [
         'Nueva sinergia <b>K-Pop</b> con 4 grupos: <b>KDA</b>, <b>True Damage</b>, <b>Huntrix</b> y <b>SayaBoys</b> (11 cartas, incluida la legendaria AitoRLG Singer).',

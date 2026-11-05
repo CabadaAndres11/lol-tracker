@@ -11,7 +11,7 @@
         '<b>Saja Boys</b>: por cada Saja Boys, un rival no legendario queda encandilado y su primer ataque golpea a un aliado suyo.',
         '<b>AitoRLG Singer</b> potencia al grupo: KDA gana oro por asistencia, True Damage hace un Beat Drop (daño doble) cada 3 ataques, Huntrix duplica el escudo y Saja Boys mejora +1/+1 al resto del grupo cada 2 combates.',
         'Con 4 cartas K-Pop distintas, el grupo elegido gana +5/+5 permanente; con 6, +10/+10.',
-        'Ya están las ilustraciones de <b>KDA</b> y <b>True Damage</b>: las cartas de cada grupo y la AitoRLG Singer, que cambia de ilustración según el grupo elegido.'
+        'Ya están las ilustraciones de <b>KDA</b>, <b>True Damage</b> y <b>Huntrix</b>: las cartas de cada grupo y la AitoRLG Singer, que cambia de ilustración según el grupo elegido.'
       ] },
     { date: '2026-11-04', tag: 'Avance', title: 'Charla con los Desarrolladores: bajas, 2.2 y más', pet: true,
       items: ['Segunda charla con los desarrolladores: confirmamos lo que se ha retirado en la 2.1 y adelantamos lo que viene en la 2.2 y más allá. Con una visita inesperada.'],

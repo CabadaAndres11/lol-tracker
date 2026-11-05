@@ -24,7 +24,7 @@
     voley: { atk: [1, 2, 3], red: [1, 1, 2], cap: 8 },
     novias: { eriko: [2, 3, 4], eCap: [10, 15, 20], helena: [0, 2, 4], lucia: [3, 4, 5], ari: [0.5, 0.6, 0.7] }, // por nivel de Correa // novias del hueco 5 (sinergia Correa)
     gambling: { orbs: [1, 2, 3], probs: [[60, 30, 10], [40, 40, 20], [20, 40, 40]] }, // orbes por ronda sin daño directo; probabilidad (%) de que cada orbe dé +1/+1, +2/+2 o +3/+3
-    kpop: { stat: [0, 5, 10], kdaAtk: 1, kdaHp: 2, kdaGold: 1, beat: 3, shield: [1, 2], sajaEvery: 2, sajaStat: 1 }, // K-Pop: +ataque/vida del grupo por nivel; KDA asistencia (+ataque) y golpe de gracia (+vida); True Damage Beat Drop cada 3 ataques; Huntrix escudo (x vida de la marca); Saja Boys: Singer cada 2 combates
+    kpop: { stat: [0, 5, 10], kdaAtk: 1, kdaHp: 2, kdaGold: 1, beat: 3, shield: [1, 2], sajaEvery: 2, sajaStat: 1 }, // K-Pop: +ataque/vida del grupo por nivel; KDA asistencia (+ataque) y golpe de gracia (+vida); True Damage Beat Drop cada 3 ataques; Huntrix escudo (x vida de la marca); SayaBoys: Singer cada 2 combates
   };
 
   var CARD = {};
@@ -90,7 +90,7 @@
     kpopSync(s, p);
   }
   // ---------- K-Pop: grupos ----------
-  var KGROUPS = ['KDA', 'True Damage', 'Huntrix', 'Saja Boys'];
+  var KGROUPS = ['KDA', 'True Damage', 'Huntrix', 'SayaBoys'];
   function isSinger(i) { return !!(i && i.id === 'aitorlg-singer'); }
   // Cartas distintas de cada grupo entre mesa y mano; AitoRLG Singer cuenta +1 en todos.
   function kpopCounts(P) {
@@ -858,7 +858,7 @@
     });
   }
 
-  // K-Pop al empezar el combate: Huntrix marca al rival con más vida, Saja Boys encandila y la Singer de Saja mejora al grupo
+  // K-Pop al empezar el combate: Huntrix marca al rival con más vida, SayaBoys encandila y la Singer de SayaBoys mejora al grupo
   function kpopStart(s) {
     [0, 1].forEach(function (p) {
       var P = s.p[p], k = s.kp[p], E = s.p[1 - p];
@@ -871,16 +871,16 @@
           s.mark[p] = foes[0].uid;
           fxFrame(s, p, 'kpop', 'Huntrix · Marca', card(foes[0]).name + ' queda marcado: si cae, el equipo gana ' + Math.round(maxHp(foes[0]) * FX.kpop.shield[k.sg ? 1 : 0]) + ' de escudo', mem.map(function (i) { return i.uid; }).concat([foes[0].uid]));
         }
-      } else if (k.g === 'Saja Boys') {
+      } else if (k.g === 'SayaBoys') {
         var n = mem.length, ch = targetable(E).filter(function (i) { return card(i).rarity !== 'Legendaria' && !i.turret; }).sort(function (a, b) { return atk(b) - atk(a); }).slice(0, n);
         ch.forEach(function (i) { i.tmp.charm = true; });
-        if (ch.length) fxFrame(s, p, 'kpop', 'Saja Boys · Encanto', ch.map(function (i) { return card(i).name; }).join(', ') + ': su primer ataque golpea a un aliado', mem.map(function (i) { return i.uid; }).concat(ch.map(function (i) { return i.uid; })));
+        if (ch.length) fxFrame(s, p, 'kpop', 'SayaBoys · Encanto', ch.map(function (i) { return card(i).name; }).join(', ') + ': su primer ataque golpea a un aliado', mem.map(function (i) { return i.uid; }).concat(ch.map(function (i) { return i.uid; })));
         if (k.sg) {
           P.sajaN = (P.sajaN || 0) + 1;
           if (P.sajaN % FX.kpop.sajaEvery === 0) {
-            var oth = P.mesa.concat(P.hand).filter(function (i) { return i && isTroop(i) && !isSinger(i) && card(i).grp === 'Saja Boys'; });
+            var oth = P.mesa.concat(P.hand).filter(function (i) { return i && isTroop(i) && !isSinger(i) && card(i).grp === 'SayaBoys'; });
             oth.forEach(function (i) { grow(i, 'atk', FX.kpop.sajaStat); grow(i, 'hp', FX.kpop.sajaStat); });
-            if (oth.length) fxFrame(s, p, 'kpop', 'Saja Boys · Productora', '+' + FX.kpop.sajaStat + '/+' + FX.kpop.sajaStat + ' permanente al grupo', oth.map(function (i) { return i.uid; }));
+            if (oth.length) fxFrame(s, p, 'kpop', 'SayaBoys · Productora', '+' + FX.kpop.sajaStat + '/+' + FX.kpop.sajaStat + ' permanente al grupo', oth.map(function (i) { return i.uid; }));
           }
         }
       }
@@ -1047,7 +1047,7 @@
       if (!tgt && foes.length) { tgt = foes[Math.floor(s.rng() * foes.length)]; retarget = !!P.target[a.uid]; }
       if (!tgt && a.tmp.loan != null) delete a.tmp.loan;
       var redir = false, charmed = false;
-      if (a.tmp.charm && !a.tmp.charmUsed) { // Saja Boys: el primer ataque del encandilado golpea a un aliado suyo
+      if (a.tmp.charm && !a.tmp.charmUsed) { // SayaBoys: el primer ataque del encandilado golpea a un aliado suyo
         a.tmp.charmUsed = true;
         var cal = targetable(P).filter(function (x) { return x !== a; });
         if (cal.length) { tgt = cal[Math.floor(s.rng() * cal.length)]; charmed = true; }

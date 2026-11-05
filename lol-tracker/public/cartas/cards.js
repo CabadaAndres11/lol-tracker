@@ -820,12 +820,12 @@ var D={
   },
   {
    "id": "lihone-saja",
-   "name": "Lihone Saja Boys",
+   "name": "Lihone SayaBoys",
    "person": "Lihone",
    "themes": [
     "K-Pop"
    ],
-   "grp": "Saja Boys",
+   "grp": "SayaBoys",
    "cost": 3,
    "atk": 5,
    "hp": 10,
@@ -835,12 +835,12 @@ var D={
   },
   {
    "id": "petea-saja",
-   "name": "Petea Saja Boys",
+   "name": "Petea SayaBoys",
    "person": "Petea",
    "themes": [
     "K-Pop"
    ],
-   "grp": "Saja Boys",
+   "grp": "SayaBoys",
    "cost": 4,
    "atk": 5,
    "hp": 15,
@@ -863,7 +863,7 @@ var D={
    "size": 2,
    "pas": {
     "n": "Productora",
-    "t": "Cuenta como una carta más de cualquier grupo K-Pop y recibe sus mejoras de estadísticas. Potencia el grupo elegido: KDA: cada asistencia da además 1 de oro. True Damage: cada tercer ataque de tus tropas del grupo es un Beat Drop de daño doble. Huntrix: el escudo vale el 200% de la vida de la marca. Saja Boys: cada 2 combates da +1/+1 permanente a las demás cartas del grupo."
+    "t": "Cuenta como una carta más de cualquier grupo K-Pop y recibe sus mejoras de estadísticas. Potencia el grupo elegido: KDA: cada asistencia da además 1 de oro. True Damage: cada tercer ataque de tus tropas del grupo es un Beat Drop de daño doble. Huntrix: el escudo vale el 200% de la vida de la marca. SayaBoys: cada 2 combates da +1/+1 permanente a las demás cartas del grupo."
    }
   }
  ],
@@ -1369,7 +1369,7 @@ var D={
    ],
    "color": "#e879f9",
    "tx": [
-    "Elige un grupo del que tengas 2 cartas distintas (AitoRLG Singer cuenta como +1 en cualquiera). KDA: las que golpeen a un enemigo que cae ganan +1 de ataque permanente (asistencia) y quien lo derriba +2 de vida. True Damage: sus golpes atraviesan el 100% de las reducciones de daño y escudos. Huntrix: marcan al rival con más vida; si cae, el equipo gana un escudo con toda su vida. Saja Boys: un rival no legendario por cada Saja Boys queda encandilado y su primer ataque golpea a un aliado suyo.",
+    "Elige un grupo del que tengas 2 cartas distintas (AitoRLG Singer cuenta como +1 en cualquiera). KDA: las que golpeen a un enemigo que cae ganan +1 de ataque permanente (asistencia) y quien lo derriba +2 de vida. True Damage: sus golpes atraviesan el 100% de las reducciones de daño y escudos. Huntrix: marcan al rival con más vida; si cae, el equipo gana un escudo con toda su vida. SayaBoys: un rival no legendario por cada SayaBoys queda encandilado y su primer ataque golpea a un aliado suyo.",
     "Las cartas del grupo elegido ganan +5/+5 permanente.",
     "Las cartas del grupo elegido ganan +10/+10 permanente."
    ]

@@ -706,12 +706,12 @@ var D={
     "K-Pop"
    ],
    "grp": "KDA",
-   "cost": 2,
-   "atk": 4,
-   "hp": 6,
-   "rarity": "Común",
+   "cost": 4,
+   "atk": 5,
+   "hp": 15,
+   "rarity": "Épica",
    "type": "tropa",
-   "size": 1
+   "size": 2
   },
   {
    "id": "javihi-kda",
@@ -736,12 +736,12 @@ var D={
     "K-Pop"
    ],
    "grp": "KDA",
-   "cost": 4,
-   "atk": 5,
-   "hp": 15,
-   "rarity": "Épica",
+   "cost": 2,
+   "atk": 4,
+   "hp": 6,
+   "rarity": "Común",
    "type": "tropa",
-   "size": 2
+   "size": 1
   },
   {
    "id": "chipy-td",
@@ -766,12 +766,12 @@ var D={
     "K-Pop"
    ],
    "grp": "True Damage",
-   "cost": 3,
-   "atk": 5,
-   "hp": 10,
-   "rarity": "Rara",
+   "cost": 4,
+   "atk": 8,
+   "hp": 12,
+   "rarity": "Épica",
    "type": "tropa",
-   "size": 1
+   "size": 2
   },
   {
    "id": "dashlight-td",
@@ -781,12 +781,12 @@ var D={
     "K-Pop"
    ],
    "grp": "True Damage",
-   "cost": 4,
-   "atk": 8,
-   "hp": 12,
-   "rarity": "Épica",
+   "cost": 3,
+   "atk": 5,
+   "hp": 10,
+   "rarity": "Rara",
    "type": "tropa",
-   "size": 2
+   "size": 1
   },
   {
    "id": "sech-huntrix",
@@ -826,12 +826,12 @@ var D={
     "K-Pop"
    ],
    "grp": "SayaBoys",
-   "cost": 3,
+   "cost": 4,
    "atk": 5,
-   "hp": 10,
-   "rarity": "Rara",
+   "hp": 15,
+   "rarity": "Épica",
    "type": "tropa",
-   "size": 1
+   "size": 2
   },
   {
    "id": "petea-saja",
@@ -841,12 +841,12 @@ var D={
     "K-Pop"
    ],
    "grp": "SayaBoys",
-   "cost": 4,
+   "cost": 3,
    "atk": 5,
-   "hp": 15,
-   "rarity": "Épica",
+   "hp": 10,
+   "rarity": "Rara",
    "type": "tropa",
-   "size": 2
+   "size": 1
   },
   {
    "id": "aitorlg-singer",

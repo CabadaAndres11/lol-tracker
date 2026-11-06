@@ -282,6 +282,7 @@ function banReasons(mon) {
   const reasons = [];
   if (BANNED_SPECIES.includes(normText(mon.species))) reasons.push('Slaking no está permitido');
   if (BAN_ABILITY_SET.has(normText(mon.ability))) reasons.push(`la habilidad ${mon.ability} no está permitida`);
+  if (isMegaStone(mon.item) && !mon.megaAbility) reasons.push('debes añadir la habilidad de la Mega (edita el Pokémon)');
   if (mon.megaAbility && BAN_ABILITY_SET.has(normText(mon.megaAbility))) reasons.push(`la habilidad Mega ${mon.megaAbility} no está permitida`);
   // Indefenso + movimiento OHKO: solo es ilegal la combinación (cada cosa por separado vale).
   if (NOGUARD_SET.has(normText(mon.ability))) {

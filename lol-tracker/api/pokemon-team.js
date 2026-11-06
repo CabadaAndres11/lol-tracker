@@ -72,8 +72,7 @@ function validateTeam(team) {
     if (!ability) throw new Error(`Pokémon ${n}: falta la habilidad.`);
     if (!moves[0]) throw new Error(`Pokémon ${n}: indica al menos un movimiento.`);
 
-    if (isMegaStone(item) && !megaAbility) throw new Error(`Pokémon ${n}: indica la habilidad de la Mega (lleva una megapiedra).`);
-
+    // Con megapiedra la habilidad de la Mega es obligatoria en el formulario; si falta (p. ej. al importar de Showdown) se guarda vacía y la web lo marca en rojo.
     for (const text of [species, nickname, ability, item, megaAbility, ...moves]) {
       if (text.length > MAX_FIELD) throw new Error(`Los textos no pueden superar ${MAX_FIELD} caracteres.`);
       if (/[<>]/.test(text)) throw new Error('Hay caracteres no permitidos.');

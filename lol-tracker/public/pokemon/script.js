@@ -476,20 +476,23 @@ function circleHtml(player) {
   const lead = team[li];
   const rival = rivals[id];
   const banned = lead ? banReasons(lead) : [];
-  const leadTypes = lead ? typesOf(lead) : [];
+  const leadMega = lead && lead.megaAbility ? megaFormOf(lead) : null;       // forma Mega (si lleva megapiedra y habilidad)
+  const megaActive = !!(leadMega && megaOn.has(`${id}:${li}`));
+  const shown = megaActive ? { ...lead, dexId: leadMega.id } : lead;          // lo que se enseña en el campo
+  const leadTypes = lead ? typesOf(shown) : [];
   const rivalTypes = rival ? typesOf(rival) : [];
   const firstMoveType = lead ? TYPES[moveTypes[String(lead.moves[0] || '').toLowerCase()]] : null;
   const tint = TYPES[leadTypes[0]]?.[1] || firstMoveType?.[1] || '#4cc9f0';
   const chips = (ids) => ids.map((t) => TYPES[t] ? `<span class="bt-type${isLightColor(TYPES[t][1]) ? ' light' : ''}" style="--tc:${TYPES[t][1]}">${TYPES[t][0]}</span>` : '').join('');
   const fav = favInfo(player.name);
 
-  const leadName = lead ? (lead.nickname || lead.species) : '';
+  const leadName = lead ? (megaActive ? leadMega.name : (lead.nickname || lead.species)) : '';
   const msg = lead ? `¡Adelante, ${leadName}!` : team.length ? '' : 'Todavía no hay Pokémon. ¡Añade el primero!';
 
   const sparks = (on) => on ? '<i class="bt-spark" style="left:12%;top:14%"></i><i class="bt-spark" style="right:14%;top:26%;animation-delay:.4s"></i><i class="bt-spark" style="left:46%;top:4%;animation-delay:.8s"></i><i class="bt-spark" style="right:24%;bottom:22%;animation-delay:1.1s"></i>' : '';
 
   const meHtml = lead
-    ? `<button type="button" class="bt-sprite" data-action="open-mon" data-id="${eid}" data-index="${li}" title="Ver detalles de ${escapeHtml(lead.species)}" aria-label="Ver detalles de ${escapeHtml(lead.species)}">${monImage(lead, 'bt-img')}${sparks(lead.shiny)}</button>`
+    ? `<button type="button" class="bt-sprite" data-action="open-mon" data-id="${eid}" data-index="${li}" title="Ver detalles de ${escapeHtml(lead.species)}" aria-label="Ver detalles de ${escapeHtml(lead.species)}">${monImage(shown, 'bt-img')}${sparks(lead.shiny)}</button>${leadMega ? `<button type="button" class="bt-mega${megaActive ? ' on' : ''}" data-action="toggle-mega" data-id="${eid}" data-index="${li}" title="${megaActive ? 'Volver a la forma normal' : 'Megaevolucionar'}" aria-label="${megaActive ? 'Volver a la forma normal' : 'Megaevolucionar'}"><img src="/pokemon/mega.png" alt="" draggable="false"></button>` : ''}`
     : `<button type="button" class="bt-sprite" data-action="add-mon" data-id="${eid}" aria-label="Añadir Pokémon"><div class="bt-img bt-img-empty">+</div></button>`;
 
   const foeHtml = rival
@@ -543,8 +546,8 @@ function circleHtml(player) {
         <div class="bt-moves">${moves}</div>
         ${lead ? `<div class="bt-info">
           ${banned.length ? banAlert(banned) : ''}
-          <div><span>Pokémon</span>${escapeHtml(lead.species)}</div>
-          <div><span>Habilidad</span>${escapeHtml(lead.ability)}</div>
+          <div><span>Pokémon</span>${escapeHtml(megaActive ? leadMega.name : lead.species)}</div>
+          <div><span>Habilidad${megaActive ? ' (Mega)' : ''}</span>${escapeHtml(megaActive ? lead.megaAbility : lead.ability)}</div>
           <div><span>Objeto</span>${escapeHtml(lead.item || '—')}</div>
           <div><span>Naturaleza</span>${escapeHtml(nat)}</div>
           <button type="button" class="bt-link" data-action="open-mon" data-id="${eid}" data-index="${li}">Ver / editar este Pokémon</button>
@@ -1270,6 +1273,7 @@ async function onAction(e) {
   } else if (action === 'toggle-mega') {
     const k = `${id}:${index}`;
     if (megaOn.has(k)) megaOn.delete(k); else megaOn.add(k);
+    render();
     renderPopup();
   } else if (action === 'open-mon') {
     viewing = { id, index };

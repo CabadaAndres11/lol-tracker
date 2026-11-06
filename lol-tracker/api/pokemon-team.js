@@ -43,6 +43,12 @@ async function redis(cfg, command) {
   return data.result;
 }
 
+// Megapiedras: en español acaban en "-ita" (con X/Y/Z opcional) y en inglés en "-ite". Eviolite no lo es.
+const isMegaStone = (item) => {
+  const t = String(item || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase();
+  return t !== 'eviolite' && /(ita|ite)( [xyz])?$/.test(t);
+};
+
 function clean(value) {
   return String(value ?? '').replace(/\s+/g, ' ').trim();
 }
@@ -58,6 +64,7 @@ function validateTeam(team) {
     const nickname = clean(mon?.nickname);
     const ability = clean(mon?.ability);
     const item = clean(mon?.item); // objeto equipado (opcional)
+    const megaAbility = clean(mon?.megaAbility); // habilidad al megaevolucionar (obligatoria con megapiedra)
     const moves = (Array.isArray(mon?.moves) ? mon.moves : []).slice(0, 4).map(clean);
     while (moves.length < 4) moves.push('');
 
@@ -65,7 +72,9 @@ function validateTeam(team) {
     if (!ability) throw new Error(`Pokémon ${n}: falta la habilidad.`);
     if (!moves[0]) throw new Error(`Pokémon ${n}: indica al menos un movimiento.`);
 
-    for (const text of [species, nickname, ability, item, ...moves]) {
+    if (isMegaStone(item) && !megaAbility) throw new Error(`Pokémon ${n}: indica la habilidad de la Mega (lleva una megapiedra).`);
+
+    for (const text of [species, nickname, ability, item, megaAbility, ...moves]) {
       if (text.length > MAX_FIELD) throw new Error(`Los textos no pueden superar ${MAX_FIELD} caracteres.`);
       if (/[<>]/.test(text)) throw new Error('Hay caracteres no permitidos.');
     }
@@ -78,6 +87,7 @@ function validateTeam(team) {
     if (nature && !NATURES.includes(nature)) throw new Error(`Pokémon ${n}: naturaleza no válida.`);
 
     const out = { species, nickname, ability, item, moves };
+    if (isMegaStone(item)) out.megaAbility = megaAbility;
     if (nature) out.nature = nature;
     if (mon?.shiny === true) out.shiny = true;
     if (dexId) out.dexId = dexId;

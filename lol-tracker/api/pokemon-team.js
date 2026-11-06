@@ -1,7 +1,20 @@
 // Equipos de los participantes del torneo Pokémon (máx. 6 Pokémon cada uno).
 // Se guardan en Redis (Upstash) en un hash: campo = nombre del jugador en
 // minúsculas, valor = JSON con la lista de Pokémon.
+const crypto = require('crypto');
 const { checkPin } = require('./_pin');
+
+// Fecha límite de entrega de equipos (misma que la cuenta atrás de la web).
+// Pasada esa hora solo se pueden modificar con la clave de administrador (LEAGUE_ADMIN_KEY).
+const DELIVERY_DEADLINE = Date.parse('2026-11-11T23:59:00+01:00');
+
+function adminOk(req) {
+  const expected = process.env.LEAGUE_ADMIN_KEY;
+  if (!expected) return false; // sin clave configurada nadie es administrador
+  const a = Buffer.from(String(req.headers['x-admin-key'] ?? ''));
+  const b = Buffer.from(expected);
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
 
 const PLAYERS_KEY = 'pokemon:players';
 const TEAMS_KEY = 'pokemon:teams';
@@ -101,6 +114,11 @@ module.exports = async function handler(req, res) {
       const players = (await redis(cfg, ['ZRANGE', PLAYERS_KEY, 0, -1])).map((s) => JSON.parse(s));
       if (!id || !players.some((p) => p.name.toLowerCase() === id)) {
         res.status(404).json({ error: 'Ese participante no existe.' });
+        return;
+      }
+
+      if (Date.now() >= DELIVERY_DEADLINE && !adminOk(req)) {
+        res.status(403).json({ closed: true, error: 'La entrega de equipos está cerrada: ya no se pueden modificar.' });
         return;
       }
 

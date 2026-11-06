@@ -1144,10 +1144,11 @@ async function putWithPin(id, url, payload) {
   for (let attempt = 0; attempt < 4; attempt++) {
     const res = await fetch(url, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json', ...(pin ? { 'X-Pin': pin } : {}) },
+      headers: { 'Content-Type': 'application/json', ...(pin ? { 'X-Pin': pin } : {}), ...(getAdminKey() ? { 'X-Admin-Key': getAdminKey() } : {}) },
       body: JSON.stringify(payload),
     });
     const data = await res.json();
+    if (res.status === 403 && data.closed) { setAdminKey(''); throw new Error(data.error + ' (clave de administrador incorrecta o ausente)'); }
     if (res.status === 401 && data.needPin) {
       setPin(id, '');
       const asked = prompt(
@@ -1210,6 +1211,15 @@ function toggleBadge(id, i) {
 // Interacción con la lista (delegación de eventos)
 // ---------------------------------------------------------------
 
+// Pasada la fecha de entrega, solo se pueden tocar los equipos con la clave de administrador.
+function ensureTeamEdit() {
+  if (Date.now() < DELIVERY_DEADLINE || getAdminKey()) return true;
+  const key = prompt('La entrega de equipos está cerrada y ya no se pueden modificar.\n\nSi eres administrador, introduce la clave:');
+  if (!key || !key.trim()) return false;
+  setAdminKey(key.trim());
+  return true;
+}
+
 async function onAction(e) {
   const btn = e.target.closest('[data-action]');
   if (!btn) return;
@@ -1217,6 +1227,8 @@ async function onAction(e) {
   const action = btn.dataset.action;
   const id = btn.dataset.id ? decodeURIComponent(btn.dataset.id) : null;
   const index = Number(btn.dataset.index);
+
+  if (['add-mon', 'edit-mon', 'delete-mon', 'import-team'].includes(action) && !ensureTeamEdit()) return;
 
   if (action === 'badge') {
     toggleBadge(id, index);

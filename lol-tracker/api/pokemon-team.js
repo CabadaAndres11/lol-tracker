@@ -1,7 +1,20 @@
 // Equipos de los participantes del torneo Pokémon (máx. 6 Pokémon cada uno).
 // Se guardan en Redis (Upstash) en un hash: campo = nombre del jugador en
 // minúsculas, valor = JSON con la lista de Pokémon.
+const crypto = require('crypto');
 const { checkPin } = require('./_pin');
+
+// Fecha límite de entrega de equipos (misma que la cuenta atrás de la web).
+// Pasada esa hora solo se pueden modificar con la clave de administrador (LEAGUE_ADMIN_KEY).
+const DELIVERY_DEADLINE = Date.parse('2026-11-11T23:59:00+01:00');
+
+function adminOk(req) {
+  const expected = process.env.LEAGUE_ADMIN_KEY;
+  if (!expected) return false; // sin clave configurada nadie es administrador
+  const a = Buffer.from(String(req.headers['x-admin-key'] ?? ''));
+  const b = Buffer.from(expected);
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
 
 const PLAYERS_KEY = 'pokemon:players';
 const TEAMS_KEY = 'pokemon:teams';
@@ -30,6 +43,12 @@ async function redis(cfg, command) {
   return data.result;
 }
 
+// Megapiedras: en español acaban en "-ita" (con X/Y/Z opcional) y en inglés en "-ite". Eviolite no lo es.
+const isMegaStone = (item) => {
+  const t = String(item || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase();
+  return t !== 'eviolite' && /(ita|ite)( [xyz])?$/.test(t);
+};
+
 function clean(value) {
   return String(value ?? '').replace(/\s+/g, ' ').trim();
 }
@@ -45,6 +64,7 @@ function validateTeam(team) {
     const nickname = clean(mon?.nickname);
     const ability = clean(mon?.ability);
     const item = clean(mon?.item); // objeto equipado (opcional)
+    const megaAbility = clean(mon?.megaAbility); // habilidad al megaevolucionar (obligatoria con megapiedra)
     const moves = (Array.isArray(mon?.moves) ? mon.moves : []).slice(0, 4).map(clean);
     while (moves.length < 4) moves.push('');
 
@@ -52,7 +72,8 @@ function validateTeam(team) {
     if (!ability) throw new Error(`Pokémon ${n}: falta la habilidad.`);
     if (!moves[0]) throw new Error(`Pokémon ${n}: indica al menos un movimiento.`);
 
-    for (const text of [species, nickname, ability, item, ...moves]) {
+    // Con megapiedra la habilidad de la Mega es obligatoria en el formulario; si falta (p. ej. al importar de Showdown) se guarda vacía y la web lo marca en rojo.
+    for (const text of [species, nickname, ability, item, megaAbility, ...moves]) {
       if (text.length > MAX_FIELD) throw new Error(`Los textos no pueden superar ${MAX_FIELD} caracteres.`);
       if (/[<>]/.test(text)) throw new Error('Hay caracteres no permitidos.');
     }
@@ -65,6 +86,7 @@ function validateTeam(team) {
     if (nature && !NATURES.includes(nature)) throw new Error(`Pokémon ${n}: naturaleza no válida.`);
 
     const out = { species, nickname, ability, item, moves };
+    if (isMegaStone(item)) out.megaAbility = megaAbility;
     if (nature) out.nature = nature;
     if (mon?.shiny === true) out.shiny = true;
     if (dexId) out.dexId = dexId;
@@ -101,6 +123,11 @@ module.exports = async function handler(req, res) {
       const players = (await redis(cfg, ['ZRANGE', PLAYERS_KEY, 0, -1])).map((s) => JSON.parse(s));
       if (!id || !players.some((p) => p.name.toLowerCase() === id)) {
         res.status(404).json({ error: 'Ese participante no existe.' });
+        return;
+      }
+
+      if (Date.now() >= DELIVERY_DEADLINE && !adminOk(req)) {
+        res.status(403).json({ closed: true, error: 'La entrega de equipos está cerrada: ya no se pueden modificar.' });
         return;
       }
 

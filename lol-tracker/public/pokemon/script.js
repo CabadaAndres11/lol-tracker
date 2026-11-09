@@ -261,11 +261,29 @@ const BAN_ABILITY_SET = bannedSet(BANNED_ABILITIES);
 const NOGUARD_SET = bannedSet(NOGUARD);
 const BAN_MOVE_SET = bannedSet(BANNED_MOVES);
 
+// Megapiedras (ver también api/pokemon-team.js): acaban en "-ita" / "-ite" con X/Y/Z opcional.
+const isMegaStone = (item) => { const t = normText(item); return t !== 'eviolite' && /(ita|ite)( [xyz])?$/.test(t); };
+
+// Forma Mega de un Pokémon con su megapiedra (null si no se conoce en la Pokédex).
+function megaFormOf(mon) {
+  if (!mon || !isMegaStone(mon.item)) return null;
+  const id = mon.dexId || dexLookup(mon.species)?.id;
+  if (!id) return null;
+  const base = dexById[id]?.baseId || id;
+  const forms = Object.values(dexById).filter((d) => d.baseId === base && /^Mega /.test(d.name));
+  if (!forms.length) return null;
+  const suf = normText(mon.item).match(/ ([xyz])$/);
+  return (suf && forms.find((d) => normText(d.name).endsWith(' ' + suf[1]))) || forms[0];
+}
+const megaOn = new Set(); // fichas abiertas mostrando su forma Mega: 'id:index'
+
 // Devuelve la lista de motivos por los que un Pokémon no vale (vacía si es válido).
 function banReasons(mon) {
   const reasons = [];
   if (BANNED_SPECIES.includes(normText(mon.species))) reasons.push('Slaking no está permitido');
   if (BAN_ABILITY_SET.has(normText(mon.ability))) reasons.push(`la habilidad ${mon.ability} no está permitida`);
+  if (isMegaStone(mon.item) && !mon.megaAbility) reasons.push('debes añadir la habilidad de la Mega (edita el Pokémon)');
+  if (mon.megaAbility && BAN_ABILITY_SET.has(normText(mon.megaAbility))) reasons.push(`la habilidad Mega ${mon.megaAbility} no está permitida`);
   // Indefenso + movimiento OHKO: solo es ilegal la combinación (cada cosa por separado vale).
   if (NOGUARD_SET.has(normText(mon.ability))) {
     (mon.moves || []).filter(Boolean).forEach((m) => {
@@ -320,19 +338,24 @@ function moveLi(name) {
 }
 
 function monDetail(mon, index, id) {
+  const mega = megaFormOf(mon);
+  const showMega = !!(mega && megaOn.has(`${id}:${index}`));
+  const shown = showMega ? { ...mon, dexId: mega.id } : mon;
   const moves = mon.moves.filter(Boolean).map(moveLi).join('');
   return `
     <div class="mon-detail${banReasons(mon).length ? ' is-banned' : ''}">
       ${banReasons(mon).length ? banAlert(banReasons(mon)) : ''}
-      ${monImage(mon, 'detail-img')}
-      <h2>${escapeHtml(mon.species)}${mon.shiny ? ' <span class="shiny-star" title="Shiny">✨</span>' : ''}</h2>
+      ${monImage(shown, 'detail-img')}
+      <h2>${escapeHtml(showMega ? mega.name : mon.species)}${mon.shiny ? ' <span class="shiny-star" title="Shiny">✨</span>' : ''}</h2>
       ${mon.nickname ? `<div class="mon-nick">“${escapeHtml(mon.nickname)}”</div>` : ''}
       <div class="detail-rows">
-        <div class="mon-ability"><span>Habilidad</span> ${escapeHtml(mon.ability)}</div>
+        <div class="mon-ability"><span>Habilidad${showMega ? ' (Mega)' : ''}</span> ${escapeHtml(showMega ? mon.megaAbility : mon.ability)}</div>
+        ${mon.megaAbility && !showMega && !mega ? `<div class="mon-ability"><span>Habilidad (Mega)</span> ${escapeHtml(mon.megaAbility)}</div>` : ''}
         ${mon.nature ? `<div class="mon-ability"><span>Naturaleza</span> ${escapeHtml(natureByName(mon.nature) ? natureText(natureByName(mon.nature)) : mon.nature)}</div>` : ''}
         ${mon.item ? `<div class="mon-ability"><span>Objeto</span> ${escapeHtml(mon.item)}</div>` : ''}
       </div>
       <ul class="mon-moves">${moves}</ul>
+      ${mega && mon.megaAbility ? `<button type="button" class="mega-btn${showMega ? ' on' : ''}" data-action="toggle-mega" data-id="${encodeURIComponent(id)}" data-index="${index}">${showMega ? '↩ Forma normal' : '⚡ Megaevolucionar'}</button>` : ''}
       <div class="mon-actions">
         <button type="button" class="link-btn" data-action="edit-mon" data-id="${encodeURIComponent(id)}" data-index="${index}">Editar</button>
         <button type="button" class="link-btn link-danger" data-action="delete-mon" data-id="${encodeURIComponent(id)}" data-index="${index}">Quitar</button>
@@ -356,6 +379,7 @@ function monForm(id, index) {
         <label>Mote<input name="nickname" type="text" maxlength="30" value="${v(mon?.nickname)}" /></label>
         <label>Habilidad *<input name="ability" type="text" maxlength="30" required list="es-abilities" autocomplete="off" value="${v(mon?.ability)}" /></label>
         <label>Objeto equipado<input name="item" type="text" maxlength="30" list="es-items" autocomplete="off" value="${v(mon?.item)}" /></label>
+        <label data-mega${isMegaStone(mon?.item) ? '' : ' hidden'}>Habilidad de la Mega *<input name="megaAbility" type="text" maxlength="30" list="es-abilities" autocomplete="off" value="${v(mon?.megaAbility)}"${isMegaStone(mon?.item) ? ' required' : ''} /></label>
         <label>Naturaleza
           <select name="nature">
             <option value="">— Sin indicar —</option>
@@ -453,20 +477,23 @@ function circleHtml(player) {
   const lead = team[li];
   const rival = rivals[id];
   const banned = lead ? banReasons(lead) : [];
-  const leadTypes = lead ? typesOf(lead) : [];
+  const leadMega = lead && lead.megaAbility ? megaFormOf(lead) : null;       // forma Mega (si lleva megapiedra y habilidad)
+  const megaActive = !!(leadMega && megaOn.has(`${id}:${li}`));
+  const shown = megaActive ? { ...lead, dexId: leadMega.id } : lead;          // lo que se enseña en el campo
+  const leadTypes = lead ? typesOf(shown) : [];
   const rivalTypes = rival ? typesOf(rival) : [];
   const firstMoveType = lead ? TYPES[moveTypes[String(lead.moves[0] || '').toLowerCase()]] : null;
   const tint = TYPES[leadTypes[0]]?.[1] || firstMoveType?.[1] || '#4cc9f0';
   const chips = (ids) => ids.map((t) => TYPES[t] ? `<span class="bt-type${isLightColor(TYPES[t][1]) ? ' light' : ''}" style="--tc:${TYPES[t][1]}">${TYPES[t][0]}</span>` : '').join('');
   const fav = favInfo(player.name);
 
-  const leadName = lead ? (lead.nickname || lead.species) : '';
+  const leadName = lead ? (megaActive ? leadMega.name : (lead.nickname || lead.species)) : '';
   const msg = lead ? `¡Adelante, ${leadName}!` : team.length ? '' : 'Todavía no hay Pokémon. ¡Añade el primero!';
 
   const sparks = (on) => on ? '<i class="bt-spark" style="left:12%;top:14%"></i><i class="bt-spark" style="right:14%;top:26%;animation-delay:.4s"></i><i class="bt-spark" style="left:46%;top:4%;animation-delay:.8s"></i><i class="bt-spark" style="right:24%;bottom:22%;animation-delay:1.1s"></i>' : '';
 
   const meHtml = lead
-    ? `<button type="button" class="bt-sprite" data-action="open-mon" data-id="${eid}" data-index="${li}" title="Ver detalles de ${escapeHtml(lead.species)}" aria-label="Ver detalles de ${escapeHtml(lead.species)}">${monImage(lead, 'bt-img')}${sparks(lead.shiny)}</button>`
+    ? `<button type="button" class="bt-sprite" data-action="open-mon" data-id="${eid}" data-index="${li}" title="Ver detalles de ${escapeHtml(lead.species)}" aria-label="Ver detalles de ${escapeHtml(lead.species)}">${monImage(shown, 'bt-img')}${sparks(lead.shiny)}</button>${leadMega ? `<button type="button" class="bt-mega${megaActive ? ' on' : ''}" data-action="toggle-mega" data-id="${eid}" data-index="${li}" title="${megaActive ? 'Volver a la forma normal' : 'Megaevolucionar'}" aria-label="${megaActive ? 'Volver a la forma normal' : 'Megaevolucionar'}"><img src="/pokemon/mega.png" alt="" draggable="false"></button>` : ''}`
     : `<button type="button" class="bt-sprite" data-action="add-mon" data-id="${eid}" aria-label="Añadir Pokémon"><div class="bt-img bt-img-empty">+</div></button>`;
 
   const foeHtml = rival
@@ -520,8 +547,8 @@ function circleHtml(player) {
         <div class="bt-moves">${moves}</div>
         ${lead ? `<div class="bt-info">
           ${banned.length ? banAlert(banned) : ''}
-          <div><span>Pokémon</span>${escapeHtml(lead.species)}</div>
-          <div><span>Habilidad</span>${escapeHtml(lead.ability)}</div>
+          <div><span>Pokémon</span>${escapeHtml(megaActive ? leadMega.name : lead.species)}</div>
+          <div><span>Habilidad${megaActive ? ' (Mega)' : ''}</span>${escapeHtml(megaActive ? lead.megaAbility : lead.ability)}</div>
           <div><span>Objeto</span>${escapeHtml(lead.item || '—')}</div>
           <div><span>Naturaleza</span>${escapeHtml(nat)}</div>
           <button type="button" class="bt-link" data-action="open-mon" data-id="${eid}" data-index="${li}">Ver / editar este Pokémon</button>
@@ -1144,10 +1171,11 @@ async function putWithPin(id, url, payload) {
   for (let attempt = 0; attempt < 4; attempt++) {
     const res = await fetch(url, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json', ...(pin ? { 'X-Pin': pin } : {}) },
+      headers: { 'Content-Type': 'application/json', ...(pin ? { 'X-Pin': pin } : {}), ...(getAdminKey() ? { 'X-Admin-Key': getAdminKey() } : {}) },
       body: JSON.stringify(payload),
     });
     const data = await res.json();
+    if (res.status === 403 && data.closed) { setAdminKey(''); throw new Error(data.error + ' (clave de administrador incorrecta o ausente)'); }
     if (res.status === 401 && data.needPin) {
       setPin(id, '');
       const asked = prompt(
@@ -1210,6 +1238,15 @@ function toggleBadge(id, i) {
 // Interacción con la lista (delegación de eventos)
 // ---------------------------------------------------------------
 
+// Pasada la fecha de entrega, solo se pueden tocar los equipos con la clave de administrador.
+function ensureTeamEdit() {
+  if (Date.now() < DELIVERY_DEADLINE || getAdminKey()) return true;
+  const key = prompt('La entrega de equipos está cerrada y ya no se pueden modificar.\n\nSi eres administrador, introduce la clave:');
+  if (!key || !key.trim()) return false;
+  setAdminKey(key.trim());
+  return true;
+}
+
 async function onAction(e) {
   const btn = e.target.closest('[data-action]');
   if (!btn) return;
@@ -1217,6 +1254,8 @@ async function onAction(e) {
   const action = btn.dataset.action;
   const id = btn.dataset.id ? decodeURIComponent(btn.dataset.id) : null;
   const index = Number(btn.dataset.index);
+
+  if (['add-mon', 'edit-mon', 'delete-mon', 'import-team'].includes(action) && !ensureTeamEdit()) return;
 
   if (action === 'badge') {
     toggleBadge(id, index);
@@ -1232,6 +1271,11 @@ async function onAction(e) {
     renderPopup();
   } else if (action === 'clear-rival') {
     saveRival(editing.id, null).then(() => { closePopup(); render(); }).catch((err) => { if (!err.cancelled) alert(err.message); });
+  } else if (action === 'toggle-mega') {
+    const k = `${id}:${index}`;
+    if (megaOn.has(k)) megaOn.delete(k); else megaOn.add(k);
+    render();
+    renderPopup();
   } else if (action === 'open-mon') {
     viewing = { id, index };
     renderPopup();
@@ -1282,9 +1326,14 @@ document.getElementById('close-mon').addEventListener('click', closePopup);
 // Aviso en vivo en el formulario (se puede guardar igualmente).
 function updateFormBan(form) {
   const fd = new FormData(form);
+  // La habilidad de la Mega solo se pide (y es obligatoria) si el objeto es una megapiedra.
+  const mega = isMegaStone(fd.get('item'));
+  const megaLabel = form.querySelector('[data-mega]');
+  if (megaLabel) { megaLabel.hidden = !mega; megaLabel.querySelector('input').required = mega; }
   const reasons = banReasons({
     species: fd.get('species'),
     ability: fd.get('ability'),
+    megaAbility: mega ? fd.get('megaAbility') : '',
     moves: [0, 1, 2, 3].map((i) => fd.get(`move${i}`)),
   });
   const box = form.querySelector('[data-ban]');
@@ -1316,6 +1365,7 @@ monModal.addEventListener('submit', async (e) => {
     nickname: fd.get('nickname'),
     ability: fd.get('ability'),
     item: fd.get('item'),
+    megaAbility: isMegaStone(fd.get('item')) ? fd.get('megaAbility') : '',
     nature: fd.get('nature') || '',
     shiny: fd.get('shiny') === 'on',
     moves: [0, 1, 2, 3].map((i) => fd.get(`move${i}`)),
@@ -1427,11 +1477,13 @@ function parseTeamText(text) {
     if (m) { nickname = m[1].trim(); species = m[2].trim(); }
 
     let ability = '';
+    let megaAbility = '';
     let nature = '';
     let shiny = false;
     const moves = [];
     for (const l of lines.slice(1)) {
-      if (/^ability:/i.test(l)) ability = l.replace(/^ability:/i, '').trim();
+      if (/^mega ability:/i.test(l)) megaAbility = l.replace(/^mega ability:/i, '').trim();
+      else if (/^ability:/i.test(l)) ability = l.replace(/^ability:/i, '').trim();
       else if (/^shiny:\s*yes/i.test(l)) shiny = true;
       else if (/^[A-Za-z]+\s+nature$/i.test(l)) nature = natureByName(l.replace(/\s+nature$/i, ''))?.[0] || '';
       else if (/^-\s*\S/.test(l)) moves.push(l.replace(/^-\s*/, '').trim());
@@ -1444,6 +1496,7 @@ function parseTeamText(text) {
       nickname: nickname && nickname.toLowerCase() !== species.toLowerCase() ? clean(nickname) : '',
       ability: ability ? toEs('abilities', ability) : '',
       item: item ? toEs('items', item) : '',
+      megaAbility: megaAbility ? toEs('abilities', megaAbility) : '',
       nature,
       shiny,
       moves: [0, 1, 2, 3].map((i) => (moves[i] ? toEs('moves', moves[i]) : '')),
@@ -1470,6 +1523,7 @@ function teamToText(team) {
     return [
       head + (m.item ? ` @ ${toEn('items', m.item)}` : ''),
       m.ability ? `Ability: ${toEn('abilities', m.ability)}` : '',
+      m.megaAbility ? `Mega Ability: ${toEn('abilities', m.megaAbility)}` : '',
       m.shiny ? 'Shiny: Yes' : '',
       nat ? `${nat} Nature` : '',
       ...m.moves.filter(Boolean).map((mv) => `- ${toEn('moves', mv)}`),

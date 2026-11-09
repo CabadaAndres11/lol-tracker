@@ -51,7 +51,7 @@
     var x = p(a), y = p(b);
     return '#' + x.map(function (v, i) { return ('0' + Math.round(v * (1 - t) + y[i] * t).toString(16)).slice(-2); }).join('');
   }
-  var TIMG = { 'Pokémon': 'pokemon', 'Lol': 'lol', 'KOI': 'koi', 'Anime': 'anime', 'Comebacker': 'comebacker', 'Voley': 'voley', 'Informático': 'informatico', 'Magic Botlane': 'magic-botlane', 'K-Pop': 'kpop' };
+  var TIMG = { 'Pokémon': 'pokemon', 'Lol': 'lol', 'KOI': 'koi', 'Anime': 'anime', 'Comebacker': 'comebacker', 'Voley': 'voley', 'Informático': 'informatico', 'Magic Botlane': 'magic-botlane', 'K-Pop': 'kpop', 'Fantasía': 'fantasia' };
   function tic(t) { return TIMG[t] ? '<img class="ic tic timg" src="/cartas/img/' + TIMG[t] + '.png" alt="">' : ic('t-' + t, 'tic'); }
   function tn(t) { return t === 'K-Pop' ? '' : esc(t); } // K-Pop: el logo ya lleva el nombre
   function tagHtml(t) { return '<span class="tag" style="--tc:' + D.themes[t].color + '">' + tic(t) + tn(t) + '</span>'; }
@@ -1823,6 +1823,7 @@
       if (v.id === 'sech-duo' && !v.dead && P.arma) { var an = E.ARMA_NM[P.arma]; o.extra = (o.extra || '') + '<span class="wpnb" title="Armas Lunares · ' + an + ': ' + E.ARMA_TX[P.arma] + '"><img src="/cartas/img/arma-' + P.arma + '.png" alt="' + an + '"><b>' + an + '</b></span>'; }
       if (I && I.turret) o.cls += ' turretc';
       if ((I && I.tmp && I.tmp.stun) || v.stun) o.cls += ' stunned';
+      if (I && !I.dead && P.prot === I.uid && (E.tiers(P)['Fantasía'] || 0) >= 1) { o.cls += ' protag'; o.extra = (o.extra || '') + '<span class="protb" title="Protagonista: recibe todos los ataques rivales">' + ic('estrella') + ' Protagonista</span>'; }
       var wl = k > 0 ? P.mesa[k - 1] : null; // Prórroga (AitoRLG Renata): marca la casilla que protege
       if (wl && !wl.dead && wl.id === 'aitorlg-renata' && !v.dead && !(I && I.shadow)) { o.cls += ' warded' + (I && I.tmp && I.tmp.ward ? ' wardhold' : ''); o.extra = (o.extra || '') + '<span class="wardfx" title="Prórroga: no cae a 0 de vida hasta que ataque">' + ic('escudo') + '</span>'; }
       o.gl = I ? I.gl : 1; o.lv = lvG(side, v.id); o.skin = skG(side, v.id); if (mine) o.slv = sleeveId(); if (mine && k === 4 && !(I && I.shadow)) under += novSwitch(s); h += '<div class="cw">' + cardHtml(c, o) + under + '</div>';
@@ -2503,7 +2504,7 @@ var GOB_SVG = '<svg class="gobsvg" viewBox="0 0 100 100"><g class="gobleg a"><re
   }
 
     // ---------- Efectos de sinergia: cartel, bola, números flotantes ----------
-  var FXICON = { loot: 'moneda', duo: 'duo', armas: 'duo', novia: 'corazon', eriko: 'corazon', lucia: 'ojo', voley: 'voley', comeback: 'fuego', kpop: 'estrella', koi: 'trofeo', trabajo: 'maletin', gorb: 'dado', gambling: 'dado', malaracha: 'dado', colega: 'dado' };
+  var FXICON = { loot: 'moneda', duo: 'duo', armas: 'duo', novia: 'corazon', eriko: 'corazon', lucia: 'ojo', voley: 'voley', comeback: 'fuego', kpop: 'estrella', koi: 'trofeo', trabajo: 'maletin', fantasia: 'estrella', gorb: 'dado', gambling: 'dado', malaracha: 'dado', colega: 'dado' };
   // Gambling: ruleta de casino (una sola tirada) que termina mostrando el total de mejora de todas las orbes
   function gamWheelSvg(win, total) {
     var N = 24, step = 360 / N, h = '', k, hi = Math.max(3, total + 2), vals = [];

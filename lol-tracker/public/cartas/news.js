@@ -1,6 +1,15 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-09', tag: 'Novedad', title: 'Nueva sinergia: Fantasía',
+      items: [
+        'Nueva sinergia Fantasía (niveles con 2 y 4 cartas distintas): Sech, Pampert Carry, Lihone Rudeus, Hellbramn Goblin, Javihi KDA y Chipy Goku.',
+        'Eliges un Protagonista con la nueva carta de acción Giro de Guion (Set 2), que también sirve para cambiarlo. Si llega el combate sin elegir, se fija solo.',
+        'Nivel 1: el Protagonista recibe el 75 % de la vida de las demás cartas Fantasía. Nivel 2: recibe el 100 % y ellas quedan a 1 de vida.',
+        'Todos los ataques rivales van al Protagonista y los contraataques no dañan a las cartas Fantasía. El daño en área y las pasivas sí siguen dañando y pueden eliminar a las demás.',
+        'Si el Protagonista cae, caen también todas las cartas Fantasía.',
+        'Chipy Goku pasa a Épica (coste 4, 7/13) y gana la pasiva Guinazo: si el Protagonista cae, el resto de cartas Fantasía se quedan en el campo con 1 de vida.'
+      ] },
     { date: '2026-11-09', tag: 'Novedad', title: 'Reforja en el inventario',
       items: [
         'Nueva Reforja en la pestaña Inventario: coloca 3 skins repetidas (o 3 efectos repetidos, sin mezclar clases) en el triángulo y pulsa Reforjar. Las tres giran en espiral hasta el centro y consigues una skin o un efecto que no tengas.',

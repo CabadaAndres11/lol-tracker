@@ -2973,3 +2973,11 @@ body.gpulling #app { opacity: 0; pointer-events: none; }
 .rfov.stage-done .rfmain { opacity: 0; transition: opacity .3s; }
 .rfres { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .6rem; padding: 1rem; animation: dgfade .6s ease-out both; }
 .rfres .gcardw { width: min(46vw, 200px); } .rfname { font-size: 1.3rem; text-align: center; }
+
+/* Fantasía: Protagonista */
+.card.protag { position: relative; }
+.card.protag::after { content: ''; position: absolute; inset: -4px; border-radius: 12px; pointer-events: none; z-index: 6; border: 2px solid #c4b5fd; box-shadow: 0 0 16px rgba(167,139,250,.9), inset 0 0 14px rgba(167,139,250,.4); }
+.protb { position: absolute; left: 50%; bottom: -.7em; transform: translateX(-50%); z-index: 8; background: #6d28d9; color: #fff; font-size: .6rem; font-weight: 800; padding: 1px 7px; border-radius: 999px; white-space: nowrap; display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 0 10px rgba(167,139,250,.8); }
+.protb svg { width: .8em; height: .8em; }
+img.timg[src$="fantasia.png"], .tlogo[src$="fantasia.png"] { width: auto; height: auto; max-width: 1.6em; max-height: 1.6em; }
+.card.accion .tlogo[src$="fantasia.png"] { max-width: .9em; max-height: .9em; }

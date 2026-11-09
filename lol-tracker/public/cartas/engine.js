@@ -545,6 +545,9 @@
       ok: function (s, p, t) { if ((tiers(s.p[p])['Magic Botlane'] || 0) < 1) return 'Necesitas el nivel 1 de Magic Botlane (Javihi Dúo + Sech Dúo).'; return t && t.tmp.noAtk ? 'Esa tropa ya no puede actuar este turno.' : ''; },
       run: function (s, p, t) { t.tmp.noAtk = true; t.tmp.stun = true; return card(t).name + ' no podrá actuar en este combate'; } },
     lluvia: { ok: function (s, p) { return targetable(s.p[1 - p]).length ? '' : 'El rival no tiene tropas.'; }, run: function (s, p) { var n = sc(s, 2); targetable(s.p[1 - p]).forEach(function (i) { genCharge(s, i, Math.min(n, Math.max(0, i.hp))); i.hp -= n; if (i.hp <= 0) dropDead(s, 1 - p, i); }); return n + ' de daño a todas las rivales'; } },
+    'giro-de-guion': {
+      ok: function (s, p, t) { if ((tiers(s.p[p])['Fantasía'] || 0) < 1) return 'Necesitas el nivel 1 de Fantasía (2 cartas distintas).'; return t ? '' : 'Elige una tropa desplegada en tu mesa.'; },
+      run: function (s, p, t) { s.p[p].prot = t.uid; return card(t).name + ' es ahora el Protagonista'; } },
     'cambio-de-escenario': {
       ok: function (s, p) { var P = s.p[p]; if ((tiers(P)['K-Pop'] || 0) < 1) return 'Necesitas el nivel 1 de K-Pop (2 cartas distintas).'; return P.kgrp ? '' : 'Aún no has elegido un grupo K-Pop.'; },
       run: function (s, p) { var P = s.p[p], old = P.kgrp; P.kgrp = null; kpopSync(s, p); return 'olvidas el grupo ' + old + ': elige otro en el panel de K-Pop'; } },
@@ -692,7 +695,7 @@
       var i = P.hand[k];
       if (!i || isTroop(i)) continue; // (una acción anterior pudo fusionar cartas y acortar la mano)
       var c = card(i), allies = mesaTroops(P), foes = targetable(s.p[1 - p]);
-      if (c.id === 'cambio-de-linea' || c.id === 'cambio-de-escenario' || (c.id === 'genkidama' && genStored(P) < 3) || (c.id === 'kamehameha' && genStored(P) < 2 * Math.max(1, foes.length))) continue; // la IA no la usa
+      if (c.id === 'cambio-de-linea' || c.id === 'cambio-de-escenario' || c.id === 'giro-de-guion' || (c.id === 'genkidama' && genStored(P) < 3) || (c.id === 'kamehameha' && genStored(P) < 2 * Math.max(1, foes.length))) continue; // la IA no la usa
       var tgt = null;
       if (c.target === 'ally') { allies.sort(function (a, b) { return atk(b) - atk(a); }); tgt = allies[0]; if (c.id === 'armadura') tgt = allies.slice().sort(function (a, b) { return maxHp(b) - maxHp(a); })[0]; }
       else if (c.target === 'enemy') {
@@ -919,7 +922,7 @@
 
   // Efectos al caer una tropa (KOI). Devuelve texto de registro y animación.
   // ---------- Pasivas de legendarias ----------
-  var PAS = { 'dashlight-sun-jin-woo': 'sombra', 'aitorlg-maomao': 'boticaria', 'javihi-duo': 'muro', 'sech-duo': 'armas', 'javihi-friki': 'remate', 'sech': 'embargo', 'potango': 'amor', 'petea-goblin': 'loot', 'rey-goblin': 'avaricia', 'lihone-viego': 'racha', 'aitorlg-renata': 'prorroga', 'lihone': 'captura', 'pampert-koisito': 'cabezon', 'aitorlg-koisito': 'heredero', 'mertens-gambler': 'malaracha', 'computer-dashlight': 'medallas', 'pampert-gambler': 'colega', 'aitorlg-singer': 'singer', 'hellbramn-kda': 'firestarter', 'pampert-td': 'giants', 'mertens-huntrix': 'golden', 'lihone-saja': 'idol' };
+  var PAS = { 'dashlight-sun-jin-woo': 'sombra', 'aitorlg-maomao': 'boticaria', 'javihi-duo': 'muro', 'sech-duo': 'armas', 'javihi-friki': 'remate', 'sech': 'embargo', 'potango': 'amor', 'petea-goblin': 'loot', 'rey-goblin': 'avaricia', 'lihone-viego': 'racha', 'aitorlg-renata': 'prorroga', 'lihone': 'captura', 'pampert-koisito': 'cabezon', 'aitorlg-koisito': 'heredero', 'mertens-gambler': 'malaracha', 'computer-dashlight': 'medallas', 'pampert-gambler': 'colega', 'aitorlg-singer': 'singer', 'hellbramn-kda': 'firestarter', 'pampert-td': 'giants', 'mertens-huntrix': 'golden', 'lihone-saja': 'idol', 'chipy-goku': 'guinazo' };
   function pas(i) { return PAS[i.id] || ''; }
   // ---------- Magic Botlane: Armas Lunares (Sech Dúo) y Muro de Hielo (Javihi Dúo) ----------
   var ARMAS = ['calibrum', 'severum', 'gravitum', 'infernum', 'crescendum'];
@@ -929,6 +932,35 @@
   function pickArma(s, P) {
     var opts = ARMAS.filter(function (a) { return a !== P.arma; });
     P.arma = opts[Math.floor(s.rng() * opts.length)];
+  }
+  // Fantasía: el Protagonista (P.prot) y las cartas Fantasía de la mesa
+  function fanMembers(P) { return mesaTroops(P).filter(function (i) { return has(i, 'Fantasía'); }); }
+  function fanProt(P) { var u = P.prot; return u == null ? null : (mesaTroops(P).filter(function (i) { return i.uid === u; })[0] || null); }
+  // Si llega el combate sin Protagonista, se fija el de más vida entre las cartas Fantasía
+  function fanAuto(s, p) {
+    var P = s.p[p]; if ((tiers(P)['Fantasía'] || 0) < 1 || fanProt(P)) return;
+    var m = fanMembers(P).sort(function (a, b) { return maxHp(b) - maxHp(a); })[0];
+    if (!m) return;
+    P.prot = m.uid;
+    if (p === 0 || s.pvp) say(s, pv(s, p, 'Fantasía: no elegiste Protagonista, se fija ' + card(m).name + '.', 'El rival fija su Protagonista: ' + card(m).name + '.'));
+  }
+  // Al empezar el combate el Protagonista absorbe la vida de las demás Fantasía (75 % / 100 %, que quedan a 1)
+  function fanStart(s) {
+    s.fan = [null, null];
+    [0, 1].forEach(function (p) {
+      var P = s.p[p], lv = s.tiers[p]['Fantasía'] || 0, pr = lv ? fanProt(P) : null;
+      if (!pr) return;
+      s.fan[p] = pr.uid;
+      var tot = 0, ids = [pr.uid];
+      fanMembers(P).forEach(function (m) {
+        if (m === pr) return;
+        var n = lv >= 2 ? m.hp - 1 : Math.floor(m.hp * 0.75);
+        n = Math.max(0, Math.min(n, m.hp - 1));
+        m.hp -= n; tot += n; ids.push(m.uid);
+      });
+      if (tot > 0) { pr.tmp.hp += tot; pr.hp += tot; }
+      fxFrame(s, p, 'fantasia', 'Fantasía · Protagonista', card(pr).name + ' recibe ' + tot + ' de vida de las demás cartas Fantasía', ids);
+    });
   }
   // Magic Botlane activa y ambas vivas en la mesa: devuelve a Javihi Dúo para redirigir los ataques a Sech Dúo
   function botlaneGuard(s, owner) {
@@ -961,6 +993,14 @@
   function deathFx(s, d, depth) {
     var line = '', fxk = null; depth = depth || 0;
     var killer = s.killer; s.killer = null;
+    if (s.fan && s.fan[d.owner] === d.uid) { // Fantasía: al caer el Protagonista caen las demás cartas Fantasía (salvo con Guinazo)
+      var fm = fanMembers(s.p[d.owner]).filter(function (i) { return i !== d; });
+      var gz = fm.some(function (i) { return pas(i) === 'guinazo'; });
+      if (fm.length) {
+        if (gz) { fm.forEach(function (i) { if (pas(i) !== 'guinazo') i.hp = 1; }); line += ' Guinazo: las cartas Fantasía no caen y se quedan a 1 de vida.'; }
+        else fm.forEach(function (i) { if (i.dead) return; i.dead = true; i.hp = 0; line += ' ' + card(i).name + ' cae con el Protagonista.'; line += deathFx(s, i, depth + 1).line; });
+      }
+    }
         var tt2 = s.tiers[d.owner];
         if (has(d, 'KOI') && tt2['KOI']) {
           var kb = FX.koi.atk[tt2['KOI'] - 1];
@@ -1010,6 +1050,7 @@
     if (!s.pvp) aiTargets(s, 1);
     frame(s, 'Empieza el combate. ' + pv(s, s.first, 'Atacas primero.', 'Ataca primero el rival.'), null);
     kpopAuto(s, 0); kpopAuto(s, 1);
+    fanAuto(s, 0); fanAuto(s, 1);
     novSync(s, 0); novSync(s, 1);
     s.kp = [0, 1].map(function (p) { var P = s.p[p]; return { g: P.kact || null, sg: mesaTroops(P).some(isSinger) }; }); s.mark = [null, null]; s.killer = null; s.fs = [false, false];
     startEffects(s);
@@ -1028,6 +1069,7 @@
       } else fxFrame(s, p, 'armas', 'Armas Lunares · ' + an, ARMA_TX[P.arma], [sd.uid]);
     });
     kpopStart(s);
+    fanStart(s);
     var seq = order(s);
     // Remate doble: los Voley en ataque golpean dos veces; en defensa no atacan y reciben como mucho 1
     var dbl = {};
@@ -1063,6 +1105,7 @@
         if (cal.length) { tgt = cal[Math.floor(s.rng() * cal.length)]; charmed = true; }
       }
       if (tgt && !charmed && tgt.id === 'sech-duo') { var bg = botlaneGuard(s, tgt.owner); if (bg && bg !== tgt) { tgt = bg; redir = true; } } // Magic Botlane: los ataques a Sech Dúo van a Javihi Dúo
+      if (tgt && !charmed && s.fan && s.fan[tgt.owner] != null && tgt.uid !== s.fan[tgt.owner]) { var fp = fanProt(s.p[tgt.owner]); if (fp && !immune(fp)) { tgt = fp; redir = 'fan'; } } // Fantasía: todos los ataques rivales van al Protagonista
       var dmg = atk(a), splash = [], share = 0;
       if (tgt && pas(a) === 'armas' && P.armaOn === 'infernum' && dmg > 0) { // Infernum: reparte el daño entre todos los enemigos
         splash = foes.filter(function (f) { return f !== tgt; });
@@ -1092,7 +1135,7 @@
       if (kmem && kga.g === 'KDA' && dmg > 0) (tgt.tmp.hitBy = tgt.tmp.hitBy || {})[a.uid] = 1;
       genCharge(s, tgt, Math.min(real, Math.max(0, tgt.hp)));
       tgt.hp -= real;
-      var line = card(a).name + (charmed ? ' (encandilado) ataca a ' : redir ? ' (redirigido por Magic Botlane) ataca a ' : retarget ? ' (su objetivo ya cayó) ataca a ' : ' ataca a ') + card(tgt).name + ': ' + real + ' de daño' + (tgt.tmp.red && real < dmg ? ' (reducido)' : '') + (ariSave ? ' (¡Ari lo evita!)' : '') + (tdm ? ' (daño verdadero)' : '') + (beat ? ' ¡Beat Drop: daño doble!' : '') + (absorbed ? ' (escudo absorbe ' + absorbed + ')' : '') + (tgt.id === 'javihi-duo' && real < dmg ? ' (Muro de Hielo)' : '') + '.';
+      var line = card(a).name + (charmed ? ' (encandilado) ataca a ' : redir ? (redir === 'fan' ? ' (redirigido al Protagonista) ataca a ' : ' (redirigido por Magic Botlane) ataca a ') : retarget ? ' (su objetivo ya cayó) ataca a ' : ' ataca a ') + card(tgt).name + ': ' + real + ' de daño' + (tgt.tmp.red && real < dmg ? ' (reducido)' : '') + (ariSave ? ' (¡Ari lo evita!)' : '') + (tdm ? ' (daño verdadero)' : '') + (beat ? ' ¡Beat Drop: daño doble!' : '') + (absorbed ? ' (escudo absorbe ' + absorbed + ')' : '') + (tgt.id === 'javihi-duo' && real < dmg ? ' (Muro de Hielo)' : '') + '.';
       if (real > 0) {
         var ta = s.tiers[a.owner], tt = s.tiers[tgt.owner];
         if (has(a, 'Lol') && ta['Lol']) {
@@ -1151,6 +1194,7 @@
         var ca = a, cg = a.id === 'sech-duo' ? botlaneGuard(s, a.owner) : null; // Magic Botlane: el contraataque a Sech Dúo va a Javihi Dúo
         if (cg && cg !== a) ca = cg;
         rec = Math.max(0, atk(tgt) - ca.tmp.red);
+        if (s.fan && s.fan[ca.owner] != null && has(ca, 'Fantasía')) rec = 0; // Fantasía: los contraataques no dañan a las cartas Fantasía
         if (ca.tmp.cap1) rec = Math.min(rec, 1);
         rec = muroDmg(ca, rec);
         if (rec > 0) {

@@ -279,7 +279,8 @@ var D={
    "name": "Sech",
    "person": "Sech",
    "themes": [
-    "Trabajo"
+    "Trabajo",
+    "Fantasía"
    ],
    "cost": 5,
    "atk": 6,
@@ -485,7 +486,8 @@ var D={
    "name": "Pampert Carry",
    "person": "Pampert",
    "themes": [
-    "Lol"
+    "Lol",
+    "Fantasía"
    ],
    "cost": 2,
    "atk": 4,
@@ -533,7 +535,8 @@ var D={
    "name": "Lihone Rudeus",
    "person": "Lihone",
    "themes": [
-    "Anime"
+    "Anime",
+    "Fantasía"
    ],
    "cost": 3,
    "atk": 5,
@@ -611,14 +614,19 @@ var D={
    "name": "Chipy Goku",
    "person": "Chipy",
    "themes": [
-    "Anime"
+    "Anime",
+    "Fantasía"
    ],
-   "cost": 3,
-   "atk": 6,
-   "hp": 9,
-   "rarity": "Rara",
+   "cost": 4,
+   "atk": 7,
+   "hp": 13,
+   "rarity": "Épica",
    "type": "tropa",
-   "size": 1
+   "size": 1,
+   "pas": {
+    "n": "Guinazo",
+    "t": "Si el Protagonista cae, el resto de cartas Fantasía no caen con él: se quedan en el campo con 1 de vida."
+   }
   },
   {
    "id": "pampert-asta",
@@ -639,7 +647,8 @@ var D={
    "name": "Hellbramn Goblin",
    "person": "Hellbramn",
    "themes": [
-    "Goblins"
+    "Goblins",
+    "Fantasía"
    ],
    "cost": 2,
    "atk": 4,
@@ -724,7 +733,8 @@ var D={
    "name": "Javihi KDA",
    "person": "Javihi",
    "themes": [
-    "K-Pop"
+    "K-Pop",
+    "Fantasía"
    ],
    "grp": "KDA",
    "cost": 3,
@@ -1227,6 +1237,18 @@ var D={
    "target": "none",
    "text": "Olvidas el grupo K-Pop elegido y puedes elegir otro (necesitas el nivel 1 de K-Pop y un grupo ya elegido).",
    "theme": "K-Pop"
+  },
+  {
+   "id": "giro-de-guion",
+   "pack": "set2",
+   "name": "Giro de Guion",
+   "cost": 2,
+   "rarity": "Rara",
+   "type": "accion",
+   "size": 1,
+   "target": "ally",
+   "text": "Eliges a una de tus tropas como Protagonista (o cambias al actual). Necesitas el nivel 1 de Fantasía.",
+   "theme": "Fantasía"
   }
  ],
  "tokens": [
@@ -1411,6 +1433,17 @@ var D={
     "Elige un grupo del que tengas 2 cartas distintas (AitoRLG Singer cuenta como +1 en cualquiera). KDA: las que golpeen a un enemigo que cae ganan +1 de ataque permanente (asistencia) y quien lo derriba +2 de vida. True Damage: sus golpes atraviesan el 100% de las reducciones de daño y escudos. Huntrix: marcan al rival con más vida; si cae, el equipo gana un escudo con toda su vida. SajaBoys: un rival no legendario (el de más ataque) queda encandilado y su primer ataque golpea a un aliado suyo, sean cuantos sean los SajaBoys.",
     "Las cartas del grupo elegido ganan +5/+5 permanente.",
     "Las cartas del grupo elegido ganan +10/+10 permanente."
+   ]
+  },
+  "Fantasía": {
+   "th": [
+    2,
+    4
+   ],
+   "color": "#a78bfa",
+   "tx": [
+    "Eliges un Protagonista (con la carta Giro de Guion; si no, se fija solo). Recibe el 75 % de la vida de las demás cartas Fantasía. Todos los ataques rivales van a él y sus contraataques no dañan a las Fantasía (el daño en área sí). Si el Protagonista cae, caen todas las Fantasía.",
+    "El Protagonista recibe el 100 % de la vida de las demás Fantasía, que quedan a 1 de vida. Mismos efectos de redirección y caída."
    ]
   },
   "Goblins": {

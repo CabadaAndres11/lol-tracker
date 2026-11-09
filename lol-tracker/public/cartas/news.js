@@ -1,6 +1,11 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-09', tag: 'Novedad', title: 'Reforja en el inventario',
+      items: [
+        'Nueva Reforja en la pestaña Inventario: coloca 3 skins repetidas (o 3 efectos repetidos, sin mezclar clases) en el triángulo y pulsa Reforjar. Las tres giran en espiral hasta el centro y consigues una skin o un efecto que no tengas.',
+        'Las skins y efectos repetidos que salen en Destino son el material de la Reforja.'
+      ] },
     { date: '2026-11-09', tag: 'Ajuste', title: 'Nerfeo de Petea Goblin',
       items: [
         'Loot Infinito (Petea Goblin) baja de +5/+5, +10/+10 y +15/+15 a +2/+2, +5/+5 y +10/+10 según el nivel de la carta (1, 2 y 3).'

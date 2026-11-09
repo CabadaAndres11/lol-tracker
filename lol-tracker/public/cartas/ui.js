@@ -648,6 +648,8 @@
     if (sel && !items.some(function (x) { return x.k === sel; })) sel = ui.invSel = '';
     var h = (ui.msg ? '<p class="err">' + esc(ui.msg) + '</p>' : '');
     if (!items.length) return h + '<div class="invempty"><p class="mut">Tu inventario está vacío. Consigue cajas completando misiones y subiendo de rango, y sobres en el pase de batalla o en la tienda.</p><div class="btnrow"><button class="btn sec" data-act="nav" data-to="missions">' + ic('mision') + ' Misiones</button><button class="btn sec" data-act="nav" data-to="ladder">' + ic('trofeo') + ' Clasificación</button><button class="btn sec" data-act="nav" data-to="pass">' + ic('estrella') + ' Pase de batalla</button></div></div>';
+    var dupTot = {}; Object.keys((ui.acct && ui.acct.invDup) || {}).forEach(function (k) { var c = k.split(':')[0]; dupTot[c] = (dupTot[c] || 0) + ui.acct.invDup[k]; });
+    h += '<div class="rfbar"><button class="btn sec" data-act="rfopen">' + ic('cambio') + ' Reforja</button><span class="mut">Junta 3 skins repetidas o 3 efectos repetidos y consigue uno nuevo' + ((dupTot.skin >= 3 || dupTot.fx >= 3) ? '' : ' (aún no tienes 3 repetidos de la misma clase)') + '.</span></div>';
     h += '<p class="mut colhint">Pulsa un objeto para ver qué puedes hacer con él.</p><div class="invgrid">' + items.map(function (it) {
       var on = sel === it.k;
       return '<div class="invcell' + (on ? ' on' : '') + '"><button class="invtile" data-act="invsel" data-k="' + it.k + '" title="' + it.name + '">' + it.img + '' + (it.n ? '<span class="invn">×' + it.n + '</span>' : '') + '</button>' +
@@ -1086,6 +1088,66 @@
       '<div class="destpity"><div class="meter"><i class="on" style="width:' + Math.round(n / cfg.pity * 100) + '%"></i></div><span class="mut">Tiradas sin conseguirla: <b>' + n + '</b> / ' + cfg.pity + ' · ' + (left === 1 ? 'la próxima tirada la asegura' : 'asegurada en ' + left + ' tiradas') + '</span></div>' +
       '<ul class="destodds">' + odds.map(function (x) { return '<li style="--oc:' + x[2] + '"><i></i><span>' + x[0] + '</span><b>' + x[1] + '</b></li>'; }).join('') + '</ul>' +
       '<div class="destbtns"><button class="btn cta big" data-act="gpull" data-n="1"' + (a.coins < cfg.cost || ui.gbusy ? ' disabled' : '') + '>' + ic('moneda') + ' Tirar · ' + cfg.cost + '</button><button class="btn big" data-act="gpull" data-n="10"' + (a.coins < cfg.cost * 10 || ui.gbusy ? ' disabled' : '') + '>' + ic('moneda') + ' Multi-tirada ×10 · ' + cfg.cost * 10 + '</button></div><p class="mut" style="margin-top:.5rem">Tienes ' + a.coins + ' monedas · la multi-tirada cuesta lo mismo que 10 sueltas y se muestra la mejor recompensa.</p></div></div></div>';
+  }
+
+  // ---------- Reforja: 3 repetidos de la misma clase -> 1 objeto nuevo ----------
+  function rfPool(kind) {
+    var a = ui.acct || {};
+    if (kind === 'skin') return (window.CARTAS_SKINS || []).filter(function (k) { return !k.pass && (a.skins || []).indexOf(k.id) < 0 && (a.invSkins || []).indexOf(k.id) < 0; }).length;
+    return DEPLOY_LIST.concat(SLEEVE_LIST, FIN_LIST).filter(function (e) { return e.price > 0 && !e.pass && !fxHas(e.id); }).length;
+  }
+  function rfItem(key) {
+    var kd = key.split(':')[0], id = key.slice(kd.length + 1);
+    if (kd === 'skin') { var sk = (window.CARTAS_SKINS || []).filter(function (k) { return k.id === id; })[0]; return { name: sk ? sk.name : id, img: '<img class="invskin" src="/cartas/art/' + id + '.webp" alt="">' }; }
+    var fx = fxInfo(id); return { name: fx ? fx.name : id, img: '<span class="invfx">' + ic('brillo') + '</span>' };
+  }
+  function rfClose() { var o = document.getElementById('rfov'); if (o) o.remove(); (window.__rtm || []).forEach(clearTimeout); window.__rtm = []; ui.rf = null; }
+  function rfDraw() {
+    var o = document.getElementById('rfov'); if (!o || !ui.rf) return;
+    var r = ui.rf, dup = (ui.acct && ui.acct.invDup) || {}, used = {};
+    r.slots.forEach(function (k) { if (k) used[k] = (used[k] || 0) + 1; });
+    var pool = rfPool(r.kind), full = r.slots.every(Boolean), busy = r.stage !== 'idle';
+    var avail = Object.keys(dup).filter(function (k) { return k.indexOf(r.kind + ':') === 0 && dup[k] - (used[k] || 0) > 0; });
+    var slots = [0, 120, 240].map(function (ang, i) {
+      var k = r.slots[i], it = k ? rfItem(k) : null;
+      return '<div class="rfarm" style="--a:' + ang + 'deg"><div class="rfslot' + (k ? ' on' : '') + '"><button class="rfcell" data-rf="slot" data-i="' + i + '"' + (busy ? ' disabled' : '') + ' title="' + (k ? 'Quitar' : 'Vacío') + '"><span class="rfcnt">' + (it ? it.img : '<i>+</i>') + '</span></button></div></div>';
+    }).join('');
+    var picker = busy ? '' : '<div class="rfpick">' + (avail.length ? avail.map(function (k) { var it = rfItem(k); return '<button class="rfopt" data-rf="add" data-k="' + k + '" title="' + esc(it.name) + '"><span class="rfcnt">' + it.img + '</span><b>' + esc(it.name) + '</b><em>×' + (dup[k] - (used[k] || 0)) + '</em></button>'; }).join('') : '<p class="mut">No tienes ' + (r.kind === 'skin' ? 'skins' : 'efectos') + ' repetidos disponibles.</p>') + '</div>';
+    var note = !pool ? '<p class="err">Ya tienes todas las ' + (r.kind === 'skin' ? 'skins' : 'los efectos') + ': no hay nada que reforjar.</p>' : '';
+    var done = r.stage === 'done' && r.reward, it2 = done ? gachaItemHtml(r.reward) : null;
+    o.className = 'rfov stage-' + r.stage;
+    o.innerHTML = '<div class="rfstars"></div><button class="rfx" data-rf="close" aria-label="Cerrar">×</button>' +
+      '<div class="rfmain"><h2>Reforja</h2><div class="rftabs"><button class="' + (r.kind === 'skin' ? 'on' : '') + '" data-rf="kind" data-kind="skin"' + (busy ? ' disabled' : '') + '>Skins</button><button class="' + (r.kind === 'fx' ? 'on' : '') + '" data-rf="kind" data-kind="fx"' + (busy ? ' disabled' : '') + '>Efectos</button></div>' +
+      '<p class="mut rfhint">Coloca 3 ' + (r.kind === 'skin' ? 'skins' : 'efectos') + ' repetidos para conseguir ' + (r.kind === 'skin' ? 'una skin' : 'un efecto') + ' que no tengas.</p>' + note +
+      '<div class="rftri">' + slots + '<button class="rfgo" data-rf="go"' + (full && pool && !busy ? '' : ' disabled') + '>Reforjar</button><div class="rfflash"></div></div>' + picker + '</div>' +
+      (done ? '<div class="rfres"><div class="gglow" style="--gc:' + (GRCOL[r.reward.rarity] || '#fff') + '"></div><p class="grar" style="--gc:' + (GRCOL[r.reward.rarity] || '#fff') + '">' + (GEM[r.reward.rarity] || '') + ' ' + esc(r.reward.rarity) + '</p><div class="gcardw" style="--gc:' + (GRCOL[r.reward.rarity] || '#fff') + '">' + it2.html + '</div><b class="rfname">' + (r.kind === 'skin' ? '¡Nueva skin!' : '¡Nuevo efecto!') + ' ' + esc(it2.name) + '</b><small class="mut">' + esc(it2.sub) + '</small><div class="gbtns"><button class="btn cta" data-rf="close">Continuar</button><button class="btn sec" data-rf="again">Seguir reforjando</button></div></div>' : '');
+  }
+  function rfOpen() {
+    rfClose(); ui.rf = { kind: 'skin', slots: [null, null, null], stage: 'idle', reward: null };
+    var o = document.createElement('div'); o.id = 'rfov'; document.body.appendChild(o);
+    o.addEventListener('click', function (e) {
+      var b = e.target.closest && e.target.closest('[data-rf]'); if (!b || !ui.rf) return; var a = b.dataset.rf, r = ui.rf;
+      if (a === 'close') { rfClose(); render(); return; }
+      if (r.stage === 'spin') return;
+      if (a === 'again') { r.stage = 'idle'; r.slots = [null, null, null]; r.reward = null; return rfDraw(); }
+      if (a === 'kind') { r.kind = b.dataset.kind; r.slots = [null, null, null]; return rfDraw(); }
+      if (a === 'slot') { r.slots[+b.dataset.i] = null; return rfDraw(); }
+      if (a === 'add') { var i = r.slots.indexOf(null); if (i >= 0) r.slots[i] = b.dataset.k; return rfDraw(); }
+      if (a === 'go') rfGo();
+    });
+    rfDraw();
+  }
+  function rfGo() {
+    var r = ui.rf; if (!r || !r.slots.every(Boolean) || r.stage !== 'idle') return;
+    r.stage = 'spin'; rfDraw(); snd('rev-Rara', 0);
+    var t0 = Date.now(), resp = null, finished = false;
+    var finish = function () {
+      if (finished || !resp || Date.now() - t0 < 2300) return; finished = true;
+      if (!resp.ok) { r.stage = 'idle'; ui.msg = (resp.data && resp.data.error) || 'No se pudo reforjar.'; if (resp.data && resp.data.user) setAcct(resp.data.user); rfDraw(); return; }
+      setAcct(resp.data.user); r.reward = resp.data.reward; r.stage = 'done'; r.slots = [null, null, null]; rfDraw(); snd('rev-' + (r.reward.rarity === 'Mítica' ? 'Legendaria' : r.reward.rarity), 0);
+    };
+    api('reforge', { kind: r.kind, keys: r.slots.slice() }).then(function (x) { resp = x; finish(); });
+    window.__rtm = [setTimeout(finish, 2350), setTimeout(finish, 3500)];
   }
   function renderPacks() {
     var a = ui.acct, tab = ui.shopTab || 'feat';
@@ -2808,6 +2870,7 @@ var GOB_SVG = '<svg class="gobsvg" viewBox="0 0 100 100"><g class="gobleg a"><re
     if (act === 'shopsel') { ui.shopSel = +el.dataset.i; ui.shopTab = 'feat'; return render(); }
     if (act === 'newssel') { ui.newsSel = +el.dataset.i; ui.newsFull = false; return refreshNews(); }
     if (act === 'devchat') return openChat(+el.dataset.i);
+    if (act === 'rfopen') return rfOpen();
     if (act === 'gpull') return gachaPull(+el.dataset.n || 1);
     if (act === 'gdemo') { var rr = el.dataset.r, dc = rr === 'Mítica' ? CARD['aitorlg-singer'] : D.cards.filter(function (x) { return x.rarity === rr && !x.nopack && ARTS[x.id]; })[0]; return gachaPlay([{ kind: 'card', id: dc.id, rarity: rr, main: rr === 'Mítica' }], true); }
     if (act === 'newsmore') { ui.newsFull = !ui.newsFull; return refreshNews(); }

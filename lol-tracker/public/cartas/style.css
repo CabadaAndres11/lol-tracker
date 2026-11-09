@@ -2936,3 +2936,40 @@ body.gpulling #app { opacity: 0; pointer-events: none; }
 /* la carta de recompensa de Destino late menos */
 .destcard { animation: destpulse 3s ease-in-out infinite alternate; }
 @keyframes destpulse { to { transform: scale(1.025); filter: drop-shadow(0 0 30px rgba(239,68,68,.65)); } }
+
+/* ---------- Reforja ---------- */
+.rfbar { display: flex; align-items: center; gap: .8rem; flex-wrap: wrap; margin-bottom: .6rem; }
+.rfov { position: fixed; inset: 0; z-index: 8500; overflow-y: auto; background: radial-gradient(ellipse at 50% 100%, #5a2410 0%, #1d0d10 55%, #07040a 100%); animation: dgfade .4s ease-out both; }
+.rfx { position: absolute; right: 1rem; top: .6rem; z-index: 3; background: transparent; border: 0; color: #fcd9b6; font-size: 2rem; cursor: pointer; line-height: 1; }
+.rfmain { display: flex; flex-direction: column; align-items: center; gap: .5rem; padding: 1.2rem 1rem 2rem; color: #fff; }
+.rfmain h2 { margin: 0; letter-spacing: .25em; text-transform: uppercase; text-shadow: 0 0 16px #ff8a3d; }
+.rftabs { display: flex; gap: .4rem; } .rftabs button { padding: .35rem 1.1rem; border-radius: 999px; border: 1px solid #a8561f; background: rgba(0,0,0,.35); color: #fcd9b6; cursor: pointer; } .rftabs button.on { background: #ff8a3d; color: #2a1004; font-weight: 800; } .rftabs button:disabled { opacity: .6; cursor: default; }
+.rfhint { margin: 0; text-align: center; }
+.rftri { position: relative; width: 340px; height: 340px; margin: .6rem 0; }
+.rfarm { position: absolute; left: 50%; top: 50%; width: 0; height: 0; transform: rotate(var(--a)); }
+.rfslot { position: absolute; left: -42px; top: calc(-42px - 120px); width: 84px; height: 84px; transform: translateY(0); }
+.rfcell { width: 100%; height: 100%; border-radius: 12px; border: 2px dashed #a8561f; background: rgba(0,0,0,.4); color: #ff8a3d; font-size: 2rem; cursor: pointer; padding: 0; overflow: hidden; transform: rotate(calc(-1 * var(--a))); transition: border-color .15s; }
+.rfslot.on .rfcell { border: 2px solid #ffb36b; box-shadow: 0 0 14px rgba(255,138,61,.7); }
+.rfcell:hover:not(:disabled) { border-color: #ffd7a8; }
+.rfcnt { display: grid; place-items: center; width: 100%; height: 100%; } .rfcnt img { width: 100%; height: 100%; object-fit: cover; } .rfcnt i { font-style: normal; }
+.rfgo { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 92px; height: 92px; border-radius: 50%; border: 3px solid #ffd7a8; background: radial-gradient(circle at 35% 30%, #ffb36b, #d4561a 70%); color: #2a1004; font-weight: 900; cursor: pointer; box-shadow: 0 0 20px rgba(255,138,61,.7); }
+.rfgo:disabled { filter: grayscale(.8) brightness(.6); cursor: default; box-shadow: none; }
+.rfpick { display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem; max-width: 640px; }
+.rfopt { position: relative; width: 92px; padding: .25rem; border-radius: 10px; border: 1px solid #a8561f; background: rgba(0,0,0,.4); color: #fff; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: .15rem; }
+.rfopt .rfcnt { height: 64px; } .rfopt b { font-size: .62rem; text-align: center; line-height: 1.1; } .rfopt em { position: absolute; right: 4px; top: 2px; font-style: normal; font-size: .7rem; background: #d4561a; border-radius: 8px; padding: 0 5px; }
+.rfflash { position: absolute; left: 50%; top: 50%; width: 20px; height: 20px; margin: -10px; border-radius: 50%; background: #fff; opacity: 0; pointer-events: none; }
+/* animación: cada ranura gira en espiral hasta el centro */
+.rfov.stage-spin .rfarm { animation: rfspin 2.2s cubic-bezier(.55,.05,.7,.9) both; }
+.rfov.stage-spin .rfslot { animation: rfin 2.2s cubic-bezier(.55,.05,.7,.9) both; }
+.rfov.stage-spin .rfcell { animation: rfcount 2.2s cubic-bezier(.55,.05,.7,.9) both; }
+.rfov.stage-spin .rfgo { animation: rfgopulse 2.2s ease-in both; }
+.rfov.stage-spin .rfflash { animation: rfboom 2.2s ease-in both; }
+@keyframes rfspin { from { transform: rotate(var(--a)); } to { transform: rotate(calc(var(--a) + 900deg)); } }
+@keyframes rfin { 0% { transform: translateY(0) scale(1); opacity: 1; } 80% { opacity: 1; } 100% { transform: translateY(120px) scale(.25); opacity: 0; } }
+@keyframes rfcount { from { transform: rotate(calc(-1 * var(--a))); } to { transform: rotate(calc(-1 * var(--a) - 900deg)); } }
+@keyframes rfgopulse { 0% { transform: translate(-50%, -50%) scale(1); } 85% { transform: translate(-50%, -50%) scale(1.1); } 100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; } }
+@keyframes rfboom { 0%, 80% { opacity: 0; transform: scale(1); } 90% { opacity: 1; } 100% { opacity: 1; transform: scale(30); background: #ffd7a8; } }
+.rfov.stage-spin .rfpick, .rfov.stage-done .rfmain { pointer-events: none; }
+.rfov.stage-done .rfmain { opacity: 0; transition: opacity .3s; }
+.rfres { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .6rem; padding: 1rem; animation: dgfade .6s ease-out both; }
+.rfres .gcardw { width: min(46vw, 200px); } .rfname { font-size: 1.3rem; text-align: center; }

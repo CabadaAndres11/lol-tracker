@@ -1065,6 +1065,28 @@ module.exports = async function handler(req, res) {
       res.status(200).json({ rewards, reward: rewards[0], user: publicUser(u) }); return;
     }
 
+    if (act === 'reforge') { // Reforja: 3 repetidos de la misma clase (skins o efectos) -> 1 skin/efecto que no tengas
+      const kind = body.kind === 'fx' ? 'fx' : 'skin';
+      const keys = Array.isArray(body.keys) ? body.keys.map(String) : [];
+      if (keys.length !== 3 || keys.some((k) => !k.startsWith(kind + ':'))) { res.status(400).json({ error: 'Elige 3 objetos repetidos de la misma clase.', user: publicUser(u) }); return; }
+      const need = {};
+      keys.forEach((k) => { need[k] = (need[k] || 0) + 1; });
+      u.invDup = u.invDup || {};
+      if (Object.keys(need).some((k) => (u.invDup[k] || 0) < need[k])) { res.status(400).json({ error: 'No tienes esas copias repetidas.', user: publicUser(u) }); return; }
+      let pool;
+      if (kind === 'skin') pool = SKINS.filter((k) => !k.pass && !(u.skins || []).includes(k.id) && !(u.invSkins || []).includes(k.id)).map((k) => ({ id: k.id, rarity: skinRar(k) }));
+      else pool = FX_DEPLOY.filter((id) => FX_PRICE[id] > 0 && !FX_PASS.includes(id) && !fxOwned(u).includes(id)).map((id) => ({ id, rarity: fxRar(id) }));
+      if (!pool.length) { res.status(400).json({ error: kind === 'skin' ? 'Ya tienes todas las skins.' : 'Ya tienes todos los efectos.', user: publicUser(u) }); return; }
+      Object.keys(need).forEach((k) => { u.invDup[k] -= need[k]; if (u.invDup[k] <= 0) delete u.invDup[k]; });
+      const pick = pool[crypto.randomInt(0, pool.length)];
+      const reward = { kind, id: pick.id, rarity: pick.rarity, isNew: true };
+      if (kind === 'skin') { u.skins = u.skins || []; u.skins.push(pick.id); }
+      else { u.fxOwned = [...(u.fxOwned || []), pick.id]; reward.fxKind = Object.keys(FX_KINDS).find((k) => FX_KINDS[k][pick.id] !== undefined); }
+      u.st = u.st || {}; u.st.reforge = (u.st.reforge || 0) + 1;
+      await saveUser(cfg, u);
+      res.status(200).json({ reward, user: publicUser(u) }); return;
+    }
+
     if (act === 'missionClaim') { // recoger la caja de una misión completada
       const m = MS.MISSIONS.find((x) => x.id === String(body.id || ''));
       if (!m) { res.status(400).json({ error: 'Esa misión no existe.' }); return; }

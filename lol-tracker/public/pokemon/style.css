@@ -2314,3 +2314,6 @@ footer { padding-bottom: calc(3rem + env(safe-area-inset-bottom)); }
 .bt-mega:hover { transform: scale(1.12) rotate(8deg); }
 .bt-mega.on { box-shadow: 0 2px 10px rgba(0,0,0,.55), 0 0 18px 4px rgba(251,191,36,.9); border-color: #fde68a; }
 @keyframes megapulse { to { box-shadow: 0 2px 10px rgba(0,0,0,.55), 0 0 22px rgba(120,220,255,.9); } }
+
+/* La caja del rival queda por encima del Pokémon propio (si no, el "+" / sprite robaba los clics del botón "Cambiar rival") */
+.bt-box-foe { z-index: 5; }

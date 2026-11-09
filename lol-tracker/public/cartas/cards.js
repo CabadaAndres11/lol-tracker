@@ -1408,7 +1408,7 @@ var D={
    ],
    "color": "#e879f9",
    "tx": [
-    "Elige un grupo del que tengas 2 cartas distintas (AitoRLG Singer cuenta como +1 en cualquiera). KDA: las que golpeen a un enemigo que cae ganan +1 de ataque permanente (asistencia) y quien lo derriba +2 de vida. True Damage: sus golpes atraviesan el 100% de las reducciones de daño y escudos. Huntrix: marcan al rival con más vida; si cae, el equipo gana un escudo con toda su vida. SajaBoys: un rival no legendario por cada SajaBoys queda encandilado y su primer ataque golpea a un aliado suyo.",
+    "Elige un grupo del que tengas 2 cartas distintas (AitoRLG Singer cuenta como +1 en cualquiera). KDA: las que golpeen a un enemigo que cae ganan +1 de ataque permanente (asistencia) y quien lo derriba +2 de vida. True Damage: sus golpes atraviesan el 100% de las reducciones de daño y escudos. Huntrix: marcan al rival con más vida; si cae, el equipo gana un escudo con toda su vida. SajaBoys: un rival no legendario (el de más ataque) queda encandilado y su primer ataque golpea a un aliado suyo, sean cuantos sean los SajaBoys.",
     "Las cartas del grupo elegido ganan +5/+5 permanente.",
     "Las cartas del grupo elegido ganan +10/+10 permanente."
    ]

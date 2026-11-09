@@ -881,7 +881,7 @@
           fxFrame(s, p, 'kpop', 'Huntrix · Marca', card(foes[0]).name + ' queda marcado: si cae, el equipo gana ' + Math.round(maxHp(foes[0]) * FX.kpop.shield[k.sg ? 1 : 0]) + ' de escudo', mem.map(function (i) { return i.uid; }).concat([foes[0].uid]));
         }
       } else if (k.g === 'SajaBoys') {
-        var n = mem.length, ch = targetable(E).filter(function (i) { return card(i).rarity !== 'Legendaria' && card(i).rarity !== 'Mítica' && !i.turret; }).sort(function (a, b) { return atk(b) - atk(a); }).slice(0, n);
+        var n = mem.length, ch = targetable(E).filter(function (i) { return card(i).rarity !== 'Legendaria' && card(i).rarity !== 'Mítica' && !i.turret; }).sort(function (a, b) { return atk(b) - atk(a); }).slice(0, 1); // un solo enemigo, sean cuantos sean los SajaBoys
         ch.forEach(function (i) { i.tmp.charm = true; });
         if (ch.length) fxFrame(s, p, 'kpop', 'SajaBoys · Encanto', ch.map(function (i) { return card(i).name; }).join(', ') + ': su primer ataque golpea a un aliado', mem.map(function (i) { return i.uid; }).concat(ch.map(function (i) { return i.uid; })));
         if (k.sg) {

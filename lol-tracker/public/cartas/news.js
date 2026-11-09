@@ -1,6 +1,10 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-09', tag: 'Ajuste', title: 'Encanto de los SajaBoys',
+      items: [
+        'El Encanto de SajaBoys afecta siempre a un solo enemigo (el rival no legendario con más ataque), sea cual sea la cantidad de SajaBoys en el campo.'
+      ] },
     { date: '2026-11-05', tag: 'Novedad', title: 'Nuevo apartado: Destino', gacha: true,
       items: [
         'Nuevo apartado en el menú principal: Destino, un gacha donde cada tirada cuesta 25 monedas.',
@@ -31,7 +35,7 @@
         'KDA: las que golpean a un enemigo que cae ganan +1 de ataque permanente (asistencia) y quien lo derriba +2 de vida.',
         'True Damage: sus golpes atraviesan el 100% de las reducciones de daño y los escudos.',
         'Huntrix: marcan al rival con más vida; si cae, el equipo gana un escudo igual a toda su vida.',
-        'SajaBoys: por cada SajaBoys, un rival no legendario queda encandilado y su primer ataque golpea a un aliado suyo.',
+        'SajaBoys: un rival no legendario (el de más ataque) queda encandilado y su primer ataque golpea a un aliado suyo, sean cuantos sean los SajaBoys.',
         'AitoRLG Singer potencia al grupo: KDA gana oro por asistencia, True Damage hace un Beat Drop (daño doble) cada 3 ataques, Huntrix duplica el escudo y SajaBoys mejora +1/+1 al resto del grupo cada 2 combates.',
         'El selector de grupo muestra el logo de cada uno.',
         'Una vez elegido, el grupo queda fijado. Para cambiarlo hay una nueva acción: Cambio de Escenario. La pasiva de la Singer pasa a llamarse Vocalista Principal.',

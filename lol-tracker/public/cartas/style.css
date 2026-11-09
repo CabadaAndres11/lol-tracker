@@ -2987,3 +2987,26 @@ img.timg[src$="fantasia.png"], .tlogo[src$="fantasia.png"] { width: auto; height
 .rksk.lock { filter: grayscale(1) brightness(.5); }
 .rksk.ready { box-shadow: 0 0 10px rgba(251,191,36,.8); border-color: #fbbf24; }
 .rktiers li .rkrw { display: inline-flex !important; align-items: center; color: inherit; }
+
+/* ---------- Pop-up de bienvenida 2.2 (base de la 2.0, paleta violeta y rosa) ---------- */
+.introst.i22 { border-color: rgba(232,121,249,.75); background: #0b0716; box-shadow: 0 20px 60px rgba(0,0,0,.75), 0 0 50px rgba(232,121,249,.3), 0 0 90px rgba(125,211,252,.22); }
+.i22 .icap span { border-color: rgba(232,121,249,.7); background: rgba(14,8,28,.82); }
+.i22 .i20bg .bgimg { background: radial-gradient(ellipse 70% 60% at 50% 40%, rgba(110,40,150,.55), transparent 70%), linear-gradient(#0d0820, #06030f); }
+.i22 .i20bg .a1 { background: #a21caf; } .i22 .i20bg .a2 { background: #6d28d9; } .i22 .i20bg .a3 { background: #0284c7; }
+.i22 .i20bg .gr { background-image: linear-gradient(rgba(232,121,249,.4) 1px, transparent 1px), linear-gradient(90deg, rgba(167,139,250,.4) 1px, transparent 1px); }
+.i22 .i20ti small { color: #f5d0fe; text-shadow: 0 0 1.5cqw #c026d3; }
+.i22 .i20ti b { background: linear-gradient(180deg, #fff 0%, #f0abfc 40%, #a78bfa 100%); -webkit-background-clip: text; background-clip: text; filter: drop-shadow(0 0 2cqw rgba(217,70,239,.7)); }
+.i22 .i20ti b::before { color: #e879f9; } .i22 .i20ti b::after { color: #7dd3fc; }
+.i22 .i20ring { border-color: #e879f9; box-shadow: 0 0 2cqw #e879f9, inset 0 0 2cqw #e879f9; } .i22 .i20ring.r2 { border-color: #a78bfa; box-shadow: 0 0 2cqw #a78bfa, inset 0 0 2cqw #a78bfa; }
+.i22 .i20tk span { color: #fae8ff; text-shadow: 0 0 1.2cqw #c026d3; }
+.i22 .i20chips.k span { background: rgba(232,121,249,.2); border-color: rgba(240,171,252,.85); color: #fae8ff; }
+.i22 .i20chips.f span { background: rgba(167,139,250,.2); border-color: rgba(196,181,253,.85); color: #ede9fe; }
+.i22 .i20chips.b span { background: rgba(125,211,252,.18); border-color: rgba(125,211,252,.85); color: #e0f2fe; }
+.i22 .i20row .card { box-shadow: 0 1cqw 3cqw rgba(0,0,0,.7), 0 0 2cqw rgba(232,121,249,.4); }
+.i22 .i20tg.two { top: 31cqw; } .i22 .i20tg.two .t { height: 17cqw; }
+.i22 .i20gk.f { background: radial-gradient(circle at 40% 35%, #fff 0 12%, #ede9fe 30%, #a78bfa 58%, rgba(76,29,149,.25) 72%); box-shadow: 0 0 3cqw #a78bfa, 0 0 7cqw rgba(196,181,253,.5); }
+.i22 .i20gk.f b { color: #3b0764; animation: none; text-shadow: 0 0 1cqw #fff; }
+.i22 .i20gk.x { background: radial-gradient(circle at 40% 35%, #fff 0 12%, #fecdd3 30%, #fb7185 58%, rgba(159,18,57,.25) 72%); box-shadow: 0 0 3cqw #fb7185, 0 0 7cqw rgba(251,113,133,.5); }
+.i22 .i20gk.x b { color: #fff; animation: none; text-shadow: 0 0 1cqw #be123c; }
+.i22 .i20gk.g { background: radial-gradient(circle at 40% 35%, #fff 0 12%, #fef08a 30%, #eab308 58%, rgba(161,98,7,.25) 72%); box-shadow: 0 0 3cqw #eab308, 0 0 7cqw rgba(253,224,71,.5); }
+.i22 .i20gk.g b { color: #713f12; animation: none; text-shadow: 0 0 1cqw #fff; }

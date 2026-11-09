@@ -265,6 +265,64 @@
     introEl.addEventListener('click', function (e) { if (e.target === introEl || e.target.classList.contains('intropanel')) closeIntro(); });
     document.addEventListener('keydown', introKey);
   }
+  // ---------- Pop-up de bienvenida de la versión 2.2 ----------
+  function intro22Off() { try { return localStorage.getItem(lk('intro-v22')) === '1'; } catch (e) { return false; } }
+  function maybeIntro22() {
+    if (ui.intro22Seen || !ui.acct || intro22Off() || introEl) return;
+    ui.intro22Seen = true;
+    setTimeout(function () { if (ui.screen === 'home' && !introEl) openIntro22(); }, 700);
+  }
+  function openIntro22() {
+    closeIntro();
+    var k, bg = '<i class="bgimg"></i><i class="aur a1"></i><i class="aur a2"></i><i class="aur a3"></i><i class="gr"></i><i class="sw"></i>';
+    for (k = 0; k < 22; k++) bg += '<i class="pt" style="left:' + (2 + k * 4.5) + '%;--d:' + ((k * 7) % 13) * .5 + 's;--c:' + ['#e879f9', '#a78bfa', '#7dd3fc', '#fde047'][k % 4] + '"></i>';
+    var tk = 'K-POP ✦ FANTASÍA ✦ DESTINO ✦ REFORJA ✦ MÍTICA ✦ SKINS POR RANGO ✦ ';
+    var title = '<div class="i20s st" data-s="0,6"><i class="i20flash"></i><i class="i20ring"></i><i class="i20ring r2"></i><div class="i20ti"><small>¡Ya está aquí la versión!</small><b data-t="2.2">2.2</b></div><div class="i20tk"><span>' + tk + tk + '</span></div></div>';
+    var FLY = [['-90cqw', '-30cqw', '-40deg'], ['-40cqw', '50cqw', '35deg'], ['0', '-60cqw', '-15deg'], ['50cqw', '50cqw', '-30deg'], ['90cqw', '-30cqw', '40deg']];
+    function chips(cls, arr) { return '<div class="i20chips ' + cls + '">' + arr.map(function (t) { return '<span>' + t + '</span>'; }).join('') + '</div>'; }
+    function row(ids) { return '<div class="i20row">' + ids.map(function (id, i) { return '<div class="c" style="--i:' + i + ';--fx:' + FLY[i % 5][0] + ';--fy:' + FLY[i % 5][1] + ';--fr:' + FLY[i % 5][2] + '">' + cardHtml(CARD[id], { lv: 1 }) + '</div>'; }).join('') + '</div>'; }
+    function sk(ids) { return '<div class="v am">' + ids.map(function (id) { return '<span style="background-image:url(art/' + id + '.webp)"></span>'; }).join('') + '<i>✦</i></div>'; }
+    var s1 = '<div class="i20s" data-s="1"><div class="i20h" style="--hc:#e879f9">K-Pop</div>' + chips('k', ['KDA', 'True Damage', 'Huntrix', 'SajaBoys']) + row(['javihi-kda', 'pampert-td', 'mertens-huntrix', 'lihone-saja', 'aitorlg-singer']) + '</div>';
+    var s2 = '<div class="i20s" data-s="2"><div class="i20h" style="--hc:#a78bfa">Fantasía</div>' + chips('f', ['Protagonista', 'Giro de Guion', 'Guinazo']) + row(['sech', 'pampert-friki', 'lihone-rudeus', 'chipy-goku', 'giro-de-guion']) + '</div>';
+    var s3 = '<div class="i20s" data-s="3"><div class="i20h" style="--hc:#fde047">Destino</div><div class="i20tg">' +
+      '<div class="t" style="--i:0"><div class="v"><img src="img/coin.webp" alt=""></div><div><b>El gacha de las estrellas</b><span>25 monedas por tirada o 10 juntas</span></div></div>' +
+      '<div class="t" style="--i:1"><div class="v"><div class="i20gk g"><b>⬢</b></div></div><div><b>Nueva rareza: Mítica</b><span>AitoRLG Singer, 10 % y asegurada en la tirada 20</span></div></div>' +
+      '<div class="t" style="--i:2"><div class="v"><img src="img/box.webp" alt=""></div><div><b>Cartas, skins y efectos</b><span>Los repetidos van al inventario</span></div></div>' +
+      '<div class="t" style="--i:3"><div class="v"><div class="i20gk f"><b>3→1</b></div></div><div><b>Reforja</b><span>Tres repetidos de una clase por uno nuevo</span></div></div></div></div>';
+    var s4 = '<div class="i20s" data-s="4"><div class="i20h" style="--hc:#7dd3fc">Skins por rango</div>' + chips('b', ['Hierro', 'Bronce', 'Plata', 'Oro', 'Platino']) +
+      '<div class="i20tg two"><div class="t" style="--i:0">' + sk(['lihone-goblin-hierro', 'dashlight-sun-jin-woo-bronce', 'aitorlg-renata-plata']) + '<div><b>Una skin por rango</b><span>Se recogen en Clasificación junto a la caja</span></div></div>' +
+      '<div class="t" style="--i:1">' + sk(['javihi-koisito-oro', 'computer-petea-platino']) + '<div><b>Oro y Platino</b><span>Koisito de Oro y Petea de Platino</span></div></div></div></div>';
+    var s5 = '<div class="i20s" data-s="5"><div class="i20h" style="--hc:#fb7185">Y mucho más</div><div class="i20tg">' +
+      '<div class="t" style="--i:0"><div class="v"><img src="img/pack-set2.webp" alt=""><i class="shn"></i></div><div><b>Sobre Set 2</b><span>Ahora con todas las cartas K-Pop</span></div></div>' +
+      '<div class="t" style="--i:1"><div class="v"><div class="i20gk f"><b>★</b></div></div><div><b>Singer con reflejos</b><span>El color de cada grupo sobre su carta</span></div></div>' +
+      '<div class="t" style="--i:2"><div class="v"><div class="i20gk x"><b>-</b></div></div><div><b>Ajustes</b><span>Petea Goblin baja a +2/+5/+10 y SajaBoys encandila a un solo rival</span></div></div>' +
+      '<div class="t" style="--i:3"><div class="v"><div class="i20gk g"><b>✦</b></div></div><div><b>Demon Hunters</b><span>Nuevo efecto de victoria y derrota</span></div></div></div></div>';
+    var h = '<div class="intropanel"><div class="introst i20 i22" data-sc="0"><div class="i20bg">' + bg + '</div>' + title + s1 + s2 + s3 + s4 + s5 +
+      '<div class="icap"><span></span></div></div>' +
+      '<label class="ibtns inever"><input type="checkbox" data-i="never22"' + (intro22Off() ? ' checked' : '') + '> No mostrar más</label><p class="zhint">Pulsa fuera de la animación para cerrarla</p></div>';
+    introEl = document.createElement('div'); introEl.className = 'introov'; introEl.innerHTML = h;
+    document.body.appendChild(introEl);
+    var st = introEl.querySelector('.introst'), cap = st.querySelector('.icap span'), scs = st.querySelectorAll('.i20s');
+    var CAPS = ['', 'K-Pop: cuatro grupos con efectos propios y AitoRLG Singer como vocalista', 'Fantasía: un Protagonista con el poder del guion; si cae, caen todos (salvo con Guinazo)', 'Destino: gacha de cartas, skins y efectos, con la nueva rareza Mítica y la Reforja', 'Cada rango, de Hierro a Platino, te da una skin exclusiva', 'Sobre Set 2 con K-Pop, Singer con reflejos, ajustes y el efecto Demon Hunters', ''];
+    function go(n) {
+      st.dataset.sc = n; cap.textContent = CAPS[n] || ''; cap.parentNode.classList.toggle('on', !!CAPS[n]);
+      Array.prototype.forEach.call(scs, function (el) { el.classList.toggle('on', el.dataset.s.split(',').indexOf(String(n)) >= 0); });
+    }
+    function run() {
+      introT.forEach(clearTimeout); introT = [];
+      st.classList.add('reset'); go(0);
+      introT.push(setTimeout(function () { st.classList.remove('reset'); go(0); }, 80));
+      [[3800, 1], [11000, 2], [18200, 3], [25400, 4], [33600, 5], [42000, 6]].forEach(function (x) { introT.push(setTimeout(function () { go(x[1]); }, x[0])); });
+      introT.push(setTimeout(run, 46000));
+    }
+    run();
+    introEl.addEventListener('change', function (e) {
+      if (e.target.dataset.i !== 'never22') return;
+      try { if (e.target.checked) localStorage.setItem(lk('intro-v22'), '1'); else localStorage.removeItem(lk('intro-v22')); } catch (er) {}
+    });
+    introEl.addEventListener('click', function (e) { if (e.target === introEl || e.target.classList.contains('intropanel')) closeIntro(); });
+    document.addEventListener('keydown', introKey);
+  }
   // ---------- Pop-up de bienvenida de la versión 2.0 ----------
   function intro20Off() { try { return localStorage.getItem(lk('intro-v20')) === '1'; } catch (e) { return false; } }
   function maybeIntro20() {
@@ -826,10 +884,11 @@
       ].map(function (m) { return '<button class="ricon" data-act="nav" data-to="' + m[0] + '"><span class="rii">' + m[1] + '</span><b>' + m[2] + '</b><span class="mut">' + m[3] + '</span></button>'; }).join('') + '</div>' + homeNews() + '</div>';
     h += '<p class="mut" style="text-align:center">' + D.cards.length + ' tropas · ' + D.actions.length + ' acciones</p></div>';
     app.innerHTML = h;
-    maybeIntro21();
+    maybeIntro22();
   }
   // Animaciones de versiones anteriores: se pueden volver a ver desde el perfil
   var ANIM_LIST = [
+    { id: 'v22', ver: 'v2.2', name: 'Bienvenida a la 2.2: K-Pop, Fantasía y Destino', desc: 'Pop-up de la versión 2.2: sinergias K-Pop y Fantasía, Destino y la rareza Mítica, Reforja, skins por rango y más.' },
     { id: 'v21', ver: 'v2.1', name: 'Bienvenida a la 2.1: Goblins y Magic Botlane', desc: 'Pop-up de la versión 2.1: sinergias Goblins y Magic Botlane, cambios de cartas, sinergias eliminadas, sobre Set 2, inventario y efectos de oro.' },
     { id: 'v20', ver: 'v2.0', name: 'Bienvenida a la 2.0: Amigos y Pase de batalla', desc: 'Pop-up de la versión 2.0: amigos y chat, perfil y emoticonos, pase de batalla, Royal Rumble, Sobre Anime, montaje automático y nuevos efectos.' },
     { id: 'v13', ver: 'v1.3', name: 'Bienvenida a la 1.3: Anime', desc: 'Pop-up de la versión 1.3: cartas nuevas de Anime, la Genkidama, el Soldado de Sombra y los nuevos efectos de despliegue, funda y victoria/derrota.' },
@@ -2818,7 +2877,7 @@ var GOB_SVG = '<svg class="gobsvg" viewBox="0 0 100 100"><g class="gobleg a"><re
     if (act === 'sfxtest') { var tc = el.dataset.cat; snd(tc === 'ui' ? 'buy' : tc === 'combat' ? 'heavy' : tc === 'pack' ? 'rev-Épica' : 'win'); return; }
     if (ui.finPrev && act !== 'finprev' && act !== 'passfin' && act !== 'finflip' && act !== 'finclose') ui.finPrev = null;
     if (ui.dedit) { var ne = document.getElementById('de-name'); if (ne) ui.dedit.name = ne.value; }
-    if (act === 'playanim') { if (el.dataset.id === 'correa') openIntro(); else if (el.dataset.id === 'v12') openIntro12(); else if (el.dataset.id === 'v13') openIntro13(); else if (el.dataset.id === 'v20') openIntro20(); else if (el.dataset.id === 'v21') openIntro21(); return; }
+    if (act === 'playanim') { if (el.dataset.id === 'correa') openIntro(); else if (el.dataset.id === 'v12') openIntro12(); else if (el.dataset.id === 'v13') openIntro13(); else if (el.dataset.id === 'v20') openIntro20(); else if (el.dataset.id === 'v21') openIntro21(); else if (el.dataset.id === 'v22') openIntro22(); return; }
     if (act === 'avedit') { ui.avEdit = !ui.avEdit; return render(); }
     if (act === 'acctmenu') { var w = el.closest('.acctw'); if (w) w.classList.toggle('open'); return; }
     if (act === 'logout') return logout();

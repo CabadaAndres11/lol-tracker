@@ -517,7 +517,10 @@
   function msDone(m) { return msProg(m) >= m.goal; }
   function msClaimed(m) { return ((ui.acct && ui.acct.ms && ui.acct.ms.claimed) || []).indexOf(m.id) >= 0; }
   function rkReached(rb) { return ui.acct && (ui.acct.ptsMax || ui.acct.pts || 0) >= rb.min; }
-  function rkClaimed(rb) { return ((ui.acct && ui.acct.rkClaimed) || []).indexOf(rb.id) >= 0; }
+  function rkClaimed(rb) { // recompensa de rango recogida (caja y, si la tiene, skin)
+    var a = ui.acct || {};
+    return (rb.nobox || (a.rkClaimed || []).indexOf(rb.id) >= 0) && (!rb.skin || (a.rkSk || []).indexOf(rb.id) >= 0);
+  }
   function claimableCount() {
     if (!ui.acct) return 0;
     return MSN.MISSIONS.filter(function (m) { return msDone(m) && !msClaimed(m); }).length + seasonReady('season');
@@ -528,9 +531,10 @@
   function boxImg(cls) { return '<img class="bximg ' + (cls || '') + '" src="/cartas/img/box.webp" alt="Caja">'; }
   function rankBoxBtn(r) {
     var rb = MSN.RANK_BOXES.filter(function (x) { return x.min === r.min; })[0]; if (!rb) return '<span></span>';
-    if (rkClaimed(rb)) return '<span class="rkboxd" title="Caja recogida">' + ic('check') + ' Caja</span>';
-    if (rkReached(rb)) return '<button class="rkbox" data-act="rkclaim" data-id="' + rb.id + '">' + ic('caja') + ' Recoger</button>';
-    return '<span class="rkboxl" title="Alcanza este rango para ganar una caja">' + ic('caja') + '</span>';
+    var sk = rb.skin ? '<img class="rksk' + (rkClaimed(rb) ? '' : rkReached(rb) ? ' ready' : ' lock') + '" src="/cartas/art/' + rb.skin + '.webp" alt="" title="Skin: ' + esc(((window.CARTAS_SKINS || []).filter(function (k) { return k.id === rb.skin; })[0] || {}).name || '') + '">' : '';
+    if (rkClaimed(rb)) return '<span class="rkrw">' + sk + '<span class="rkboxd" title="Recompensa recogida">' + ic('check') + (rb.nobox ? ' Skin' : ' Caja') + '</span></span>';
+    if (rkReached(rb)) return '<span class="rkrw">' + sk + '<button class="rkbox" data-act="rkclaim" data-id="' + rb.id + '">' + ic(rb.nobox ? 'regalo' : 'caja') + ' Recoger</button></span>';
+    return '<span class="rkrw">' + sk + '<span class="rkboxl" title="Alcanza este rango para ganar una caja' + (rb.skin ? ' y una skin' : '') + '">' + ic('caja') + '</span></span>';
   }
   function refreshAcct(then) { api('me').then(function (r) { if (r.ok) { setAcct(r.data.user); if (then) then(); } }); }
   // ---------- Temporada y pase de batalla ----------
@@ -702,7 +706,7 @@
       '<p class="mut rknote">Puntúan las partidas contra otros jugadores: 1 contra 1 (+20 / -20) y Versus de 4 (+40 / +20 / -20 / -40 según tu puesto). Aparecen todas las cuentas, hayan jugado o no.</p></div>' +
       '<aside class="rkside" style="--rc:' + mr.c + '"><div class="rkbanner">' + rkEmblem(mk, true) + '<span class="rkpl">' + (L && L.pos ? 'Clasificación: ' + L.pos + (L.total ? ' de ' + L.total : '') : 'Sin clasificar') + '</span><b class="rkrn">' + mr.n + '</b><span class="rkpp">' + myPts + ' PL</span>' +
       (nx ? '<div class="meter rkm"><i class="on" style="width:' + Math.round((myPts - mr.min) / (nx.min - mr.min) * 100) + '%"></i></div><span class="rknx">' + (nx.min - myPts) + ' puntos para ' + nx.n + '</span>' : '<span class="rknx">Rango máximo</span>') + '</div>' +
-      '<p class="mut rkboxnote">' + ic('caja') + ' Cada rango, desde Bronce, te da una caja. Recógela aquí y ábrela en Colección → Inventario.</p><ul class="rktiers">' + tiers + '</ul></aside></div></div>';
+      '<p class="mut rkboxnote">' + ic('caja') + ' Cada rango, desde Bronce, te da una caja, y de Hierro a Platino además una skin exclusiva. Recógela aquí y ábrela en Colección → Inventario.</p><ul class="rktiers">' + tiers + '</ul></aside></div></div>';
   }
   // Ilustraciones de una noticia: las indicadas (art) o las cartas que se nombran en el texto; si no hay, el logo.
   function newsArts(n) {
@@ -949,6 +953,7 @@
     var hasCard = a.owned.indexOf(s.card) >= 0, own = (a.skins || []).indexOf(s.id) >= 0, eq = a.skinSel && a.skinSel[s.card] === s.id;
     return own ? (eq ? '<button class="btn sec sm" data-act="skinequip" data-skin="" data-card="' + s.card + '">' + ic('check') + ' Equipada · usar clásica</button>' : '<button class="btn sm" data-act="skinequip" data-skin="' + s.id + '" data-card="' + s.card + '">Equipar</button>')
       : s.legacy ? '<button class="btn sm" disabled>Ya no disponible</button>'
+      : s.rank ? '<button class="btn sm" disabled>Recompensa de rango</button>'
       : s.pass ? '<button class="btn sm" disabled>Exclusiva del pase</button>'
       : !hasCard ? '<button class="btn sm" disabled>Necesitas la carta</button>'
       : '<button class="btn sm" data-act="skinbuy" data-skin="' + s.id + '"' + (a.coins < (a.admin ? 0 : s.price) ? ' disabled' : '') + '>Comprar · ' + (a.admin ? 'gratis' : s.price + ' ' + ic('moneda')) + '</button>';

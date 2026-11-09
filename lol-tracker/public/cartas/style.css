@@ -2981,3 +2981,9 @@ body.gpulling #app { opacity: 0; pointer-events: none; }
 .protb svg { width: .8em; height: .8em; }
 img.timg[src$="fantasia.png"], .tlogo[src$="fantasia.png"] { width: auto; height: auto; max-width: 1.6em; max-height: 1.6em; }
 .card.accion .tlogo[src$="fantasia.png"] { max-width: .9em; max-height: .9em; }
+
+/* Skins de recompensa de rango */
+.rksk { width: 1.6rem; height: 2.2rem; object-fit: cover; border-radius: 4px; border: 1px solid rgba(255,255,255,.3); margin-right: .35rem; vertical-align: middle; }
+.rksk.lock { filter: grayscale(1) brightness(.5); }
+.rksk.ready { box-shadow: 0 0 10px rgba(251,191,36,.8); border-color: #fbbf24; }
+.rktiers li .rkrw { display: inline-flex !important; align-items: center; color: inherit; }

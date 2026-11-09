@@ -1,6 +1,12 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-09', tag: 'Novedad', title: 'Skins por subir de rango',
+      items: [
+        'Cada rango da ahora una skin exclusiva, que se recoge en Clasificación junto a la caja (Hierro solo da skin).',
+        'Hierro: Lihone Goblin. Bronce: Dashlight Sung Jin Woo. Plata: AitoRLG Renata. Oro: Javihi Koisito. Platino: Computer Petea.',
+        'Estas skins no se venden ni salen en cajas ni en Destino.'
+      ] },
     { date: '2026-11-09', tag: 'Novedad', title: 'Nueva sinergia: Fantasía',
       items: [
         'Nueva sinergia Fantasía (niveles con 2 y 4 cartas distintas): Sech, Pampert Carry, Lihone Rudeus, Hellbramn Goblin, Javihi KDA y Chipy Goku.',

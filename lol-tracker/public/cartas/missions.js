@@ -25,10 +25,11 @@
     { id: 'sk1', stat: 'skins', goal: 1, t: 'Cambio de look', d: 'Consigue una skin.' },
     { id: 'fx1', stat: 'fx', goal: 1, t: 'Con estilo', d: 'Consigue un efecto (despliegue, funda o victoria y derrota).' }
   ];
-  // Una caja por cada rango alcanzado, a partir de Bronce (puntos mínimos de la clasificación).
+  // Una caja por cada rango alcanzado, a partir de Bronce; Hierro a Platino dan además una skin (puntos mínimos de la clasificación).
   var RANK_BOXES = [
-    { id: 'bronce', n: 'Bronce', min: 60 }, { id: 'plata', n: 'Plata', min: 140 }, { id: 'oro', n: 'Oro', min: 240 },
-    { id: 'platino', n: 'Platino', min: 360 }, { id: 'esmeralda', n: 'Esmeralda', min: 500 }, { id: 'diamante', n: 'Diamante', min: 680 },
+    { id: 'hierro', n: 'Hierro', min: 0, nobox: true, skin: 'lihone-goblin-hierro' },
+    { id: 'bronce', n: 'Bronce', min: 60, skin: 'dashlight-sun-jin-woo-bronce' }, { id: 'plata', n: 'Plata', min: 140, skin: 'aitorlg-renata-plata' }, { id: 'oro', n: 'Oro', min: 240, skin: 'javihi-koisito-oro' },
+    { id: 'platino', n: 'Platino', min: 360, skin: 'computer-petea-platino' }, { id: 'esmeralda', n: 'Esmeralda', min: 500 }, { id: 'diamante', n: 'Diamante', min: 680 },
     { id: 'maestro', n: 'Maestro', min: 900 }, { id: 'aspirante', n: 'Aspirante', min: 1200 }
   ];
   var API = { MISSIONS: MISSIONS, RANK_BOXES: RANK_BOXES };

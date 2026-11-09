@@ -198,7 +198,7 @@ function gachaRoll(u) {
 }
 function publicUser(u) {
   return {
-    name: u.name, boxLocked: boxLocked(u), pts: u.pts || 0, coins: u.coins, owned: u.owned, dups: u.dups || {}, skins: u.skins || [], skinSel: u.skinSel || {}, decks: u.decks || null, avatar: u.avatar || '', fx: { deploy: fxSel(u, 'deploy'), sleeve: fxSel(u, 'sleeve'), finish: fxSel(u, 'finish') }, fxOwned: fxOwned(u), boxes: u.boxes || 0, invSkins: (u.invSkins || []).filter((id) => !(u.skins || []).includes(id)), invDup: u.invDup || {}, gachaN: u.gachaN || 0, gacha: { id: GACHA.id, cost: GACHA.cost, rate: GACHA.rate, pity: GACHA.pity }, ms: { stats: missionStats(u), claimed: u.msClaimed || [] }, packs: u.packs || 0, packsAnime: u.packsAnime || 0, packsSet2: u.packsSet2 || 0, emoteSets: emoteSetsOf(u), rkClaimed: u.rkClaimed || [], season: seasonPublic(u), ptsMax: rankReached(u),
+    name: u.name, boxLocked: boxLocked(u), pts: u.pts || 0, coins: u.coins, owned: u.owned, dups: u.dups || {}, skins: u.skins || [], skinSel: u.skinSel || {}, decks: u.decks || null, avatar: u.avatar || '', fx: { deploy: fxSel(u, 'deploy'), sleeve: fxSel(u, 'sleeve'), finish: fxSel(u, 'finish') }, fxOwned: fxOwned(u), boxes: u.boxes || 0, invSkins: (u.invSkins || []).filter((id) => !(u.skins || []).includes(id)), invDup: u.invDup || {}, gachaN: u.gachaN || 0, gacha: { id: GACHA.id, cost: GACHA.cost, rate: GACHA.rate, pity: GACHA.pity }, ms: { stats: missionStats(u), claimed: u.msClaimed || [] }, packs: u.packs || 0, packsAnime: u.packsAnime || 0, packsSet2: u.packsSet2 || 0, emoteSets: emoteSetsOf(u), rkClaimed: u.rkClaimed || [], rkSk: u.rkSk || [], season: seasonPublic(u), ptsMax: rankReached(u),
     dailyAvailable: u.lastDaily !== today(),
     gamesToday: u.rewardDay === today() ? u.rewardCount : 0,
     maxGamesToday: MAX_GAME_REWARDS_PER_DAY,
@@ -986,7 +986,7 @@ module.exports = async function handler(req, res) {
       u.skins = u.skins || []; u.skinSel = u.skinSel || {};
       if (act === 'skinBuy') {
         if (!sk) { res.status(400).json({ error: 'Skin no válida.' }); return; }
-        if (sk.pass) { res.status(403).json({ error: 'Esa skin es exclusiva del pase de batalla.' }); return; }
+        if (sk.pass) { res.status(403).json({ error: sk.rank ? 'Esa skin es una recompensa de rango (Clasificación).' : 'Esa skin es exclusiva del pase de batalla.' }); return; }
         if (u.skins.includes(sk.id)) { res.status(409).json({ error: 'Ya tienes esa skin.', user: publicUser(u) }); return; }
         if (u.owned.indexOf(sk.card) < 0) { res.status(403).json({ error: 'Necesitas tener la carta para comprar su skin.' }); return; }
         const cost = isAdmin(u) ? 0 : sk.price;
@@ -1121,10 +1121,12 @@ module.exports = async function handler(req, res) {
     if (act === 'rankClaim') { // recoger la caja de un rango alcanzado
       const rk = MS.RANK_BOXES.find((x) => x.id === String(body.id || ''));
       if (!rk) { res.status(400).json({ error: 'Ese rango no existe.' }); return; }
-      u.rkClaimed = u.rkClaimed || [];
-      if (u.rkClaimed.includes(rk.id)) { res.status(409).json({ error: 'Ya has recogido esa caja.', user: publicUser(u) }); return; }
+      u.rkClaimed = u.rkClaimed || []; u.rkSk = u.rkSk || [];
+      const needBox = !rk.nobox && !u.rkClaimed.includes(rk.id), needSkin = !!rk.skin && !u.rkSk.includes(rk.id);
+      if (!needBox && !needSkin) { res.status(409).json({ error: 'Ya has recogido esa recompensa.', user: publicUser(u) }); return; }
       if (rankReached(u) < rk.min) { res.status(403).json({ error: 'Aún no has alcanzado ese rango.', user: publicUser(u) }); return; }
-      u.rkClaimed.push(rk.id); u.boxes = (u.boxes || 0) + 1;
+      if (needBox) { u.rkClaimed.push(rk.id); u.boxes = (u.boxes || 0) + 1; }
+      if (needSkin) { u.rkSk.push(rk.id); u.skins = u.skins || []; if (!u.skins.includes(rk.skin)) u.skins.push(rk.skin); }
       await saveUser(cfg, u);
       res.status(200).json({ user: publicUser(u) }); return;
     }

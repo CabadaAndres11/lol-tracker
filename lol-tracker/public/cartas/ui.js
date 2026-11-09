@@ -785,7 +785,7 @@
   }
   // ---------- Noticia «Charla con los Desarrolladores»: conversación que avanza con cada clic ----------
   function chatNewsMain(n) {
-    return '<div class="rnmain chatnews"><img class="cnc c1" src="/cartas/tutor/guia.webp" alt=""><img class="cnc c2" src="/cartas/tutor/dev.webp" alt="">' + (n.pet ? '<img class="cnc c3" src="/cartas/tutor/petea.webp" alt="">' : '') +
+    return '<div class="rnmain chatnews"><img class="cnc c1" src="/cartas/tutor/guia.webp" alt=""><img class="cnc c2" src="/cartas/tutor/dev.webp" alt="">' + (n.pet ? '<img class="cnc c3" src="/cartas/tutor/petea.webp" alt="">' : '') + (n.guest ? '<img class="cnc c3" src="/cartas/tutor/invitado.webp" alt="">' : '') +
       '<div class="rnbody"><span class="ntag nt-' + esc(n.tag) + '">' + esc(n.tag) + '</span><h2>' + esc(n.title) + '</h2>' +
       '<button class="btn cnplay" data-act="devchat" data-i="' + (window.CARTAS_NEWS || []).indexOf(n) + '">▶ Reproducir charla</button></div></div>';
   }
@@ -793,10 +793,10 @@
     if (!f) return '';
     var h = '', i;
     if (f.k === 'syn') {
-      h = '<div class="fxrow">' + f.ids.map(function (t, i) { return '<div class="sy" style="--i:' + i + '"><span class="sic">' + tic(t) + '<i class="slash"></i></span><b>' + esc(t) + '</b></div>'; }).join('') + '</div><div class="fxlab bad">' + (f.lab || 'Sinergias que se retiran') + '</div>';
+      h = '<div class="fxrow">' + f.ids.map(function (t, i) { return '<div class="sy" style="--i:' + i + '"><span class="sic">' + tic(t) + (f.nw ? '' : '<i class="slash"></i>') + '</span><b>' + esc(t) + '</b></div>'; }).join('') + '</div><div class="fxlab ' + (f.nw ? 'new' : 'bad') + '">' + (f.lab || 'Sinergias que se retiran') + '</div>';
     } else if (f.k === 'cards') {
       var cl = f.items || f.ids.filter(function (id) { return CARD[id]; }).map(function (id) { return [id, CARD[id].name]; });
-      h = '<div class="fxgrid' + (f.items ? ' gone' : '') + '">' + cl.map(function (x, i) { return '<div class="ct" style="--i:' + i + '"><span class="ctp" style="background-image:url(/cartas/art/' + x[0] + '.webp)"></span><i class="cts">' + (f.items ? '✕' : '↻') + '</i><b>' + esc(x[1]) + '</b></div>'; }).join('') + '</div><div class="fxlab ' + (f.items ? 'bad' : 'warn') + '">' + (f.lab || 'Cartas que cambian por completo') + '</div>';
+      h = '<div class="fxgrid' + (f.items ? ' gone' : '') + '">' + cl.map(function (x, i) { return '<div class="ct" style="--i:' + i + '"><span class="ctp" style="background-image:url(/cartas/art/' + x[0] + '.webp)"></span><i class="cts">' + (f.nw ? '✦' : f.items ? '✕' : '↻') + '</i><b>' + esc(x[1]) + '</b></div>'; }).join('') + '</div><div class="fxlab ' + (f.nw ? 'new' : f.items ? 'bad' : 'warn') + '">' + (f.lab || 'Cartas que cambian por completo') + '</div>';
     } else if (f.k === 'art') {
       h = '<span class="fxspoil">Spoiler</span><div class="fxrow art">' + [0, 1, 2].map(function (i) { return '<div class="ct q" style="--i:' + i + '"><span class="ctq">?</span><i class="brush"></i></div>'; }).join('') + '</div><div class="fxlab new">' + (f.lab || 'Nuevas ilustraciones') + '</div>';
     } else if (f.k === 'newsyn') {
@@ -826,7 +826,7 @@
     var N = window.CARTAS_NEWS || [], n = N[i] && N[i].chat ? N[i] : N.filter(function (x) { return x.chat; })[0]; if (!n) return;
     closeChat(); chatS = { l: n.chat, i: -1, t: null, full: '', pos: 0 };
     chatEl = document.createElement('div'); chatEl.className = 'devchat';
-    chatEl.innerHTML = '<div class="dcbox"><button class="dcx" data-dc="close" title="Cerrar">✕</button><img class="dcc l" src="/cartas/tutor/guia.webp" alt=""><img class="dcc r" src="/cartas/tutor/dev.webp" alt=""><img class="dcc p" src="/cartas/tutor/petea.webp" alt=""><div class="dcfx"></div>' +
+    chatEl.innerHTML = '<div class="dcbox"><button class="dcx" data-dc="close" title="Cerrar">✕</button><img class="dcc l" src="/cartas/tutor/guia.webp" alt=""><img class="dcc r" src="/cartas/tutor/dev.webp" alt=""><img class="dcc p" src="/cartas/tutor/petea.webp" alt=""><img class="dcc k" src="/cartas/tutor/invitado.webp" alt=""><div class="dcfx"></div>' +
       '<div class="dcbub"><span class="dcname"></span><p class="dctx"></p><span class="dcgo">Pulsa para continuar ▸</span><span class="dcn"></span></div></div>';
     document.body.appendChild(chatEl);
     chatEl.addEventListener('click', function (e) { if (e.target.closest('[data-dc="close"]') || e.target === chatEl) return closeChat(); chatNext(); });
@@ -841,7 +841,7 @@
     s.i++; var L = s.l[s.i]; s.full = L.t; s.pos = 0; chatEl.classList.remove('done');
     chatEl.dataset.w = L.w; chatEl.dataset.p = L.p || '';
     if ('fx' in L) { var fe = chatEl.querySelector('.dcfx'); fe.innerHTML = chatFx(L.fx); fe.className = 'dcfx' + (L.fx ? ' on k-' + L.fx.k : ''); }
-    chatEl.querySelector('.dcname').textContent = L.w === 'd' ? 'Dev' : L.w === 'p' ? 'Petea Goblin' : 'Guía';
+    chatEl.querySelector('.dcname').textContent = L.w === 'd' ? 'Dev' : L.w === 'p' ? 'Petea Goblin' : L.w === 'k' ? 'Invitado' : 'Guía';
     chatEl.querySelector('.dcn').textContent = (s.i + 1) + ' / ' + s.l.length;
     chatEl.querySelector('.dcgo').textContent = s.i === s.l.length - 1 ? 'Pulsa para cerrar ✕' : 'Pulsa para continuar ▸';
     var g = chatEl.querySelector('.dcc.l'); g.src = '/cartas/tutor/' + (L.p === 'e' ? 'guia-enfadado' : 'guia') + '.webp';

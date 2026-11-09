@@ -3008,3 +3008,10 @@ img.timg[src$="fantasia.png"], .tlogo[src$="fantasia.png"] { width: auto; height
 .i22 .i20gk.x b { color: #fff; animation: none; text-shadow: 0 0 1cqw #be123c; }
 .i22 .i20gk.g { background: radial-gradient(circle at 40% 35%, #fff 0 12%, #fef08a 30%, #eab308 58%, rgba(161,98,7,.25) 72%); box-shadow: 0 0 3cqw #eab308, 0 0 7cqw rgba(253,224,71,.5); }
 .i22 .i20gk.g b { color: #713f12; animation: none; text-shadow: 0 0 1cqw #fff; }
+
+/* Charla: invitado */
+.dcc.k { left: 3%; bottom: 20%; height: 72%; opacity: 0; filter: brightness(.45) saturate(.6); transform: translateY(8%) scale(.94); pointer-events: none; }
+.devchat[data-w="k"] .dcc.k { opacity: 1; filter: drop-shadow(0 0 14px rgba(239,68,68,.8)); transform: none; animation: dcpet .5s cubic-bezier(.2,1.5,.4,1); }
+.devchat[data-w="k"] .dcc.l { opacity: 0; transform: translateX(-12%) scale(.9); }
+.devchat[data-w="k"] .dcname { background: #b91c1c; }
+.fxlab.new { background: #6d28d9; color: #fff; border-color: #c4b5fd; }

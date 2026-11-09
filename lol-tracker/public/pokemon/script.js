@@ -496,9 +496,8 @@ function circleHtml(player) {
     ? `<button type="button" class="bt-sprite" data-action="open-mon" data-id="${eid}" data-index="${li}" title="Ver detalles de ${escapeHtml(lead.species)}" aria-label="Ver detalles de ${escapeHtml(lead.species)}">${monImage(shown, 'bt-img')}${sparks(lead.shiny)}</button>${leadMega ? `<button type="button" class="bt-mega${megaActive ? ' on' : ''}" data-action="toggle-mega" data-id="${eid}" data-index="${li}" title="${megaActive ? 'Volver a la forma normal' : 'Megaevolucionar'}" aria-label="${megaActive ? 'Volver a la forma normal' : 'Megaevolucionar'}"><img src="/pokemon/mega.png" alt="" draggable="false"></button>` : ''}`
     : `<button type="button" class="bt-sprite" data-action="add-mon" data-id="${eid}" aria-label="Añadir Pokémon"><div class="bt-img bt-img-empty">+</div></button>`;
 
-  const foeHtml = rival
-    ? `${monImage(rival, 'bt-img')}${sparks(rival.shiny)}`
-    : '<div class="bt-img bt-img-empty">?</div>';
+  // El rival (o el "?") abre directamente el formulario de rival: solo pide el nombre
+  const foeHtml = `<button type="button" class="bt-sprite" data-action="edit-rival" data-id="${eid}" title="${rival ? 'Cambiar rival' : 'Elegir rival'}" aria-label="${rival ? 'Cambiar rival' : 'Elegir rival'}">${rival ? `${monImage(rival, 'bt-img')}${sparks(rival.shiny)}` : '<div class="bt-img bt-img-empty">?</div>'}</button>`;
 
   const parties = Array.from({ length: MAX_TEAM }, (_, i) => {
     const mon = team[i];

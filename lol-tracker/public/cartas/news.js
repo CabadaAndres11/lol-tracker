@@ -1,7 +1,7 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
-    { date: '2026-11-09', tag: 'Novedad', title: '¡Ya está aquí la versión 2.2! K-Pop, Fantasía y Destino', art: ['aitorlg-singer', 'sech', 'chipy-goku'], gacha: true,
+    { date: '2026-11-09', tag: 'Novedad', title: '¡Ya está aquí la versión 2.2! K-Pop, Fantasía y Destino', art: ['aitorlg-singer', 'sech', 'chipy-goku'],
       items: [
         'Versión 2.2: dos sinergias nuevas, un gacha y mucho más. Al entrar verás un pop-up animado con todas las novedades (puedes desactivarlo o volver a verlo desde tu perfil).',
         'Sinergias: K-Pop (KDA, True Damage, Huntrix y SajaBoys; eliges un grupo y AitoRLG Singer lo potencia) y Fantasía (un Protagonista que recibe la vida de las demás cartas Fantasía y todos los ataques rivales; nueva acción Giro de Guion; Chipy Goku pasa a Épica con Guinazo).',

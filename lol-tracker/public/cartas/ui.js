@@ -861,7 +861,7 @@
     }).join('') + '</ul>' + (isChat ? chatNewsMain(n) : '<div class="rnmain' + (arts.length ? '' : ' nologo') + (ui.newsFull && newsNeedsFull(n) ? ' full' : '') + '" style="' + (arts.length ? '--rart:url(/cartas/art/' + arts[0] + '.webp)' : '') + '">' +
       (arts.length ? '' : '<img class="rnlogo" src="/cartas/logo.webp" alt="">') +
       '<div class="rnbody"><span class="ntag nt-' + esc(n.tag) + '">' + esc(n.tag) + '</span><h2>' + esc(n.title) + '</h2><ul>' + (ui.newsFull && newsNeedsFull(n) ? n.items.map(function (t) { return '<li>' + (t.indexOf('{{intro}}') >= 0 ? esc(t.replace('{{intro}}', '')) + '<a href="#" class="newslink" data-act="introplay">▶ Ver la animación</a>' : esc(t)) + '</li>'; }) : newsSummary(n).map(function (t) { return '<li>' + esc(t) + '</li>'; })).join('') + '</ul>' +
-      (n.gacha ? gachaDemoBtns() : '') + (newsNeedsFull(n) ? '<button class="btn sec sm" data-act="newsmore">' + (ui.newsFull ? 'Mostrar menos ▴' : 'Leer la noticia completa ▾') + '</button>' : '') +
+      (newsNeedsFull(n) ? '<button class="btn sec sm" data-act="newsmore">' + (ui.newsFull ? 'Mostrar menos ▴' : 'Leer la noticia completa ▾') + '</button>' : '') +
       (arts.length > 1 ? '<div class="rnthumbs">' + arts.map(function (id) { return '<span style="background-image:url(/cartas/art/' + id + '.webp)" title="' + esc(CARD[id] ? CARD[id].name : id.replace(/-/g, ' ')) + '"></span>'; }).join('') + '</div>' : '') + '</div></div>') + '</div>';
   }
   // Cambia solo el panel de noticias (así la lista conserva su scroll)
@@ -1087,9 +1087,6 @@
   var GRCOL = { 'Común': '#cbd5e1', 'Rara': '#60a5fa', 'Épica': '#c084fc', 'Legendaria': '#fbbf24', 'Mítica': '#ef4444' };
   function fxInfo(id) { return DEPLOY_LIST.concat(SLEEVE_LIST, FIN_LIST).filter(function (e) { return e.id === id; })[0] || null; }
   function gachaCfg() { return (ui.acct && ui.acct.gacha) || { id: 'aitorlg-singer', cost: 25, rate: 10, pity: 20 }; }
-  function gachaDemoBtns() {
-    return '<div class="gdemo"><span class="mut">Probar la animación de Destino:</span>' + ['Común', 'Rara', 'Épica', 'Legendaria', 'Mítica'].map(function (r) { return '<button class="btn sec sm" style="--gc:' + GRCOL[r] + '" data-act="gdemo" data-r="' + r + '">' + r + '</button>'; }).join('') + '</div>';
-  }
   function gachaItemHtml(r) {
     if (r.kind === 'card') { var c = CARD[r.id]; return { name: c.name, sub: c.type === 'tropa' ? 'Carta · ' + c.rarity : 'Acción · ' + c.rarity, html: cardHtml(c, { skin: '' }) }; }
     if (r.kind === 'skin') { var sk = (window.CARTAS_SKINS || []).filter(function (k) { return k.id === r.id; })[0]; var cc = sk && CARD[sk.card]; return { name: sk ? sk.name : r.id, sub: 'Skin' + (cc ? ' de ' + cc.name : ''), html: cc ? cardHtml(cc, { skin: r.id }) : '' }; }
@@ -2937,7 +2934,6 @@ var GOB_SVG = '<svg class="gobsvg" viewBox="0 0 100 100"><g class="gobleg a"><re
     if (act === 'devchat') return openChat(+el.dataset.i);
     if (act === 'rfopen') return rfOpen();
     if (act === 'gpull') return gachaPull(+el.dataset.n || 1);
-    if (act === 'gdemo') { var rr = el.dataset.r, dc = rr === 'Mítica' ? CARD['aitorlg-singer'] : D.cards.filter(function (x) { return x.rarity === rr && !x.nopack && ARTS[x.id]; })[0]; return gachaPlay([{ kind: 'card', id: dc.id, rarity: rr, main: rr === 'Mítica' }], true); }
     if (act === 'newsmore') { ui.newsFull = !ui.newsFull; return refreshNews(); }
     if (act === 'setavatar') { return api('avatarSet', { card: el.dataset.card }).then(function (r) { if (r.ok) { setAcct(r.data.user); ui.msg = ''; ui.avEdit = false; } else ui.msg = (r.data && r.data.error) || 'No se pudo cambiar la foto.'; render(); }); }
     if (PLAYACTS[act]) { if (!ui.picked) return askDeck(act); ui.picked = false; }

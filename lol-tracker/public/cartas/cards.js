@@ -695,7 +695,7 @@ var D={
    "size": 2,
    "pas": {
     "n": "Loot Infinito",
-    "t": "Si está en la mesa, los Goblins ganan +5/+5 por el nivel de su carta durante el combate (nivel 1: +5/+5, nivel 2: +10/+10, nivel 3: +15/+15)."
+    "t": "Si está en la mesa, los Goblins ganan estadísticas según el nivel de su carta durante el combate (nivel 1: +2/+2, nivel 2: +5/+5, nivel 3: +10/+10)."
    }
   },
   {

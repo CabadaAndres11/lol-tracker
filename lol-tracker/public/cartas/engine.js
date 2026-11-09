@@ -802,11 +802,11 @@
           fxFrame(s, p, 'inf', 'Actualizaciones', '+1/+1 por cada 3 actualizaciones de tienda (' + s.refreshN[p] + ' en total)', inf.map(function (i) { return i.uid; }));
         }
       }
-      // Petea Goblin: Loot Infinito, los Goblins ganan +5/+5 por el nivel de su carta durante el combate
+      // Petea Goblin: Loot Infinito, los Goblins ganan +2/+2, +5/+5 o +10/+10 según el nivel de su carta durante el combate
       if (troops.some(function (i) { return pas(i) === 'loot'; })) {
         var gb = troops.filter(function (i) { return has(i, 'Goblins'); });
-        gb.forEach(function (i) { var b = 5 * (i.gl || 1); i.tmp.atk += b; i.tmp.hp += b; i.hp += b; });
-        if (gb.length) fxFrame(s, p, 'loot', 'Loot Infinito', '+5/+5 por nivel de carta a los Goblins', gb.map(function (i) { return i.uid; }));
+        gb.forEach(function (i) { var b = [2, 5, 10][Math.min(3, i.gl || 1) - 1]; i.tmp.atk += b; i.tmp.hp += b; i.hp += b; });
+        if (gb.length) fxFrame(s, p, 'loot', 'Loot Infinito', '+2/+5/+10 de ataque y vida a los Goblins según su nivel de carta', gb.map(function (i) { return i.uid; }));
       }
       // Pokémon: bola (las acciones pueden añadir bolas extra esta ronda)
       if (t['Pokémon']) {

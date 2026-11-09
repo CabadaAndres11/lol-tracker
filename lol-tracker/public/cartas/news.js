@@ -1,6 +1,10 @@
 /* Parches y noticias. Añade las nuevas AL PRINCIPIO (la más reciente primero). */
 (function (root) {
   var NEWS = [
+    { date: '2026-11-09', tag: 'Ajuste', title: 'Nerfeo de Petea Goblin',
+      items: [
+        'Loot Infinito (Petea Goblin) baja de +5/+5, +10/+10 y +15/+15 a +2/+2, +5/+5 y +10/+10 según el nivel de la carta (1, 2 y 3).'
+      ] },
     { date: '2026-11-09', tag: 'Ajuste', title: 'Encanto de los SajaBoys',
       items: [
         'El Encanto de SajaBoys afecta siempre a un solo enemigo (el rival no legendario con más ataque), sea cual sea la cantidad de SajaBoys en el campo.'

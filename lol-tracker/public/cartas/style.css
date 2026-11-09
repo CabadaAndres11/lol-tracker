@@ -2852,7 +2852,8 @@ body.soc-open #app { margin-right: 286px; }
 .card .holo.hk-saja::before { background: linear-gradient(115deg, transparent 30%, rgba(180,90,255,.42) 38%, rgba(255,90,200,.4) 44%, rgba(140,80,255,.46) 50%, rgba(255,130,230,.4) 56%, transparent 64%); }
 
 /* logo de la sinergia K-Pop (apaisado) */
-img.timg[src$="kpop.png"], .card.accion .tlogo[src$="kpop.png"], .tlogo[src$="kpop.png"] { width: auto; height: auto; max-width: 4em; max-height: 1.5em; }
+img.timg[src$="kpop.png"], .tlogo[src$="kpop.png"] { width: auto; height: auto; max-width: 4em; max-height: 1.5em; }
+.card.accion .tlogo[src$="kpop.png"] { max-width: 2em; max-height: .75em; }
 .starter .si img.timg[src$="kpop.png"] { width: 4.4rem; height: auto; max-height: 2.6rem; }
 
 /* rareza Mítica: hexágono rojo */

@@ -2317,3 +2317,15 @@ footer { padding-bottom: calc(3rem + env(safe-area-inset-bottom)); }
 
 /* La caja del rival queda por encima del Pokémon propio (si no, el "+" / sprite robaba los clics del botón "Cambiar rival") */
 .bt-box-foe { z-index: 5; }
+
+/* Equipos ocultos hasta la fecha de entrega */
+.battle { position: relative; }
+.battle.is-locked .bt-me, .battle.is-locked .bt-cmd, .battle.is-locked .bt-party, .battle.is-locked .bt-hint { filter: blur(7px); pointer-events: none; user-select: none; }
+.battle.is-locked .bt-box-foe .bt-link { display: none; }
+.battle.is-locked .bt-foe .bt-sprite { pointer-events: none; }
+.bt-slot.is-locked { display: inline-flex; align-items: center; justify-content: center; color: rgba(255,255,255,.5); font-weight: 700; }
+.thumb-locked { display: inline-flex; align-items: center; justify-content: center; filter: blur(2px); color: rgba(255,255,255,.7); font-weight: 700; }
+.bt-lock { position: absolute; left: 4%; right: 4%; bottom: 6%; z-index: 9; display: grid; gap: .6rem; justify-items: center; text-align: center; padding: 1rem 1.2rem; border-radius: 14px; background: rgba(8, 14, 32, .82); border: 2px solid rgba(255,255,255,.55); box-shadow: 0 8px 30px rgba(0,0,0,.6); backdrop-filter: blur(3px); color: #fff; }
+.bt-lock p { margin: 0; font-size: .9rem; line-height: 1.4; }
+.bt-lock-ic { font-size: 1.6rem; }
+.bt-lock-actions { display: flex; flex-wrap: wrap; gap: .8rem; align-items: center; justify-content: center; }

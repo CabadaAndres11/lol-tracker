@@ -15,8 +15,33 @@ function pinFor(id) {
   return String(h.readUInt32BE(0) % 10000).padStart(4, '0');
 }
 
+// Clave de administrador (LEAGUE_ADMIN_KEY): sin ella configurada nadie es administrador.
+function adminOk(req) {
+  const expected = process.env.LEAGUE_ADMIN_KEY;
+  if (!expected) return false;
+  const a = Buffer.from(String(req.headers['x-admin-key'] ?? ''));
+  const b = Buffer.from(expected);
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
+
+// Comprueba un PIN suelto (lectura de equipos ocultos). Cuenta los fallos igual que checkPin.
+async function verifyPin(cfg, id, given) {
+  const expected = pinFor(id);
+  if (!expected) return true; // sin PIN_SECRET no hay forma de identificar a nadie
+  given = String(given || '').trim();
+  if (!/^\d{4}$/.test(given)) return false;
+  const failKey = `pokemon:pinfail:${id}`;
+  if (Number((await redis(cfg, ['GET', failKey])) || 0) >= MAX_FAILS) return false;
+  if (crypto.timingSafeEqual(Buffer.from(given), Buffer.from(expected))) return true;
+  await redis(cfg, ['INCR', failKey]);
+  await redis(cfg, ['EXPIRE', failKey, BLOCK_SECONDS]);
+  return false;
+}
+
 // Devuelve null si todo va bien, o { status, body } con la respuesta de error.
+// Los administradores (clave de administrador) pueden modificar cualquier cosa sin PIN.
 async function checkPin(cfg, req, id) {
+  if (adminOk(req)) return null;
   const expected = pinFor(id);
   if (!expected) return null;
 
@@ -39,4 +64,4 @@ async function checkPin(cfg, req, id) {
   };
 }
 
-module.exports = { pinFor, checkPin };
+module.exports = { pinFor, checkPin, adminOk, verifyPin };

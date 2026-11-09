@@ -11,6 +11,7 @@ const countEl = document.getElementById('count');
 // Estado de la pantalla
 let players = [];          // [{ name, at }]
 let teams = {};            // { idJugador: [pokemon, ...] }
+let hiddenTeams = {};      // { idJugador: nº de Pokémon } equipos ocultos hasta la fecha de entrega (solo los ve su dueño con PIN o un admin)
 let currentId = null;      // participante que se está mostrando
 let viewing = null;        // { id, index } Pokémon abierto en la ventana emergente
 let animating = false;     // true mientras dura la animación de deslizamiento
@@ -471,7 +472,9 @@ function leadIndex(id) {
 function circleHtml(player) {
   const id = idOf(player);
   const eid = encodeURIComponent(id);
-  const team = teams[id] || [];
+  const locked = hiddenTeams[id] != null;
+  const lockedN = locked ? hiddenTeams[id] : 0;
+  const team = locked ? [] : teams[id] || [];
   const mask = badges[id] || 0;
   const li = leadIndex(id);
   const lead = team[li];
@@ -488,11 +491,13 @@ function circleHtml(player) {
   const fav = favInfo(player.name);
 
   const leadName = lead ? (megaActive ? leadMega.name : (lead.nickname || lead.species)) : '';
-  const msg = lead ? `¡Adelante, ${leadName}!` : team.length ? '' : 'Todavía no hay Pokémon. ¡Añade el primero!';
+  const msg = locked ? '' : lead ? `¡Adelante, ${leadName}!` : team.length ? '' : 'Todavía no hay Pokémon. ¡Añade el primero!';
 
   const sparks = (on) => on ? '<i class="bt-spark" style="left:12%;top:14%"></i><i class="bt-spark" style="right:14%;top:26%;animation-delay:.4s"></i><i class="bt-spark" style="left:46%;top:4%;animation-delay:.8s"></i><i class="bt-spark" style="right:24%;bottom:22%;animation-delay:1.1s"></i>' : '';
 
-  const meHtml = lead
+  const meHtml = locked
+    ? '<div class="bt-sprite"><div class="bt-img bt-img-empty">?</div></div>'
+    : lead
     ? `<button type="button" class="bt-sprite" data-action="open-mon" data-id="${eid}" data-index="${li}" title="Ver detalles de ${escapeHtml(lead.species)}" aria-label="Ver detalles de ${escapeHtml(lead.species)}">${monImage(shown, 'bt-img')}${sparks(lead.shiny)}</button>${leadMega ? `<button type="button" class="bt-mega${megaActive ? ' on' : ''}" data-action="toggle-mega" data-id="${eid}" data-index="${li}" title="${megaActive ? 'Volver a la forma normal' : 'Megaevolucionar'}" aria-label="${megaActive ? 'Volver a la forma normal' : 'Megaevolucionar'}"><img src="/pokemon/mega.png" alt="" draggable="false"></button>` : ''}`
     : `<button type="button" class="bt-sprite" data-action="add-mon" data-id="${eid}" aria-label="Añadir Pokémon"><div class="bt-img bt-img-empty">+</div></button>`;
 
@@ -501,6 +506,7 @@ function circleHtml(player) {
 
   const parties = Array.from({ length: MAX_TEAM }, (_, i) => {
     const mon = team[i];
+    if (locked) return i < lockedN ? '<span class="bt-slot is-locked">?</span>' : '<span class="bt-slot bt-slot-empty"></span>';
     if (!mon) return `<button type="button" class="bt-slot bt-slot-empty" data-action="add-mon" data-id="${eid}" title="Añadir Pokémon" aria-label="Añadir Pokémon">+</button>`;
     const title = `${mon.species}${mon.nickname ? ` “${mon.nickname}”` : ''}${banReasons(mon).length ? ' — ⚠ NO PERMITIDO' : ''}`;
     return `<button type="button" class="bt-slot${i === li ? ' is-on' : ''}${banReasons(mon).length ? ' is-banned' : ''}" data-action="set-lead" data-id="${eid}" data-index="${i}" title="${escapeHtml(title)}" aria-label="Sacar a ${escapeHtml(mon.species)}">${monImage(mon, 'bt-slot-img')}</button>`;
@@ -510,13 +516,13 @@ function circleHtml(player) {
   const nat = lead?.nature ? (natureByName(lead.nature) ? natureText(natureByName(lead.nature)) : lead.nature) : '—';
 
   return `
-    <div class="battle${fav ? ` is-fav fav-glow-${fav.rank + 1}` : ''}">
+    <div class="battle${locked ? ' is-locked' : ''}${fav ? ` is-fav fav-glow-${fav.rank + 1}` : ''}">
       <div class="bt-ghost" aria-hidden="true">${escapeHtml(player.name.toUpperCase())}</div>
       <div class="bt-head">
         ${avatarHtml(player.name, 'bt-avatar')}
         <div>
           <h2 class="bt-name">${escapeHtml(player.name)}${hasBadge(mask, LEAGUE) ? ' <span class="crown" title="Campeón de la Liga">🏆</span>' : ''}</h2>
-          <div class="bt-sub">${team.length}/${MAX_TEAM} Pokémon</div>
+          <div class="bt-sub">${locked ? lockedN : team.length}/${MAX_TEAM} Pokémon</div>
         </div>
         ${badgesBlock(id, true)}
       </div>
@@ -556,6 +562,14 @@ function circleHtml(player) {
 
       <div class="bt-party">${parties}</div>
       <div class="bt-hint">Pulsa un Pokémon del equipo para sacarlo al campo</div>
+      ${locked ? `<div class="bt-lock" role="status">
+        <div class="bt-lock-ic" aria-hidden="true">🔒</div>
+        <p><strong>Equipo oculto.</strong> Los Pokémon y movimientos de los demás participantes se podrán ver pasada la fecha de entrega (${DELIVERY_TEXT}).</p>
+        <div class="bt-lock-actions">
+          <button type="button" class="add-btn small" data-action="unlock-pin" data-id="${eid}">Soy ${escapeHtml(player.name)}: poner mi PIN</button>
+          <button type="button" class="link-btn" data-action="unlock-admin">Soy administrador</button>
+        </div>
+      </div>` : ''}
     </div>`;
 }
 
@@ -593,7 +607,7 @@ function render() {
   const player = currentPlayer();
   currentId = idOf(player);
 
-  stage.innerHTML = circleHtml(player) + favBlock(player.name) + `<div class="import-row"><button type="button" class="dex-btn" data-action="import-team" data-id="${encodeURIComponent(currentId)}"><span aria-hidden="true">⬆</span> Importar equipo</button><button type="button" class="dex-btn" data-action="export-team" data-id="${encodeURIComponent(currentId)}"${(teams[currentId] || []).length ? '' : ' disabled title="Este participante aún no tiene equipo"'}><span aria-hidden="true">⬇</span> Exportar equipo</button></div>` + porraBlock(currentId);
+  stage.innerHTML = circleHtml(player) + favBlock(player.name) + (hiddenTeams[currentId] != null ? '' : `<div class="import-row"><button type="button" class="dex-btn" data-action="import-team" data-id="${encodeURIComponent(currentId)}"><span aria-hidden="true">⬆</span> Importar equipo</button><button type="button" class="dex-btn" data-action="export-team" data-id="${encodeURIComponent(currentId)}"${(teams[currentId] || []).length ? '' : ' disabled title="Este participante aún no tiene equipo"'}><span aria-hidden="true">⬇</span> Exportar equipo</button></div>`) + porraBlock(currentId);
   updatePorraBar();
   document.getElementById('trainers').innerHTML = trainersHtml();
 
@@ -1113,7 +1127,7 @@ async function loadAll() {
   try {
     const [pRes, tRes, bRes, prRes, rvRes] = await Promise.all([
       fetch('/api/pokemon-players'),
-      fetch('/api/pokemon-team'),
+      fetch('/api/pokemon-team', { headers: teamReadHeaders() }),
       fetch('/api/pokemon-badges'),
       fetch('/api/pokemon-porra').catch(() => null), // si falla, el resto de la página sigue funcionando
       fetch('/api/pokemon-rival').catch(() => null),
@@ -1127,6 +1141,9 @@ async function loadAll() {
 
     players = pData.players;
     teams = tData.teams;
+    hiddenTeams = tData.hidden || {};
+    (tData.badPins || []).forEach((id) => setPin(id, '')); // PIN guardado que ya no vale
+    if (getAdminKey() && tData.admin === false) setAdminKey(''); // clave de administrador que ya no vale
     badges = bData.badges;
     if (prRes && prRes.ok) {
       const prData = await prRes.json();
@@ -1140,7 +1157,7 @@ async function loadAll() {
     renderPorrasTab();
     if (editing || viewing) return; // por si empezó a editar mientras cargaba
     // Solo se repinta si los datos han cambiado (así no se reinician las animaciones en cada sondeo).
-    const sig = JSON.stringify([players, teams, badges, rivals, porras, spectators, porraClosed]);
+    const sig = JSON.stringify([players, teams, hiddenTeams, badges, rivals, porras, spectators, porraClosed]);
     if (sig === lastSig && stage.querySelector('.battle')) return;
     lastSig = sig;
     render();
@@ -1161,6 +1178,20 @@ function setPin(id, pin) {
     if (pin) o[id] = pin; else delete o[id];
     localStorage.setItem(PIN_KEY, JSON.stringify(o));
   } catch { /* sin almacenamiento: se pedirá cada vez */ }
+}
+
+// Recarga ya (esperando a que acabe cualquier animación o ventana abierta).
+async function reloadNow() {
+  for (let i = 0; i < 30 && (editing || viewing || animating); i++) await new Promise((r) => setTimeout(r, 150));
+  lastSig = '';
+  await loadAll();
+}
+
+// Cabeceras para leer los equipos: los PIN y la clave de administrador que recuerda este navegador.
+function teamReadHeaders() {
+  let pins = {};
+  try { pins = JSON.parse(localStorage.getItem(PIN_KEY) || '{}'); } catch { pins = {}; }
+  return { 'X-Pins': JSON.stringify(pins), ...(getAdminKey() ? { 'X-Admin-Key': getAdminKey() } : {}) };
 }
 
 // PUT que pide el PIN del participante si el servidor lo exige.
@@ -1254,6 +1285,7 @@ async function onAction(e) {
   const id = btn.dataset.id ? decodeURIComponent(btn.dataset.id) : null;
   const index = Number(btn.dataset.index);
 
+  if (id && hiddenTeams[id] != null && ['add-mon', 'open-mon', 'edit-mon', 'delete-mon', 'import-team', 'set-lead', 'edit-rival'].includes(action)) return; // equipo oculto
   if (['add-mon', 'edit-mon', 'delete-mon', 'import-team'].includes(action) && !ensureTeamEdit()) return;
 
   if (action === 'badge') {
@@ -1275,6 +1307,20 @@ async function onAction(e) {
     if (megaOn.has(k)) megaOn.delete(k); else megaOn.add(k);
     render();
     renderPopup();
+  } else if (action === 'unlock-pin') {
+    const pin = prompt('Introduce tu PIN (4 dígitos) para ver y editar tu equipo:');
+    if (pin && pin.trim()) {
+      setPin(id, pin.trim());
+      await reloadNow();
+      if (hiddenTeams[id] != null) alert('PIN incorrecto.');
+    }
+  } else if (action === 'unlock-admin') {
+    const key = prompt('Clave de administrador:');
+    if (key && key.trim()) {
+      setAdminKey(key.trim());
+      await reloadNow();
+      if (!getAdminKey()) alert('Clave de administrador incorrecta.');
+    }
   } else if (action === 'open-mon') {
     viewing = { id, index };
     renderPopup();
@@ -1685,6 +1731,7 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !notice.
 
 // Horario de España peninsular en noviembre = UTC+1.
 const DELIVERY_DEADLINE = new Date('2026-11-11T23:59:00+01:00');
+const DELIVERY_TEXT = 'miércoles 11 de noviembre, 23:59';
 const TOURNAMENT_START = new Date('2026-11-15T17:00:00+01:00');
 
 function updateDeadlineCountdown() {
@@ -1779,6 +1826,8 @@ function computeStandings() {
 
 function teamThumbs(name) {
   const team = teams[lcName(name)] || [];
+  const nHidden = hiddenTeams[lcName(name)];
+  if (nHidden != null) return Array.from({ length: MAX_TEAM }, (_, i) => i < nHidden ? '<span class="thumb thumb-locked" title="Equipo oculto hasta la fecha de entrega">?</span>' : '<span class="thumb thumb-empty"></span>').join('');
   return Array.from({ length: MAX_TEAM }, (_, i) =>
     team[i]
       ? `<span class="thumb${banReasons(team[i]).length ? ' is-banned' : ''}" title="${escapeHtml(team[i].species)}${banReasons(team[i]).length ? ' — ⚠ NO PERMITIDO' : ''}">${monImage(team[i], 'liga-img')}</span>`

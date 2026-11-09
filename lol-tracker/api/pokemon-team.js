@@ -1,20 +1,12 @@
 // Equipos de los participantes del torneo Pokémon (máx. 6 Pokémon cada uno).
 // Se guardan en Redis (Upstash) en un hash: campo = nombre del jugador en
 // minúsculas, valor = JSON con la lista de Pokémon.
-const crypto = require('crypto');
-const { checkPin } = require('./_pin');
+const { checkPin, adminOk, verifyPin } = require('./_pin');
 
 // Fecha límite de entrega de equipos (misma que la cuenta atrás de la web).
 // Pasada esa hora solo se pueden modificar con la clave de administrador (LEAGUE_ADMIN_KEY).
 const DELIVERY_DEADLINE = Date.parse('2026-11-11T23:59:00+01:00');
 
-function adminOk(req) {
-  const expected = process.env.LEAGUE_ADMIN_KEY;
-  if (!expected) return false; // sin clave configurada nadie es administrador
-  const a = Buffer.from(String(req.headers['x-admin-key'] ?? ''));
-  const b = Buffer.from(expected);
-  return a.length === b.length && crypto.timingSafeEqual(a, b);
-}
 
 const PLAYERS_KEY = 'pokemon:players';
 const TEAMS_KEY = 'pokemon:teams';
@@ -108,9 +100,23 @@ module.exports = async function handler(req, res) {
   try {
     if (req.method === 'GET') {
       const flat = await redis(cfg, ['HGETALL', TEAMS_KEY]);
-      const teams = {};
-      for (let i = 0; i < flat.length; i += 2) teams[flat[i]] = JSON.parse(flat[i + 1]);
-      res.status(200).json({ teams });
+      const all = {};
+      for (let i = 0; i < flat.length; i += 2) all[flat[i]] = JSON.parse(flat[i + 1]);
+      // Hasta la fecha de entrega cada equipo solo lo ve su dueño (con su PIN) o un administrador;
+      // del resto solo se devuelve cuántos Pokémon tiene.
+      const admin = adminOk(req);
+      if (Date.now() >= DELIVERY_DEADLINE || admin) {
+        res.status(200).json({ teams: all, hidden: {}, admin, open: Date.now() >= DELIVERY_DEADLINE });
+        return;
+      }
+      let pins = {};
+      try { pins = JSON.parse(String(req.headers['x-pins'] || '{}')) || {}; } catch { pins = {}; }
+      const teams = {}, hidden = {}, badPins = [];
+      for (const id of Object.keys(all)) {
+        if (await verifyPin(cfg, id, pins[id])) teams[id] = all[id];
+        else { hidden[id] = all[id].length; if (pins[id]) badPins.push(id); }
+      }
+      res.status(200).json({ teams, hidden, badPins, admin: false, open: false });
       return;
     }
 

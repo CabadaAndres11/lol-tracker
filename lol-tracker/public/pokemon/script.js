@@ -23,6 +23,15 @@ let badges = {};           // { idJugador: máscara de bits (bit 0 = medalla 1 .
 
 const idOf = (p) => p.name.toLowerCase();
 
+// Equipos corroborados por la administración con fotos de la partida. Se edita aquí, a mano (no hay botón en la web).
+const VERIFIED_TEAMS = new Set(['lihone', 'pampert', 'aitorlg', 'dashlight']);
+function verifiedBadge(id) {
+  if (!VERIFIED_TEAMS.has(id)) return '';
+  return '<span class="verified" tabindex="0" role="note" aria-label="Equipo verificado por la administración: el equipo del participante ha sido corroborado con fotos de la partida">'
+    + '<span class="verified-ic" aria-hidden="true">✔</span> Equipo Verificado Por La Administración'
+    + '<span class="verified-tip" role="tooltip">El equipo de este participante ha sido corroborado con fotos de la partida.</span></span>';
+}
+
 // ---------------------------------------------------------------
 // Medallas (misma forma y color para todos los jugadores)
 // Cambia aquí los nombres si quieres los de las medallas reales del juego.
@@ -523,6 +532,7 @@ function circleHtml(player) {
         <div>
           <h2 class="bt-name">${escapeHtml(player.name)}${hasBadge(mask, LEAGUE) ? ' <span class="crown" title="Campeón de la Liga">🏆</span>' : ''}</h2>
           <div class="bt-sub">${locked ? lockedN : team.length}/${MAX_TEAM} Pokémon</div>
+          ${verifiedBadge(id)}
         </div>
         ${badgesBlock(id, true)}
       </div>

@@ -2329,3 +2329,9 @@ footer { padding-bottom: calc(3rem + env(safe-area-inset-bottom)); }
 .bt-lock p { margin: 0; font-size: .9rem; line-height: 1.4; }
 .bt-lock-ic { font-size: 1.6rem; }
 .bt-lock-actions { display: flex; flex-wrap: wrap; gap: .8rem; align-items: center; justify-content: center; }
+
+/* Marca "Equipo Verificado Por La Administración" (se pone por código en VERIFIED_TEAMS) */
+.verified { position: relative; display: inline-flex; align-items: center; gap: .35rem; margin-top: .35rem; padding: .2rem .65rem; border-radius: 999px; font-size: .72rem; font-weight: 700; letter-spacing: .02em; color: #052e16; background: linear-gradient(135deg, #86efac, #4ade80); border: 1px solid #bbf7d0; box-shadow: 0 0 10px rgba(74, 222, 128, .5); cursor: help; outline: none; }
+.verified-ic { display: inline-flex; align-items: center; justify-content: center; width: 1.1rem; height: 1.1rem; border-radius: 50%; background: #166534; color: #fff; font-size: .7rem; }
+.verified-tip { position: absolute; left: 0; top: calc(100% + 8px); z-index: 30; width: max-content; max-width: min(18rem, 80vw); padding: .5rem .7rem; border-radius: 10px; background: #0b1220; color: #fff; border: 1px solid rgba(255,255,255,.5); font-size: .78rem; font-weight: 500; line-height: 1.35; letter-spacing: 0; box-shadow: 0 6px 20px rgba(0,0,0,.6); opacity: 0; transform: translateY(-4px); pointer-events: none; transition: opacity .15s, transform .15s; }
+.verified:hover .verified-tip, .verified:focus .verified-tip { opacity: 1; transform: none; }

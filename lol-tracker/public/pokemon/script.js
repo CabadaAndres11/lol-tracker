@@ -2061,11 +2061,22 @@ async function loadLeague() {
 
 let leagueQueue = Promise.resolve();
 
+// La clave de administrador se recuerda en este navegador (como los PIN personales) hasta que el servidor la rechace.
 function getAdminKey() {
-  try { return sessionStorage.getItem(ADMIN_KEY_STORAGE) || ''; } catch { return ''; }
+  try {
+    let v = localStorage.getItem(ADMIN_KEY_STORAGE) || '';
+    if (!v) { // migra la que antes solo duraba la pestaña
+      v = sessionStorage.getItem(ADMIN_KEY_STORAGE) || '';
+      if (v) { localStorage.setItem(ADMIN_KEY_STORAGE, v); sessionStorage.removeItem(ADMIN_KEY_STORAGE); }
+    }
+    return v;
+  } catch { return ''; }
 }
 function setAdminKey(v) {
-  try { v ? sessionStorage.setItem(ADMIN_KEY_STORAGE, v) : sessionStorage.removeItem(ADMIN_KEY_STORAGE); } catch { /* ignorar */ }
+  try {
+    sessionStorage.removeItem(ADMIN_KEY_STORAGE);
+    v ? localStorage.setItem(ADMIN_KEY_STORAGE, v) : localStorage.removeItem(ADMIN_KEY_STORAGE);
+  } catch { /* ignorar */ }
 }
 
 async function sendResult(a, b, winner) {

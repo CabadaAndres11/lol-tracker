@@ -41,7 +41,7 @@ function opggUrl(name, tag, platform) {
 const THEMES = {
   aitorlg: { id: 'akali', champ: 'Akali K/DA Firestarter', tag: 'La Rebelde del Escenario' },
   lihone: { id: 'viego', champ: 'Viego', tag: 'El Rey Arruinado' },
-  pampert: { id: 'aatrox', champ: 'Aatrox', tag: 'La Espada de los Darkin' },
+  'σxpσrt': { id: 'aatrox', champ: 'Aatrox', tag: 'La Espada de los Darkin' },
   dashlight: { id: 'fiora', champ: 'Fiora', tag: 'La Gran Duelista' },
   hellbramn: { id: 'shyvana', champ: 'Shyvana', tag: 'La Mestiza Dragón' },
 };

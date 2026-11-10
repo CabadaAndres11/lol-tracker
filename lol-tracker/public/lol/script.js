@@ -47,14 +47,18 @@ const THEMES = {
 };
 const keyOf = (p) => p.displayName.split('#')[0].toLowerCase();
 
-let themeOverride = null;        // jugador del podio elegido a mano (null = el líder)
+const THEME_PREF_KEY = 'lol-theme-pref-v1';
+let themePref = null;            // jugador elegido a mano (se recuerda en este navegador)
+try { themePref = localStorage.getItem(THEME_PREF_KEY) || null; } catch (e) {}
+function saveThemePref() { try { themePref ? localStorage.setItem(THEME_PREF_KEY, themePref) : localStorage.removeItem(THEME_PREF_KEY); } catch (e) {} }
+let themeOverride = null;        // preferencia vigente: solo si sigue en el podio
 let podiumKeys = [];             // jugadores del podio
 
 function applyTheme(players) {
   const ok = (players || []).filter((p) => !p.error);
   const first = ok[0];
   podiumKeys = ok.slice(0, 3).map(keyOf);
-  if (themeOverride && !(podiumKeys.includes(themeOverride) && THEMES[themeOverride])) themeOverride = null;
+  themeOverride = (themePref && podiumKeys.includes(themePref) && THEMES[themePref]) ? themePref : null;
   const key = themeOverride || (first ? keyOf(first) : '');
   const t = THEMES[key];
   const line = document.getElementById('theme-line');
@@ -96,7 +100,8 @@ function onPodiumThemeClick(e) {
   const k = av.dataset.key;
   const first = lastPlayers.find((p) => !p.error);
   const leader = first ? keyOf(first) : '';
-  themeOverride = (k === leader || k === themeOverride) ? null : k;
+  themePref = (k === leader || k === themeOverride) ? null : k;
+  saveThemePref();
   applyTheme(lastPlayers);
 }
 document.getElementById('podium').addEventListener('click', onPodiumThemeClick);

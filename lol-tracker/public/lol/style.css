@@ -1192,3 +1192,12 @@ body[data-theme] .hero { border-bottom-color: color-mix(in srgb, var(--gold) 40%
 #challenge-countdown .cc-label { font-size: .72em; letter-spacing: .12em; opacity: .85; }
 #challenge-countdown .cc-time { font-weight: 700; font-size: 1.1em; letter-spacing: .04em; color: var(--gold-bright, #fff); text-shadow: 0 0 14px color-mix(in srgb, var(--gold, #c8aa6e) 55%, transparent); }
 @media (max-width: 700px) { #challenge-countdown .cc-time { font-size: 1.15em; } }
+
+/* pulso para indicar que el icono es pulsable */
+.podium-avatar.themable:not(.theme-on) { animation: avatar-pulse 2.2s ease-in-out infinite; }
+@keyframes avatar-pulse {
+  0%, 100% { box-shadow: 0 0 16px color-mix(in srgb, var(--medal-color) 65%, transparent), 0 0 0 0 color-mix(in srgb, var(--gold) 70%, transparent); }
+  50% { box-shadow: 0 0 22px color-mix(in srgb, var(--medal-color) 85%, transparent), 0 0 0 9px color-mix(in srgb, var(--gold) 0%, transparent); }
+}
+.podium-avatar.themable:hover { animation: none; }
+@media (prefers-reduced-motion: reduce) { .podium-avatar.themable:not(.theme-on) { animation: none; } }

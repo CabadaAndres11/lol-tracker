@@ -38,7 +38,7 @@ function opggUrl(name, tag, platform) {
 // ---------- Estado de la tabla ----------
 // Temática según quién va primero (nombre de invocador en minúsculas -> campeón)
 const THEMES = {
-  aitorlg: { id: 'renata', champ: 'Renata Glasc', tag: 'La Matriarca Química' },
+  aitorlg: { id: 'akali', champ: 'Akali K/DA Firestarter', tag: 'La Rebelde del Escenario' },
   lihone: { id: 'viego', champ: 'Viego', tag: 'El Rey Arruinado' },
 };
 

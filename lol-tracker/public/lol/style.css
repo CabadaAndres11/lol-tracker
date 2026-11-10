@@ -1050,7 +1050,7 @@ footer { padding-bottom: calc(3rem + env(safe-area-inset-bottom)); }
 
 
 /* ============================================================
-   TEMÁTICA SEGÚN EL LÍDER (Renata / Viego)
+   TEMÁTICA SEGÚN EL LÍDER (Akali K/DA Firestarter / Viego)
    ============================================================ */
 .champ-bg { position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: 0; transition: opacity 1.2s ease; overflow: hidden; }
 body[data-theme] .champ-bg { opacity: 1; }
@@ -1063,24 +1063,24 @@ body[data-theme] .champ-bg { opacity: 1; }
 .hex-bg { transition: opacity 1s ease; }
 body[data-theme] .hex-bg { opacity: .18; }
 
-/* ---- Renata Glasc: púrpura químico, magenta y oro ---- */
-body[data-theme="renata"] {
-  --bg: #08060c; --surface: #150d1a; --surface-alt: #1f1226; --line: #3d2447;
-  --text: #f6eef7; --text-muted: #b9a6bf;
-  --gold: #ff5db8; --gold-bright: #ffd3ee; --gold-soft: #8a2a62;
-  --rise: #a6f24b; --neon-cyan: #b6f55a; --neon-purple: #e0409a;
+/* ---- Akali K/DA Firestarter: neón magenta, carmesí y azul eléctrico sobre púrpura noche ---- */
+body[data-theme="akali"] {
+  --bg: #0a0614; --surface: #170c24; --surface-alt: #231236; --line: #4a2a63;
+  --text: #f8eefc; --text-muted: #bba5cc;
+  --gold: #ff4d94; --gold-bright: #ffc4dd; --gold-soft: #8c2358;
+  --rise: #46d4ff; --neon-cyan: #3cc8ff; --neon-purple: #b05cff;
 }
-body[data-theme="renata"] .champ-art { background-image: url('/lol/themes/renata.jpg'); }
-body[data-theme="renata"] .champ-fx {
+body[data-theme="akali"] .champ-art { background-image: url('/lol/themes/akali.jpg'); background-position: 52% 22%; }
+body[data-theme="akali"] .champ-fx {
   background:
-    radial-gradient(40vw 30vw at 15% 85%, rgba(224, 64, 154, .26), transparent 70%),
-    radial-gradient(35vw 28vw at 88% 15%, rgba(166, 242, 75, .16), transparent 70%),
-    radial-gradient(30vw 22vw at 60% 70%, rgba(255, 93, 184, .16), transparent 70%);
-  animation: renata-pulse 9s ease-in-out infinite alternate;
+    radial-gradient(40vw 30vw at 12% 88%, rgba(255, 59, 100, .26), transparent 70%),
+    radial-gradient(38vw 28vw at 90% 12%, rgba(60, 200, 255, .2), transparent 70%),
+    radial-gradient(30vw 22vw at 60% 70%, rgba(255, 77, 148, .16), transparent 70%);
+  animation: akali-pulse 7s ease-in-out infinite alternate;
 }
-@keyframes renata-pulse { from { opacity: .55; transform: scale(1); } to { opacity: 1; transform: scale(1.04); } }
-body[data-theme="renata"] .hero { background: radial-gradient(ellipse at top, rgba(224, 64, 154, .2), transparent 62%), linear-gradient(180deg, rgba(8, 6, 12, .35), transparent); }
-body[data-theme="renata"] h1 { background-image: linear-gradient(90deg, #ffd3ee, #ff5db8 50%, #b6f55a); }
+@keyframes akali-pulse { from { opacity: .5; transform: scale(1); } to { opacity: 1; transform: scale(1.05); } }
+body[data-theme="akali"] .hero { background: radial-gradient(ellipse at top, rgba(255, 77, 148, .22), transparent 62%), linear-gradient(180deg, rgba(10, 6, 20, .35), transparent); }
+body[data-theme="akali"] h1 { background-image: linear-gradient(90deg, #ffc4dd, #ff4d94 45%, #ff3b5c 70%, #3cc8ff); }
 
 /* ---- Viego: niebla espectral verde sobre negro azabache ---- */
 body[data-theme="viego"] {
@@ -1102,9 +1102,9 @@ body[data-theme="viego"] .hero { background: radial-gradient(ellipse at top, rgb
 body[data-theme="viego"] h1 { background-image: linear-gradient(90deg, #c9ffee, #3ef0b0 55%, #2a8f86); }
 
 /* filas, bordes y paneles con los colores del tema */
-body[data-theme="renata"] tbody tr { background: linear-gradient(90deg, rgba(21, 13, 26, .9), rgba(31, 18, 38, .9)); }
-body[data-theme="renata"] tbody tr:hover { background: linear-gradient(90deg, #1f1226, #331b3f); box-shadow: 0 0 0 1px rgba(255, 93, 184, .65), 0 8px 24px rgba(0, 0, 0, .5); }
-body[data-theme="renata"] tbody tr.rank-first { background: linear-gradient(90deg, rgba(110, 28, 78, .9), rgba(31, 18, 38, .9) 60%); box-shadow: 0 0 0 1px rgba(255, 211, 238, .45), 0 0 30px rgba(255, 93, 184, .3); }
+body[data-theme="akali"] tbody tr { background: linear-gradient(90deg, rgba(23, 12, 36, .9), rgba(35, 18, 54, .9)); }
+body[data-theme="akali"] tbody tr:hover { background: linear-gradient(90deg, #231236, #3a1d57); box-shadow: 0 0 0 1px rgba(255, 77, 148, .7), 0 8px 24px rgba(0, 0, 0, .5); }
+body[data-theme="akali"] tbody tr.rank-first { background: linear-gradient(90deg, rgba(122, 26, 70, .9), rgba(35, 18, 54, .9) 60%); box-shadow: 0 0 0 1px rgba(255, 196, 221, .5), 0 0 30px rgba(255, 59, 100, .32), 0 0 60px rgba(60, 200, 255, .12); }
 body[data-theme="viego"] tbody tr { background: linear-gradient(90deg, rgba(7, 25, 26, .92), rgba(11, 38, 38, .92)); }
 body[data-theme="viego"] tbody tr:hover { background: linear-gradient(90deg, #0b2626, #0f3a36); box-shadow: 0 0 0 1px rgba(62, 240, 176, .6), 0 8px 24px rgba(0, 0, 0, .5); }
 body[data-theme="viego"] tbody tr.rank-first { background: linear-gradient(90deg, rgba(14, 70, 56, .92), rgba(7, 28, 28, .92) 60%); box-shadow: 0 0 0 1px rgba(201, 255, 238, .4), 0 0 30px rgba(62, 240, 176, .28); }

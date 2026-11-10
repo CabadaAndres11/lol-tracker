@@ -394,3 +394,21 @@ setInterval(updateCountdown, 1000);
 document.getElementById("winner-close").addEventListener("click", () => {
   document.getElementById("winner-popup").classList.add("is-hidden");
 });
+
+
+// ============================================================
+// CUENTA ATRÁS DEL RETO (hasta el 6 de enero de 2027, 8:59 CET)
+// ============================================================
+
+const CHALLENGE_END = new Date('2027-01-06T08:59:00+01:00').getTime();
+const ccTime = document.getElementById('cc-time');
+function updateChallengeCountdown() {
+  const ms = CHALLENGE_END - Date.now();
+  if (ms <= 0) { ccTime.textContent = '¡Tiempo cumplido!'; return; }
+  const t = Math.floor(ms / 1000);
+  const d = Math.floor(t / 86400), h = Math.floor((t % 86400) / 3600), m = Math.floor((t % 3600) / 60), s = t % 60;
+  const p = (n) => String(n).padStart(2, '0');
+  ccTime.textContent = `${d}d ${p(h)}h ${p(m)}m ${p(s)}s`;
+}
+updateChallengeCountdown();
+setInterval(updateChallengeCountdown, 1000);

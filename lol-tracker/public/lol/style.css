@@ -1114,3 +1114,9 @@ body[data-theme] .hero { border-bottom-color: color-mix(in srgb, var(--gold) 40%
 
 @media (max-width: 700px) { .champ-art { background-position: 58% 0; opacity: .45; } }
 @media (prefers-reduced-motion: reduce) { .champ-art, .champ-fx { animation: none !important; } }
+
+/* Cuenta atrás del reto */
+#challenge-countdown { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; }
+#challenge-countdown .cc-label { font-size: .72em; letter-spacing: .12em; opacity: .85; }
+#challenge-countdown .cc-time { font: 700 1.35em var(--font-mono); letter-spacing: .06em; font-variant-numeric: tabular-nums; color: var(--gold-bright, #fff); text-shadow: 0 0 14px color-mix(in srgb, var(--gold, #c8aa6e) 55%, transparent); }
+@media (max-width: 700px) { #challenge-countdown .cc-time { font-size: 1.15em; } }

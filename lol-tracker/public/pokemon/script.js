@@ -22,6 +22,7 @@ let leads = {};            // { idJugador: índice del Pokémon que está en el 
 let badges = {};           // { idJugador: máscara de bits (bit 0 = medalla 1 ... bit 8 = Liga) }
 
 const idOf = (p) => p.name.toLowerCase();
+const ADMIN_KEY_STORAGE = 'pokemon-league-admin-key'; // definida arriba: la primera carga ya la necesita
 
 // Equipos corroborados por la administración con fotos de la partida. Se edita aquí, a mano (no hay botón en la web).
 const VERIFIED_TEAMS = new Set(['lihone', 'pampert', 'aitorlg', 'dashlight']);
@@ -1776,7 +1777,6 @@ setInterval(updateDeadlineCountdown, 60 * 1000);
 
 const POINTS_WIN = 3;   // puntos por victoria
 const QUALIFY = 8;      // los 8 primeros pasan al bracket
-const ADMIN_KEY_STORAGE = 'pokemon-league-admin-key';
 
 let leaguePlayers = [];     // nombres, en el orden del servidor
 let leagueResults = {};     // { 'ana|luis': 'ana' }  (ganador en minúsculas)

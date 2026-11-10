@@ -406,9 +406,9 @@ function updateChallengeCountdown() {
   const ms = CHALLENGE_END - Date.now();
   if (ms <= 0) { ccTime.textContent = '¡Tiempo cumplido!'; return; }
   const t = Math.floor(ms / 1000);
-  const d = Math.floor(t / 86400), h = Math.floor((t % 86400) / 3600), m = Math.floor((t % 3600) / 60), s = t % 60;
-  const p = (n) => String(n).padStart(2, '0');
-  ccTime.textContent = `${d}d ${p(h)}h ${p(m)}m ${p(s)}s`;
+  const d = Math.floor(t / 86400), h = Math.floor((t % 86400) / 3600), m = Math.floor((t % 3600) / 60);
+  const u = (n, one, many) => `${n} ${n === 1 ? one : many}`;
+  ccTime.textContent = `Quedan ${u(d, 'día', 'días')}, ${u(h, 'hora', 'horas')} y ${u(m, 'minuto', 'minutos')}`;
 }
 updateChallengeCountdown();
 setInterval(updateChallengeCountdown, 1000);

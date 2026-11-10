@@ -37,25 +37,70 @@ function opggUrl(name, tag, platform) {
 
 // ---------- Estado de la tabla ----------
 // Temática según quién va primero (nombre de invocador en minúsculas -> campeón)
+// Cualquiera del podio con temática puede activarla pulsando su icono.
 const THEMES = {
   aitorlg: { id: 'akali', champ: 'Akali K/DA Firestarter', tag: 'La Rebelde del Escenario' },
   lihone: { id: 'viego', champ: 'Viego', tag: 'El Rey Arruinado' },
+  pampert: { id: 'aatrox', champ: 'Aatrox', tag: 'La Espada de los Darkin' },
+  dashlight: { id: 'fiora', champ: 'Fiora', tag: 'La Gran Duelista' },
+  hellbramn: { id: 'shyvana', champ: 'Shyvana', tag: 'La Mestiza Dragón' },
 };
+const keyOf = (p) => p.displayName.split('#')[0].toLowerCase();
+
+let themeOverride = null;        // jugador del podio elegido a mano (null = el líder)
+let podiumKeys = [];             // jugadores del podio
 
 function applyTheme(players) {
-  const first = (players || []).find((p) => !p.error);
-  const key = first ? first.displayName.split('#')[0].toLowerCase() : '';
+  const ok = (players || []).filter((p) => !p.error);
+  const first = ok[0];
+  podiumKeys = ok.slice(0, 3).map(keyOf);
+  if (themeOverride && !(podiumKeys.includes(themeOverride) && THEMES[themeOverride])) themeOverride = null;
+  const key = themeOverride || (first ? keyOf(first) : '');
   const t = THEMES[key];
   const line = document.getElementById('theme-line');
   if (t) {
+    const nm = (ok.find((p) => keyOf(p) === key) || first).displayName.split('#')[0];
     document.body.dataset.theme = t.id;
-    line.textContent = `${first.displayName.split('#')[0]} lidera · ${t.champ}, ${t.tag}`;
+    line.textContent = `${themeOverride ? 'Temática de' : ''} ${nm}${themeOverride ? '' : ' lidera'} · ${t.champ}, ${t.tag}`.trim();
     line.hidden = false;
   } else {
     delete document.body.dataset.theme;
     line.hidden = true;
   }
+  // iconos del podio: botón si tienen temática
+  for (let place = 1; place <= 3; place++) {
+    const av = document.querySelector(`#podium-${place} .podium-avatar`);
+    if (!av) continue;
+    const k = podiumKeys[place - 1];
+    const th = k && THEMES[k];
+    av.classList.toggle('themable', !!th);
+    av.classList.toggle('theme-on', !!th && k === key);
+    if (th) {
+      av.setAttribute('role', 'button');
+      av.tabIndex = 0;
+      av.title = k === key ? `Tema activo: ${th.champ}` : `Tematizar la página como ${th.champ}`;
+      av.setAttribute('aria-pressed', k === key ? 'true' : 'false');
+      av.dataset.key = k;
+    } else {
+      av.removeAttribute('role'); av.removeAttribute('tabindex'); av.removeAttribute('title');
+      av.removeAttribute('aria-pressed'); delete av.dataset.key;
+    }
+  }
 }
+
+function onPodiumThemeClick(e) {
+  const av = e.target.closest('.podium-avatar.themable');
+  if (!av) return;
+  if (e.type === 'keydown' && e.key !== 'Enter' && e.key !== ' ') return;
+  e.preventDefault();
+  const k = av.dataset.key;
+  const first = lastPlayers.find((p) => !p.error);
+  const leader = first ? keyOf(first) : '';
+  themeOverride = (k === leader || k === themeOverride) ? null : k;
+  applyTheme(lastPlayers);
+}
+document.getElementById('podium').addEventListener('click', onPodiumThemeClick);
+document.getElementById('podium').addEventListener('keydown', onPodiumThemeClick);
 
 let lastPlayers = [];            // en el orden del servidor (diferencia de LP)
 let formMap = null;              // { 'Nombre#Tag': ['W','L',...] } (de más antigua a más reciente)

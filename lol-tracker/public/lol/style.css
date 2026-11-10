@@ -1101,6 +1101,78 @@ body[data-theme="viego"] .champ-fx {
 body[data-theme="viego"] .hero { background: radial-gradient(ellipse at top, rgba(63, 240, 176, .14), transparent 62%), linear-gradient(180deg, rgba(4, 11, 16, .3), transparent); }
 body[data-theme="viego"] h1 { background-image: linear-gradient(90deg, #c9ffee, #3ef0b0 55%, #2a8f86); }
 
+
+/* ---- Aatrox ---- */
+body[data-theme="aatrox"] {
+  --bg: #0a0405; --surface: #170a0c; --surface-alt: #261014; --line: #4f2028;
+  --text: #f7e8e8; --text-muted: #bd9ea0;
+  --gold: #e3333f; --gold-bright: #ffa08f; --gold-soft: #7d1a23;
+  --rise: #ff6a3d; --neon-cyan: #ff4a3a; --neon-purple: #9a2a50;
+}
+body[data-theme="aatrox"] .champ-art { background-image: url('/lol/themes/aatrox.jpg'); background-position: 45% 18%; }
+body[data-theme="aatrox"] .champ-fx {
+  background:
+    radial-gradient(42vw 28vw at 10% 90%, rgba(255,40,50, .22), transparent 70%),
+    radial-gradient(38vw 26vw at 90% 15%, rgba(255,110,60, .16), transparent 70%),
+    radial-gradient(30vw 22vw at 60% 75%, rgba(200,30,60, .14), transparent 70%);
+  animation: akali-pulse 8s ease-in-out infinite alternate;
+}
+body[data-theme="aatrox"] .hero { background: radial-gradient(ellipse at top, rgba(255,48,60, .16), transparent 62%), linear-gradient(180deg, rgba(10,4,5, .35), transparent); }
+body[data-theme="aatrox"] h1 { background-image: linear-gradient(90deg, #ffb3a3, #e3333f 48%, #8a1c34); }
+body[data-theme="aatrox"] tbody tr { background: linear-gradient(90deg, rgba(28,10,13, .92), rgba(42,15,20, .92)); }
+body[data-theme="aatrox"] tbody tr:hover { background: linear-gradient(90deg, #2a1014, #401820); box-shadow: 0 0 0 1px #e3333f, 0 8px 24px rgba(0, 0, 0, .5); }
+body[data-theme="aatrox"] tbody tr.rank-first { background: linear-gradient(90deg, rgba(110,20,28, .9), rgba(28,10,13, .92) 60%); box-shadow: 0 0 0 1px #ffa08f66, 0 0 30px #e3333f55; }
+
+/* ---- Fiora ---- */
+body[data-theme="fiora"] {
+  --bg: #0a0c16; --surface: #131728; --surface-alt: #1d2342; --line: #3a4670;
+  --text: #f6f2f8; --text-muted: #aab0cc;
+  --gold: #d8b46a; --gold-bright: #f6e2b0; --gold-soft: #7e6a3c;
+  --rise: #8fd6ff; --neon-cyan: #9fd8ff; --neon-purple: #9a5aa8;
+}
+body[data-theme="fiora"] .champ-art { background-image: url('/lol/themes/fiora.jpg'); background-position: 50% 22%; }
+body[data-theme="fiora"] .champ-fx {
+  background:
+    radial-gradient(42vw 28vw at 10% 90%, rgba(220,60,100, .22), transparent 70%),
+    radial-gradient(38vw 26vw at 90% 15%, rgba(150,200,255, .16), transparent 70%),
+    radial-gradient(30vw 22vw at 60% 75%, rgba(216,180,106, .14), transparent 70%);
+  animation: akali-pulse 8s ease-in-out infinite alternate;
+}
+body[data-theme="fiora"] .hero { background: radial-gradient(ellipse at top, rgba(216,180,106, .16), transparent 62%), linear-gradient(180deg, rgba(10,12,22, .35), transparent); }
+body[data-theme="fiora"] h1 { background-image: linear-gradient(90deg, #f6e2b0, #d8b46a 50%, #d93a5e); }
+body[data-theme="fiora"] tbody tr { background: linear-gradient(90deg, rgba(17,21,40, .92), rgba(27,33,60, .92)); }
+body[data-theme="fiora"] tbody tr:hover { background: linear-gradient(90deg, #171c34, #252d52); box-shadow: 0 0 0 1px #d8b46a, 0 8px 24px rgba(0, 0, 0, .5); }
+body[data-theme="fiora"] tbody tr.rank-first { background: linear-gradient(90deg, rgba(80,62,28, .9), rgba(17,21,40, .92) 60%); box-shadow: 0 0 0 1px #f6e2b066, 0 0 30px #d8b46a55; }
+
+/* ---- Shyvana ---- */
+body[data-theme="shyvana"] {
+  --bg: #0b0910; --surface: #171320; --surface-alt: #241c30; --line: #4e3a58;
+  --text: #f8efe9; --text-muted: #bfaaa6;
+  --gold: #ff8a2a; --gold-bright: #ffd29a; --gold-soft: #8c4614;
+  --rise: #ffb347; --neon-cyan: #ff6a3a; --neon-purple: #9b7ac4;
+}
+body[data-theme="shyvana"] .champ-art { background-image: url('/lol/themes/shyvana.jpg'); background-position: 50% 18%; }
+body[data-theme="shyvana"] .champ-fx {
+  background:
+    radial-gradient(42vw 28vw at 10% 90%, rgba(255,110,30, .22), transparent 70%),
+    radial-gradient(38vw 26vw at 90% 15%, rgba(220,50,50, .16), transparent 70%),
+    radial-gradient(30vw 22vw at 60% 75%, rgba(160,120,200, .14), transparent 70%);
+  animation: akali-pulse 8s ease-in-out infinite alternate;
+}
+body[data-theme="shyvana"] .hero { background: radial-gradient(ellipse at top, rgba(255,138,42, .16), transparent 62%), linear-gradient(180deg, rgba(11,9,16, .35), transparent); }
+body[data-theme="shyvana"] h1 { background-image: linear-gradient(90deg, #ffd29a, #ff8a2a 50%, #d63a3a); }
+body[data-theme="shyvana"] tbody tr { background: linear-gradient(90deg, rgba(23,19,32, .92), rgba(36,28,48, .92)); }
+body[data-theme="shyvana"] tbody tr:hover { background: linear-gradient(90deg, #221a2e, #35284a); box-shadow: 0 0 0 1px #ff8a2a, 0 8px 24px rgba(0, 0, 0, .5); }
+body[data-theme="shyvana"] tbody tr.rank-first { background: linear-gradient(90deg, rgba(110,48,14, .9), rgba(23,19,32, .92) 60%); box-shadow: 0 0 0 1px #ffd29a66, 0 0 30px #ff8a2a55; }
+
+/* iconos del podio como botón de temática */
+.podium-avatar.themable { cursor: pointer; position: relative; transition: transform .2s ease, box-shadow .2s ease; }
+.podium-avatar.themable:hover { transform: scale(1.07); }
+.podium-avatar.themable:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+.podium-avatar.themable::after { content: '🎨'; position: absolute; left: 0; right: 0; bottom: 0; height: 30%; background: color-mix(in srgb, var(--bg) 70%, transparent); display: grid; place-items: center; font-size: 10px; line-height: 1; opacity: 0; transition: opacity .2s; }
+.podium-avatar.themable:hover::after, .podium-avatar.themable:focus-visible::after { opacity: 1; }
+.podium-avatar.theme-on { box-shadow: 0 0 0 3px var(--gold), 0 0 22px var(--gold); }
+
 /* filas, bordes y paneles con los colores del tema */
 body[data-theme="akali"] tbody tr { background: linear-gradient(90deg, rgba(23, 12, 36, .9), rgba(35, 18, 54, .9)); }
 body[data-theme="akali"] tbody tr:hover { background: linear-gradient(90deg, #231236, #3a1d57); box-shadow: 0 0 0 1px rgba(255, 77, 148, .7), 0 8px 24px rgba(0, 0, 0, .5); }

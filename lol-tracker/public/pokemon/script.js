@@ -297,9 +297,25 @@ const BAN_MOVE_SET = bannedSet(BANNED_MOVES);
 // Megapiedras (ver también api/pokemon-team.js): acaban en "-ita" / "-ite" con X/Y/Z opcional.
 const isMegaStone = (item) => { const t = normText(item); return t !== 'eviolite' && /(ita|ite)( [xyz])?$/.test(t); };
 
+// Ultranecrostal Z: Necrozma (o sus formas Melena Crepuscular / Alas del Alba) se transforma en Ultra-Necrozma.
+const isUltraCrystal = (item) => /^ultranecrostal z$|^ultranecrozium z$/.test(normText(item));
+const ULTRA_ABILITY = 'Fuerza Cerebral';
+const NECROZMA_ID = 800;
+function ultraFormOf(mon) {
+  if (!mon || !isUltraCrystal(mon.item)) return null;
+  const id = mon.dexId || dexLookup(mon.species)?.id;
+  if (!id || (dexById[id]?.baseId || id) !== NECROZMA_ID) return null;
+  return Object.values(dexById).find((d) => d.baseId === NECROZMA_ID && /ultra/i.test(d.name)) || null;
+}
+// Con el Ultranecrostal Z la habilidad de la forma Ultra es fija, no hay que pedirla.
+const withUltra = (mon) => (mon && ultraFormOf(mon) && !mon.megaAbility ? { ...mon, megaAbility: ULTRA_ABILITY } : mon);
+
 // Forma Mega de un Pokémon con su megapiedra (null si no se conoce en la Pokédex).
 function megaFormOf(mon) {
-  if (!mon || !isMegaStone(mon.item)) return null;
+  if (!mon) return null;
+  const ultra = ultraFormOf(mon);
+  if (ultra) return ultra;
+  if (!isMegaStone(mon.item)) return null;
   const id = mon.dexId || dexLookup(mon.species)?.id;
   if (!id) return null;
   const base = dexById[id]?.baseId || id;
@@ -371,6 +387,7 @@ function moveLi(name) {
 }
 
 function monDetail(mon, index, id) {
+  mon = withUltra(mon);
   const mega = megaFormOf(mon);
   const showMega = !!(mega && megaOn.has(`${id}:${index}`));
   const shown = showMega ? { ...mon, dexId: mega.id } : mon;
@@ -509,7 +526,7 @@ function circleHtml(player) {
   const team = locked ? [] : teams[id] || [];
   const mask = badges[id] || 0;
   const li = leadIndex(id);
-  const lead = team[li];
+  const lead = withUltra(team[li]);
   const rival = rivals[id];
   const banned = lead ? banReasons(lead) : [];
   const leadMega = lead && lead.megaAbility ? megaFormOf(lead) : null;       // forma Mega (si lleva megapiedra y habilidad)
@@ -1659,6 +1676,7 @@ async function loadEsData() {
     const res = await fetch('/pokemon/data/es.json');
     if (!res.ok) return;
     const data = await res.json();
+    if (!data.items.some(([es]) => es === 'Ultranecrostal Z')) data.items.push(['Ultranecrostal Z', 'Ultranecrozium Z']);
     for (const k of ['moves', 'abilities', 'items']) {
       esMap[k] = new Map(data[k].map(([es, en]) => [en.toLowerCase(), es]));
     }

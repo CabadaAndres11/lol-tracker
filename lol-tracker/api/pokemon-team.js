@@ -78,7 +78,7 @@ function validateTeam(team) {
     if (nature && !NATURES.includes(nature)) throw new Error(`Pokémon ${n}: naturaleza no válida.`);
 
     const out = { species, nickname, ability, item, moves };
-    if (isMegaStone(item)) out.megaAbility = megaAbility;
+    if (isMegaStone(item) || /^ultranecro(stal|zium) z$/i.test(item.normalize('NFD').replace(/[\u0300-\u036f]/g, ''))) out.megaAbility = megaAbility;
     if (nature) out.nature = nature;
     if (mon?.shiny === true) out.shiny = true;
     if (dexId) out.dexId = dexId;

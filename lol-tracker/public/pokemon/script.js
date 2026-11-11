@@ -429,7 +429,7 @@ function monForm(id, index) {
         <label>Mote<input name="nickname" type="text" maxlength="30" value="${v(mon?.nickname)}" /></label>
         <label>Habilidad *<input name="ability" type="text" maxlength="30" required list="es-abilities" autocomplete="off" value="${v(mon?.ability)}" /></label>
         <label>Objeto equipado<input name="item" type="text" maxlength="30" list="es-items" autocomplete="off" value="${v(mon?.item)}" /></label>
-        <label data-mega${isMegaStone(mon?.item) ? '' : ' hidden'}>Habilidad de la Mega *<input name="megaAbility" type="text" maxlength="30" list="es-abilities" autocomplete="off" value="${v(mon?.megaAbility)}"${isMegaStone(mon?.item) ? ' required' : ''} /></label>
+        <label data-mega${isMegaStone(mon?.item) || isUltraCrystal(mon?.item) ? '' : ' hidden'}>Habilidad de la Mega<span data-req>${isMegaStone(mon?.item) ? ' *' : ''}</span><input name="megaAbility" type="text" maxlength="30" list="es-abilities" autocomplete="off" placeholder="${ULTRA_ABILITY} (por defecto en Ultra-Necrozma)" value="${v(mon?.megaAbility)}"${isMegaStone(mon?.item) ? ' required' : ''} /></label>
         <label>Naturaleza
           <select name="nature">
             <option value="">— Sin indicar —</option>
@@ -1424,12 +1424,17 @@ function updateFormBan(form) {
   const fd = new FormData(form);
   // La habilidad de la Mega solo se pide (y es obligatoria) si el objeto es una megapiedra.
   const mega = isMegaStone(fd.get('item'));
+  const ultra = isUltraCrystal(fd.get('item'));
   const megaLabel = form.querySelector('[data-mega]');
-  if (megaLabel) { megaLabel.hidden = !mega; megaLabel.querySelector('input').required = mega; }
+  if (megaLabel) {
+    megaLabel.hidden = !(mega || ultra);
+    megaLabel.querySelector('input').required = mega;
+    megaLabel.querySelector('[data-req]').textContent = mega ? ' *' : '';
+  }
   const reasons = banReasons({
     species: fd.get('species'),
     ability: fd.get('ability'),
-    megaAbility: mega ? fd.get('megaAbility') : '',
+    megaAbility: mega || ultra ? fd.get('megaAbility') : '',
     moves: [0, 1, 2, 3].map((i) => fd.get(`move${i}`)),
   });
   const box = form.querySelector('[data-ban]');
@@ -1461,7 +1466,7 @@ monModal.addEventListener('submit', async (e) => {
     nickname: fd.get('nickname'),
     ability: fd.get('ability'),
     item: fd.get('item'),
-    megaAbility: isMegaStone(fd.get('item')) ? fd.get('megaAbility') : '',
+    megaAbility: isMegaStone(fd.get('item')) || isUltraCrystal(fd.get('item')) ? fd.get('megaAbility') : '',
     nature: fd.get('nature') || '',
     shiny: fd.get('shiny') === 'on',
     moves: [0, 1, 2, 3].map((i) => fd.get(`move${i}`)),

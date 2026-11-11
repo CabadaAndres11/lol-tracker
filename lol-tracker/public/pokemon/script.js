@@ -44,6 +44,7 @@ function verifiedBadge(id) {
 // Habilidades que no existen en el juego normal: se muestran con un "!" azul y su descripción.
 const CUSTOM_ABILITIES = {
   tintineo: 'Replica una campana para curar los estados del equipo cuando sale a combatir. Además los movimientos de sonido pasan a ser psíquicos y aumentan su potencia un 20%.',
+  'poder gelido': 'Aumenta el poder de hielo y la velocidad un 50% en clima nevado.',
 };
 const isCustomAb = (name) => !!CUSTOM_ABILITIES[normText(name || '')];
 const hasCustomAb = (mon, megaOn_ = false) => !!mon && (isCustomAb(megaOn_ ? mon.megaAbility : mon.ability));

@@ -2365,3 +2365,7 @@ footer { padding-bottom: calc(3rem + env(safe-area-inset-bottom)); }
 /* Participante retirado */
 .withdrawn { display: inline-flex; align-items: center; gap: .35rem; margin-top: .35rem; padding: .2rem .65rem; border-radius: 999px; font-size: .72rem; font-weight: 700; letter-spacing: .02em; color: #fff; background: #7f1d1d; border: 1px solid #fca5a5; }
 .duel-side.is-auto { cursor: default; }
+
+/* El marco Pokédex de las ventanas ponía overflow:hidden y la porra no podía hacer scroll */
+.modal-card.porra-card { overflow-y: auto; overflow-x: hidden; max-height: min(90vh, 760px); max-height: min(90dvh, 760px); overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+.modal-card.porra-card .porra-actions { position: sticky; bottom: -1.6rem; z-index: 2; padding: .7rem 0 .2rem; background: linear-gradient(180deg, transparent, #0e1730 35%); }

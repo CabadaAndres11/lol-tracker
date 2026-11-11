@@ -43,7 +43,7 @@ const THEMES = {
   lihone: { id: 'viego', champ: 'Viego', tag: 'El Rey Arruinado' },
   'σxpσrt': { id: 'aatrox', champ: 'Aatrox', tag: 'La Espada de los Darkin' },
   dashlight: { id: 'fiora', champ: 'Fiora', tag: 'La Gran Duelista' },
-  hellbramn: { id: 'shyvana', champ: 'Shyvana', tag: 'La Mestiza Dragón' },
+  helbramn: { id: 'shyvana', champ: 'Shyvana', tag: 'La Mestiza Dragón' },
 };
 const keyOf = (p) => p.displayName.split('#')[0].toLowerCase();
 

@@ -25,7 +25,7 @@ const idOf = (p) => p.name.toLowerCase();
 const ADMIN_KEY_STORAGE = 'pokemon-league-admin-key'; // definida arriba: la primera carga ya la necesita
 
 // Equipos corroborados por la administración con fotos de la partida. Se edita aquí, a mano (no hay botón en la web).
-const VERIFIED_TEAMS = new Set(['lihone', 'pampert', 'aitorlg', 'dashlight', 'el compa', 'leviathan', 'steven', 'kekkan']);
+const VERIFIED_TEAMS = new Set(['lihone', 'pampert', 'aitorlg', 'dashlight', 'el compa', 'leviathan', 'steven', 'kekkan', 'helbramn']);
 // Participantes dados de baja (en minúsculas): lo mismo que WITHDRAWN en api/_league.js.
 // Se compara sin tildes ni mayúsculas y por prefijo, para que valga aunque el nombre inscrito se haya escrito algo distinto.
 const WITHDRAWN_PLAYERS = ['beldi'];

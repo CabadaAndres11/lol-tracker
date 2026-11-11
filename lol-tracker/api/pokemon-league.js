@@ -6,7 +6,7 @@
 // conozca esa clave podrá marcar o borrar resultados (los demás solo los verán).
 const crypto = require('crypto');
 const { redisConfig, redis } = require('./_redis');
-const { PLAYERS } = require('./_league');
+const { PLAYERS, WITHDRAWN } = require('./_league');
 
 const LEAGUE_KEY = 'pokemon:league';
 
@@ -39,7 +39,13 @@ module.exports = async function handler(req, res) {
       const flat = await redis(cfg, ['HGETALL', LEAGUE_KEY]);
       const results = {};
       for (let i = 0; i < flat.length; i += 2) results[flat[i]] = flat[i + 1];
-      res.status(200).json({ players: PLAYERS, results, protected: Boolean(process.env.LEAGUE_ADMIN_KEY) });
+      // Victoria automática para quien se enfrenta a un participante retirado.
+      for (const w of WITHDRAWN) {
+        for (const p of PLAYERS) {
+          if (lc(p) !== w && !WITHDRAWN.includes(lc(p))) results[matchKey(p, w)] = lc(p);
+        }
+      }
+      res.status(200).json({ players: PLAYERS, withdrawn: WITHDRAWN, results, protected: Boolean(process.env.LEAGUE_ADMIN_KEY) });
       return;
     }
 
@@ -98,6 +104,11 @@ module.exports = async function handler(req, res) {
 
       if (!known.includes(a) || !known.includes(b) || a === b) {
         res.status(400).json({ error: 'Combate no válido.' });
+        return;
+      }
+
+      if (WITHDRAWN.includes(a) || WITHDRAWN.includes(b)) {
+        res.status(400).json({ error: 'Participante retirado: sus combates se dan por ganados al rival automáticamente.' });
         return;
       }
 

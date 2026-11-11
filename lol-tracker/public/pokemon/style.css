@@ -2361,3 +2361,7 @@ footer { padding-bottom: calc(3rem + env(safe-area-inset-bottom)); }
 .mon-detail.has-custom-ab { box-shadow: 0 0 0 1px rgba(47, 140, 255, .55), 0 0 22px rgba(47, 140, 255, .35); border-radius: 16px; }
 @media (prefers-reduced-motion: reduce) { .ab-mark, .bt-sprite.has-custom-ab::before { animation: none; } }
 .bt-sprite.has-custom-ab .ab-mark { right: 14%; top: 10%; width: 1.5rem; height: 1.5rem; font-size: 1rem; }
+
+/* Participante retirado */
+.withdrawn { display: inline-flex; align-items: center; gap: .35rem; margin-top: .35rem; padding: .2rem .65rem; border-radius: 999px; font-size: .72rem; font-weight: 700; letter-spacing: .02em; color: #fff; background: #7f1d1d; border: 1px solid #fca5a5; }
+.duel-side.is-auto { cursor: default; }

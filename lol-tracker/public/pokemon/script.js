@@ -26,6 +26,12 @@ const ADMIN_KEY_STORAGE = 'pokemon-league-admin-key'; // definida arriba: la pri
 
 // Equipos corroborados por la administración con fotos de la partida. Se edita aquí, a mano (no hay botón en la web).
 const VERIFIED_TEAMS = new Set(['lihone', 'pampert', 'aitorlg', 'dashlight', 'el compa', 'leviathan']);
+// Participantes dados de baja (en minúsculas): lo mismo que WITHDRAWN en api/_league.js.
+const WITHDRAWN_PLAYERS = new Set(['beldiño']);
+function withdrawnBadge(id) {
+  if (!WITHDRAWN_PLAYERS.has(id)) return '';
+  return '<span class="withdrawn" role="note">⛔ Participante Retirado</span>';
+}
 function verifiedBadge(id) {
   if (!VERIFIED_TEAMS.has(id)) return '';
   return '<span class="verified" tabindex="0" role="note" aria-label="Equipo verificado por la administración: el equipo del participante ha sido corroborado con fotos de la partida">'
@@ -550,7 +556,7 @@ function circleHtml(player) {
         <div>
           <h2 class="bt-name">${escapeHtml(player.name)}${hasBadge(mask, LEAGUE) ? ' <span class="crown" title="Campeón de la Liga">🏆</span>' : ''}</h2>
           <div class="bt-sub">${locked ? lockedN : team.length}/${MAX_TEAM} Pokémon</div>
-          ${verifiedBadge(id)}
+          ${withdrawnBadge(id)}${verifiedBadge(id)}
         </div>
         ${badgesBlock(id, true)}
       </div>
@@ -1863,11 +1869,12 @@ function teamThumbs(name) {
 }
 
 function sideHtml(name, other, key, state) {
-  const label = state === 'win' ? '🏆 Ganador · +3 pts' : state === 'lose' ? 'Derrota' : 'Elegir ganador';
+  const locked = WITHDRAWN_PLAYERS.has(lcName(name)) || WITHDRAWN_PLAYERS.has(lcName(other));
+  const label = state === 'win' && locked ? '🏆 Victoria automática · +3 pts' : state === 'win' ? '🏆 Ganador · +3 pts' : state === 'lose' ? 'Derrota' : 'Elegir ganador';
   return `
-    <button type="button" class="duel-side is-${state}" data-pick="${encodeURIComponent(name)}"
+    <button type="button" class="duel-side is-${state}${locked ? ' is-auto' : ''}"${locked ? ' data-locked="1"' : ''} data-pick="${encodeURIComponent(name)}"
       data-a="${encodeURIComponent(name)}" data-b="${encodeURIComponent(other)}" data-key="${escapeHtml(key)}"
-      aria-pressed="${state === 'win'}" title="${state === 'win' ? 'Clic para deshacer' : 'Clic para marcar como ganador'}">
+      aria-pressed="${state === 'win'}" title="${locked ? 'Rival retirado: victoria automática' : state === 'win' ? 'Clic para deshacer' : 'Clic para marcar como ganador'}">
       ${avatarHtml(name, 'duel-avatar')}
       <span class="duel-name">${escapeHtml(name)}</span>
       <span class="duel-team">${teamThumbs(name)}</span>
@@ -2262,6 +2269,7 @@ document.getElementById('liga-root').addEventListener('click', (e) => {
 
   const side = e.target.closest('[data-pick]');
   if (!side) return;
+  if (side.dataset.locked) return; // combate contra un retirado: resultado automático
 
   const pick = decodeURIComponent(side.dataset.pick);
   const a = decodeURIComponent(side.dataset.a);

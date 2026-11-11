@@ -5,4 +5,7 @@ const PLAYERS = [
   'Helbramn', 'Steven', 'AitoRLG', 'Dashlight', 'Beldiño', 'Leviathan',
 ];
 
-module.exports = { PLAYERS };
+// Participantes dados de baja: sus rivales ganan automáticamente cada combate de la liga (en minúsculas).
+const WITHDRAWN = ['beldiño'];
+
+module.exports = { PLAYERS, WITHDRAWN };

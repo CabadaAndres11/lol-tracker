@@ -27,9 +27,11 @@ const ADMIN_KEY_STORAGE = 'pokemon-league-admin-key'; // definida arriba: la pri
 // Equipos corroborados por la administración con fotos de la partida. Se edita aquí, a mano (no hay botón en la web).
 const VERIFIED_TEAMS = new Set(['lihone', 'pampert', 'aitorlg', 'dashlight', 'el compa', 'leviathan']);
 // Participantes dados de baja (en minúsculas): lo mismo que WITHDRAWN en api/_league.js.
-const WITHDRAWN_PLAYERS = new Set(['beldiño']);
+// Se compara sin tildes ni mayúsculas y por prefijo, para que valga aunque el nombre inscrito se haya escrito algo distinto.
+const WITHDRAWN_PLAYERS = ['beldi'];
+const isWithdrawn = (name) => { const t = String(name || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase(); return WITHDRAWN_PLAYERS.some((w) => t.startsWith(w)); };
 function withdrawnBadge(id) {
-  if (!WITHDRAWN_PLAYERS.has(id)) return '';
+  if (!isWithdrawn(id)) return '';
   return '<span class="withdrawn" role="note">⛔ Participante Retirado</span>';
 }
 function verifiedBadge(id) {
@@ -1892,7 +1894,7 @@ function teamThumbs(name) {
 }
 
 function sideHtml(name, other, key, state) {
-  const locked = WITHDRAWN_PLAYERS.has(lcName(name)) || WITHDRAWN_PLAYERS.has(lcName(other));
+  const locked = isWithdrawn(name) || isWithdrawn(other);
   const label = state === 'win' && locked ? '🏆 Victoria automática · +3 pts' : state === 'win' ? '🏆 Ganador · +3 pts' : state === 'lose' ? 'Derrota' : 'Elegir ganador';
   return `
     <button type="button" class="duel-side is-${state}${locked ? ' is-auto' : ''}"${locked ? ' data-locked="1"' : ''} data-pick="${encodeURIComponent(name)}"

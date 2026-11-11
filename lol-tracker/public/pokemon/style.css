@@ -2335,3 +2335,14 @@ footer { padding-bottom: calc(3rem + env(safe-area-inset-bottom)); }
 .verified-ic { display: inline-flex; align-items: center; justify-content: center; width: 1.1rem; height: 1.1rem; border-radius: 50%; background: #166534; color: #fff; font-size: .7rem; }
 .verified-tip { position: absolute; left: 0; top: calc(100% + 8px); z-index: 30; width: max-content; max-width: min(18rem, 80vw); padding: .5rem .7rem; border-radius: 10px; background: #0b1220; color: #fff; border: 1px solid rgba(255,255,255,.5); font-size: .78rem; font-weight: 500; line-height: 1.35; letter-spacing: 0; box-shadow: 0 6px 20px rgba(0,0,0,.6); opacity: 0; transform: translateY(-4px); pointer-events: none; transition: opacity .15s, transform .15s; }
 .verified:hover .verified-tip, .verified:focus .verified-tip { opacity: 1; transform: none; }
+
+/* Habilidades personalizadas (no existen en el juego normal) */
+.custom-ab { position: relative; display: inline-flex; align-items: center; gap: .35rem; cursor: help; outline: none; }
+.custom-ab-ic { display: inline-flex; align-items: center; justify-content: center; width: 1.05rem; height: 1.05rem; border-radius: 50%; background: #2f8cff; color: #fff; font: 800 .72rem/1 sans-serif; box-shadow: 0 0 8px rgba(47, 140, 255, .8); animation: custom-ab-glow 2.4s ease-in-out infinite; }
+@keyframes custom-ab-glow { 0%, 100% { box-shadow: 0 0 4px rgba(47, 140, 255, .6); } 50% { box-shadow: 0 0 12px rgba(47, 140, 255, 1); } }
+.custom-ab-tip { position: absolute; left: 0; top: calc(100% + 8px); z-index: 30; width: max-content; max-width: min(19rem, 80vw); padding: .55rem .75rem; border-radius: 10px; background: #0b1220; color: #fff; border: 1px solid #2f8cff; font-size: .78rem; font-weight: 500; line-height: 1.4; box-shadow: 0 6px 20px rgba(0, 0, 0, .6); opacity: 0; transform: translateY(-4px); pointer-events: none; transition: opacity .15s, transform .15s; text-align: left; white-space: normal; text-transform: none; letter-spacing: 0; font-family: system-ui, sans-serif; }
+.custom-ab-tip { color: #e8eefc; }
+.custom-ab-tip b { display: block; margin-bottom: .2rem; color: #7cb8ff; font-size: .72rem; letter-spacing: .04em; text-transform: uppercase; }
+.custom-ab:hover .custom-ab-tip, .custom-ab:focus .custom-ab-tip { opacity: 1; transform: none; }
+.mon-ability .custom-ab-tip, .detail-rows .mon-ability .custom-ab-tip, .bt-info .custom-ab-tip { color: #e8eefc; font: 500 .78rem/1.4 system-ui, sans-serif; text-transform: none; letter-spacing: 0; }
+.mon-ability .custom-ab-tip b, .detail-rows .mon-ability .custom-ab-tip b, .bt-info .custom-ab-tip b { display: block; color: #7cb8ff; font: 700 .72rem system-ui, sans-serif; letter-spacing: .04em; text-transform: uppercase; }

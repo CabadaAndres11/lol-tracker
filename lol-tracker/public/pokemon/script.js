@@ -33,6 +33,19 @@ function verifiedBadge(id) {
     + '<span class="verified-tip" role="tooltip">El equipo de este participante ha sido corroborado con fotos de la partida.</span></span>';
 }
 
+// Habilidades que no existen en el juego normal: se muestran con un "!" azul y su descripción.
+const CUSTOM_ABILITIES = {
+  tintineo: 'Replica una campana para curar los estados del equipo cuando sale a combatir. Además los movimientos de sonido pasan a ser psíquicos y aumentan su potencia un 20%.',
+};
+function abilityHtml(name) {
+  const text = escapeHtml(name || '');
+  const desc = CUSTOM_ABILITIES[normText(name || '')];
+  if (!desc) return text;
+  return `<span class="custom-ab" tabindex="0" role="note" aria-label="Habilidad personalizada, no existe en el juego normal: ${escapeHtml(desc)}">${text}`
+    + '<span class="custom-ab-ic" aria-hidden="true">!</span>'
+    + `<span class="custom-ab-tip" role="tooltip"><b>Habilidad exclusiva del torneo</b>${escapeHtml(desc)}</span></span>`;
+}
+
 // ---------------------------------------------------------------
 // Medallas (misma forma y color para todos los jugadores)
 // Cambia aquí los nombres si quieres los de las medallas reales del juego.
@@ -360,8 +373,8 @@ function monDetail(mon, index, id) {
       <h2>${escapeHtml(showMega ? mega.name : mon.species)}${mon.shiny ? ' <span class="shiny-star" title="Shiny">✨</span>' : ''}</h2>
       ${mon.nickname ? `<div class="mon-nick">“${escapeHtml(mon.nickname)}”</div>` : ''}
       <div class="detail-rows">
-        <div class="mon-ability"><span>Habilidad${showMega ? ' (Mega)' : ''}</span> ${escapeHtml(showMega ? mon.megaAbility : mon.ability)}</div>
-        ${mon.megaAbility && !showMega && !mega ? `<div class="mon-ability"><span>Habilidad (Mega)</span> ${escapeHtml(mon.megaAbility)}</div>` : ''}
+        <div class="mon-ability"><span>Habilidad${showMega ? ' (Mega)' : ''}</span> ${abilityHtml(showMega ? mon.megaAbility : mon.ability)}</div>
+        ${mon.megaAbility && !showMega && !mega ? `<div class="mon-ability"><span>Habilidad (Mega)</span> ${abilityHtml(mon.megaAbility)}</div>` : ''}
         ${mon.nature ? `<div class="mon-ability"><span>Naturaleza</span> ${escapeHtml(natureByName(mon.nature) ? natureText(natureByName(mon.nature)) : mon.nature)}</div>` : ''}
         ${mon.item ? `<div class="mon-ability"><span>Objeto</span> ${escapeHtml(mon.item)}</div>` : ''}
       </div>
@@ -564,7 +577,7 @@ function circleHtml(player) {
         ${lead ? `<div class="bt-info">
           ${banned.length ? banAlert(banned) : ''}
           <div><span>Pokémon</span>${escapeHtml(megaActive ? leadMega.name : lead.species)}</div>
-          <div><span>Habilidad${megaActive ? ' (Mega)' : ''}</span>${escapeHtml(megaActive ? lead.megaAbility : lead.ability)}</div>
+          <div><span>Habilidad${megaActive ? ' (Mega)' : ''}</span>${abilityHtml(megaActive ? lead.megaAbility : lead.ability)}</div>
           <div><span>Objeto</span>${escapeHtml(lead.item || '—')}</div>
           <div><span>Naturaleza</span>${escapeHtml(nat)}</div>
           <button type="button" class="bt-link" data-action="open-mon" data-id="${eid}" data-index="${li}">Ver / editar este Pokémon</button>

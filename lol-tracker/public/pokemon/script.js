@@ -37,6 +37,9 @@ function verifiedBadge(id) {
 const CUSTOM_ABILITIES = {
   tintineo: 'Replica una campana para curar los estados del equipo cuando sale a combatir. Además los movimientos de sonido pasan a ser psíquicos y aumentan su potencia un 20%.',
 };
+const isCustomAb = (name) => !!CUSTOM_ABILITIES[normText(name || '')];
+const hasCustomAb = (mon, megaOn_ = false) => !!mon && (isCustomAb(megaOn_ ? mon.megaAbility : mon.ability));
+const abMark = '<i class="ab-mark" aria-hidden="true">!</i>';
 function abilityHtml(name) {
   const text = escapeHtml(name || '');
   const desc = CUSTOM_ABILITIES[normText(name || '')];
@@ -367,9 +370,9 @@ function monDetail(mon, index, id) {
   const shown = showMega ? { ...mon, dexId: mega.id } : mon;
   const moves = mon.moves.filter(Boolean).map(moveLi).join('');
   return `
-    <div class="mon-detail${banReasons(mon).length ? ' is-banned' : ''}">
+    <div class="mon-detail${banReasons(mon).length ? ' is-banned' : ''}${hasCustomAb(mon, showMega) ? ' has-custom-ab' : ''}">
       ${banReasons(mon).length ? banAlert(banReasons(mon)) : ''}
-      ${monImage(shown, 'detail-img')}
+      ${hasCustomAb(mon, showMega) ? `<div class="ab-stage">${monImage(shown, 'detail-img')}${abMark}</div>` : monImage(shown, 'detail-img')}
       <h2>${escapeHtml(showMega ? mega.name : mon.species)}${mon.shiny ? ' <span class="shiny-star" title="Shiny">✨</span>' : ''}</h2>
       ${mon.nickname ? `<div class="mon-nick">“${escapeHtml(mon.nickname)}”</div>` : ''}
       <div class="detail-rows">
@@ -521,7 +524,7 @@ function circleHtml(player) {
   const meHtml = locked
     ? '<div class="bt-sprite"><div class="bt-img bt-img-empty">?</div></div>'
     : lead
-    ? `<button type="button" class="bt-sprite" data-action="open-mon" data-id="${eid}" data-index="${li}" title="Ver detalles de ${escapeHtml(lead.species)}" aria-label="Ver detalles de ${escapeHtml(lead.species)}">${monImage(shown, 'bt-img')}${sparks(lead.shiny)}</button>${leadMega ? `<button type="button" class="bt-mega${megaActive ? ' on' : ''}" data-action="toggle-mega" data-id="${eid}" data-index="${li}" title="${megaActive ? 'Volver a la forma normal' : 'Megaevolucionar'}" aria-label="${megaActive ? 'Volver a la forma normal' : 'Megaevolucionar'}"><img src="/pokemon/mega.png" alt="" draggable="false"></button>` : ''}`
+    ? `<button type="button" class="bt-sprite${hasCustomAb(lead, megaActive) ? ' has-custom-ab' : ''}" data-action="open-mon" data-id="${eid}" data-index="${li}" title="Ver detalles de ${escapeHtml(lead.species)}${hasCustomAb(lead, megaActive) ? ' — lleva una habilidad exclusiva del torneo' : ''}" aria-label="Ver detalles de ${escapeHtml(lead.species)}">${monImage(shown, 'bt-img')}${sparks(lead.shiny)}${hasCustomAb(lead, megaActive) ? abMark : ''}</button>${leadMega ? `<button type="button" class="bt-mega${megaActive ? ' on' : ''}" data-action="toggle-mega" data-id="${eid}" data-index="${li}" title="${megaActive ? 'Volver a la forma normal' : 'Megaevolucionar'}" aria-label="${megaActive ? 'Volver a la forma normal' : 'Megaevolucionar'}"><img src="/pokemon/mega.png" alt="" draggable="false"></button>` : ''}`
     : `<button type="button" class="bt-sprite" data-action="add-mon" data-id="${eid}" aria-label="Añadir Pokémon"><div class="bt-img bt-img-empty">+</div></button>`;
 
   // El rival (o el "?") abre directamente el formulario de rival: solo pide el nombre
@@ -531,8 +534,9 @@ function circleHtml(player) {
     const mon = team[i];
     if (locked) return i < lockedN ? '<span class="bt-slot is-locked">?</span>' : '<span class="bt-slot bt-slot-empty"></span>';
     if (!mon) return `<button type="button" class="bt-slot bt-slot-empty" data-action="add-mon" data-id="${eid}" title="Añadir Pokémon" aria-label="Añadir Pokémon">+</button>`;
-    const title = `${mon.species}${mon.nickname ? ` “${mon.nickname}”` : ''}${banReasons(mon).length ? ' — ⚠ NO PERMITIDO' : ''}`;
-    return `<button type="button" class="bt-slot${i === li ? ' is-on' : ''}${banReasons(mon).length ? ' is-banned' : ''}" data-action="set-lead" data-id="${eid}" data-index="${i}" title="${escapeHtml(title)}" aria-label="Sacar a ${escapeHtml(mon.species)}">${monImage(mon, 'bt-slot-img')}</button>`;
+    const cab = isCustomAb(mon.ability) || isCustomAb(mon.megaAbility);
+    const title = `${mon.species}${mon.nickname ? ` “${mon.nickname}”` : ''}${banReasons(mon).length ? ' — ⚠ NO PERMITIDO' : ''}${cab ? ' — habilidad exclusiva del torneo' : ''}`;
+    return `<button type="button" class="bt-slot${i === li ? ' is-on' : ''}${banReasons(mon).length ? ' is-banned' : ''}${cab ? ' has-custom-ab' : ''}" data-action="set-lead" data-id="${eid}" data-index="${i}" title="${escapeHtml(title)}" aria-label="Sacar a ${escapeHtml(mon.species)}">${monImage(mon, 'bt-slot-img')}</button>`;
   }).join('');
 
   const moves = lead ? [0, 1, 2, 3].map((i) => moveBtn(lead.moves[i])).join('') : [0, 1, 2, 3].map(() => moveBtn('')).join('');

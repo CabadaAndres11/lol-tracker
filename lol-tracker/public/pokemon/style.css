@@ -2346,3 +2346,18 @@ footer { padding-bottom: calc(3rem + env(safe-area-inset-bottom)); }
 .custom-ab:hover .custom-ab-tip, .custom-ab:focus .custom-ab-tip { opacity: 1; transform: none; }
 .mon-ability .custom-ab-tip, .detail-rows .mon-ability .custom-ab-tip, .bt-info .custom-ab-tip { color: #e8eefc; font: 500 .78rem/1.4 system-ui, sans-serif; text-transform: none; letter-spacing: 0; }
 .mon-ability .custom-ab-tip b, .detail-rows .mon-ability .custom-ab-tip b, .bt-info .custom-ab-tip b { display: block; color: #7cb8ff; font: 700 .72rem system-ui, sans-serif; letter-spacing: .04em; text-transform: uppercase; }
+
+/* Pokémon con habilidad exclusiva del torneo: aura azul */
+.ab-mark { position: absolute; right: 2px; top: 2px; z-index: 3; display: inline-flex; align-items: center; justify-content: center; width: 1.15rem; height: 1.15rem; border-radius: 50%; background: #2f8cff; color: #fff; font: 800 .75rem/1 sans-serif; font-style: normal; box-shadow: 0 0 10px rgba(47, 140, 255, .9); animation: custom-ab-glow 2.4s ease-in-out infinite; pointer-events: none; }
+.bt-sprite.has-custom-ab { position: relative; }
+.bt-sprite.has-custom-ab::before { content: ''; position: absolute; inset: 8% 8% 0; border-radius: 50%; background: radial-gradient(closest-side, rgba(47, 140, 255, .45), rgba(47, 140, 255, 0) 72%); animation: ab-aura 2.6s ease-in-out infinite; pointer-events: none; }
+.bt-sprite.has-custom-ab .bt-img { filter: drop-shadow(0 0 8px rgba(70, 160, 255, .95)); }
+@keyframes ab-aura { 0%, 100% { opacity: .55; transform: scale(.95); } 50% { opacity: 1; transform: scale(1.08); } }
+.bt-slot.has-custom-ab { position: relative; box-shadow: 0 0 0 2px #2f8cff, 0 0 12px rgba(47, 140, 255, .85); }
+.bt-slot.has-custom-ab::after { content: '!'; position: absolute; right: -3px; top: -3px; width: .95rem; height: .95rem; border-radius: 50%; background: #2f8cff; color: #fff; font: 800 .65rem/.95rem sans-serif; text-align: center; box-shadow: 0 0 8px rgba(47, 140, 255, .9); }
+.ab-stage { position: relative; display: inline-block; }
+.ab-stage .ab-mark { right: 6px; top: 6px; width: 1.4rem; height: 1.4rem; font-size: .9rem; }
+.mon-detail.has-custom-ab .detail-img { filter: drop-shadow(0 0 10px rgba(70, 160, 255, .95)); }
+.mon-detail.has-custom-ab { box-shadow: 0 0 0 1px rgba(47, 140, 255, .55), 0 0 22px rgba(47, 140, 255, .35); border-radius: 16px; }
+@media (prefers-reduced-motion: reduce) { .ab-mark, .bt-sprite.has-custom-ab::before { animation: none; } }
+.bt-sprite.has-custom-ab .ab-mark { right: 14%; top: 10%; width: 1.5rem; height: 1.5rem; font-size: 1rem; }

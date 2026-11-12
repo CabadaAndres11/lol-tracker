@@ -2389,3 +2389,5 @@ footer { padding-bottom: calc(3rem + env(safe-area-inset-bottom)); }
 .mem-img { width: 100%; height: auto; border-radius: 12px; border: 2px solid #3b4a80; display: block; }
 .mem-dl { text-decoration: none; display: inline-flex; align-items: center; }
 .mem-load { color: var(--text-muted); }
+
+.liga-img-row { text-align: center; margin: 1rem 0 .4rem; }

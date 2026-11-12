@@ -807,9 +807,7 @@ async function drawMemory(id) {
   return cv;
 }
 
-async function openMemory(id) {
-  const player = players.find((p) => idOf(p) === id);
-  if (!player || hiddenTeams[id] != null || !(teams[id] || []).length) return;
+async function openImageModal(title, file, alt, draw) {
   let m = document.getElementById('memory-modal');
   if (!m) {
     m = document.createElement('div');
@@ -820,19 +818,181 @@ async function openMemory(id) {
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !m.hidden) close(); });
   }
   m.hidden = false;
-  m.innerHTML = '<div class="modal-card memory-card"><button class="modal-close" data-mem="close" type="button" aria-label="Cerrar">&times;</button><h2>📸 Recuerdo</h2><p class="mem-load">Creando la imagen…</p></div>';
+  const x = '<button class="modal-close" data-mem="close" type="button" aria-label="Cerrar">&times;</button>';
+  m.innerHTML = `<div class="modal-card memory-card">${x}<h2>📸 ${escapeHtml(title)}</h2><p class="mem-load">Creando la imagen…</p></div>`;
   try {
-    const cv = await drawMemory(id);
+    const cv = await draw();
     const url = cv.toDataURL('image/png');
-    const file = `recuerdo-${avatarSlug(player.name) || 'equipo'}.png`;
-    m.querySelector('.memory-card').innerHTML = `<button class="modal-close" data-mem="close" type="button" aria-label="Cerrar">&times;</button>
-      <h2>📸 Recuerdo de ${escapeHtml(player.name)}</h2>
-      <img class="mem-img" src="${url}" alt="Equipo de ${escapeHtml(player.name)}">
+    m.querySelector('.memory-card').innerHTML = `${x}
+      <h2>📸 ${escapeHtml(title)}</h2>
+      <img class="mem-img" src="${url}" alt="${escapeHtml(alt)}">
       <div class="porra-actions"><button type="button" class="link-btn" data-mem="close">Cerrar</button><a class="add-btn small mem-dl" href="${url}" download="${file}">⬇ Descargar</a></div>`;
   } catch (err) {
-    m.querySelector('.memory-card').innerHTML = '<button class="modal-close" data-mem="close" type="button" aria-label="Cerrar">&times;</button><h2>📸 Recuerdo</h2><p class="form-error">No se ha podido crear la imagen. Inténtalo de nuevo.</p>';
+    m.querySelector('.memory-card').innerHTML = `${x}<h2>📸 ${escapeHtml(title)}</h2><p class="form-error">No se ha podido crear la imagen. Inténtalo de nuevo.</p>`;
   }
 }
+
+function openMemory(id) {
+  const player = players.find((p) => idOf(p) === id);
+  if (!player || hiddenTeams[id] != null || !(teams[id] || []).length) return;
+  return openImageModal(`Recuerdo de ${player.name}`, `recuerdo-${avatarSlug(player.name) || 'equipo'}.png`, `Equipo de ${player.name}`, () => drawMemory(id));
+}
+
+// ---- Imágenes de la Liga y del bracket ----
+function imgCanvas(title, sub) {
+  const W = 1600, H = 900;
+  const cv = document.createElement('canvas');
+  cv.width = W; cv.height = H;
+  const ctx = cv.getContext('2d');
+  const bg = ctx.createLinearGradient(0, 0, W, H);
+  bg.addColorStop(0, '#0e1730'); bg.addColorStop(1, '#070b18');
+  ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = '#e3262f'; ctx.fillRect(0, 0, W, 10);
+  ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+  ctx.fillStyle = '#fff'; ctx.font = '800 46px system-ui, sans-serif'; ctx.fillText(title, 48, 58);
+  ctx.fillStyle = '#9aa6c8'; ctx.font = '600 22px system-ui, sans-serif'; ctx.textAlign = 'right';
+  ctx.fillText(sub, W - 48, 58); ctx.textAlign = 'left';
+  return { cv, ctx, W, H };
+}
+async function avatarMap(names) {
+  const m = new Map();
+  await Promise.all(names.filter(Boolean).map(async (n) => m.set(n, await loadImg(`/pokemon/avatars/${avatarSlug(n)}.png`))));
+  return m;
+}
+function drawAvatar(ctx, img, name, cx, cy, r, ring) {
+  ctx.save();
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.closePath(); ctx.clip();
+  if (img) ctx.drawImage(img, cx - r, cy - r, r * 2, r * 2);
+  else { ctx.fillStyle = '#26345f'; ctx.fillRect(cx - r, cy - r, r * 2, r * 2); }
+  ctx.restore();
+  if (!img) { ctx.fillStyle = '#fff'; ctx.font = `700 ${Math.round(r)}px system-ui, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(String(name).charAt(0).toUpperCase(), cx, cy + 2); ctx.textAlign = 'left'; }
+  ctx.lineWidth = 3; ctx.strokeStyle = ring || '#3b4a80'; ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.stroke();
+}
+
+async function drawLeagueImage() {
+  const standings = computeStandings();
+  const total = schedule.reduce((n, r) => n + r.matches.length, 0);
+  const played = playedCount();
+  const { cv, ctx, W, H } = imgCanvas('Clasificación de la Liga', `RandomLocke · ${played}/${total} combates jugados`);
+  const avs = await avatarMap(standings.map((r) => r.name));
+  const n = standings.length;
+  const two = n > QUALIFY;
+  const groups = two ? [standings.slice(0, QUALIFY), standings.slice(QUALIFY)] : [standings];
+  const top = 118, colW = two ? 724 : 900, gapX = 56;
+  const startX = two ? (W - colW * 2 - gapX) / 2 : (W - colW) / 2;
+  const rowH = Math.min(62, (H - top - 40 - 52) / Math.max(...groups.map((g) => g.length)));
+  groups.forEach((g, gi) => {
+    const x0 = startX + gi * (colW + gapX);
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = gi === 0 && two && played > 0 ? '#ffe066' : '#9aa6c8'; ctx.font = '700 20px system-ui, sans-serif'; ctx.textAlign = 'left';
+    ctx.fillText(two ? (gi === 0 ? (played > 0 ? 'CLASIFICAN AL BRACKET' : 'PRIMEROS 8') : 'RESTO') : 'CLASIFICACIÓN', x0 + 8, top + 8);
+    const heads = [['V', colW - 210], ['D', colW - 140], ['PTS', colW - 52]];
+    ctx.textAlign = 'center'; ctx.fillStyle = '#9aa6c8'; ctx.font = '700 18px system-ui, sans-serif';
+    heads.forEach(([t, dx]) => ctx.fillText(t, x0 + dx, top + 8));
+    ctx.textAlign = 'left';
+    g.forEach((row, k) => {
+      const pos = gi * QUALIFY + k + 1;
+      const y = top + 34 + k * rowH;
+      const gold = played > 0 && pos <= QUALIFY;
+      rrect(ctx, x0, y, colW, rowH - 8, 14);
+      ctx.fillStyle = gold ? 'rgba(255,224,102,.13)' : '#16224a'; ctx.fill();
+      ctx.lineWidth = gold ? 2 : 1.5; ctx.strokeStyle = gold ? '#b89a2a' : '#2c3b6e'; ctx.stroke();
+      const cy = y + (rowH - 8) / 2;
+      ctx.fillStyle = gold ? '#ffe066' : '#9aa6c8'; ctx.font = '800 26px system-ui, sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText(String(pos), x0 + 34, cy + 1);
+      drawAvatar(ctx, avs.get(row.name), row.name, x0 + 92, cy, Math.min(24, (rowH - 8) / 2 - 3), gold ? '#ffe066' : '#3b4a80');
+      ctx.textAlign = 'left'; ctx.fillStyle = '#fff'; ctx.font = '700 28px system-ui, sans-serif';
+      ctx.fillText(fitText(ctx, row.name, colW - 400), x0 + 134, cy + 1);
+      ctx.textAlign = 'center'; ctx.font = '700 26px system-ui, sans-serif';
+      ctx.fillStyle = '#7ee08c'; ctx.fillText(String(row.v), x0 + colW - 210, cy + 1);
+      ctx.fillStyle = '#ff8a8a'; ctx.fillText(String(row.d), x0 + colW - 140, cy + 1);
+      ctx.fillStyle = '#ffe066'; ctx.font = '800 30px system-ui, sans-serif'; ctx.fillText(String(row.pts), x0 + colW - 52, cy + 1);
+      ctx.textAlign = 'left';
+    });
+  });
+  return cv;
+}
+
+async function drawBracketImage() {
+  const standings = computeStandings();
+  const played = playedCount();
+  const total = schedule.reduce((n, r) => n + r.matches.length, 0);
+  const model = bracketModel(standings, played);
+  const { cv, ctx, W, H } = imgCanvas('Bracket eliminatorio', `RandomLocke · todos los cruces al mejor de 3${played < total ? ' · provisional' : ''}`);
+  const names = [...model.ties.flatMap((t) => [t.a, t.b]), model.final.winner];
+  const avs = await avatarMap([...new Set(names.filter(Boolean))]);
+  const cw = 440, ch = 158, colX = [40, 580, 1120];
+  const area0 = 112, area1 = H - 24, gap = 22;
+  const qh = (area1 - area0 - gap * 3) / 4; // alto reservado por cuarto
+  const cardH = Math.min(ch, qh);
+  const qy = (i) => area0 + i * (qh + gap) + (qh - cardH) / 2;
+  const pos = new Map();
+  model.q.forEach((t, i) => pos.set(t.id, [colX[0], qy(i)]));
+  const mid = (a, b) => (pos.get(a)[1] + pos.get(b)[1]) / 2;
+  pos.set('s1', [colX[1], mid('q1', 'q2')]); pos.set('s2', [colX[1], mid('q3', 'q4')]);
+  pos.set('f', [colX[2], mid('s1', 's2') - 10]);
+
+  const prevLabel = { s1: ['Ganador cuartos 1', 'Ganador cuartos 2'], s2: ['Ganador cuartos 3', 'Ganador cuartos 4'], f: ['Ganador semifinal 1', 'Ganador semifinal 2'] };
+  // líneas de unión
+  ctx.strokeStyle = '#2c3b6e'; ctx.lineWidth = 3;
+  [['q1', 's1'], ['q2', 's1'], ['q3', 's2'], ['q4', 's2'], ['s1', 'f'], ['s2', 'f']].forEach(([a, b]) => {
+    const [ax, ay] = pos.get(a), [bx, by] = pos.get(b);
+    const x1 = ax + cw, y1 = ay + cardH / 2, x2 = bx, y2 = by + cardH / 2, xm = (x1 + x2) / 2;
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(xm, y1); ctx.lineTo(xm, y2); ctx.lineTo(x2, y2); ctx.stroke();
+  });
+
+  const colTitles = [['Cuartos de final', 0], ['Semifinales', 1], ['Final', 2]];
+  ctx.textBaseline = 'middle'; ctx.fillStyle = '#9aa6c8'; ctx.font = '700 18px system-ui, sans-serif';
+  colTitles.forEach(([t, c]) => ctx.fillText(t.toUpperCase(), colX[c] + 6, 96));
+
+  model.ties.forEach((t) => {
+    const [x, y] = pos.get(t.id);
+    rrect(ctx, x, y, cw, cardH, 16);
+    ctx.fillStyle = '#16224a'; ctx.fill();
+    ctx.lineWidth = 2.5; ctx.strokeStyle = t.winner ? '#b89a2a' : '#2c3b6e'; ctx.stroke();
+    ctx.fillStyle = '#ffe066'; ctx.font = '700 17px system-ui, sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+    ctx.fillText(t.title.toUpperCase(), x + 18, y + 20);
+    const sh = (cardH - 38) / 2;
+    [0, 1].forEach((side) => {
+      const name = side ? t.b : t.a;
+      const sy = y + 36 + side * sh, cy = sy + sh / 2;
+      const seed = t.seedA ? `${side ? t.seedB : t.seedA}º` : '';
+      const won = !!t.winner && t.winner === name, lost = !!t.winner && !!name && t.winner !== name;
+      if (won) { rrect(ctx, x + 8, sy + 2, cw - 16, sh - 4, 10); ctx.fillStyle = 'rgba(126,224,140,.18)'; ctx.fill(); }
+      ctx.globalAlpha = lost ? 0.45 : 1;
+      ctx.textAlign = 'center'; ctx.fillStyle = '#9aa6c8'; ctx.font = '700 18px system-ui, sans-serif';
+      if (seed) ctx.fillText(seed, x + 34, cy + 1);
+      if (name) {
+        drawAvatar(ctx, avs.get(name), name, x + 84, cy, Math.min(22, sh / 2 - 4), won ? '#7ee08c' : '#3b4a80');
+        ctx.textAlign = 'left'; ctx.fillStyle = '#fff'; ctx.font = '700 26px system-ui, sans-serif';
+        ctx.fillText(fitText(ctx, name, cw - 190), x + 118, cy + 1);
+        if (won) { ctx.textAlign = 'right'; ctx.fillStyle = '#7ee08c'; ctx.font = '800 26px system-ui, sans-serif'; ctx.fillText('✔', x + cw - 22, cy + 1); }
+      } else {
+        ctx.textAlign = 'left'; ctx.fillStyle = '#6b78a3'; ctx.font = '600 20px system-ui, sans-serif';
+        ctx.fillText((prevLabel[t.id] && prevLabel[t.id][side]) || '—', x + 66, cy + 1);
+      }
+      ctx.globalAlpha = 1;
+    });
+    ctx.textAlign = 'left';
+  });
+
+  if (model.final.winner) {
+    const [fx, fy] = pos.get('f');
+    const cy = fy + cardH + 70;
+    drawAvatar(ctx, avs.get(model.final.winner), model.final.winner, fx + 70, cy, 44, '#ffe066');
+    ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#ffe066'; ctx.font = '800 20px system-ui, sans-serif'; ctx.fillText('🏆 CAMPEÓN', fx + 132, cy - 20);
+    ctx.fillStyle = '#fff'; ctx.font = '800 38px system-ui, sans-serif'; ctx.fillText(fitText(ctx, model.final.winner, cw - 140), fx + 132, cy + 22);
+  }
+  return cv;
+}
+
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('[data-liga-img]');
+  if (!b) return;
+  if (b.dataset.ligaImg === 'bracket') openImageModal('Bracket eliminatorio', 'bracket-randomlocke.png', 'Bracket eliminatorio del torneo', drawBracketImage);
+  else openImageModal('Clasificación de la Liga', 'clasificacion-randomlocke.png', 'Clasificación de la Liga', drawLeagueImage);
+});
 
 function trainersHtml() {
   const cur = currentId;
@@ -2210,6 +2370,7 @@ function bracketHtml(standings, played, totalMatches) {
       <section class="bk-round"><h3>Semifinales</h3><div class="bk-cards">${model.semis.map(card).join('')}</div></section>
       <section class="bk-round"><h3>Final</h3><div class="bk-cards">${card(model.final)}</div></section>
     </div>
+    <div class="liga-img-row"><button type="button" class="add-btn small" data-liga-img="bracket">📸 Crear imagen del bracket</button></div>
     <div class="reset-row"><button type="button" class="link-btn link-danger" data-reset="bracket">Reiniciar bracket</button></div>`;
 }
 
@@ -2286,6 +2447,7 @@ function renderLeague() {
     <p class="liga-hint">Haz clic en un participante para marcarlo como ganador. Vuelve a pulsarlo para deshacerlo.</p>
 
     <div class="duels">${rd.matches.map(duelHtml).join('')}</div>
+    <div class="liga-img-row"><button type="button" class="add-btn small" data-liga-img="liga">📸 Crear imagen de la clasificación</button></div>
     <div class="reset-row"><button type="button" class="link-btn link-danger" data-reset="league">Reiniciar liga y bracket</button></div>`;
 
   const anim = paneAnim ? ` slide-${paneAnim}` : '';

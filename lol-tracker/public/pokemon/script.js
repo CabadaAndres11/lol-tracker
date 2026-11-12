@@ -2370,7 +2370,6 @@ function bracketHtml(standings, played, totalMatches) {
       <section class="bk-round"><h3>Semifinales</h3><div class="bk-cards">${model.semis.map(card).join('')}</div></section>
       <section class="bk-round"><h3>Final</h3><div class="bk-cards">${card(model.final)}</div></section>
     </div>
-    <div class="liga-img-row"><button type="button" class="add-btn small" data-liga-img="bracket">📸 Crear imagen del bracket</button></div>
     <div class="reset-row"><button type="button" class="link-btn link-danger" data-reset="bracket">Reiniciar bracket</button></div>`;
 }
 
@@ -2447,9 +2446,12 @@ function renderLeague() {
     <p class="liga-hint">Haz clic en un participante para marcarlo como ganador. Vuelve a pulsarlo para deshacerlo.</p>
 
     <div class="duels">${rd.matches.map(duelHtml).join('')}</div>
-    <div class="liga-img-row"><button type="button" class="add-btn small" data-liga-img="liga">📸 Crear imagen de la clasificación</button></div>
     <div class="reset-row"><button type="button" class="link-btn link-danger" data-reset="league">Reiniciar liga y bracket</button></div>`;
 
+  const imgBar = document.getElementById('liga-img-bar');
+  if (imgBar) imgBar.innerHTML = ligaView === 'bracket'
+    ? '<button type="button" class="add-btn" data-liga-img="bracket">📸 Crear imagen del bracket</button>'
+    : '<button type="button" class="add-btn" data-liga-img="liga">📸 Crear imagen de la clasificación</button>';
   const anim = paneAnim ? ` slide-${paneAnim}` : '';
   paneAnim = '';
   root.innerHTML = `

@@ -46,8 +46,18 @@ const CUSTOM_ABILITIES = {
   tintineo: 'Replica una campana para curar los estados del equipo cuando sale a combatir. Además los movimientos de sonido pasan a ser psíquicos y aumentan su potencia un 20%.',
   'poder gelido': 'Aumenta el poder de hielo y la velocidad un 50% en clima nevado.',
 };
+// Movimientos que no existen en el juego normal: misma marca azul que las habilidades.
+const CUSTOM_MOVES = {
+  deslizamiento: { type: 15, cat: 'Físico', power: 70, acc: 100, desc: 'Siempre sube un nivel la velocidad del usuario.' },
+};
+const customMove = (name) => CUSTOM_MOVES[normText(name || '')] || null;
+function customMoveTip(name) {
+  const m = customMove(name);
+  if (!m) return '';
+  return `<span class="custom-ab-ic" aria-hidden="true">!</span><span class="custom-ab-tip" role="tooltip"><b>Movimiento exclusivo del torneo</b>${TYPES[m.type][0]} · ${m.cat} · Potencia ${m.power} · Precisión ${m.acc}<br>${escapeHtml(m.desc)}</span>`;
+}
 const isCustomAb = (name) => !!CUSTOM_ABILITIES[normText(name || '')];
-const hasCustomAb = (mon, megaOn_ = false) => !!mon && (isCustomAb(megaOn_ ? mon.megaAbility : mon.ability));
+const hasCustomAb = (mon, megaOn_ = false) => !!mon && (isCustomAb(megaOn_ ? mon.megaAbility : mon.ability) || (mon.moves || []).some(customMove));
 const abMark = '<i class="ab-mark" aria-hidden="true">!</i>';
 function abilityHtml(name) {
   const text = escapeHtml(name || '');
@@ -383,6 +393,11 @@ const TYPES = {
 // Fondo del movimiento según su tipo; texto claro u oscuro según el color.
 function moveLi(name) {
   const t = TYPES[moveTypes[String(name).toLowerCase()]];
+  if (customMove(name)) {
+    const [r, g, b] = [1, 3, 5].map((i) => parseInt(t[1].slice(i, i + 2), 16));
+    const dark = (0.299 * r + 0.587 * g + 0.114 * b) > 150;
+    return `<li class="typed custom-ab custom-mv${dark ? ' typed-light' : ''}" tabindex="0" style="--tc:${t[1]}" title="${t[0]}">${escapeHtml(name)}${customMoveTip(name)}</li>`;
+  }
   if (!t) return `<li>${escapeHtml(name)}</li>`;
   const [r, g, b] = [1, 3, 5].map((i) => parseInt(t[1].slice(i, i + 2), 16));
   const dark = (0.299 * r + 0.587 * g + 0.114 * b) > 150;
@@ -511,6 +526,7 @@ const isLightColor = (hex) => {
 function moveBtn(name) {
   if (!name) return '<div class="bt-mv empty">—</div>';
   const t = TYPES[moveTypes[String(name).toLowerCase()]];
+  if (customMove(name)) return `<div class="bt-mv custom-ab custom-mv${isLightColor(t[1]) ? ' light' : ''}" tabindex="0" style="--tc:${t[1]}"><span>${escapeHtml(name)}</span>${customMoveTip(name)}</div>`;
   if (!t) return `<div class="bt-mv">${escapeHtml(name)}</div>`;
   return `<div class="bt-mv${isLightColor(t[1]) ? ' light' : ''}" style="--tc:${t[1]}" title="${t[0]}"><span>${escapeHtml(name)}</span></div>`;
 }
@@ -560,7 +576,7 @@ function circleHtml(player) {
     const mon = team[i];
     if (locked) return i < lockedN ? '<span class="bt-slot is-locked">?</span>' : '<span class="bt-slot bt-slot-empty"></span>';
     if (!mon) return `<button type="button" class="bt-slot bt-slot-empty" data-action="add-mon" data-id="${eid}" title="Añadir Pokémon" aria-label="Añadir Pokémon">+</button>`;
-    const cab = isCustomAb(mon.ability) || isCustomAb(mon.megaAbility);
+    const cab = isCustomAb(mon.ability) || isCustomAb(mon.megaAbility) || (mon.moves || []).some(customMove);
     const title = `${mon.species}${mon.nickname ? ` “${mon.nickname}”` : ''}${banReasons(mon).length ? ' — ⚠ NO PERMITIDO' : ''}${cab ? ' — habilidad exclusiva del torneo' : ''}`;
     return `<button type="button" class="bt-slot${i === li ? ' is-on' : ''}${banReasons(mon).length ? ' is-banned' : ''}${cab ? ' has-custom-ab' : ''}" data-action="set-lead" data-id="${eid}" data-index="${i}" title="${escapeHtml(title)}" aria-label="Sacar a ${escapeHtml(mon.species)}">${monImage(mon, 'bt-slot-img')}</button>`;
   }).join('');
@@ -1679,11 +1695,13 @@ importInput.addEventListener('change', async () => {
 // Sugerencias en español (generadas a partir de los datos oficiales de PokéAPI).
 const esMap = {};
 const moveTypes = {}; // nombre del movimiento (es o en, minúsculas) -> id de tipo
+for (const [k, m] of Object.entries(CUSTOM_MOVES)) moveTypes[k] = m.type;
 async function loadEsData() {
   try {
     const res = await fetch('/pokemon/data/es.json');
     if (!res.ok) return;
     const data = await res.json();
+    if (!data.moves.some(([es]) => es === 'Deslizamiento')) data.moves.push(['Deslizamiento', 'Slide', 15]);
     if (!data.items.some(([es]) => es === 'Ultranecrostal Z')) data.items.push(['Ultranecrostal Z', 'Ultranecrozium Z']);
     for (const k of ['moves', 'abilities', 'items']) {
       esMap[k] = new Map(data[k].map(([es, en]) => [en.toLowerCase(), es]));

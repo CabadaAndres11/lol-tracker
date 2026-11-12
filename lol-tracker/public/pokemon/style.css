@@ -2369,3 +2369,14 @@ footer { padding-bottom: calc(3rem + env(safe-area-inset-bottom)); }
 /* El marco Pokédex de las ventanas ponía overflow:hidden y la porra no podía hacer scroll */
 .modal-card.porra-card { overflow-y: auto; overflow-x: hidden; max-height: min(90vh, 760px); max-height: min(90dvh, 760px); overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
 .modal-card.porra-card .porra-actions { position: sticky; bottom: -1.6rem; z-index: 2; padding: .7rem 0 .2rem; background: linear-gradient(180deg, transparent, #0e1730 35%); }
+
+/* Movimientos exclusivos del torneo */
+.bt-mv.custom-mv { overflow: visible; box-shadow: 0 4px 0 rgba(0, 0, 0, .45), 0 0 0 2px #2f8cff, 0 0 14px rgba(47, 140, 255, .8); }
+.bt-mv.custom-mv::after { display: none; }
+.bt-mv.custom-mv .custom-ab-ic { margin-left: auto; flex: none; }
+.bt-mv.custom-mv .custom-ab-tip { top: auto; bottom: calc(100% + 8px); left: 0; color: #e8eefc; font: 500 .78rem/1.4 system-ui, sans-serif; text-transform: none; }
+.bt-mv.custom-mv .custom-ab-tip b { display: block; color: #7cb8ff; font: 700 .72rem system-ui, sans-serif; letter-spacing: .04em; text-transform: uppercase; margin-bottom: .2rem; }
+.mon-moves li.custom-mv { box-shadow: 0 0 0 2px #2f8cff, 0 0 12px rgba(47, 140, 255, .8); }
+.mon-moves li.custom-mv .custom-ab-tip { color: #e8eefc; font: 500 .78rem/1.4 system-ui, sans-serif; text-transform: none; letter-spacing: 0; }
+.mon-moves li.custom-mv .custom-ab-tip b { display: block; color: #7cb8ff; font: 700 .72rem system-ui, sans-serif; letter-spacing: .04em; text-transform: uppercase; margin-bottom: .2rem; }
+.mon-moves li.custom-mv .custom-ab-tip { top: auto; bottom: calc(100% + 8px); }

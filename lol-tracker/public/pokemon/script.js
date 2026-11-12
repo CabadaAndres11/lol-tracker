@@ -688,7 +688,7 @@ function blueMark(ctx, cx, cy, r) {
 
 async function drawMemory(id) {
   const player = players.find((p) => idOf(p) === id);
-  const team = (teams[id] || []).filter(Boolean);
+  let team = (teams[id] || []).filter(Boolean);
   const W = 1600, H = 900;
   const cv = document.createElement('canvas');
   cv.width = W; cv.height = H;
@@ -722,13 +722,16 @@ async function drawMemory(id) {
   const cols = Math.min(3, team.length), rows = Math.ceil(team.length / 3);
   const cw = (W - padX * 2 - gap * 2) / 3;
   const ch = (H - top - padB - gap * (rows - 1)) / rows;
+  team = team.map(withUltra);
+  const megas = team.map(megaFormOf);
   const sprites = await Promise.all(team.map(monSprite));
+  const megaSprites = await Promise.all(team.map((mon, i) => (megas[i] ? monSprite({ ...mon, dexId: megas[i].id }) : null)));
   team.forEach((mon, i) => {
     const r = Math.floor(i / 3), c = i % 3;
     const inRow = r === rows - 1 ? team.length - r * 3 : 3;
     const x0 = padX + (cw + gap) * c + (3 - inRow) * (cw + gap) / 2;
     const y0 = top + (ch + gap) * r;
-    const special = hasCustomAb(mon);
+    const special = hasCustomAb(mon) || isCustomAb(mon.megaAbility);
     ctx.save();
     rrect(ctx, x0, y0, cw, ch, 22);
     const cg = ctx.createLinearGradient(x0, y0, x0, y0 + ch);
@@ -743,7 +746,16 @@ async function drawMemory(id) {
     // sprite
     const sz = Math.min(ch * 0.52, 230);
     const sx = x0 + 18, sy = y0 + 16;
-    if (sprites[i]) ctx.drawImage(sprites[i], sx, sy, sz, sz);
+    const hasMega = !!(megas[i] && mon.megaAbility);
+    if (hasMega) {
+      // base arriba a la izquierda y Mega delante, en diagonal
+      const d = sz * 0.74, off = sz - d;
+      const draw = (im, x, y) => { if (im) ctx.drawImage(im, x, y, d, d); else { ctx.fillStyle = '#3b4a80'; ctx.font = `700 ${d * 0.5}px system-ui, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('?', x + d / 2, y + d / 2); ctx.textAlign = 'left'; } };
+      ctx.globalAlpha = 0.9; draw(sprites[i], sx, sy); ctx.globalAlpha = 1;
+      draw(megaSprites[i] || sprites[i], sx + off, sy + off);
+      ctx.fillStyle = '#ff6a3d'; ctx.font = '800 17px system-ui, sans-serif'; ctx.textBaseline = 'alphabetic';
+      ctx.fillText('MEGA', sx + off + d - 52, sy + sz + 2);
+    } else if (sprites[i]) ctx.drawImage(sprites[i], sx, sy, sz, sz);
     else { ctx.fillStyle = '#3b4a80'; ctx.font = `700 ${sz * 0.5}px system-ui, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('?', sx + sz / 2, sy + sz / 2); ctx.textAlign = 'left'; }
     if (mon.shiny) { ctx.fillStyle = '#ffe066'; ctx.font = '700 22px system-ui, sans-serif'; ctx.textBaseline = 'top'; ctx.fillText('✦', sx, sy); }
 
@@ -761,6 +773,16 @@ async function drawMemory(id) {
     ctx.fillText(abTxt, tx, ly + 28);
     if (abCustom) blueMark(ctx, tx + ctx.measureText(abTxt).width + 20, ly + 21, 11);
     ly += 62;
+    if (hasMega) {
+      const mCustom = isCustomAb(mon.megaAbility);
+      ly -= 6;
+      ctx.fillStyle = '#ff6a3d'; ctx.font = '700 17px system-ui, sans-serif'; ctx.fillText('HABILIDAD MEGA', tx, ly);
+      ctx.fillStyle = '#fff'; ctx.font = '700 23px system-ui, sans-serif';
+      const mTxt = fitText(ctx, mon.megaAbility, tw - (mCustom ? 34 : 0));
+      ctx.fillText(mTxt, tx, ly + 28);
+      if (mCustom) blueMark(ctx, tx + ctx.measureText(mTxt).width + 20, ly + 21, 11);
+      ly += 54;
+    }
     if (mon.item) { ctx.fillStyle = '#9aa6c8'; ctx.font = '600 19px system-ui, sans-serif'; ctx.fillText(fitText(ctx, '🎒 ' + mon.item, tw), tx, ly); }
 
     // movimientos 2x2 abajo

@@ -108,7 +108,9 @@ document.getElementById('podium').addEventListener('click', onPodiumThemeClick);
 document.getElementById('podium').addEventListener('keydown', onPodiumThemeClick);
 
 let lastPlayers = [];            // en el orden del servidor (diferencia de LP)
-let formMap = null;              // { 'Nombre#Tag': ['W','L',...] } (de más antigua a más reciente)
+let formMap = null;              // { 'Nombre#Tag': [partida, ...] } (de la más reciente a la más antigua)
+const openRows = new Set();      // participantes con el desplegable de partidas abierto
+let justOpened = null;           // fila recién abierta (para animarla solo esa vez)
 let sortKey = 'gained';          // 'gained' | 'rank' | 'wr'
 let sortDir = 'desc';            // 'desc' | 'asc'
 let formRetries = 0;
@@ -154,21 +156,60 @@ function emblemHtml(tier, color, small) {
   return `<img class="emblem${small ? ' emblem-sm' : ''}" src="${urls[0]}" data-fb="${urls.slice(1).join('|')}" alt="${capitalize(t)}" loading="lazy" draggable="false" onerror="${onerror}">`;
 }
 
-function formHtml(displayName) {
-  const arr = formMap ? formMap[displayName] : undefined;
-  const loading = formMap == null;
-  const slots = [];
-  const list = Array.isArray(arr) ? arr : [];
-  for (let i = 0; i < 5 - list.length; i++) slots.push(null); // huecos a la izquierda
-  list.forEach((r) => slots.push(r));
-  const last = slots.length - 1;
-  const label = { W: 'Victoria', L: 'Derrota', R: 'Remake' };
-  const txt = { W: 'V', L: 'D', R: '–' };
-  return `<span class="form${loading ? ' is-loading' : ''}" aria-label="Últimas 5 partidas">${slots
-    .map((r, i) => r
-      ? `<span class="fm fm-${r.toLowerCase()}${i === last ? ' fm-last' : ''}" title="${label[r]}${i === last ? ' (la más reciente)' : ''}">${txt[r]}</span>`
-      : `<span class="fm fm-none" title="Sin datos"></span>`)
-    .join('')}</span>`;
+// ---------- Desplegable: últimas 5 partidas de cada participante ----------
+const CHAMP_ICON = (id) => `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champion-icons/${id}.png`;
+const RESULT = { W: ['Victoria', 'win'], L: ['Derrota', 'loss'], R: ['Rehacer', 'remake'] };
+
+function timeAgo(ts) {
+  const m = Math.max(1, Math.round((Date.now() - ts) / 60000));
+  if (m < 60) return `hace ${m} ${m === 1 ? 'minuto' : 'minutos'}`;
+  const h = Math.round(m / 60);
+  if (h < 24) return `hace ${h} ${h === 1 ? 'hora' : 'horas'}`;
+  const d = Math.round(h / 24);
+  return `hace ${d} ${d === 1 ? 'día' : 'días'}`;
+}
+
+function champImg(id, cls, name) {
+  return `<img class="${cls}" src="${CHAMP_ICON(id)}" alt="${escapeHtml(name || '')}" loading="lazy" draggable="false" onerror="this.style.visibility='hidden'">`;
+}
+
+function matchHtml(m) {
+  if (!m) return '<li class="match match-empty"><span class="match-skel"></span></li>';
+  const [label, cls] = RESULT[m.r] || RESULT.L;
+  const mins = Math.max(1, m.dur / 60);
+  const kda = m.d === 0 ? (m.k + m.a > 0 ? 'Perfecto' : '0.00') : ((m.k + m.a) / m.d).toFixed(2);
+  const team = (t) => `<ul class="match-team">${(t || [])
+    .map(([id, name, me]) => `<li class="${me ? 'is-me' : ''}">${champImg(id, 'mt-ic', '')}<span>${escapeHtml(name)}</span></li>`)
+    .join('')}</ul>`;
+  return `
+    <li class="match is-${cls}">
+      <div class="match-head">
+        <span class="match-result">${label}</span>
+        <span class="match-meta">Clasificatoria solo/dúo</span>
+        <span class="match-meta">${timeAgo(m.end)} · ${Math.floor(m.dur / 60)} min ${String(m.dur % 60).padStart(2, '0')} s</span>
+      </div>
+      <div class="match-champ">
+        <span class="mc-wrap">${champImg(m.c, 'mc-ic', m.cn)}<b class="mc-lv">${m.lv}</b></span>
+        <span class="mc-name">${escapeHtml(m.cn || '')}</span>
+      </div>
+      <div class="match-kda">
+        <span class="kda-line"><b>${m.k}</b> / <b class="kda-d">${m.d}</b> / <b>${m.a}</b></span>
+        <span class="kda-ratio">${kda}${m.d === 0 && m.k + m.a > 0 ? '' : ':1'} KDA</span>
+      </div>
+      <div class="match-stats">
+        <span>P/Kill <b>${m.kp}%</b></span>
+        <span>CS <b>${m.cs}</b> (${(m.cs / mins).toFixed(1)})</span>
+      </div>
+      <div class="match-teams">${team(m.t && m.t[0])}${team(m.t && m.t[1])}</div>
+    </li>`;
+}
+
+function matchesHtml(displayName) {
+  if (formMap == null) return '<p class="matches-note">Cargando las últimas partidas…</p>';
+  const arr = formMap[displayName];
+  if (arr === undefined || arr === null) return '<p class="matches-note">Todavía no hay datos de sus partidas. Se cargarán en unos segundos.</p>';
+  if (!arr.length) return '<p class="matches-note">No ha jugado clasificatorias solo/dúo recientemente.</p>';
+  return `<ul class="matches">${arr.map(matchHtml).join('')}</ul>`;
 }
 
 function updateSortHeaders() {
@@ -204,6 +245,10 @@ function renderTable() {
 
     const isLeader = p.displayName === leader;
     if (isLeader) tr.classList.add('rank-first');
+    const isOpen = openRows.has(p.displayName);
+    tr.classList.add('player-row');
+    if (isOpen) tr.classList.add('is-open');
+    tr.dataset.player = p.displayName;
 
     const [name, tag] = p.displayName.split('#');
     const color = TIER_COLORS[p.tier] || TIER_COLORS.UNRANKED;
@@ -231,7 +276,7 @@ function renderTable() {
       <td class="col-name">
         <span class="name-wrap">
           ${icon}
-          <a class="player-link" href="${profileUrl}" target="_blank" rel="noopener noreferrer">${escapeHtml(name)} <span class="player-tag">#${escapeHtml(tag)}</span></a>
+          <span class="player-link">${escapeHtml(name)} <span class="player-tag">#${escapeHtml(tag)}</span></span>
           ${liveDot}
         </span>
       </td>
@@ -259,9 +304,22 @@ function renderTable() {
       <td class="col-wr ${wrClass}">
         ${p.winrate == null ? '—' : `<span class="wr-num">${p.winrate}%</span><span class="wr-bar"><i style="width:${p.winrate}%"></i></span><span class="wr-sub">${p.wins}V · ${p.losses}D</span>`}
       </td>
-      <td class="col-form">${formHtml(p.displayName)}</td>`;
+      <td class="col-form">
+        <span class="row-actions">
+          <a class="opgg-btn" href="${profileUrl}" target="_blank" rel="noopener noreferrer" title="Ver a ${escapeHtml(name)} en OP.GG" aria-label="Ver a ${escapeHtml(name)} en OP.GG"><img src="/lol/opgg.png" alt="" width="30" height="30" draggable="false"></a>
+          <button type="button" class="expand-btn" aria-expanded="${isOpen}" aria-label="${isOpen ? 'Ocultar' : 'Ver'} las últimas partidas de ${escapeHtml(name)}" title="Últimas 5 partidas"><span aria-hidden="true">▾</span></button>
+        </span>
+      </td>`;
 
     body.appendChild(tr);
+
+    if (isOpen) {
+      const dr = document.createElement('tr');
+      dr.className = `detail-row${justOpened === p.displayName ? ' just-opened' : ''}`;
+      dr.style.setProperty('--tc', color);
+      dr.innerHTML = `<td colspan="7"><div class="matches-panel"><h3>Últimas 5 partidas de ${escapeHtml(name)}</h3>${matchesHtml(p.displayName)}</div></td>`;
+      body.appendChild(dr);
+    }
   });
 }
 
@@ -270,7 +328,7 @@ async function loadForm() {
     const res = await fetch('/api/lol-form');
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Error');
-    formMap = data.form || {};
+    formMap = data.matches || {};
     renderTable();
     // Si faltan partidas por consultar, volvemos a preguntar en unos segundos.
     if (data.pending && formRetries < 8) {
@@ -282,6 +340,18 @@ async function loadForm() {
     if (formMap == null) { formMap = {}; renderTable(); }
   }
 }
+
+// Pulsar la fila (o su flecha) abre o cierra las últimas partidas; los enlaces siguen funcionando.
+document.getElementById('ladder-body').addEventListener('click', (e) => {
+  if (e.target.closest('a')) return;
+  const tr = e.target.closest('tr.player-row');
+  if (!tr) return;
+  const key = tr.dataset.player;
+  if (openRows.has(key)) openRows.delete(key);
+  else { openRows.add(key); justOpened = key; }
+  renderTable();
+  justOpened = null;
+});
 
 document.querySelector('.ladder thead').addEventListener('click', (e) => {
   const btn = e.target.closest('.sort-btn');

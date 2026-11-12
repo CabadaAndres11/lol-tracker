@@ -1,4 +1,5 @@
-// Últimas 5 partidas clasificatorias (SoloQ) de cada jugador: victoria (W), derrota (L) o remake (R).
+// Últimas 5 partidas clasificatorias (SoloQ) de cada jugador, con su detalle: resultado (W victoria,
+// L derrota, R remake), campeón, K/D/A, súbditos, duración y los diez jugadores de la partida.
 // Los resultados de una partida no cambian nunca, así que se guardan en Redis y solo se piden a Riot
 // las partidas nuevas. Si no da tiempo a todas en una petición, devuelve lo que tiene con
 // pending:true y la web vuelve a preguntar unos segundos después.
@@ -7,10 +8,34 @@ const { redisConfig, redis } = require('./_redis');
 const { REGIONAL_ROUTING, riotFetch } = require('./_riot');
 
 const PUUIDS_KEY = 'lol:puuids';
-const MATCHES_KEY = 'lol:matches';
+const MATCHES_KEY = 'lol:matches:v2'; // v2: guarda el detalle de la partida en JSON, no solo W/L/R
 const COUNT = 5;
 const SOLOQ = 420;
 const BUDGET_MS = 7000; // límite de la función en Vercel: 10 s
+
+// Resumen compacto de una partida desde el punto de vista de un jugador.
+function summarize(m, puuid) {
+  const ps = m.info.participants || [];
+  const me = ps.find((x) => x.puuid === puuid);
+  if (!me) return null;
+  const teamKills = ps.filter((x) => x.teamId === me.teamId).reduce((n, x) => n + (x.kills || 0), 0);
+  const side = (teamId) => ps
+    .filter((x) => x.teamId === teamId)
+    .map((x) => [x.championId, String(x.riotIdGameName || x.summonerName || '?').slice(0, 24), x.puuid === puuid ? 1 : 0]);
+  return {
+    r: me.gameEndedInEarlySurrender ? 'R' : me.win ? 'W' : 'L',
+    c: me.championId,
+    cn: me.championName,
+    lv: me.champLevel,
+    k: me.kills, d: me.deaths, a: me.assists,
+    cs: (me.totalMinionsKilled || 0) + (me.neutralMinionsKilled || 0),
+    kp: teamKills > 0 ? Math.round(((me.kills + me.assists) / teamKills) * 100) : 0,
+    dur: m.info.gameDuration,
+    end: m.info.gameEndTimestamp || (m.info.gameCreation + m.info.gameDuration * 1000),
+    t: [side(100), side(200)],
+  };
+}
+const parse = (s) => { try { return typeof s === 'string' ? JSON.parse(s) : null; } catch { return null; } };
 
 module.exports = async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
@@ -53,14 +78,13 @@ module.exports = async function handler(req, res) {
       const results = [];
       let missing = false;
       for (let i = 0; i < ids.length; i++) {
-        let r = cached[i];
+        let r = parse(cached[i]);
         if (!r) {
           if (Date.now() - started > BUDGET_MS) { missing = true; results.push(null); continue; }
           try {
             const m = await riotFetch(`https://${region}.api.riotgames.com/lol/match/v5/matches/${ids[i]}`, apiKey);
-            const me = m.info.participants.find((x) => x.puuid === puuid);
-            r = !me ? null : me.gameEndedInEarlySurrender ? 'R' : me.win ? 'W' : 'L';
-            if (r) await rd(['HSET', MATCHES_KEY, fields[i], r]);
+            r = summarize(m, puuid);
+            if (r) await rd(['HSET', MATCHES_KEY, fields[i], JSON.stringify(r)]);
           } catch {
             r = null;
           }
@@ -69,12 +93,12 @@ module.exports = async function handler(req, res) {
         results.push(r);
       }
       if (missing) pending = true;
-      // Más antigua → más reciente (la última partida queda a la derecha).
-      out[key] = results.reverse();
+      // De la más reciente a la más antigua.
+      out[key] = results;
     } catch (err) {
       out[key] = null;
     }
   }
 
-  res.status(200).json({ form: out, pending });
+  res.status(200).json({ matches: out, pending });
 };

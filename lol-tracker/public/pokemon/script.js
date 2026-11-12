@@ -651,7 +651,8 @@ function loadImg(src) {
     im.crossOrigin = 'anonymous';
     im.onload = () => resolve(im);
     im.onerror = () => resolve(null);
-    im.src = src;
+    // El service worker guarda las imágenes sin CORS (opacas) y un canvas no puede usarlas: se pide otra URL para forzar una petición CORS real.
+    im.src = /^https?:/.test(src) ? src + (src.includes('?') ? '&' : '?') + 'cors=1' : src;
   });
 }
 async function monSprite(mon) {

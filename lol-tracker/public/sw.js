@@ -35,7 +35,7 @@ self.addEventListener('fetch', (e) => {
     e.respondWith(
       caches.open(IMAGES).then(async (c) => {
         const hit = await c.match(req);
-        if (hit) return hit;
+        if (hit && !(hit.type === 'opaque' && req.mode === 'cors')) return hit; // una respuesta opaca no sirve para un canvas
         try {
           const res = await fetch(req);
           if (res.ok || res.type === 'opaque') { c.put(req, res.clone()); trim(IMAGES, MAX_IMAGES); }

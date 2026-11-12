@@ -2380,3 +2380,5 @@ footer { padding-bottom: calc(3rem + env(safe-area-inset-bottom)); }
 .mon-moves li.custom-mv .custom-ab-tip { color: #e8eefc; font: 500 .78rem/1.4 system-ui, sans-serif; text-transform: none; letter-spacing: 0; }
 .mon-moves li.custom-mv .custom-ab-tip b { display: block; color: #7cb8ff; font: 700 .72rem system-ui, sans-serif; letter-spacing: .04em; text-transform: uppercase; margin-bottom: .2rem; }
 .mon-moves li.custom-mv .custom-ab-tip { top: auto; bottom: calc(100% + 8px); }
+/* el tooltip de verificado debe quedar por encima del campo de combate */
+.bt-head { z-index: 20; }

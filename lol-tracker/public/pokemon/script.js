@@ -632,6 +632,7 @@ function circleHtml(player) {
 
       <div class="bt-party">${parties}</div>
       <div class="bt-hint">Pulsa un Pokémon del equipo para sacarlo al campo</div>
+      ${!locked && team.length ? `<div class="bt-memory"><button type="button" class="add-btn small" data-action="make-memory" data-id="${eid}">📸 Crear recuerdo</button></div>` : ''}
       ${locked ? `<div class="bt-lock" role="status">
         <div class="bt-lock-ic" aria-hidden="true">🔒</div>
         <p><strong>Equipo oculto.</strong> Los Pokémon y movimientos de los demás participantes se podrán ver pasada la fecha de entrega (${DELIVERY_TEXT}).</p>
@@ -641,6 +642,173 @@ function circleHtml(player) {
         </div>
       </div>` : ''}
     </div>`;
+}
+
+// ---- Recuerdo: imagen apaisada del equipo, dibujada en un canvas y descargable ----
+function loadImg(src) {
+  return new Promise((resolve) => {
+    const im = new Image();
+    im.crossOrigin = 'anonymous';
+    im.onload = () => resolve(im);
+    im.onerror = () => resolve(null);
+    im.src = src;
+  });
+}
+async function monSprite(mon) {
+  const id = mon.dexId || dexLookup(mon.species)?.id;
+  if (!id) return null;
+  const fb = dexById[id]?.baseId;
+  for (const u of [mon.shiny ? SHINY_URL(id) : null, ARTWORK_URL(id), fb ? ARTWORK_URL(fb) : null].filter(Boolean)) {
+    const im = await loadImg(u);
+    if (im) return im;
+  }
+  return null;
+}
+function rrect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+}
+function fitText(ctx, text, maxW) {
+  let t = String(text);
+  if (ctx.measureText(t).width <= maxW) return t;
+  while (t.length > 1 && ctx.measureText(t + '…').width > maxW) t = t.slice(0, -1);
+  return t + '…';
+}
+function blueMark(ctx, cx, cy, r) {
+  ctx.save();
+  ctx.shadowColor = 'rgba(47,140,255,.9)'; ctx.shadowBlur = 10;
+  ctx.fillStyle = '#2f8cff'; ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+  ctx.fillStyle = '#fff'; ctx.font = `800 ${Math.round(r * 1.4)}px system-ui, sans-serif`;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('!', cx, cy + 1);
+  ctx.textAlign = 'left';
+}
+
+async function drawMemory(id) {
+  const player = players.find((p) => idOf(p) === id);
+  const team = (teams[id] || []).filter(Boolean);
+  const W = 1600, H = 900;
+  const cv = document.createElement('canvas');
+  cv.width = W; cv.height = H;
+  const ctx = cv.getContext('2d');
+  await (document.fonts?.ready || Promise.resolve());
+
+  // fondo
+  const bg = ctx.createLinearGradient(0, 0, W, H);
+  bg.addColorStop(0, '#0e1730'); bg.addColorStop(1, '#070b18');
+  ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = '#e3262f'; ctx.fillRect(0, 0, W, 10);
+
+  // esquina: avatar + nombre
+  const av = await loadImg(`/pokemon/avatars/${avatarSlug(player.name)}.png`);
+  const ax = 56, ay = 56, ar = 40;
+  ctx.save();
+  ctx.beginPath(); ctx.arc(ax, ay, ar, 0, Math.PI * 2); ctx.closePath(); ctx.clip();
+  if (av) ctx.drawImage(av, ax - ar, ay - ar, ar * 2, ar * 2);
+  else { ctx.fillStyle = '#26345f'; ctx.fillRect(ax - ar, ay - ar, ar * 2, ar * 2); }
+  ctx.restore();
+  ctx.lineWidth = 4; ctx.strokeStyle = '#ffe066'; ctx.beginPath(); ctx.arc(ax, ay, ar, 0, Math.PI * 2); ctx.stroke();
+  if (!av) { ctx.fillStyle = '#fff'; ctx.font = '700 40px system-ui, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(player.name.charAt(0).toUpperCase(), ax, ay + 2); ctx.textAlign = 'left'; }
+  ctx.fillStyle = '#fff'; ctx.textBaseline = 'middle'; ctx.font = '800 44px system-ui, sans-serif';
+  ctx.fillText(fitText(ctx, player.name, 700), ax + ar + 22, ay + 2);
+  ctx.fillStyle = '#9aa6c8'; ctx.font = '600 20px system-ui, sans-serif'; ctx.textAlign = 'right';
+  ctx.fillText('RandomLocke', W - 40, ay + 2);
+  ctx.textAlign = 'left';
+
+  // cuadrícula del equipo
+  const top = 112, gap = 20, padX = 32, padB = 28;
+  const cols = Math.min(3, team.length), rows = Math.ceil(team.length / 3);
+  const cw = (W - padX * 2 - gap * 2) / 3;
+  const ch = (H - top - padB - gap * (rows - 1)) / rows;
+  const sprites = await Promise.all(team.map(monSprite));
+  team.forEach((mon, i) => {
+    const r = Math.floor(i / 3), c = i % 3;
+    const inRow = r === rows - 1 ? team.length - r * 3 : 3;
+    const x0 = padX + (cw + gap) * c + (3 - inRow) * (cw + gap) / 2;
+    const y0 = top + (ch + gap) * r;
+    const special = hasCustomAb(mon);
+    ctx.save();
+    rrect(ctx, x0, y0, cw, ch, 22);
+    const cg = ctx.createLinearGradient(x0, y0, x0, y0 + ch);
+    cg.addColorStop(0, '#1b2a55'); cg.addColorStop(1, '#101a3a');
+    ctx.fillStyle = cg;
+    if (special) { ctx.shadowColor = 'rgba(47,140,255,.85)'; ctx.shadowBlur = 24; }
+    ctx.fill();
+    ctx.restore();
+    rrect(ctx, x0, y0, cw, ch, 22);
+    ctx.lineWidth = special ? 4 : 3; ctx.strokeStyle = special ? '#2f8cff' : '#3b4a80'; ctx.stroke();
+
+    // sprite
+    const sz = Math.min(ch * 0.52, 230);
+    const sx = x0 + 18, sy = y0 + 16;
+    if (sprites[i]) ctx.drawImage(sprites[i], sx, sy, sz, sz);
+    else { ctx.fillStyle = '#3b4a80'; ctx.font = `700 ${sz * 0.5}px system-ui, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('?', sx + sz / 2, sy + sz / 2); ctx.textAlign = 'left'; }
+    if (mon.shiny) { ctx.fillStyle = '#ffe066'; ctx.font = '700 22px system-ui, sans-serif'; ctx.textBaseline = 'top'; ctx.fillText('✦', sx, sy); }
+
+    // texto a la derecha del sprite
+    const tx = sx + sz + 16, tw = cw - (tx - x0) - 18;
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = '#fff'; ctx.font = '800 32px system-ui, sans-serif';
+    ctx.fillText(fitText(ctx, mon.nickname || mon.species, tw), tx, y0 + 52);
+    if (mon.nickname) { ctx.fillStyle = '#9aa6c8'; ctx.font = '600 19px system-ui, sans-serif'; ctx.fillText(fitText(ctx, mon.species, tw), tx, y0 + 78); }
+    let ly = y0 + (mon.nickname ? 112 : 92);
+    const abCustom = isCustomAb(mon.ability);
+    ctx.fillStyle = '#ffe066'; ctx.font = '700 17px system-ui, sans-serif'; ctx.fillText('HABILIDAD', tx, ly);
+    ctx.fillStyle = '#fff'; ctx.font = '700 23px system-ui, sans-serif';
+    const abTxt = fitText(ctx, mon.ability || '—', tw - (abCustom ? 34 : 0));
+    ctx.fillText(abTxt, tx, ly + 28);
+    if (abCustom) blueMark(ctx, tx + ctx.measureText(abTxt).width + 20, ly + 21, 11);
+    ly += 62;
+    if (mon.item) { ctx.fillStyle = '#9aa6c8'; ctx.font = '600 19px system-ui, sans-serif'; ctx.fillText(fitText(ctx, '🎒 ' + mon.item, tw), tx, ly); }
+
+    // movimientos 2x2 abajo
+    const mvs = (mon.moves || []).filter(Boolean);
+    const mw = (cw - 36 - 12) / 2, mh = Math.min(58, (ch - sz - 16 - 16 - 24) / 2 - 6);
+    const my0 = y0 + ch - 18 - mh * 2 - 12;
+    mvs.slice(0, 4).forEach((mv, k) => {
+      const mx = x0 + 18 + (k % 2) * (mw + 12), my = my0 + Math.floor(k / 2) * (mh + 12);
+      const t = TYPES[moveTypes[String(mv).toLowerCase()]];
+      const col = t ? t[1] : '#4a4a62';
+      const cm = !!customMove(mv);
+      ctx.save();
+      if (cm) { ctx.shadowColor = 'rgba(47,140,255,.9)'; ctx.shadowBlur = 14; }
+      rrect(ctx, mx, my, mw, mh, 12); ctx.fillStyle = col; ctx.fill();
+      ctx.restore();
+      rrect(ctx, mx, my, mw, mh, 12); ctx.lineWidth = cm ? 3 : 2; ctx.strokeStyle = cm ? '#2f8cff' : '#111'; ctx.stroke();
+      ctx.fillStyle = isLightColor(col) ? '#111' : '#fff'; ctx.font = '700 23px system-ui, sans-serif'; ctx.textBaseline = 'middle';
+      ctx.fillText(fitText(ctx, mv, mw - 24 - (cm ? 30 : 0)), mx + 14, my + mh / 2 + 1);
+      if (cm) blueMark(ctx, mx + mw - 22, my + mh / 2, 11);
+    });
+  });
+  return cv;
+}
+
+async function openMemory(id) {
+  const player = players.find((p) => idOf(p) === id);
+  if (!player || hiddenTeams[id] != null || !(teams[id] || []).length) return;
+  let m = document.getElementById('memory-modal');
+  if (!m) {
+    m = document.createElement('div');
+    m.className = 'modal'; m.id = 'memory-modal'; m.setAttribute('role', 'dialog'); m.setAttribute('aria-modal', 'true');
+    document.body.appendChild(m);
+    const close = () => { m.hidden = true; };
+    m.addEventListener('click', (e) => { if (e.target === m || e.target.closest('[data-mem="close"]')) close(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !m.hidden) close(); });
+  }
+  m.hidden = false;
+  m.innerHTML = '<div class="modal-card memory-card"><button class="modal-close" data-mem="close" type="button" aria-label="Cerrar">&times;</button><h2>📸 Recuerdo</h2><p class="mem-load">Creando la imagen…</p></div>';
+  try {
+    const cv = await drawMemory(id);
+    const url = cv.toDataURL('image/png');
+    const file = `recuerdo-${avatarSlug(player.name) || 'equipo'}.png`;
+    m.querySelector('.memory-card').innerHTML = `<button class="modal-close" data-mem="close" type="button" aria-label="Cerrar">&times;</button>
+      <h2>📸 Recuerdo de ${escapeHtml(player.name)}</h2>
+      <img class="mem-img" src="${url}" alt="Equipo de ${escapeHtml(player.name)}">
+      <div class="porra-actions"><button type="button" class="link-btn" data-mem="close">Cerrar</button><a class="add-btn small mem-dl" href="${url}" download="${file}">⬇ Descargar</a></div>`;
+  } catch (err) {
+    m.querySelector('.memory-card').innerHTML = '<button class="modal-close" data-mem="close" type="button" aria-label="Cerrar">&times;</button><h2>📸 Recuerdo</h2><p class="form-error">No se ha podido crear la imagen. Inténtalo de nuevo.</p>';
+  }
 }
 
 function trainersHtml() {
@@ -1358,7 +1526,9 @@ async function onAction(e) {
   if (id && hiddenTeams[id] != null && ['add-mon', 'open-mon', 'edit-mon', 'delete-mon', 'import-team', 'set-lead', 'edit-rival'].includes(action)) return; // equipo oculto
   if (['add-mon', 'edit-mon', 'delete-mon', 'import-team'].includes(action) && !ensureTeamEdit()) return;
 
-  if (action === 'badge') {
+  if (action === 'make-memory') {
+    openMemory(id);
+  } else if (action === 'badge') {
     toggleBadge(id, index);
   } else if (action === 'go-player') {
     goTo(index);

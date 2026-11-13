@@ -246,7 +246,9 @@ function buildDex(results) {
     const parts = r.name.split('-');
     let baseId = null;
     for (let n = parts.length - 1; n >= 1 && baseId == null; n--) {
-      baseId = dexByName[dexKey(parts.slice(0, n).join(' '))]?.id ?? null;
+      // Solo especies base: si no, "garchomp-mega-z" cuelga de "garchomp-mega" y no se reconoce como Mega de Garchomp.
+      const cand = dexByName[dexKey(parts.slice(0, n).join(' '))];
+      baseId = cand && cand.id < FORM_MIN_ID ? cand.id : null;
     }
     const entry = { id, name: formName(r.name), baseId };
     dexById[id] = entry;

@@ -28,7 +28,7 @@ const ADMIN_KEY_STORAGE = 'pokemon-league-admin-key'; // definida arriba: la pri
 const VERIFIED_TEAMS = new Set(['lihone', 'pampert', 'aitorlg', 'dashlight', 'el compa', 'leviathan', 'steven', 'kekkan', 'helbramn', 'mertens', 'petea']);
 // Participantes dados de baja (en minúsculas): lo mismo que WITHDRAWN en api/_league.js.
 // Se compara sin tildes ni mayúsculas y por prefijo, para que valga aunque el nombre inscrito se haya escrito algo distinto.
-const WITHDRAWN_PLAYERS = ['beldi'];
+const WITHDRAWN_PLAYERS = ['beldi', 'kekkan'];
 const isWithdrawn = (name) => { const t = String(name || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase(); return WITHDRAWN_PLAYERS.some((w) => t.startsWith(w)); };
 function withdrawnBadge(id) {
   if (!isWithdrawn(id)) return '';

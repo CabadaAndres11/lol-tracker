@@ -2391,3 +2391,8 @@ footer { padding-bottom: calc(3rem + env(safe-area-inset-bottom)); }
 .mem-load { color: var(--text-muted); }
 
 .liga-img-row { text-align: center; margin: 1rem 0 .4rem; }
+
+.champion { position: relative; display: inline-flex; align-items: center; gap: .35rem; margin-top: .35rem; margin-right: .35rem; padding: .2rem .7rem; border-radius: 999px; font-size: .72rem; font-weight: 800; letter-spacing: .03em; text-transform: uppercase; color: #3b2600; background: linear-gradient(135deg, #fde68a, #fbbf24 50%, #f59e0b); border: 1px solid #fef3c7; box-shadow: 0 0 12px rgba(251, 191, 36, .65); overflow: hidden; }
+.champion::after { content: ''; position: absolute; inset: 0; background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,.65) 50%, transparent 65%); transform: translateX(-120%); animation: champ-shine 3.2s ease-in-out infinite; }
+@keyframes champ-shine { 0%, 55% { transform: translateX(-120%); } 100% { transform: translateX(120%); } }
+@media (prefers-reduced-motion: reduce) { .champion::after { animation: none; } }

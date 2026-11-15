@@ -34,6 +34,12 @@ function withdrawnBadge(id) {
   if (!isWithdrawn(id)) return '';
   return '<span class="withdrawn" role="note">⛔ Participante Retirado</span>';
 }
+// Campeón del torneo (en minúsculas).
+const CHAMPION = 'lihone';
+function championBadge(id) {
+  if (id !== CHAMPION) return '';
+  return '<span class="champion" role="note" aria-label="Campeón del torneo RandomLocke"><span class="champion-ic" aria-hidden="true">🏆</span> Campeón del Torneo</span>';
+}
 function verifiedBadge(id) {
   if (!VERIFIED_TEAMS.has(id)) return '';
   return '<span class="verified" tabindex="0" role="note" aria-label="Equipo verificado por la administración: el equipo del participante ha sido corroborado con fotos de la partida">'
@@ -594,7 +600,7 @@ function circleHtml(player) {
         <div>
           <h2 class="bt-name">${escapeHtml(player.name)}${hasBadge(mask, LEAGUE) ? ' <span class="crown" title="Campeón de la Liga">🏆</span>' : ''}</h2>
           <div class="bt-sub">${locked ? lockedN : team.length}/${MAX_TEAM} Pokémon</div>
-          ${withdrawnBadge(id)}${verifiedBadge(id)}
+          ${withdrawnBadge(id)}${championBadge(id)}${verifiedBadge(id)}
         </div>
         ${badgesBlock(id, true)}
       </div>

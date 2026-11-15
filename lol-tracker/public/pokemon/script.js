@@ -2251,9 +2251,30 @@ function computeStandings() {
     })
   );
 
-  return [...table.values()].sort(
+  const rows = [...table.values()].sort(
     (x, y) => y.pts - x.pts || y.v - x.v || x.d - y.d || x.name.localeCompare(y.name, 'es')
   );
+
+  // Desempate por duelo directo: entre los empatados a puntos, gana más victorias en los combates entre ellos
+  // (con dos empatados, quien ganó su enfrentamiento; con tres o más, una mini-liga entre ellos).
+  const out = [];
+  for (let i = 0; i < rows.length; ) {
+    let j = i;
+    while (j < rows.length && rows[j].pts === rows[i].pts) j++;
+    const grp = rows.slice(i, j);
+    if (grp.length > 1) {
+      const names = new Set(grp.map((r) => lcName(r.name)));
+      const h2h = new Map(grp.map((r) => [lcName(r.name), 0]));
+      schedule.forEach((rd) => rd.matches.forEach((m) => {
+        const w = leagueResults[m.key];
+        if (w && names.has(lcName(m.a)) && names.has(lcName(m.b))) h2h.set(w, (h2h.get(w) || 0) + 1);
+      }));
+      grp.sort((x, y) => h2h.get(lcName(y.name)) - h2h.get(lcName(x.name)) || x.name.localeCompare(y.name, 'es'));
+    }
+    out.push(...grp);
+    i = j;
+  }
+  return out;
 }
 
 function teamThumbs(name) {
@@ -2422,7 +2443,7 @@ function renderLeague() {
   const ligaPane = `
     <div class="liga-summary">
       <span><strong>${played}</strong> / ${totalMatches} combates jugados</span>
-      <span class="liga-rule">Victoria = ${POINTS_WIN} puntos · Los ${QUALIFY} primeros pasan al bracket</span>
+      <span class="liga-rule">Victoria = ${POINTS_WIN} puntos · Empate: duelo directo · Los ${QUALIFY} primeros pasan al bracket</span>
     </div>
 
     <div class="card liga-table-card">

@@ -45,6 +45,8 @@ module.exports = async function handler(req, res) {
           if (lc(p) !== w && !WITHDRAWN.includes(lc(p))) results[matchKey(p, w)] = lc(p);
         }
       }
+      // Los dos retirados se enfrentan entre sí: se da la victoria a Kekkan (única victoria entre ambos).
+      if (WITHDRAWN.includes('kekkan') && WITHDRAWN.includes('beldiño')) results[matchKey('Kekkan', 'Beldiño')] = 'kekkan';
       res.status(200).json({ players: PLAYERS, withdrawn: WITHDRAWN, results, protected: Boolean(process.env.LEAGUE_ADMIN_KEY) });
       return;
     }

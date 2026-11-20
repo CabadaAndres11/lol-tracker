@@ -94,7 +94,7 @@
   var start = new Date('2026-11-15T17:00:00+01:00').getTime();
   function tick() {
     var ms = start - Date.now();
-    if (ms <= 0) { el.textContent = 'Torneo en marcha'; return; }
+    if (ms <= 0) { el.textContent = 'Torneo terminado'; return; }
     var d = Math.floor(ms / 864e5), h = Math.floor(ms % 864e5 / 36e5);
     el.textContent = 'Empieza en ' + d + ' d ' + h + ' h';
   }

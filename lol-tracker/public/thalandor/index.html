@@ -35,12 +35,14 @@
   a { color: inherit; }
   .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
 
-  /* Cabecera */
-  .top { display: flex; align-items: center; justify-content: space-between; padding: 22px 0; border-bottom: 1px solid rgba(167, 141, 88, .18); }
-  .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; font-family: 'Cormorant Garamond', serif; font-weight: 600; font-size: 1.25rem; letter-spacing: .12em; text-transform: uppercase; color: var(--cream); }
-  .brand img { width: 36px; height: 36px; }
-  .back { font-size: .72rem; letter-spacing: .22em; text-transform: uppercase; color: var(--muted); text-decoration: none; }
-  .back:hover { color: var(--gold-soft); }
+  /* Botón volver (igual que en el resto de subpáginas) */
+  .back-home {
+    position: fixed; top: 20px; left: 20px; z-index: 9999;
+    padding: 10px 16px; background: rgba(20, 20, 20, .92); border: 1px solid rgba(167, 141, 88, .25); border-radius: 12px;
+    color: var(--cream); font-family: 'Plus Jakarta Sans', system-ui, sans-serif; font-size: 15px; font-weight: 600; text-decoration: none;
+    backdrop-filter: blur(8px);
+  }
+  .back-home:hover { border-color: var(--gold-soft); color: var(--gold-soft); }
 
   /* Portada */
   .hero { position: relative; padding: 88px 0 96px; text-align: center; overflow: hidden; }
@@ -94,10 +96,7 @@
 </head>
 <body>
 
-<div class="wrap top">
-  <a class="brand" href="/thalandor/"><img src="/thalandor/icono.png" alt="" aria-hidden="true" />Thalandor Online</a>
-  <a class="back" href="/">← Challenge Arena</a>
-</div>
+<a class="back-home" href="/" title="Volver al inicio">← Juegos</a>
 
 <header class="hero">
   <div class="wrap">

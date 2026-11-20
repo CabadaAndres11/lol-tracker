@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Thalandor Online · RPG de acción 3D vóxel</title>
+<meta name="description" content="Thalandor Online: RPG de acción en 3D vóxel con cámara isométrica, para jugar online con hasta 4 amigos. Descárgalo gratis para Windows." />
+<meta name="theme-color" content="#05070d" />
+<link rel="icon" href="/thalandor/icon.svg" type="image/svg+xml" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --ink: #05070d;
+    --panel: #0d1220;
+    --paper: #f4f1ea;
+    --muted: #9aa3b2;
+    --red: #e5533d;
+    --orange: #f08a5d;
+    --steel: #2b2f45;
+    --gold: #c8aa6e;
+  }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) { --ink: #05070d; }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    min-height: 100vh;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'Inter', system-ui, sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 16px; }
+
+  /* Cabecera */
+  .top { display: flex; align-items: center; justify-content: space-between; padding: 18px 0; }
+  .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; font-family: 'Cinzel', serif; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+  .brand img { width: 32px; height: 32px; }
+  .back { font-size: .85rem; color: var(--muted); text-decoration: none; }
+  .back:hover { color: var(--paper); }
+
+  /* Portada */
+  .hero {
+    position: relative;
+    padding: 56px 0 72px;
+    text-align: center;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: ""; position: absolute; inset: 0; z-index: -1;
+    background:
+      radial-gradient(ellipse 60% 55% at 50% 0%, rgba(229, 83, 61, .28), transparent 70%),
+      radial-gradient(ellipse 50% 45% at 50% 100%, rgba(43, 47, 69, .9), transparent 70%);
+  }
+  .kicker { margin: 0; font-size: .75rem; letter-spacing: .3em; text-transform: uppercase; color: var(--muted); }
+  h1 {
+    margin: 12px 0 0;
+    font-family: 'Cinzel', serif; font-weight: 800; letter-spacing: .06em; text-transform: uppercase;
+    font-size: clamp(2.2rem, 7vw, 4.4rem); line-height: 1.05;
+    background: linear-gradient(90deg, var(--gold), var(--paper) 50%, var(--orange));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .lead { max-width: 640px; margin: 22px auto 0; font-size: 1.12rem; color: #d7dbe4; }
+  .status {
+    display: inline-flex; align-items: center; gap: 8px; margin-top: 22px;
+    padding: 6px 14px; border: 1px solid rgba(229, 83, 61, .5); border-radius: 999px;
+    font-size: .8rem; color: var(--orange);
+  }
+  .status i { width: 8px; height: 8px; border-radius: 50%; background: var(--red); box-shadow: 0 0 10px var(--red); }
+
+  .cta-row { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 30px; }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; min-height: 52px; padding: 0 26px;
+    border-radius: 14px; font-weight: 600; text-decoration: none; transition: transform .2s, box-shadow .2s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn-primary { background: linear-gradient(135deg, var(--gold), var(--red)); color: #fff; box-shadow: 0 10px 30px rgba(229, 83, 61, .35); }
+  .btn-ghost { border: 1px solid rgba(255, 255, 255, .22); color: var(--paper); }
+
+  /* Secciones */
+  section { padding: 56px 0; }
+  h2 {
+    margin: 0 0 24px; text-align: center;
+    font-family: 'Cinzel', serif; font-weight: 800; letter-spacing: .08em; text-transform: uppercase;
+    font-size: clamp(1.4rem, 3.5vw, 2rem);
+  }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+  .card {
+    padding: 22px; border-radius: 18px; background: var(--panel);
+    border: 1px solid rgba(255, 255, 255, .08);
+  }
+  .card .num { font-family: 'Cinzel', serif; font-weight: 800; color: var(--red); font-size: 1.1rem; }
+  .card h3 { margin: 6px 0 8px; font-size: 1.05rem; }
+  .card p { margin: 0; color: var(--muted); font-size: .95rem; }
+
+  .classes { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+  .chip {
+    padding: 8px 16px; border-radius: 999px; background: var(--steel);
+    border: 1px solid rgba(240, 138, 93, .35); font-size: .92rem;
+  }
+
+  .cta-box {
+    text-align: center; padding: 42px 22px; border-radius: 22px;
+    background: linear-gradient(160deg, var(--steel), var(--panel));
+    border: 1px solid rgba(240, 138, 93, .3);
+  }
+  .cta-box p { margin: 12px auto 0; max-width: 560px; color: var(--muted); }
+  .cta-box .cta-row { margin-top: 24px; }
+
+  footer { padding: 28px 0 40px; text-align: center; font-size: .85rem; color: var(--muted); }
+  footer a { color: var(--paper); }
+
+  @media (max-width: 600px) {
+    .hero { padding: 40px 0 56px; }
+    .btn { width: 100%; }
+  }
+  @media (prefers-reduced-motion: reduce) { .btn { transition: none; } }
+</style>
+</head>
+<body>
+
+<div class="wrap top">
+  <a class="brand" href="/thalandor/"><img src="/thalandor/icon.svg" alt="" aria-hidden="true" />Thalandor Online</a>
+  <a class="back" href="/">← Challenge Arena</a>
+</div>
+
+<header class="hero">
+  <div class="wrap">
+    <p class="kicker">RPG de acción · 3D vóxel · Online</p>
+    <h1>Thalandor Online</h1>
+    <p class="lead">Un mundo de vóxeles con cámara isométrica y combate en tiempo real. Crea tu personaje, elige tu clase y avanza con hasta cuatro amigos.</p>
+    <span class="status"><i aria-hidden="true"></i>Demo en desarrollo · versión 0.7.0</span>
+    <div class="cta-row">
+      <a class="btn btn-primary" href="https://github.com/CabadaAndres11/thalandor-online-3d/releases/latest">Descargar para Windows</a>
+      <a class="btn btn-ghost" href="https://github.com/CabadaAndres11/thalandor-online-3d">Código en GitHub</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="wrap">
+    <h2>Qué es</h2>
+    <div class="grid">
+      <div class="card">
+        <span class="num">01</span>
+        <h3>Tu personaje es tuyo</h3>
+        <p>El progreso vive en tu personaje, no en la partida de otro. Nadie depende de un amigo para jugar.</p>
+      </div>
+      <div class="card">
+        <span class="num">02</span>
+        <h3>Solo o en grupo</h3>
+        <p>Juega en solitario y abre la partida a tus amigos cuando quieras. Hasta cuatro jugadores por partida.</p>
+      </div>
+      <div class="card">
+        <span class="num">03</span>
+        <h3>Roles que se complementan</h3>
+        <p>Tanques, sanadores y daño tienen sentido en grupo, y cada clase puede sobrevivir sola.</p>
+      </div>
+      <div class="card">
+        <span class="num">04</span>
+        <h3>Progreso sin techo</h3>
+        <p>No hay nivel máximo: tu personaje crece sin límite y su clase evoluciona cada 50 niveles.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap">
+    <h2>Cinco clases</h2>
+    <div class="classes">
+      <span class="chip">Guerrero</span>
+      <span class="chip">Clérigo</span>
+      <span class="chip">Mago</span>
+      <span class="chip">Arquero</span>
+      <span class="chip">Asesino</span>
+    </div>
+  </section>
+
+  <section class="wrap">
+    <div class="cta-box">
+      <h2 style="margin-bottom:0">Pruébalo con tus amigos</h2>
+      <p>Thalandor Online se juega en Windows. Descárgalo desde GitHub y comparte la partida con tu grupo.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="https://github.com/CabadaAndres11/thalandor-online-3d/releases/latest">Descargar</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <p>Thalandor Online · <a href="https://github.com/CabadaAndres11/thalandor-online-3d">GitHub</a></p>
+</footer>
+
+</body>
+</html>

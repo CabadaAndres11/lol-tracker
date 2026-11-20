@@ -174,3 +174,13 @@ body {
 .game-cartas .game-status { color: #c4b5fd; }
 .game-cartas .game-cta { color: #0d0a18; background: #c4b5fd; border-radius: 999px; }
 @media (max-width: 800px) { .game-cartas .game-name { font-size: .8rem; } }
+
+/* Thalandor Online: colores del icono del juego */
+.game-thal { border-color: rgba(229, 83, 61, .45); box-shadow: 0 20px 60px rgba(0, 0, 0, .5); }
+.game-thal:hover { border-color: #e5533d; box-shadow: 0 0 40px rgba(229, 83, 61, .3), 0 20px 60px rgba(0, 0, 0, .6); }
+.game-thal .game-bg { background: radial-gradient(ellipse 70% 60% at 50% 0%, rgba(229, 83, 61, .35), transparent 70%), radial-gradient(ellipse 60% 50% at 50% 100%, rgba(43, 47, 69, .95), transparent 70%), #05070d; }
+.thal-logo { width: clamp(110px, 15vw, 170px); height: auto; }
+.game-thal .game-name { font-family: 'Cinzel', serif; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: #f4f1ea; }
+.game-thal .game-status { color: #f08a5d; border-color: rgba(240, 138, 93, .5); }
+.game-thal .game-cta { color: #05070d; background: linear-gradient(180deg, #f4f1ea, #f08a5d); border-radius: 999px; }
+@media (max-width: 800px) { .game-thal .game-name { font-size: .8rem; } }

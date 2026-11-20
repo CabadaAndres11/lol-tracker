@@ -6,7 +6,7 @@
 <title>Thalandor Online · RPG de acción 3D vóxel</title>
 <meta name="description" content="Thalandor Online: RPG de acción en 3D vóxel con cámara isométrica, para jugar online con hasta 4 amigos. Descárgalo gratis para Windows." />
 <meta name="theme-color" content="#05070d" />
-<link rel="icon" href="/thalandor/icon.svg" type="image/svg+xml" />
+<link rel="icon" href="/thalandor/icono.png" type="image/png" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -65,6 +65,7 @@
     background: linear-gradient(90deg, var(--gold), var(--paper) 50%, var(--orange));
     -webkit-background-clip: text; background-clip: text; color: transparent;
   }
+  .hero-logo { display: block; width: min(640px, 90vw); height: auto; margin: 0 auto; }
   .lead { max-width: 640px; margin: 22px auto 0; font-size: 1.12rem; color: #d7dbe4; }
   .status {
     display: inline-flex; align-items: center; gap: 8px; margin-top: 22px;
@@ -126,14 +127,14 @@
 <body>
 
 <div class="wrap top">
-  <a class="brand" href="/thalandor/"><img src="/thalandor/icon.svg" alt="" aria-hidden="true" />Thalandor Online</a>
+  <a class="brand" href="/thalandor/"><img src="/thalandor/icono.png" alt="" aria-hidden="true" />Thalandor Online</a>
   <a class="back" href="/">← Challenge Arena</a>
 </div>
 
 <header class="hero">
   <div class="wrap">
     <p class="kicker">RPG de acción · 3D vóxel · Online</p>
-    <h1>Thalandor Online</h1>
+    <h1><img class="hero-logo" src="/thalandor/logo.png" alt="Thalandor Online" /></h1>
     <p class="lead">Un mundo de vóxeles con cámara isométrica y combate en tiempo real. Crea tu personaje, elige tu clase y avanza con hasta cuatro amigos.</p>
     <span class="status"><i aria-hidden="true"></i>Demo en desarrollo · versión 0.7.0</span>
     <div class="cta-row">
